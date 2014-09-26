@@ -27,7 +27,7 @@ protected:
     std::shared_ptr<Component> getComponent(const std::string &componentType);
 public:
     GameObject();
-    void AddComponent(std::shared_ptr<Component>component);
+    void addComponent(std::shared_ptr<Component>component);
 
     void removeComponent(std::string componentName);
     void setName(const std::string value);

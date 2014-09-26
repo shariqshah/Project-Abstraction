@@ -1,53 +1,41 @@
 #include "camera.h"
 
-Camera::Camera()
+Camera::Camera(Node parent)
 {
-	initCamera(glm::vec3(0, 0, 5),
-			   0.1f,
+	initCamera(0.1f,
 			   1000.f,
 			   4.f / 3.f,
-			   60.f);
+			   60.f,
+			   parent);
 }
 
-Camera::Camera(glm::vec3 position,
-			   float nearZ,
+Camera::Camera(float nearZ,
 			   float farZ,
 			   float aspectRatio,
-			   float fov)
+			   float fov,
+			   Node  parent)
 {
-	initCamera(position,
-			   nearZ,
+	initCamera(nearZ,
 			   farZ,
 			   aspectRatio,
-			   fov);
+			   fov,
+			   parent);
 }
 
-void Camera::initCamera(glm::vec3 position,
-						float nearZ,
+void Camera::initCamera(float nearZ,
 						float farZ,
 						float aspectRatio,
-						float fov)
+						float fov,
+						Node  parent)
 {
-	mPosition = position;
 	mNearZ = nearZ;
 	mFarZ = farZ;
 	mAspectRatio = aspectRatio;
 	mFov = fov;
-	mRotation = glm::vec3(0.f);
-	
-	mCamParentNode = Renderer::createGroupNode("CameraGroupNode");
+	mType = ComponentType::CAMERA;
+	mName = "Camera";
 	mCamNode = Renderer::createCamera("CameraMainNode");
-	h3dSetNodeParent(mCamNode, mCamParentNode);
-
-	h3dSetNodeTransform(mCamParentNode,						  
-						mPosition.x, mPosition.y, mPosition.z,
-						0, mRotation.y, 0,					  
-						1, 1, 1);							  
-
-	h3dSetNodeTransform(mCamNode,
-						0, 0, 0,
-						mRotation.x, 0, 0,
-						1, 1, 1);
+	Renderer::setParent(mCamNode, parent);
 	
 	// Resize viewport
 	Renderer::setNodeParam(mCamNode, H3DCamera::ViewportXI, 0);
@@ -63,59 +51,56 @@ void Camera::initCamera(glm::vec3 position,
 	Renderer::setCameraView(mCamNode, mFov, mAspectRatio, mNearZ, mFarZ);
 	Renderer::resizePipelineBuffers(Settings::getWindowWidth(),
 							        Settings::getWindowHeight());
-}
-
-void Camera::handleKeyboard(SDL_KeyboardEvent *key, float deltaTime)
-{
-	float increment = 20.f * deltaTime;
-	glm::vec3 translation(0.f);
-
-	if(Input::isPressed(Input::Key::W))
-		translation.z -= increment;
-	if(Input::isPressed(Input::Key::S))
-		translation.z += increment;
-	if(Input::isPressed(Input::Key::A))
-		translation.x -= increment;
-	if(Input::isPressed(Input::Key::D))
-		translation.x += increment;
-	if(Input::isPressed(Input::Key::Q))
-		translation.y += increment;
-	if(Input::isPressed(Input::Key::E))
-		translation.y -= increment;
-	
-	if(Input::isPressed(Input::MouseButton::LEFT))
-		translation.z -= increment;
-	if(Input::isReleased(Input::MouseButton::RIGHT))
-		translation.y += 10;
-
-	glm::quat rotationQuat(glm::vec3(glm::radians(mRotation.x),
-									 glm::radians(mRotation.y),
-									 0));
-	mPosition += (rotationQuat * translation);
 	
 }
 
-H3DNode Camera::getCameraNode()
+Node Camera::getCameraNode()
 {
 	return mCamNode;
 }
 
-void Camera::update(float deltaTime, SDL_Event *event)
-{
-	handleKeyboard(&event->key, deltaTime);
+// void Camera::handleKeyboard(SDL_KeyboardEvent *key, float deltaTime)
+// {
+// 	float increment = 20.f * deltaTime;
+// 	glm::vec3 translation(0.f);
+
+// 	if(Input::isPressed(Input::Key::W))
+// 		translation.z -= increment;
+// 	if(Input::isPressed(Input::Key::S))
+// 		translation.z += increment;
+// 	if(Input::isPressed(Input::Key::A))
+// 		translation.x -= increment;
+// 	if(Input::isPressed(Input::Key::D))
+// 		translation.x += increment;
+// 	if(Input::isPressed(Input::Key::Q))
+// 		translation.y += increment;
+// 	if(Input::isPressed(Input::Key::E))
+// 		translation.y -= increment;
 	
-	h3dSetNodeTransform(mCamNode,
-						0, 0, 0,
-						mRotation.x, 0, 0,
-						1, 1, 1);
+// 	if(Input::isPressed(Input::MouseButton::LEFT))
+// 		translation.z -= increment;
+// 	if(Input::isReleased(Input::MouseButton::RIGHT))
+// 		translation.y += 10;
 
-	h3dSetNodeTransform(mCamParentNode,						   
-						mPosition.x, mPosition.y, mPosition.z,
-						0, mRotation.y, 0,					   
-						1, 1, 1);							   
-}
+// 	glm::quat rotationQuat(glm::vec3(glm::radians(mRotation.x),
+// 									 glm::radians(mRotation.y),
+// 									 0));
+// 	mPosition += (rotationQuat * translation);
+	
+// }
 
-glm::vec3 Camera::getPosition()
-{
-	return mPosition;
-}
+
+// void Camera::update(float deltaTime, SDL_Event *event)
+// {
+// 	handleKeyboard(&event->key, deltaTime);
+	
+// 	h3dSetNodeTransform(mCamNode,
+// 						0, 0, 0,
+// 						mRotation.x, 0, 0,
+// 						1, 1, 1);
+
+// 	h3dSetNodeTransform(mCamParentNode,						   
+// 						mPosition.x, mPosition.y, mPosition.z,
+// 						0, mRotation.y, 0,					   
+// 						1, 1, 1);							   
+// }

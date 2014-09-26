@@ -1,8 +1,6 @@
 #ifndef TRANSFORM_H
 #define TRANSFORM_H
 
-#include <memory>
-
 #define GLM_FORCE_RADIANS
 #include "../include/glm/glm.hpp"
 #include "../include/glm/gtx/transform.hpp"
@@ -55,7 +53,9 @@ public:
     glm::vec3 getLookAt();
     glm::vec3 getUpVector();
     glm::quat getRotation();
+	glm::vec3 getRotationVector();
     glm::vec3 getForward();
+	glm::mat4 getModelMatrix();
 	bool      needsSync();
 };
 

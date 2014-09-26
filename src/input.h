@@ -72,7 +72,9 @@ namespace Input
 	void updateMousePostion(SDL_MouseMotionEvent event);
 
     void showCursor(bool show);
+	void setCursorLock(bool lock);
 	bool isCursorVisible();
+	bool isCursorLocked();
     void initializeInput();
 
 	Sint32 getMouseX();

@@ -62,7 +62,7 @@ int main(int argc, char** args)
 			
 
             //Render to screen
-			game->update(deltaTime, &e);
+			game->update(deltaTime);
 			game->draw();
 
 			//Set released keys back to inactive

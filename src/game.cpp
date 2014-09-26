@@ -13,7 +13,6 @@ Game::Game(std::string path)
 	mLogoMatRes = h3dAddResource( H3DResTypes::Material, "overlays/logo.material.xml", 0 );
 	h3dutLoadResourcesFromDisk(mContentFolderDir.c_str());
 
-	mCamera = std::make_shared<Camera>();
 	mKnightNode = h3dAddNodes(H3DRootNode, mKnightModelRes);
 	h3dSetNodeTransform(mKnightNode,
 						0, 0, 0,
@@ -34,39 +33,43 @@ Game::Game(std::string path)
 	h3dSetNodeParamF(light, H3DLight::ColorF3, 1, 0.8f);
 	h3dSetNodeParamF(light, H3DLight::ColorF3, 2, 0.7f);
 	h3dSetNodeParamF(light, H3DLight::ColorMultiplierF, 0, 1.0f);
+
+
+	GOPtr player = std::make_shared<GameObject>();
+	player->setName("Player");
+	Transform transform;
+	player->addComponent(std::make_shared<Transform>(transform));
+	Camera camera(player->getNode());
+	player->addComponent(std::make_shared<Camera>(camera));
+	player->setTag("FreeCamera");
+	mObjectList.push_back(player);
 }
 
-void Game::update(float deltaTime, SDL_Event *event)
+void Game::update(float deltaTime)
 {
-	//handleKeyboard(event);
-
-	// mX *= deltaTime;
-	// mY *= deltaTime;
-	// mZ *= deltaTime;
-	
-	// h3dSetNodeTransform(mCamNode, mX, mY, mZ, mRx, mRy, 0, 1, 1, 1);
-	mCamera->update(deltaTime, event);
+	for(GOPtr gameObject : mObjectList)
+	{
+		System::update(deltaTime, gameObject.get());
+	}
 }
 
 void Game::draw()
 {
 	h3dutShowFrameStats( mFontMatRes, mPanelMatRes, 1);
 
-	glm::vec3 pos = mCamera->getPosition();
-	std::string str = Utils::toString(pos);
-	h3dutShowText( str.c_str(), 0.03f, 0.24f, 0.026f, 1, 1, 1, mFontMatRes );
+	// std::string str2 = std::to_string(Input::getMouseX()) + ", " +
+	// 	               std::to_string(Input::getMouseY());
+	
+	// h3dutShowText( str2.c_str(), 0.03f, 0.27f, 0.026f, 1, 1, 1, mFontMatRes );
 
-	std::string str2 = std::to_string(Input::getMouseX()) + ", " +
-		               std::to_string(Input::getMouseY());
+	// std::string str3 = std::to_string(Input::getMouseRelX()) + ", " +
+	// 	                  std::to_string(Input::getMouseRelY());           
 	
-	h3dutShowText( str2.c_str(), 0.03f, 0.27f, 0.026f, 1, 1, 1, mFontMatRes );
+	// h3dutShowText( str3.c_str(), 0.03f, 0.30f, 0.026f, 1, 1, 1, mFontMatRes );
 
-	std::string str3 = std::to_string(Input::getMouseRelX()) + ", " +
-		               std::to_string(Input::getMouseRelY());
+	Renderer::drawText();
 	
-	h3dutShowText( str3.c_str(), 0.03f, 0.30f, 0.026f, 1, 1, 1, mFontMatRes );
-	
-	h3dRender(mCamera->getCameraNode());
+	h3dRender(Renderer::getCurrentCameraNode());
 	h3dFinalizeFrame();
 	h3dClearOverlays();
 	h3dutDumpMessages();
@@ -74,15 +77,15 @@ void Game::draw()
 
 void Game::resize(int width, int height)
 {
-	H3DNode camNode = mCamera->getCameraNode();
+	// H3DNode camNode = mCamera->getCameraNode();
 
-	// Resize viewport
-	h3dSetNodeParamI(camNode, H3DCamera::ViewportXI, 0);
-	h3dSetNodeParamI(camNode, H3DCamera::ViewportYI, 0);
-	h3dSetNodeParamI(camNode, H3DCamera::ViewportWidthI, width);
-	h3dSetNodeParamI(camNode, H3DCamera::ViewportHeightI, height);
+	// // Resize viewport
+	// h3dSetNodeParamI(camNode, H3DCamera::ViewportXI, 0);
+	// h3dSetNodeParamI(camNode, H3DCamera::ViewportYI, 0);
+	// h3dSetNodeParamI(camNode, H3DCamera::ViewportWidthI, width);
+	// h3dSetNodeParamI(camNode, H3DCamera::ViewportHeightI, height);
 	
-	// Set virtual camera parameters
-	h3dSetupCameraView(camNode, 45.0f, (float)width / height, 0.1f, 1000.0f);
-	h3dResizePipelineBuffers(mForwardPipeRes, width, height);
+	// // Set virtual camera parameters
+	// h3dSetupCameraView(camNode, 45.0f, (float)width / height, 0.1f, 1000.0f);
+	// h3dResizePipelineBuffers(mForwardPipeRes, width, height);
 }

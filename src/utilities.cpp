@@ -1,12 +1,7 @@
 #include "utilities.h"
 
 namespace Utils
-{
-	namespace
-	{
-		static std::string textToRender = "";
-	}
-	
+{	
     std::string toString(glm::vec3 vector)
     {
         std::string vectorString;
@@ -16,6 +11,17 @@ namespace Utils
 
         return vectorString;
     }
+
+	std::string toString(glm::quat quat)
+	{
+		std::string quatString;
+        quatString = "(" + std::to_string(quat.x) + ", " +
+                           std::to_string(quat.y) + ", " +
+                           std::to_string(quat.z) + ", " +
+                           std::to_string(quat.w) + ")";
+
+        return quatString;
+	}
 
     // btVector3 glmToBullet(glm::vec3 glmVec3)
     // {
@@ -68,17 +74,7 @@ namespace Utils
     //                          glmVec3->z);
     //     return bulletVec3;
     // }
-	
-    void initializeScreenText(std::string fontName)
-    {
-        // TODO: add initalization here 
-    }
-
-    void addText(std::string text)
-    {
-        textToRender += text + "\n";
-    }
-
+    
     std::string toString(glm::vec4 vector)
     {
         std::string vectorString;
@@ -99,5 +95,4 @@ namespace Utils
 
         return vectorString;
     }
-
 }

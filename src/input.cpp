@@ -50,6 +50,24 @@ namespace Input
 			SDL_ShowCursor(0);
 	}
 
+	void setCursorLock(bool lock)
+	{
+		if(lock)
+			SDL_SetRelativeMouseMode(SDL_TRUE);
+		else
+			SDL_SetRelativeMouseMode(SDL_FALSE);
+	}
+
+	bool isCursorLocked()
+	{
+		SDL_bool status = SDL_GetRelativeMouseMode();
+
+		if(status == SDL_TRUE)
+			return true;
+		else
+			return false;
+	}
+
 	bool isCursorVisible()
 	{
 		int status = SDL_ShowCursor(-1);
@@ -106,6 +124,7 @@ namespace Input
 		// Get cursor positon and relative cursor position
 		SDL_GetMouseState(&sMouseX, &sMouseY);
 		SDL_GetRelativeMouseState(&sMouseRelX, &sMouseRelY);
+		SDL_SetRelativeMouseMode(SDL_FALSE);
 	}
 
 	void updateMousePostion(SDL_MouseMotionEvent event)
@@ -115,6 +134,14 @@ namespace Input
 
 		sMouseRelX = event.xrel;
 		sMouseRelY = event.yrel;
+
+		int maxDelta = 50;
+
+		// if delta is unrealisticly large or small for some reason, ignore it
+		if(sMouseRelX > maxDelta || sMouseRelX < -maxDelta)
+			sMouseRelX = 0;
+		if(sMouseRelY > maxDelta || sMouseRelY < -maxDelta)
+			sMouseRelY = 0;
 	}
 
 	Sint32 getMouseX()

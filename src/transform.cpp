@@ -1,8 +1,8 @@
 #include "transform.h"
 
-Transform::Transform() : Transform(glm::vec3(0.f),
+Transform::Transform() : Transform(glm::vec3(0.f, 0.f, 15.f),
                                    glm::vec3(1.0f),
-                                   glm::quat(1, 0, 0, 0),
+                                   glm::quat(),
                                    glm::vec3(0.f, 0.f, -5.f),
                                    glm::vec3(0.f, 1.f, 0.f),
                                    glm::vec3(0.f, 0.f, -1.f))
@@ -125,6 +125,17 @@ void Transform::setRotation(glm::quat newRotation)
 	mNeedsSync = true;
 }
 
+glm::mat4 Transform::getModelMatrix()
+{
+    glm::mat4 translationMat = glm::translate(glm::mat4(1.0f), mPosition);
+    glm::mat4 scaleMat = glm::scale(glm::mat4(1.0f), mScale);
+    glm::mat4 rotationMat = glm::toMat4(glm::normalize(mRotation));
+
+    glm::mat4 ModelMat = translationMat * rotationMat * scaleMat;
+
+    return ModelMat;
+}
+
 glm::vec3 Transform::getPosition()
 {
     return mPosition;
@@ -149,6 +160,11 @@ glm::quat Transform::getRotation()
 {
     return mRotation;
 }
+
+glm::vec3 Transform::getRotationVector()
+{
+	return glm::degrees(glm::eulerAngles(mRotation));
+}  
 
 bool Transform::needsSync()
 {

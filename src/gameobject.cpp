@@ -72,10 +72,10 @@ GameObject::GameObject()
 	mNode = h3dAddGroupNode(H3DRootNode, mName.c_str());
 }
 
-void GameObject::AddComponent(std::shared_ptr<Component> component)
+void GameObject::addComponent(std::shared_ptr<Component> component)
 {
-    ComponentType type = component.get()->getType();
-    std::string name = component.get()->getName();
+    ComponentType type = component->getType();
+    std::string name = component->getName();
     std::pair<ComponentMap::iterator, bool> returnValue;
     returnValue = mComponentMap.insert(std::make_pair(name, component));
 
@@ -97,7 +97,7 @@ void GameObject::removeComponent(std::string componentName)
 
     if(position != mComponentMap.end())
     {
-        ComponentType type = position->second.get()->getType();
+        ComponentType type = position->second->getType();
         mComponentMask &= ~(long)type;
         mComponentMap.erase(position);
         Log::message(componentName + " removed from " + mName);

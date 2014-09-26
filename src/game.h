@@ -1,28 +1,28 @@
 #ifndef _game_H_
 #define _game_H_
 
+#include <vector>
 #include <memory>
 
-#include "renderer.h"
-
-#include "camera.h"
+#include "systems.h"
 #include "utilities.h"
-#include "log.h"
+
+typedef std::shared_ptr<GameObject> GOPtr;
+typedef std::vector<GOPtr> ObjectList;
 
 class Game
 {
+	ObjectList mObjectList;
     H3DNode mKnightNode;
-    H3DRes mForwardPipeRes, mKnightModelRes;
+    H3DRes mKnightModelRes;
 	H3DRes mFontMatRes;
 	H3DRes mPanelMatRes;
 	H3DRes mLogoMatRes;
     std::string mContentFolderDir;
-
-	std::shared_ptr<Camera> mCamera;
 public:
     Game(std::string path);
 
-    void update(float deltaTime, SDL_Event *event);
+    void update(float deltaTime);
     void draw();
 	void resize(int width, int height);
 };
