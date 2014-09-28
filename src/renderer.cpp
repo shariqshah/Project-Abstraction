@@ -67,6 +67,12 @@ namespace Renderer
 		return node;
 	}
 
+	Node createNode(Resource resource, Node parent)
+	{
+		Node node = h3dAddNodes(parent, resource);
+		return node;
+	}
+
 	void setNodeParam(Node node, int param, int value)
 	{
 		h3dSetNodeParamI(node, param, value);
@@ -127,5 +133,26 @@ namespace Renderer
 	void setParent(Node child, Node parent)
 	{
 		h3dSetNodeParent(child, parent);
+	}
+
+	Resource createModel(std::string filename)
+	{
+		Resource model = 0;
+
+		model = h3dFindResource(H3DResTypes::SceneGraph, filename.c_str());
+
+		if(model == 0)
+		{
+			Log::message(filename + " not loaded yet");
+			Log::message("Loading " + filename + " now");
+			model = h3dAddResource(H3DResTypes::SceneGraph,
+								   filename.c_str(),
+								   0);
+
+			if(!h3dutLoadResourcesFromDisk(cContentFolderDir.c_str()))
+				Log::error(Log::ErrorLevel::MEDIUM, filename + " not found!");
+		}
+		
+		return model;
 	}
 }

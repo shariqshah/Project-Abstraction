@@ -3,9 +3,10 @@
 
 enum class ComponentType : long
 {
-    NO_COMPONENT  = 0,
-	TRANSFORM     = 1 << 0,
-	CAMERA        = 1 << 1
+    NO_COMPONENT = 0,
+	TRANSFORM    = 1 << 0,
+	CAMERA       = 1 << 1,
+	MODEL        = 1 << 2
 };
 
 #endif // COMPONENTTYPES_H

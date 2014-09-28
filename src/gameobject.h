@@ -15,6 +15,7 @@ class GameObject
 {
     //TODO: Add measures for ensuring multiple instances of same component type
     //cannot be added
+	//TODO: Add measures for getting child object if any
 protected:
     typedef std::unordered_map<std::string, std::shared_ptr<Component>> ComponentMap;
 

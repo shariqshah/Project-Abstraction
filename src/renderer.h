@@ -9,6 +9,8 @@
 #include "../include/horde3d/Horde3D.h"
 #include "../include/horde3d/Horde3DUtils.h"
 
+#include "log.h"
+
 #include <iostream>
 #include <vector>
 
@@ -38,11 +40,12 @@ namespace Renderer
 	
 	Node getCurrentCameraNode();
     Node createCamera(std::string name, Node parent = H3DRootNode);
-    Node createNode(std::string name, Node parent = H3DRootNode);
+    Node createNode(Resource resource, Node parent = H3DRootNode);
     Node createGroupNode(std::string name, Node parent = H3DRootNode);
 	
 
     Resource getCurrentPipeline();
+    Resource createModel(std::string filename);
 }
 
 #endif
