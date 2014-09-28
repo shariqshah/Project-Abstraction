@@ -2,11 +2,20 @@
 
 Model::Model(Node parent, std::string name)
 {
-	mFilename = name;
-	mResourceID = Renderer::createModel(mFilename);
-	mNode = Renderer::createNode(mResourceID, parent);
 	mName = "Model";
 	mType = ComponentType::MODEL;
+	mFilename = name;
+	mResourceID = Renderer::createModel(mFilename);
+
+	if(mResourceID == 0)
+		mValid = false;
+	else
+	{
+		mNode = Renderer::createNode(mResourceID, parent);
+
+		if(mNode == 0)
+			mValid = false;
+	}
 }
 
 Resource Model::getResourceID()

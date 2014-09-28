@@ -57,7 +57,10 @@ namespace Renderer
 	Node createCamera(std::string name, Node parent)
 	{
 		Node node = h3dAddCameraNode(parent, name.c_str(), sCurrentPipeline);
-		setCurrentCamera(node);
+
+		if(node != 0)
+			setCurrentCamera(node);
+		
 		return node;
 	}
 	
@@ -121,8 +124,7 @@ namespace Renderer
 			count++;
 		}
 
-		sTextList.clear();
-		
+		sTextList.clear();	
 	}
 
 	void addText(std::string text)
@@ -130,9 +132,12 @@ namespace Renderer
 		sTextList.push_back(text);
     }
 
-	void setParent(Node child, Node parent)
+	bool setParent(Node child, Node parent)
 	{
-		h3dSetNodeParent(child, parent);
+		if(h3dSetNodeParent(child, parent))
+			return true;
+		else
+			return false;
 	}
 
 	Resource createModel(std::string filename)
@@ -150,7 +155,7 @@ namespace Renderer
 								   0);
 
 			if(!h3dutLoadResourcesFromDisk(cContentFolderDir.c_str()))
-				Log::error(Log::ErrorLevel::MEDIUM, filename + " not found!");
+				Log::error(Log::ErrorLevel::LOW, filename + " not found!");
 		}
 		
 		return model;

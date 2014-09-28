@@ -36,8 +36,8 @@ namespace Renderer
     void resizePipelineBuffers(int width, int height);
 	void setCurrentCamera(Node cameraNode);
 	void addText(std::string text);	
-	void setParent(Node child, Node parent);
 	
+	bool setParent(Node child, Node parent);
 	Node getCurrentCameraNode();
     Node createCamera(std::string name, Node parent = H3DRootNode);
     Node createNode(Resource resource, Node parent = H3DRootNode);

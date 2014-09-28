@@ -14,7 +14,6 @@ class Game
     H3DRes mKnightModelRes;
 	H3DRes mFontMatRes;
 	H3DRes mPanelMatRes;
-	H3DRes mLogoMatRes;
     std::string mContentFolderDir;
 public:
     Game(std::string path);

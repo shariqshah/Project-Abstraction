@@ -74,21 +74,32 @@ GameObject::GameObject()
 
 void GameObject::addComponent(std::shared_ptr<Component> component)
 {
-    ComponentType type = component->getType();
-    std::string name = component->getName();
-    std::pair<ComponentMap::iterator, bool> returnValue;
-    returnValue = mComponentMap.insert(std::make_pair(name, component));
+	ComponentType type = component->getType();
+	std::string name = component->getName();
+		
+	if(component->isValid())
+	{
+		std::pair<ComponentMap::iterator, bool> returnValue;
+		returnValue = mComponentMap.insert(std::make_pair(name, component));
 
-    if(returnValue.second)
-    {
-        mComponentMask |= (long)type;
-        Log::message(name + " component added to " + mName);
-    }
-    else
-    {
-        Log::error(Log::ErrorLevel::MEDIUM,
-                   name + " component could not be added to " + mName);
-    }
+		if(returnValue.second)
+		{
+			mComponentMask |= (long)type;
+			Log::message(name + " component added to " + mName);
+		}
+		else
+		{
+			Log::error(Log::ErrorLevel::MEDIUM,
+					   name + " component could not be added to " + mName);
+		}
+	}
+	else
+	{
+		Log::error(Log::ErrorLevel::MEDIUM,
+				   name + " component could not be added to " + mName +
+				   ". Component Invalid!");
+	}
+    
 }
 
 void GameObject::removeComponent(std::string componentName)

@@ -6,11 +6,6 @@ std::string Component::getName() const
     return mName;
 }
 
-void Component::setName(std::string value)
-{
-    mName = value;
-}
-
 Component::~Component()
 {
 
@@ -20,6 +15,7 @@ Component::Component()
 {
     mName = "DEFAULT_COMPONENT_NAME";
     mType = ComponentType::NO_COMPONENT;
+	mValid = true;
 }
 
 ComponentType Component::getType() const
@@ -27,7 +23,7 @@ ComponentType Component::getType() const
     return mType;
 }
 
-void Component::setType(ComponentType value)
+bool Component::isValid()
 {
-    mType = value;
+	return mValid;
 }

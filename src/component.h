@@ -10,13 +10,13 @@ class Component
 protected:
     std::string mName;
     ComponentType mType;
+	bool mValid;
 public:
     virtual ~Component();
     Component();
     std::string getName() const;
     ComponentType getType() const;
-    void setName(std::string value);
-    void setType(ComponentType value);
+	bool isValid();
 };
 
 #endif // COMPONENT_H
