@@ -4,13 +4,15 @@ Game::Game(std::string path)
 {	
 	Renderer::initialize();
 	
-	mContentFolderDir = "../content";
-	mKnightModelRes = h3dAddResource(H3DResTypes::SceneGraph, "models/knight/knight.scene.xml", 0);
-	// mKnightModelRes = h3dAddResource(H3DResTypes::SceneGraph, "models/test/test.scene.xml", 0);
-	H3DRes envRes = h3dAddResource( H3DResTypes::SceneGraph, "models/sphere/sphere.scene.xml", 0 );
-	mFontMatRes = h3dAddResource( H3DResTypes::Material, "overlays/font.material.xml", 0 );
-	mPanelMatRes = h3dAddResource( H3DResTypes::Material, "overlays/panel.material.xml", 0 );
-	h3dutLoadResourcesFromDisk(mContentFolderDir.c_str());
+	mKnightModelRes = Renderer::Resources::add(ResourceType::MODEL,
+											   "models/knight/knight.scene.xml");
+	H3DRes envRes = Renderer::Resources::add(ResourceType::MODEL,
+											 "models/sphere/sphere.scene.xml");
+	mFontMatRes = Renderer::Resources::add(ResourceType::MATERIAL,
+										   "overlays/font.material.xml");
+	mPanelMatRes = Renderer::Resources::add(ResourceType::MATERIAL,
+											"overlays/panel.material.xml");
+	Renderer::Resources::loadAddedResources();
 
 	mKnightNode = h3dAddNodes(H3DRootNode, mKnightModelRes);
 	h3dSetNodeTransform(mKnightNode,
@@ -18,8 +20,8 @@ Game::Game(std::string path)
 						0, 0, 0,
 						1.f, 1.f, 1.f);
 
-	H3DNode env = h3dAddNodes( H3DRootNode, envRes );
-	h3dSetNodeTransform( env, 0, -20, 0, 0, 0, 0, 20, 20, 20 );
+	H3DNode env = h3dAddNodes(H3DRootNode, envRes);
+	h3dSetNodeTransform(env, 0, -20, 0, 0, 0, 0, 20, 20, 20);
 	
 	// Add light source
 	H3DNode light = h3dAddLightNode(H3DRootNode, "Light1", 0, "LIGHTING", "SHADOWMAP");
@@ -51,6 +53,9 @@ Game::Game(std::string path)
 	Model suzModel(suzanne->getNode(), "models/test/test.scene.xml");
 	suzanne->addComponent(std::make_shared<Model>(suzModel));
 	mObjectList.push_back(suzanne);
+
+	Renderer::resizePipelineBuffers(Settings::getWindowWidth(),
+									Settings::getWindowHeight());
 }
 
 void Game::update(float deltaTime)
@@ -76,4 +81,7 @@ void Game::draw()
 void Game::resize(int width, int height)
 {
 	Renderer::resizePipelineBuffers(width, height);
+	Renderer::Camera::setViewportSize(Renderer::getCurrentCameraNode(),
+									  width,
+									  height);
 }

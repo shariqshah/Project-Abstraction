@@ -5,7 +5,7 @@ Camera::Camera(Node parent)
 	initCamera(0.1f,
 			   1000.f,
 			   4.f / 3.f,
-			   60.f,
+			   75.f,
 			   parent);
 }
 
@@ -44,21 +44,11 @@ void Camera::initCamera(float nearZ,
 			mValid = false;
 		else
 		{
-			// TODO: Add setters and getters for viewport fov etc
-			// Resize viewport
-			Renderer::setNodeParam(mCamNode, H3DCamera::ViewportXI, 0);
-			Renderer::setNodeParam(mCamNode, H3DCamera::ViewportYI, 0);
-			Renderer::setNodeParam(mCamNode,
-								   H3DCamera::ViewportWidthI,
-								   Settings::getWindowWidth());
-			Renderer::setNodeParam(mCamNode,
-								   H3DCamera::ViewportHeightI,
-								   Settings::getWindowHeight());
-	
-			// Set virtual camera parameters
-			Renderer::setCameraView(mCamNode, mFov, mAspectRatio, mNearZ, mFarZ);
-			Renderer::resizePipelineBuffers(Settings::getWindowWidth(),
-											Settings::getWindowHeight());
+			Renderer::Camera::setViewportPos(mCamNode, 0, 0);
+			Renderer::Camera::setViewportSize(mCamNode,
+											  Settings::getWindowWidth(),
+											  Settings::getWindowHeight());
+			Renderer::Camera::setView(mCamNode, mFov, mAspectRatio, mNearZ, mFarZ);
 		}
 	}
 	
@@ -67,4 +57,58 @@ void Camera::initCamera(float nearZ,
 Node Camera::getCameraNode()
 {
 	return mCamNode;
+}
+
+void Camera::setFOV(float fov)
+{
+	mFov = fov;
+	Renderer::Camera::setView(mCamNode, mFov, mAspectRatio, mNearZ, mFarZ);
+}
+
+void Camera::setNearZ(float nearZ)
+{
+	mNearZ = nearZ;
+	Renderer::Camera::setView(mCamNode, mFov, mAspectRatio, mNearZ, mFarZ);
+}
+
+void Camera::setFarZ(float farZ)
+{
+	mFarZ = farZ;
+	Renderer::Camera::setView(mCamNode, mFov, mAspectRatio, mNearZ, mFarZ);
+}
+
+void Camera::setAspectRatio(float aspectRatio)
+{
+	mAspectRatio = aspectRatio;
+	Renderer::Camera::setView(mCamNode, mFov, mAspectRatio, mNearZ, mFarZ);
+}
+
+float Camera::getFOV()
+{
+	return mFov;
+}
+
+float Camera::getFarZ()
+{
+	return mFarZ;
+}
+
+float Camera::getNearZ()
+{
+	return mNearZ;
+}
+
+float Camera::getAspectRatio()
+{
+	return mAspectRatio;
+}
+
+void Camera::resizeViewport(int width, int height)
+{
+	Renderer::Camera::setViewportSize(mCamNode, width, height);
+}
+
+void Camera::setViewportPos(int x, int y)
+{
+	Renderer::Camera::setViewportPos(mCamNode, x, y);
 }

@@ -56,9 +56,9 @@ namespace System
 					leftRightRot += sRotSpeed * deltaTime;
 
 				if(Input::isPressed(Input::Key::UP))
-					upDownRot += sRotSpeed * deltaTime;
-				if(Input::isPressed(Input::Key::DOWN))
 					upDownRot -= sRotSpeed * deltaTime;
+				if(Input::isPressed(Input::Key::DOWN))
+					upDownRot += sRotSpeed * deltaTime;
 				
 
 				leftRightRot = glm::degrees(leftRightRot);

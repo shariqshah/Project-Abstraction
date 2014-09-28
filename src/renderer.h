@@ -17,22 +17,23 @@
 typedef H3DNode Node;
 typedef H3DRes  Resource;
 
-namespace Renderer
+enum class ResourceType : int
 {
+	MODEL    = H3DResTypes::SceneGraph,
+	MATERIAL = H3DResTypes::Material
+};
+
+namespace Renderer
+{	
     void initialize();
-	void syncTransform(glm::vec3 position,
-					   glm::vec3 rotation,
-					   glm::vec3 scale,
-					   Node node);
+	void syncNodeTransform(glm::vec3 position,
+						   glm::vec3 rotation,
+						   glm::vec3 scale,
+						   Node node);
 	void setNodeTransform(Node node, glm::mat4 transformMat);
     void setNodeParam(Node node, int param, int value);
     void setNodeParam(Node node, int param, int compID, float value);
 	void drawText();
-    void setCameraView(Node cameraNode,
-					   float fov,
-					   float aspect,
-					   float nearZ,
-					   float farZ);
     void resizePipelineBuffers(int width, int height);
 	void setCurrentCamera(Node cameraNode);
 	void addText(std::string text);	
@@ -43,9 +44,25 @@ namespace Renderer
     Node createNode(Resource resource, Node parent = H3DRootNode);
     Node createGroupNode(std::string name, Node parent = H3DRootNode);
 	
-
     Resource getCurrentPipeline();
-    Resource createModel(std::string filename);
-}
+
+	namespace Camera
+	{
+		void setViewportSize(Node camera, int width, int height);
+		void setViewportPos(Node camera, int x, int y);
+		void setView(Node  cameraNode,
+					 float fov,
+					 float aspect,
+					 float nearZ,
+					 float farZ);
+	}
+
+	namespace Resources
+	{
+		Resource add(ResourceType type, std::string name, int flag = 0);
+		Resource get(ResourceType type, std::string name);
+		bool loadAddedResources();
+	}
+};
 
 #endif

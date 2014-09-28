@@ -5,7 +5,7 @@ Model::Model(Node parent, std::string name)
 	mName = "Model";
 	mType = ComponentType::MODEL;
 	mFilename = name;
-	mResourceID = Renderer::createModel(mFilename);
+	mResourceID = Renderer::Resources::get(ResourceType::MODEL, mFilename);
 
 	if(mResourceID == 0)
 		mValid = false;

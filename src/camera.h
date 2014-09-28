@@ -30,6 +30,8 @@ public:
 	void setNearZ(float nearZ);
 	void setFarZ(float farZ);
 	void setAspectRatio(float aspectRatio);
+	void resizeViewport(int width, int height);
+	void setViewportPos(int x, int y);
 
 	float getFOV();
 	float getFarZ();

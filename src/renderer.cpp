@@ -19,10 +19,10 @@ namespace Renderer
 		h3dSetNodeTransMat(node, glm::value_ptr(transformMat));
 	}
 	
-	void syncTransform(glm::vec3 position,
-					   glm::vec3 rotation,
-					   glm::vec3 scale,
-					   H3DNode node)
+	void syncNodeTransform(glm::vec3 position,
+						   glm::vec3 rotation,
+						   glm::vec3 scale,
+						   H3DNode node)
 	{	
 		h3dSetNodeTransform(node,						        // node
 							position.x, position.y, position.z, // position
@@ -86,15 +86,6 @@ namespace Renderer
 		h3dSetNodeParamF(node, param, compID,  value);
 	}
 
-	void setCameraView(Node cameraNode,
-					   float fov,
-					   float aspect,
-					   float nearZ,
-					   float farZ)
-	{
-		h3dSetupCameraView(cameraNode, fov, aspect, nearZ, farZ);
-	}
-
 	void resizePipelineBuffers(int width, int height)
 	{
 		h3dResizePipelineBuffers(sCurrentPipeline, width, height);
@@ -140,24 +131,59 @@ namespace Renderer
 			return false;
 	}
 
-	Resource createModel(std::string filename)
+	namespace Camera
 	{
-		Resource model = 0;
-
-		model = h3dFindResource(H3DResTypes::SceneGraph, filename.c_str());
-
-		if(model == 0)
+		void setViewportSize(Node camera, int width, int height)
 		{
-			Log::message(filename + " not loaded yet");
-			Log::message("Loading " + filename + " now");
-			model = h3dAddResource(H3DResTypes::SceneGraph,
-								   filename.c_str(),
-								   0);
+			h3dSetNodeParamI(camera, H3DCamera::ViewportWidthI, width);
+			h3dSetNodeParamI(camera, H3DCamera::ViewportHeightI, height);
+	    }
 
-			if(!h3dutLoadResourcesFromDisk(cContentFolderDir.c_str()))
-				Log::error(Log::ErrorLevel::LOW, filename + " not found!");
+		void setViewportPos(Node camera, int x, int y)
+		{
+			h3dSetNodeParamI(camera, H3DCamera::ViewportXI, x);
+			h3dSetNodeParamI(camera, H3DCamera::ViewportYI, y);
+		}
+
+		void setView(Node  cameraNode,
+					 float fov,
+					 float aspect,
+					 float nearZ,
+					 float farZ)
+		{
+			h3dSetupCameraView(cameraNode, fov, aspect, nearZ, farZ);
+		}
+	}
+
+	namespace Resources
+	{	
+		bool loadAddedResources()
+		{
+			return h3dutLoadResourcesFromDisk(cContentFolderDir.c_str());
+		}
+
+		Resource add(ResourceType type, std::string name, int flag)
+		{
+			Resource res = h3dAddResource((int)type, name.c_str(), flag);
+			return res;
 		}
 		
-		return model;
+		Resource get(ResourceType type, std::string name)
+		{
+			Resource res = h3dFindResource((int)type, name.c_str());
+
+			if(res == 0)
+			{
+				Log::message(name + " is not loaded yet. Loading now..");
+				res = add(type, name);
+				
+				if(!loadAddedResources())
+					Log::error(Log::ErrorLevel::LOW, name + " not found!");
+				else
+					Log::message(name + " has been loaded!");
+			}
+
+			return res;
+		}
 	}
 }
