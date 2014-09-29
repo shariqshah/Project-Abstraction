@@ -186,4 +186,62 @@ namespace Renderer
 			return res;
 		}
 	}
+
+	namespace Light
+	{
+		Node create(Node parent,
+					const std::string name,
+					Resource material,
+					const std::string lightContext,
+					const std::string shadowContext)
+		{
+			Node light = h3dAddLightNode(parent,
+										 name.c_str(),
+										 material,
+										 lightContext.c_str(),
+										 shadowContext.c_str());
+
+			if(light == 0)
+				Log::error(Log::ErrorLevel::LOW, name + " node not created!");
+
+			return light;
+		}
+		
+		void setRadius(Node light, float radius)
+		{
+			h3dSetNodeParamF(light, H3DLight::RadiusF, 0, radius);
+		}
+		
+		void setColor(Node light, glm::vec3 color)
+		{
+			h3dSetNodeParamF(light, H3DLight::ColorF3, 0, color.r);
+			h3dSetNodeParamF(light, H3DLight::ColorF3, 1, color.g);
+			h3dSetNodeParamF(light, H3DLight::ColorF3, 2, color.b);
+		}
+		
+		void setFov(Node light, float fov)
+		{
+			h3dSetNodeParamF(light, H3DLight::FovF, 0, fov);
+		}
+		
+		void setShadowMapCount(Node light, int count)
+		{
+			h3dSetNodeParamI(light, H3DLight::ShadowMapCountI, count);
+		}
+		
+		void setShadowMapBias(Node light, float bias)
+		{
+			h3dSetNodeParamF(light, H3DLight::ShadowMapBiasF, 0, bias);
+		}
+
+		void setShadowSplitLambda(Node light, float splitLambda)
+		{
+			h3dSetNodeParamF(light, H3DLight::ShadowSplitLambdaF, 0, splitLambda);
+		}
+		
+		void setIntensity(Node light, float intensity)
+		{
+			h3dSetNodeParamF(light, H3DLight::ColorMultiplierF, 0, intensity);
+		}
+	}
 }

@@ -25,6 +25,16 @@ namespace Input
 
 	enum class Key : SDL_Keycode
 	{
+		K0     = SDLK_0,
+		K1     = SDLK_1,
+		K2     = SDLK_2,
+		K3     = SDLK_3,
+		K4     = SDLK_4,
+		K5     = SDLK_5,
+		K6     = SDLK_6,
+		K7     = SDLK_7,
+		K8     = SDLK_8,
+		K9     = SDLK_9,
 		A      = SDLK_a,
 		B      = SDLK_b,
 		C      = SDLK_c,

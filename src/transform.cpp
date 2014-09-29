@@ -104,8 +104,9 @@ void Transform::setScale(glm::vec3 newScale)
 
 void Transform::setLookAt(glm::vec3 lookAt)
 {
-    mLookAt = lookAt;
-	mNeedsSync = true;
+    //mLookAt = lookAt;
+	//mNeedsSync = true;
+	setForward(glm::normalize(lookAt));
 }
 
 void Transform::setUpVector(glm::vec3 up)

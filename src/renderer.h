@@ -63,6 +63,23 @@ namespace Renderer
 		Resource get(ResourceType type, std::string name);
 		bool loadAddedResources();
 	}
-};
+
+	namespace Light
+	{
+		Node create(Node parent,
+					const std::string name,
+					Resource material = 0,
+					const std::string lightContext  = "LIGHTING",
+					const std::string shadowContext = "SHADOWMAP");
+		
+		void setRadius(Node light, float radius);
+		void setColor(Node light, glm::vec3 color);
+		void setFov(Node light, float fov);
+		void setShadowMapCount(Node light, int count);
+		void setShadowMapBias(Node light, float bias);
+		void setIntensity(Node light, float intensity);
+		void setShadowSplitLambda(Node light, float splitLambda);
+	}
+}
 
 #endif

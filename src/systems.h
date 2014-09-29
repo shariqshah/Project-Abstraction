@@ -2,6 +2,7 @@
 #define _systems_H
 
 #include "camerasystems.h"
+#include "light.h"
 
 namespace System
 {
