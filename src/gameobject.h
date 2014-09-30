@@ -4,12 +4,8 @@
 #include <memory>
 #include <unordered_map>
 
-#include "../include/horde3d/Horde3D.h"
-
 #include "component.h"
-#include "log.h"
-
-typedef H3DNode Node;
+#include "renderer.h"
 
 class GameObject
 {
@@ -23,19 +19,25 @@ protected:
     std::string mName;
     std::string mTag;
     ComponentMap mComponentMap;
+	bool mRemove;
     long mComponentMask;
 
     std::shared_ptr<Component> getComponent(const std::string &componentType);
 public:
     GameObject();
+	~GameObject();
+	
     void addComponent(std::shared_ptr<Component>component);
 
     void removeComponent(std::string componentName);
     void setName(const std::string value);
     void setComponentMask(long value);
-    bool hasComponents(long componentMask);
+	void markForRemoval();
     void setTag(std::string value);
+	
     bool compareTag(std::string tagToCompare);
+	bool isMarkedForRemoval();
+	bool hasComponents(long componentMask);
 
     std::string getName() const;
     long getComponentMask() const;

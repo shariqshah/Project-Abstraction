@@ -12,11 +12,17 @@ namespace Renderer
 		static Node sCurrentCamera;
 		static glm::vec2 sFontPos;
 		static float sFontSize;
+		static std::vector<Node> cameras(5, 0);
 	}
 
 	void setNodeTransform(Node node, glm::mat4 transformMat)
 	{
 		h3dSetNodeTransMat(node, glm::value_ptr(transformMat));
+	}
+
+	void setNodeName(Node node, const std::string name)
+	{
+		h3dSetNodeParamStr(node, H3DNodeParams::NameStr, name.c_str());
 	}
 	
 	void syncNodeTransform(glm::vec3 position,
@@ -59,7 +65,7 @@ namespace Renderer
 		Node node = h3dAddCameraNode(parent, name.c_str(), sCurrentPipeline);
 
 		if(node != 0)
-			setCurrentCamera(node);
+			cameras.push_back(node);
 		
 		return node;
 	}
@@ -74,6 +80,31 @@ namespace Renderer
 	{
 		Node node = h3dAddNodes(parent, resource);
 		return node;
+	}
+
+	void removeCamera(Node cameraToRemove)
+	{
+		if(!cameras.empty())
+		{
+			cameras.erase(std::find(cameras.begin(),
+									cameras.end(),
+									cameraToRemove),
+						  cameras.end());
+
+			if(cameraToRemove == sCurrentCamera)
+			{
+				if(!cameras.empty())
+					sCurrentCamera = cameras.front();
+				else
+				{
+					Log::warning("No active cameras left in the scene!");
+					sCurrentCamera = 0;
+				}
+			}
+		}
+	    else
+			Log::error(Log::ErrorLevel::MEDIUM,
+					   "Could not remove camera. No cameras in scene!");
 	}
 
 	void setNodeParam(Node node, int param, int value)
@@ -123,6 +154,16 @@ namespace Renderer
 		sTextList.push_back(text);
     }
 
+	bool removeNode(Node node)
+	{
+		if(node == 0)
+			return false;
+		else
+			h3dRemoveNode(node);
+
+		return true;
+	}
+
 	bool setParent(Node child, Node parent)
 	{
 		if(h3dSetNodeParent(child, parent))
@@ -160,6 +201,19 @@ namespace Renderer
 		bool loadAddedResources()
 		{
 			return h3dutLoadResourcesFromDisk(cContentFolderDir.c_str());
+		}
+
+		bool remove(Resource resource)
+		{
+			if(h3dRemoveResource(resource) == -1)
+				return false;
+
+			return true;
+		}
+
+		bool isLoaded(Resource resource)
+		{
+			return h3dIsResLoaded(resource);
 		}
 
 		Resource add(ResourceType type, std::string name, int flag)

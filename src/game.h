@@ -17,6 +17,7 @@ class Game
     std::string mContentFolderDir;
 public:
     Game(std::string path);
+	~Game();
 
     void update(float deltaTime);
     void draw();

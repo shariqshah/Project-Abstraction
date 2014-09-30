@@ -17,7 +17,8 @@ class Light : public Component
 
 public:	
 	Light(Node parent, std::string name);
-
+	~Light();
+	
 	float     getRadius();
 	float     getFov();
 	float     getIntensity();
@@ -33,7 +34,7 @@ public:
 	void setIntensity(float intensity);
 	void setShadowMapBias(float bias);
 	void setShadowSplitLambda(float splitLambda);
-	void setShadowMapCount(int shadowMapCount); 
+	void setShadowMapCount(int shadowMapCount);
 };
 
 #endif

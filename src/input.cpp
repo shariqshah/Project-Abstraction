@@ -7,6 +7,7 @@ namespace Input
         std::vector<int>releasedKeys;
 		const int cNumKeyboardKeys = 283;
 		const int cNumMouseButtons = 5;
+		const int cMaxDelta = 50;
         static Uint8 sKeyState[cNumKeyboardKeys];
         static Uint8 sMouseButtonState[cNumMouseButtons];
 		static Sint32 sMouseX, sMouseY;
@@ -135,12 +136,10 @@ namespace Input
 		sMouseRelX = event.xrel;
 		sMouseRelY = event.yrel;
 
-		int maxDelta = 50;
-
 		// if delta is unrealisticly large or small for some reason, ignore it
-		if(sMouseRelX > maxDelta || sMouseRelX < -maxDelta)
+		if(sMouseRelX > cMaxDelta || sMouseRelX < -cMaxDelta)
 			sMouseRelX = 0;
-		if(sMouseRelY > maxDelta || sMouseRelY < -maxDelta)
+		if(sMouseRelY > cMaxDelta || sMouseRelY < -cMaxDelta)
 			sMouseRelY = 0;
 	}
 

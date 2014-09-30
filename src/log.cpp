@@ -2,12 +2,12 @@
 
 namespace Log
 {
-    void message(std::string message)
+    void message(const std::string message)
     {
         std::cout<<"MESSAGE : " + message<<std::endl;
     }
 
-    void error(Log::ErrorLevel level, std::string error)
+    void error(Log::ErrorLevel level, const std::string error)
     {
         std::string levelString = "";
 
@@ -20,4 +20,9 @@ namespace Log
 
         std::cout<<"ERROR " + levelString + " : " + error<<std::endl;
     }
+
+	void warning(const std::string warningMessage)
+	{
+		std::cout<<"WARNING : " + warningMessage<<std::endl;
+	}
 }

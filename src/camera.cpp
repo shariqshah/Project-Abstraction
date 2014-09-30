@@ -50,8 +50,15 @@ void Camera::initCamera(float nearZ,
 											  Settings::getWindowHeight());
 			Renderer::Camera::setView(mCamNode, mFov, mAspectRatio, mNearZ, mFarZ);
 		}
-	}
+	}	
+}
+
+Camera::~Camera()
+{
+	Renderer::removeCamera(mCamNode);
 	
+	if(!Renderer::removeNode(mCamNode))
+		Log::warning("Camera node does not exist so not removed!");
 }
 
 Node Camera::getCameraNode()

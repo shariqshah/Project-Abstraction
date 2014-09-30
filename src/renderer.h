@@ -13,6 +13,7 @@
 
 #include <iostream>
 #include <vector>
+#include <algorithm>
 
 typedef H3DNode Node;
 typedef H3DRes  Resource;
@@ -33,12 +34,16 @@ namespace Renderer
 	void setNodeTransform(Node node, glm::mat4 transformMat);
     void setNodeParam(Node node, int param, int value);
     void setNodeParam(Node node, int param, int compID, float value);
+	void setNodeName(Node node, const std::string name);
 	void drawText();
     void resizePipelineBuffers(int width, int height);
 	void setCurrentCamera(Node cameraNode);
-	void addText(std::string text);	
+	void addText(std::string text);
+	void removeCamera(Node camera);
 	
+	bool removeNode(Node node);
 	bool setParent(Node child, Node parent);
+	
 	Node getCurrentCameraNode();
     Node createCamera(std::string name, Node parent = H3DRootNode);
     Node createNode(Resource resource, Node parent = H3DRootNode);
@@ -61,6 +66,9 @@ namespace Renderer
 	{
 		Resource add(ResourceType type, std::string name, int flag = 0);
 		Resource get(ResourceType type, std::string name);
+
+		bool isLoaded(Resource resource);
+		bool remove(Resource resource);
 		bool loadAddedResources();
 	}
 

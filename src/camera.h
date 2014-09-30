@@ -23,6 +23,7 @@ public:
 		   float aspectRatio,
 		   float fov,
 		   Node Parent);
+	~Camera();
 	
 	Node getCameraNode();
 

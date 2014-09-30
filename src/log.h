@@ -7,8 +7,9 @@ namespace Log
 {
     enum class ErrorLevel { LOW = 0, MEDIUM, CRITICAL };
 
-    void message(std::string message);
-    void error(ErrorLevel level, std::string error);
+    void message(const std::string message);
+    void error(ErrorLevel level, const std::string error);
+	void warning(const std::string warningMessage);
 }
 
 

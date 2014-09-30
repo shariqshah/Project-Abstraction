@@ -22,43 +22,28 @@ Game::Game(std::string path)
 
 	H3DNode env = h3dAddNodes(H3DRootNode, envRes);
 	h3dSetNodeTransform(env, 0, -20, 0, 0, 0, 0, 20, 20, 20);
-	
-	// Add light source
-	// H3DNode light = h3dAddLightNode(H3DRootNode, "Light1", 0, "LIGHTING", "SHADOWMAP");
-	// h3dSetNodeTransform(light, 0, 20, 16, -60, 0, 0, 1, 1, 1);
-	// h3dSetNodeParamF(light, H3DLight::RadiusF, 0, 30);
-	// h3dSetNodeParamF(light, H3DLight::FovF, 0, 90);
-	// h3dSetNodeParamI(light, H3DLight::ShadowMapCountI, 1);
-	// h3dSetNodeParamF(light, H3DLight::ShadowMapBiasF, 0, 0.01f);
-	// h3dSetNodeParamF(light, H3DLight::ColorF3, 0, 1.0f);
-	// h3dSetNodeParamF(light, H3DLight::ColorF3, 1, 0.8f);
-	// h3dSetNodeParamF(light, H3DLight::ColorF3, 2, 0.7f);
-	// h3dSetNodeParamF(light, H3DLight::ColorMultiplierF, 0, 1.0f);
 
 	GOPtr lightGO = std::make_shared<GameObject>();
 	lightGO->setName("LightGO");
-	Transform lTransform;
-	lTransform.setPosition(glm::vec3(-2, 15, 15));
-	//lTransform.setLookAt(glm::vec3(0.f));
-	//lTransform.rotate(glm::vec3(1, 0, 0), 90);
-	Model monkey(lightGO->getNode(), "models/sphere/sphere.scene.xml");
-	lightGO->addComponent(std::make_shared<Model>(monkey));
-	lightGO->addComponent(std::make_shared<Transform>(lTransform));
-	Light goLight(lightGO->getNode(), "GOLight");
-	goLight.setColor(glm::vec3(0, 0, 1));
-	lightGO->addComponent(std::make_shared<Light>(goLight));
+	lightGO->addComponent(std::make_shared<Transform>());
+	lightGO->addComponent(std::make_shared<Model>(lightGO->getNode(), "models/sphere/sphere.scene.xml"));
+	lightGO->addComponent(std::make_shared<Light>(lightGO->getNode(), "GOLight"));
+	
+	auto lTransform = lightGO->getComponent<Transform>("Transform");
+	auto goLight = lightGO->getComponent<Light>("Light");
+
+	lTransform->setPosition(glm::vec3(-2, 15, 15));
+	goLight->setColor(glm::vec3(0, 0, 1));
 	mObjectList.push_back(lightGO);
 
 	GOPtr player = std::make_shared<GameObject>();
 	player->setName("Player");
-	Transform transform;
-	player->addComponent(std::make_shared<Transform>(transform));
-	Camera camera(player->getNode());
-	player->addComponent(std::make_shared<Camera>(camera));
-	// Light camLight(player->getNode(), "newLight");
-	// camLight.setColor(glm::vec3(1, 0, 0));
-	// player->addComponent(std::make_shared<Light>(camLight));
 	player->setTag("FreeCamera");
+	player->addComponent(std::make_shared<Transform>());
+	player->addComponent(std::make_shared<Camera>(player->getNode()));
+
+	auto camera = player->getComponent<Camera>("Camera");
+	Renderer::setCurrentCamera(camera->getCameraNode());
 	mObjectList.push_back(player);
 
 	for(int i = 0; i < 50; i++)
@@ -83,6 +68,14 @@ Game::Game(std::string path)
 
 	Renderer::resizePipelineBuffers(Settings::getWindowWidth(),
 									Settings::getWindowHeight());
+}
+
+Game::~Game()
+{
+	// for(GOPtr gameObject : mObjectList)
+	// {
+	// 	gameObject->cleanup();
+	// }
 }
 
 void Game::update(float deltaTime)

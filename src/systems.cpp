@@ -48,6 +48,12 @@ namespace System
 				light->setFov(270);
 			if(Input::isReleased(Input::Key::K4))
 				light->setFov(360);
+
+			if(Input::isReleased(Input::Key::V))
+			{
+				if(gameObject->hasComponents((long)ComponentType::MODEL))
+					gameObject->removeComponent("Model");
+			}
 		}
 		
 		auto transform = gameObject->getComponent<Transform>("Transform");

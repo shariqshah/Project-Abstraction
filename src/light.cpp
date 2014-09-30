@@ -20,6 +20,12 @@ Light::Light(Node parent, std::string name)
 	}
 }
 
+Light::~Light()
+{
+	if(!Renderer::removeNode(mNode))
+		Log::warning("Light node does not exist so not removed!");
+}
+
 float Light::getRadius()
 {
 	return mRadius;

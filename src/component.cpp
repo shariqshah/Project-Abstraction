@@ -7,9 +7,7 @@ std::string Component::getName() const
 }
 
 Component::~Component()
-{
-
-}
+{}
 
 Component::Component()
 {

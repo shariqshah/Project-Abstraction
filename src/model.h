@@ -12,7 +12,8 @@ class Model : public Component
 
 public:
 	Model(Node parent, std::string name);
-
+	~Model();
+	
 	std::string getFilename();
 	Resource getResourceID();
 	Node getNode();

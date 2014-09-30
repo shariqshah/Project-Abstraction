@@ -145,9 +145,11 @@ bool init(char *pFullPath)
 
 void close()
 {
+	//game->cleanup();
+	delete game;
+	
 	// Release horde3d
 	h3dRelease();
-	delete game;
 	
 	//Destroy window
     SDL_DestroyWindow(window);

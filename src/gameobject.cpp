@@ -8,7 +8,7 @@ std::string GameObject::getName() const
 void GameObject::setName(const std::string name)
 {
     mName = name;
-	h3dSetNodeParamStr(mNode, H3DNodeParams::NameStr, mName.c_str());
+	Renderer::setNodeName(mNode, mName);
 }
 
 std::shared_ptr<Component> GameObject::getComponent(const std::string &componentType)
@@ -18,14 +18,13 @@ std::shared_ptr<Component> GameObject::getComponent(const std::string &component
 
     if(it == mComponentMap.end())
     {
-        Log::error(Log::ErrorLevel::MEDIUM,
+        Log::error(Log::ErrorLevel::LOW,
                    componentType + " not found on object " + mName);
         return nullptr;
     }
 
     return it->second;
 }
-
 
 long GameObject::getComponentMask() const
 {
@@ -44,7 +43,6 @@ bool GameObject::hasComponents(long componentMask)
     else
         return false;
 }
-
 
 std::string GameObject::getTag() const
 {
@@ -69,7 +67,16 @@ GameObject::GameObject()
     mName = "DefaultGameObjectName";
     mTag = "DefaultTag";
     mComponentMask = (long)ComponentType::NO_COMPONENT;
-	mNode = h3dAddGroupNode(H3DRootNode, mName.c_str());
+	mNode = Renderer::createGroupNode(mName.c_str());
+	mRemove = false;
+}
+
+GameObject::~GameObject()
+{
+	if(mNode != 0)
+	{	
+		Renderer::removeNode(mNode);
+	}
 }
 
 void GameObject::addComponent(std::shared_ptr<Component> component)
@@ -98,8 +105,7 @@ void GameObject::addComponent(std::shared_ptr<Component> component)
 		Log::error(Log::ErrorLevel::MEDIUM,
 				   name + " component could not be added to " + mName +
 				   ". Component Invalid!");
-	}
-    
+	}    
 }
 
 void GameObject::removeComponent(std::string componentName)
@@ -108,11 +114,11 @@ void GameObject::removeComponent(std::string componentName)
 
     if(position != mComponentMap.end())
     {
-        ComponentType type = position->second->getType();
+		auto component = position->second;
+        ComponentType type = component->getType();
         mComponentMask &= ~(long)type;
         mComponentMap.erase(position);
-        Log::message(componentName + " removed from " + mName);
-
+        Log::message(componentName + " component removed from " + mName);
     }
     else
     {
@@ -129,10 +135,19 @@ void GameObject::removeComponent(std::string componentName)
 //        mComponentMask &= ~(long)Co
 //        Log::message(componentsRemoved + " components removed from " + mName);
 //    }
-
 }
 
 Node GameObject::getNode()
 {
 	return mNode;
+}
+
+void GameObject::markForRemoval()
+{
+	mRemove = true;
+}
+
+bool GameObject::isMarkedForRemoval()
+{
+	return mRemove;
 }

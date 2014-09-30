@@ -18,6 +18,21 @@ Model::Model(Node parent, std::string name)
 	}
 }
 
+Model::~Model()
+{
+	if(mResourceID != 0 && Renderer::Resources::isLoaded(mResourceID))
+	{
+		if(!Renderer::Resources::remove(mResourceID))
+			Log::warning("Resource not removed for Model Component!");
+
+		if(mNode != 0)
+		{
+			if(!Renderer::removeNode(mNode))
+				Log::warning("Node not removed for Model Component");
+		}
+	}
+}
+
 Resource Model::getResourceID()
 {
 	return mResourceID;
