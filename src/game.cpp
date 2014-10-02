@@ -23,9 +23,7 @@ Game::Game(std::string path)
 	H3DNode env = h3dAddNodes(H3DRootNode, envRes);
 	h3dSetNodeTransform(env, 0, -20, 0, 0, 0, 0, 20, 20, 20);
 
-	GOPtr lightGO = std::make_shared<GameObject>();
-	lightGO->setName("LightGO");
-	lightGO->addComponent(std::make_shared<Transform>());
+	GOPtr lightGO = SceneManager::createGameObject("LightGO");
 	lightGO->addComponent(std::make_shared<Model>(lightGO->getNode(), "models/sphere/sphere.scene.xml"));
 	lightGO->addComponent(std::make_shared<Light>(lightGO->getNode(), "GOLight"));
 	
@@ -34,36 +32,27 @@ Game::Game(std::string path)
 
 	lTransform->setPosition(glm::vec3(-2, 15, 15));
 	goLight->setColor(glm::vec3(0, 0, 1));
-	mObjectList.push_back(lightGO);
 
-	GOPtr player = std::make_shared<GameObject>();
-	player->setName("Player");
+	GOPtr player = SceneManager::createGameObject("Player");
 	player->setTag("FreeCamera");
-	player->addComponent(std::make_shared<Transform>());
 	player->addComponent(std::make_shared<Camera>(player->getNode()));
-
 	auto camera = player->getComponent<Camera>("Camera");
 	Renderer::setCurrentCamera(camera->getCameraNode());
-	mObjectList.push_back(player);
 
 	for(int i = 0; i < 50; i++)
 	{
-		GOPtr suzanne = std::make_shared<GameObject>();
-		suzanne->setName("Suzanne" + std::to_string(i));
-		Transform suzTransform;
+		GOPtr suzanne = SceneManager::createGameObject("Suzanne" + std::to_string(i));
+		auto suzTransform = suzanne->getComponent<Transform>("Transform");
 
 		float radius = 7.f;
 		float width  = glm::sin((float)i) * radius;
 		float height = glm::cos((float)i) * radius;
 		if(i < 50)
-			suzTransform.setPosition(glm::vec3(width, 5, height));
+			suzTransform->setPosition(glm::vec3(width, 5, height));
 		else
-			suzTransform.setPosition(glm::vec3(0, height + 7, width));
+			suzTransform->setPosition(glm::vec3(0, height + 7, width));
 		
-		suzanne->addComponent(std::make_shared<Transform>(suzTransform));
-		Model suzModel(suzanne->getNode(), "models/test/test.scene.xml");
-		suzanne->addComponent(std::make_shared<Model>(suzModel));
-		mObjectList.push_back(suzanne);
+		suzanne->addComponent(std::make_shared<Model>(suzanne->getNode(), "models/test/test.scene.xml"));
 	}
 
 	Renderer::resizePipelineBuffers(Settings::getWindowWidth(),
@@ -72,18 +61,20 @@ Game::Game(std::string path)
 
 Game::~Game()
 {
-	// for(GOPtr gameObject : mObjectList)
-	// {
-	// 	gameObject->cleanup();
-	// }
+	SceneManager::cleanup();
 }
 
 void Game::update(float deltaTime)
 {
-	for(GOPtr gameObject : mObjectList)
+	SceneObjectMap* sceneObjects = SceneManager::getSceneObjects();
+	for(SceneObjectMap::iterator it = sceneObjects->begin();
+		it != sceneObjects->end();
+		++it)
 	{
-		System::update(deltaTime, gameObject.get());
+		System::update(deltaTime, it->second.get());
 	}
+
+	SceneManager::update();
 }
 
 void Game::draw()

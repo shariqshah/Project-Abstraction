@@ -3,13 +3,10 @@
 
 #include "systems.h"
 #include "model.h"
-
-typedef std::shared_ptr<GameObject> GOPtr;
-typedef std::vector<GOPtr> ObjectList;
+#include "scenemanager.h"
 
 class Game
 {
-	ObjectList mObjectList;
     H3DNode mKnightNode;
     H3DRes mKnightModelRes;
 	H3DRes mFontMatRes;

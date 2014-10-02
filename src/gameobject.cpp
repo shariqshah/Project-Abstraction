@@ -11,7 +11,7 @@ void GameObject::setName(const std::string name)
 	Renderer::setNodeName(mNode, mName);
 }
 
-std::shared_ptr<Component> GameObject::getComponent(const std::string &componentType)
+ComponentPtr GameObject::getComponent(const std::string &componentType)
 {
     ComponentMap::iterator it;
     it = mComponentMap.find(componentType);
@@ -62,10 +62,10 @@ bool GameObject::compareTag(std::string tagToCompare)
         return false;
 }
 
-GameObject::GameObject()
+GameObject::GameObject(const std::string name, const std::string tag)
 {
-    mName = "DefaultGameObjectName";
-    mTag = "DefaultTag";
+    mName = name;
+    mTag = tag;
     mComponentMask = (long)ComponentType::NO_COMPONENT;
 	mNode = Renderer::createGroupNode(mName.c_str());
 	mRemove = false;
@@ -79,7 +79,7 @@ GameObject::~GameObject()
 	}
 }
 
-void GameObject::addComponent(std::shared_ptr<Component> component)
+ComponentPtr GameObject::addComponent(ComponentPtr component)
 {
 	ComponentType type = component->getType();
 	std::string name = component->getName();
@@ -96,16 +96,20 @@ void GameObject::addComponent(std::shared_ptr<Component> component)
 		}
 		else
 		{
-			Log::error(Log::ErrorLevel::MEDIUM,
-					   name + " component could not be added to " + mName);
+			Log::warning(name + " component could not be added to " + mName +
+					     " because it already exits");
 		}
+
+		return returnValue.first->second; //return the component
 	}
 	else
 	{
 		Log::error(Log::ErrorLevel::MEDIUM,
 				   name + " component could not be added to " + mName +
 				   ". Component Invalid!");
-	}    
+	}
+
+	return nullptr;
 }
 
 void GameObject::removeComponent(std::string componentName)

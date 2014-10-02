@@ -54,6 +54,20 @@ namespace System
 				if(gameObject->hasComponents((long)ComponentType::MODEL))
 					gameObject->removeComponent("Model");
 			}
+
+			if(Input::isReleased(Input::Key::C))
+		    {
+				auto suzanne = SceneManager::find("Suzanne12");
+
+				if(suzanne)
+				{
+					auto light =suzanne->addComponent<Light>(std::make_shared<Light>(suzanne->getNode(),
+						                               "suzanneLight"));
+
+					if(light)
+						light->setColor(glm::vec3(1, 0, 0));
+				}
+			}
 		}
 		
 		auto transform = gameObject->getComponent<Transform>("Transform");
