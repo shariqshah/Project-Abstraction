@@ -8,11 +8,13 @@ namespace Renderer
 		static std::vector<std::string> sTextList(10);
 		static Resource sFontMat;
 		static Resource sPanelMat;
-		static Resource sCurrentPipeline;
+		static Resource sDefaultPipeline;
 		static Node sCurrentCamera;
 		static glm::vec2 sFontPos;
 		static float sFontSize;
-		static std::vector<Node> cameras(5, 0);
+		static std::vector<Node> cameras;
+		static Resource sPipelines[3];
+		static Resource sLightMat;
 	}
 
 	void setNodeTransform(Node node, glm::mat4 transformMat)
@@ -45,24 +47,42 @@ namespace Renderer
 		h3dSetOption(H3DOptions::MaxAnisotropy, 4);
 		h3dSetOption(H3DOptions::ShadowMapSize, 2048);
 
-		sCurrentPipeline = h3dAddResource(H3DResTypes::Pipeline, "pipelines/forward.pipeline.xml", 0);
-		sFontMat = h3dAddResource(H3DResTypes::Material, "overlays/font.material.xml", 0);
-		sPanelMat = h3dAddResource(H3DResTypes::Material, "overlays/panel.material.xml", 0);
+		sPipelines[0] = Resources::add(ResourceType::PIPELINE,
+									   "pipelines/forward.pipeline.xml",
+									   0);
+		sPipelines[1] = Resources::add(ResourceType::PIPELINE,
+									   "pipelines/deferred.pipeline.xml",
+									   0);
+		sPipelines[2] = Resources::add(ResourceType::PIPELINE,
+									   "pipelines/hdr.pipeline.xml",
+									   0);
+
+		sDefaultPipeline = sPipelines[(int)Pipeline::FORWARD];
 		
-		h3dutLoadResourcesFromDisk(cContentFolderDir.c_str());
+		sFontMat = Resources::add(ResourceType::MATERIAL,
+								  "overlays/font.material.xml",
+								  0);
+		sPanelMat = Resources::add(ResourceType::MATERIAL,
+								   "overlays/panel.material.xml",
+								   0);
+		sLightMat = Resources::add(ResourceType::MATERIAL,
+								   "materials/light.material.xml",
+								   0);
+		
+		Resources::loadAddedResources();
 
 		sFontPos = glm::vec2(0.03, 0.25);
 		sFontSize = 0.026f;
 	}
 
-	Resource getCurrentPipline()
-	{
-		return sCurrentPipeline;
-	}
+	// Resource getCurrentPipline()
+	// {
+	// 	return sDefaultPipeline;
+	// }
 
 	Node createCamera(std::string name, Node parent)
 	{
-		Node node = h3dAddCameraNode(parent, name.c_str(), sCurrentPipeline);
+		Node node = h3dAddCameraNode(parent, name.c_str(), sDefaultPipeline);
 
 		if(node != 0)
 			cameras.push_back(node);
@@ -119,7 +139,9 @@ namespace Renderer
 
 	void resizePipelineBuffers(int width, int height)
 	{
-		h3dResizePipelineBuffers(sCurrentPipeline, width, height);
+		h3dResizePipelineBuffers(sPipelines[(int)Pipeline::FORWARD], width, height);
+		h3dResizePipelineBuffers(sPipelines[(int)Pipeline::DEFERRED], width, height);
+		h3dResizePipelineBuffers(sPipelines[(int)Pipeline::HDR], width, height);
 	}
 
 	void setCurrentCamera(Node cameraNode)
@@ -194,6 +216,26 @@ namespace Renderer
 		{
 			h3dSetupCameraView(cameraNode, fov, aspect, nearZ, farZ);
 		}
+
+		void setPipeline(Node camera, Pipeline pipeline)
+		{
+			Resource newPipeline = sDefaultPipeline;
+			
+			switch(pipeline)
+			{
+			case Pipeline::FORWARD:
+				newPipeline = sPipelines[(int)Pipeline::FORWARD];
+				break;
+			case Pipeline::DEFERRED:
+				newPipeline = sPipelines[(int)Pipeline::DEFERRED];
+				break;
+			case Pipeline::HDR:
+				newPipeline = sPipelines[(int)Pipeline::HDR];
+				break;
+			}
+
+			h3dSetNodeParamI(camera, H3DCamera::PipeResI, newPipeline);
+		}
 	}
 
 	namespace Resources
@@ -251,7 +293,7 @@ namespace Renderer
 		{
 			Node light = h3dAddLightNode(parent,
 										 name.c_str(),
-										 material,
+										 sLightMat,
 										 lightContext.c_str(),
 										 shadowContext.c_str());
 

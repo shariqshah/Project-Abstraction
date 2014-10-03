@@ -23,10 +23,11 @@ protected:
 	bool mRemove;
     long mComponentMask;
 
-    ComponentPtr getComponent(const std::string &componentType);
+    ComponentPtr getComponent(const std::string& componentType);
+	ComponentPtr addComponent(ComponentPtr component);
 public:
-    GameObject(const std::string name = "Defaultgameobjectname",
-			   const std::string tag  = "DefaultTag");
+    GameObject(const std::string& name = "Defaultgameobjectname",
+			   const std::string& tag  = "DefaultTag");
 	~GameObject();
 
 	template<typename T, typename... Args>
@@ -35,23 +36,21 @@ public:
 		auto component = std::make_shared<T>(args...);
         return std::dynamic_pointer_cast<T>(addComponent(component));
     }
-	
-    ComponentPtr addComponent(ComponentPtr component);
 
-    void removeComponent(std::string componentName);
-    void setName(const std::string value);
+    void removeComponent(const std::string& componentName);
+    void setName(const std::string& value);
     void setComponentMask(long value);
 	void markForRemoval();
-    void setTag(std::string value);
+    void setTag(const std::string& value);
 	
-    bool compareTag(std::string tagToCompare);
+    bool compareTag(const std::string& tagToCompare);
 	bool isMarkedForRemoval();
 	bool hasComponents(long componentMask);
 
     std::string getName() const;
     long getComponentMask() const;
 	std::string getTag() const;
-	Node getNode();
+	Node getNode() const;
 
 	template<typename T>
     std::shared_ptr<T> getComponent(std::string componentType)

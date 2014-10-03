@@ -35,7 +35,6 @@ Game::Game(std::string path)
 	GOPtr player = SceneManager::createGameObject("Player");
 	player->setTag("FreeCamera");
 	auto camera = player->addComponent<Camera>(player->getNode());
-
 	Renderer::setCurrentCamera(camera->getCameraNode());
 
 	for(int i = 0; i < 50; i++)

@@ -10,6 +10,7 @@
 #include "../include/horde3d/Horde3DUtils.h"
 
 #include "log.h"
+#include "settings.h"
 
 #include <iostream>
 #include <vector>
@@ -57,7 +58,7 @@ namespace Renderer
     Node createNode(Resource resource, Node parent = H3DRootNode);
     Node createGroupNode(std::string name, Node parent = H3DRootNode);
 	
-    Resource getCurrentPipeline();
+    //Resource getCurrentPipeline();
 
 	namespace Camera
 	{
@@ -68,6 +69,7 @@ namespace Renderer
 					 float aspect,
 					 float nearZ,
 					 float farZ);
+		void setPipeline(Node camera, Pipeline pipeline);
 	}
 
 	namespace Resources

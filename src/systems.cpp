@@ -74,6 +74,18 @@ namespace System
 			if(Input::isReleased(Input::Key::X))
 				SceneManager::remove(79);
 		}
+
+		if(gameObject->hasComponents((long)ComponentType::CAMERA))
+		{
+			auto camera = gameObject->getComponent<Camera>("Camera");
+			
+			if(Input::isReleased(Input::Key::K5))
+				camera->setPipeline(Pipeline::FORWARD);
+			if(Input::isReleased(Input::Key::K6))
+				camera->setPipeline(Pipeline::DEFERRED);
+			if(Input::isReleased(Input::Key::K7))
+				camera->setPipeline(Pipeline::HDR);
+		}
 		
 		auto transform = gameObject->getComponent<Transform>("Transform");
 		if(transform->needsSync())

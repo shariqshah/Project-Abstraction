@@ -3,14 +3,14 @@
 
 #include "component.h"
 #include "renderer.h"
-#include "settings.h"
 
 class Camera : public Component
 {
 private:
 	Node  mCamNode;
 	float mNearZ, mFarZ, mFov, mAspectRatio;
-
+	Pipeline mPipeline;
+	
 	void initCamera(float nearZ,
 					float farZ,
 					float aspectRatio,
@@ -33,11 +33,13 @@ public:
 	void setAspectRatio(float aspectRatio);
 	void resizeViewport(int width, int height);
 	void setViewportPos(int x, int y);
+	void setPipeline(Pipeline pipeline);
 
-	float getFOV();
-	float getFarZ();
-	float getNearZ();
-	float getAspectRatio();
+	float    getFOV();
+	float    getFarZ();
+	float    getNearZ();
+	float    getAspectRatio();
+	Pipeline getPipeline();
 };
 
 #endif

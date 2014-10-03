@@ -5,7 +5,7 @@ std::string GameObject::getName() const
     return mName;
 }
 
-void GameObject::setName(const std::string name)
+void GameObject::setName(const std::string& name)
 {
     mName = name;
 	Renderer::setNodeName(mNode, mName);
@@ -49,12 +49,12 @@ std::string GameObject::getTag() const
     return mTag;
 }
 
-void GameObject::setTag(std::string tag)
+void GameObject::setTag(const std::string& tag)
 {
     mTag = tag;
 }
 
-bool GameObject::compareTag(std::string tagToCompare)
+bool GameObject::compareTag(const std::string& tagToCompare)
 {
     if(mTag == tagToCompare)
         return true;
@@ -62,7 +62,7 @@ bool GameObject::compareTag(std::string tagToCompare)
         return false;
 }
 
-GameObject::GameObject(const std::string name, const std::string tag)
+GameObject::GameObject(const std::string& name, const std::string& tag)
 {
     mName = name;
     mTag = tag;
@@ -112,7 +112,7 @@ ComponentPtr GameObject::addComponent(ComponentPtr component)
 	return nullptr;
 }
 
-void GameObject::removeComponent(std::string componentName)
+void GameObject::removeComponent(const std::string& componentName)
 {
     auto position = mComponentMap.find(componentName);
 
@@ -129,19 +129,9 @@ void GameObject::removeComponent(std::string componentName)
         Log::error(Log::ErrorLevel::MEDIUM,
                    "Component " + componentName + " not removed from " + mName);
     }
-//    if(componentsRemoved < 1)
-//    {
-//        Log::error(Log::ErrorLevel::MEDIUM,
-//                   "Component " + componentName + " not removed from " + mName);
-//    }
-//    else
-//    {
-//        mComponentMask &= ~(long)Co
-//        Log::message(componentsRemoved + " components removed from " + mName);
-//    }
 }
 
-Node GameObject::getNode()
+Node GameObject::getNode() const
 {
 	return mNode;
 }
@@ -155,3 +145,5 @@ bool GameObject::isMarkedForRemoval()
 {
 	return mRemove;
 }
+
+

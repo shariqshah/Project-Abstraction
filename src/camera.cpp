@@ -34,6 +34,7 @@ void Camera::initCamera(float nearZ,
 	mFov = fov;
 	mType = ComponentType::CAMERA;
 	mName = "Camera";
+	mPipeline = Pipeline::FORWARD;
 	mCamNode = Renderer::createCamera("CameraMainNode");
 
 	if(mCamNode == 0)
@@ -90,6 +91,12 @@ void Camera::setAspectRatio(float aspectRatio)
 	Renderer::Camera::setView(mCamNode, mFov, mAspectRatio, mNearZ, mFarZ);
 }
 
+void Camera::setPipeline(Pipeline pipeline)
+{
+	mPipeline = pipeline;
+	Renderer::Camera::setPipeline(mCamNode, pipeline);
+}
+
 float Camera::getFOV()
 {
 	return mFov;
@@ -108,6 +115,11 @@ float Camera::getNearZ()
 float Camera::getAspectRatio()
 {
 	return mAspectRatio;
+}
+
+Pipeline Camera::getPipeline()
+{
+	return mPipeline;
 }
 
 void Camera::resizeViewport(int width, int height)
