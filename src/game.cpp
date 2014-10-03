@@ -24,19 +24,18 @@ Game::Game(std::string path)
 	h3dSetNodeTransform(env, 0, -20, 0, 0, 0, 0, 20, 20, 20);
 
 	GOPtr lightGO = SceneManager::createGameObject("LightGO");
-	lightGO->addComponent(std::make_shared<Model>(lightGO->getNode(), "models/sphere/sphere.scene.xml"));
-	lightGO->addComponent(std::make_shared<Light>(lightGO->getNode(), "GOLight"));
-	
+	lightGO->addComponent<Model>(lightGO->getNode(),
+								 "models/sphere/sphere.scene.xml");
+	auto goLight = lightGO->addComponent<Light>(lightGO->getNode(), "GOLight");
 	auto lTransform = lightGO->getComponent<Transform>("Transform");
-	auto goLight = lightGO->getComponent<Light>("Light");
 
 	lTransform->setPosition(glm::vec3(-2, 15, 15));
 	goLight->setColor(glm::vec3(0, 0, 1));
 
 	GOPtr player = SceneManager::createGameObject("Player");
 	player->setTag("FreeCamera");
-	player->addComponent(std::make_shared<Camera>(player->getNode()));
-	auto camera = player->getComponent<Camera>("Camera");
+	auto camera = player->addComponent<Camera>(player->getNode());
+
 	Renderer::setCurrentCamera(camera->getCameraNode());
 
 	for(int i = 0; i < 50; i++)
@@ -52,7 +51,7 @@ Game::Game(std::string path)
 		else
 			suzTransform->setPosition(glm::vec3(0, height + 7, width));
 		
-		suzanne->addComponent(std::make_shared<Model>(suzanne->getNode(), "models/test/test.scene.xml"));
+		suzanne->addComponent<Model>(suzanne->getNode(), "models/test/test.scene.xml");
 	}
 
 	Renderer::resizePipelineBuffers(Settings::getWindowWidth(),

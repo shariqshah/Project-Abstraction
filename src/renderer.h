@@ -21,7 +21,15 @@ typedef H3DRes  Resource;
 enum class ResourceType : int
 {
 	MODEL    = H3DResTypes::SceneGraph,
-	MATERIAL = H3DResTypes::Material
+	MATERIAL = H3DResTypes::Material,
+	PIPELINE = H3DResTypes::Pipeline
+};
+
+enum class Pipeline : int
+{
+	FORWARD = 0,
+	DEFERRED = 1,
+	HDR = 2
 };
 
 namespace Renderer

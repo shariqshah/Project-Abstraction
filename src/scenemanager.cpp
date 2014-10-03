@@ -23,7 +23,8 @@ namespace SceneManager
 		}
 		else
 		{
-			Log::error(Log::ErrorLevel::MEDIUM, name + " could not be added to scene");
+			Log::error(Log::ErrorLevel::MEDIUM,
+					   name + " could not be added to scene");
 			return false;
 		}
 	}
@@ -37,12 +38,30 @@ namespace SceneManager
 			if(name == it->second->getName())
 			{
 				sRemovables.push_back(it->first);
+				Log::message(name + " removed from scene");
 				return true;
 			}
 		}
 
 		Log::error(Log::ErrorLevel::LOW,
 				   name + " not found in scene so cannot be removed.");
+		return false;
+	}
+
+	bool remove(Node node)
+	{
+		auto position = sSceneObjects.find(node);
+
+		if(position != sSceneObjects.end())
+		{
+			sRemovables.push_back(node);
+			Log::message("GO " + std::to_string(node) + " removed from scene");
+			return true;
+		}
+
+		Log::error(Log::ErrorLevel::LOW,
+				   "GO " + std::to_string(node) +
+				   " not found in scene so cannot be removed.");
 		return false;
 	}
 	
@@ -56,6 +75,17 @@ namespace SceneManager
 				return it->second;
 		}
 
+		return nullptr;
+	}
+
+	GOPtr find(Node node)
+	{
+	    auto it = sSceneObjects.find(node);
+
+		if(it != sSceneObjects.end())
+			return it->second;
+
+		
 		return nullptr;
 	}
 
@@ -85,7 +115,7 @@ namespace SceneManager
 	GOPtr createGameObject(const std::string name)
 	{
 		GOPtr newObj = std::make_shared<GameObject>(name);
-		newObj->addComponent(std::make_shared<Transform>());
+		newObj->addComponent<Transform>();
 		add(newObj);
 		
 		return newObj;

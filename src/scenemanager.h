@@ -11,7 +11,9 @@ namespace SceneManager
 {
 	bool add(GOPtr newGameObject);
 	bool remove(std::string name);
+	bool remove(Node node);
 	GOPtr find(std::string name);
+	GOPtr find(Node node);
 	void update();
 	void cleanup();
 	GOPtr createGameObject(const std::string name);

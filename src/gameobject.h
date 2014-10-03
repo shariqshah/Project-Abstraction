@@ -29,9 +29,10 @@ public:
 			   const std::string tag  = "DefaultTag");
 	~GameObject();
 
-	template<typename T>
-    std::shared_ptr<T> addComponent(ComponentPtr component)
+	template<typename T, typename... Args>
+    std::shared_ptr<T> addComponent(Args&&... args)
     {
+		auto component = std::make_shared<T>(args...);
         return std::dynamic_pointer_cast<T>(addComponent(component));
     }
 	
