@@ -281,6 +281,26 @@ namespace Renderer
 
 			return res;
 		}
+
+		bool setUniform(Resource material,
+						const std::string& name,
+						glm::vec4 value)
+		{
+			bool success = h3dSetMaterialUniform(material,
+												 name.c_str(),
+												 value.x,
+												 value.y,
+												 value.z,
+												 value.w);
+			if(!success)
+			{
+				Log::error(Log::ErrorLevel::LOW,
+						   "could not set value for uniform " + name);
+				return false;
+			}
+
+			return true;
+		}
 	}
 
 	namespace Light

@@ -46,6 +46,8 @@ float4 matSpecParams <
 	string desc_d   = "d: gloss";
 > = {0.04, 0.04, 0.04, 0.5};
 
+float4 ambientLight = {0.5, 0.5, 0.5, 1.0};
+
 // Contexts
 context ATTRIBPASS
 {
@@ -384,6 +386,7 @@ void main( void )
 
 uniform sampler2D albedoMap;
 uniform samplerCube ambientMap;
+uniform vec4 ambientLight;
 
 #ifdef _F02_NormalMapping
 	uniform sampler2D normalMap;
@@ -439,7 +442,8 @@ void main( void )
 	vec3 normal = tsbNormal;
 #endif
 	
-	gl_FragColor.rgb = albedo.rgb * textureCube( ambientMap, normal ).rgb;
+	// gl_FragColor.rgb = (albedo.rgb * textureCube( ambientMap, normal ).rgb);
+	gl_FragColor.rgb = (albedo.rgb * ambientLight.rgb);
 	
 #ifdef _F04_EnvMapping
 	vec3 refl = textureCube( envMap, reflect( pos.xyz - viewerPos, normalize( normal ) ) ).rgb;

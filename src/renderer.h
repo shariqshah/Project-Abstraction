@@ -57,8 +57,6 @@ namespace Renderer
     Node createCamera(std::string name, Node parent = H3DRootNode);
     Node createNode(Resource resource, Node parent = H3DRootNode);
     Node createGroupNode(std::string name, Node parent = H3DRootNode);
-	
-    //Resource getCurrentPipeline();
 
 	namespace Camera
 	{
@@ -80,6 +78,7 @@ namespace Renderer
 		bool isLoaded(Resource resource);
 		bool remove(Resource resource);
 		bool loadAddedResources();
+		bool setUniform(Resource material, const std::string& name, glm::vec4 value);
 	}
 
 	namespace Light

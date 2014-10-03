@@ -71,8 +71,23 @@ namespace System
 				}
 			}
 
-			if(Input::isReleased(Input::Key::X))
-				SceneManager::remove(79);
+			if(Input::isReleased(Input::Key::SPACE))
+				transform->setLookAt(glm::vec3(0));
+
+			if(Input::isReleased(Input::Key::Z))
+			{
+				Resource mat = Renderer::Resources::get(ResourceType::MATERIAL,
+														"pipelines/globalSettings.material.xml");
+				glm::vec4 ambientLight(0.1f, 0.1f, 0.1f, 1.0f);
+				bool ret = Renderer::Resources::setUniform(mat,
+														   "ambientLight",
+														   ambientLight);
+
+				if(ret)
+					Log::message("changed!");
+				else
+					Log::message("fail");
+			}
 		}
 
 		if(gameObject->hasComponents((long)ComponentType::CAMERA))
