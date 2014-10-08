@@ -1,9 +1,10 @@
 #include "component.h"
 
+const std::string Component::sName = "DEFAULT_COMPONENT_NAME";
 
-std::string Component::getName() const
+const std::string Component::getName()
 {
-    return mName;
+    return Component::sName;
 }
 
 Component::~Component()
@@ -11,8 +12,7 @@ Component::~Component()
 
 Component::Component()
 {
-    mName = "DEFAULT_COMPONENT_NAME";
-    mType = ComponentType::NO_COMPONENT;
+    mType  = ComponentType::NO_COMPONENT;
 	mValid = true;
 }
 

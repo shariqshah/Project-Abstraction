@@ -14,6 +14,7 @@ class Light : public Component
 	int       mShadowMapCount;
 	glm::vec3 mColor;
 	Node      mNode;
+	bool      mCastShadow;
 
 public:	
 	Light(Node parent, std::string name);
@@ -27,6 +28,7 @@ public:
 	int       getShadowMapCount();
 	glm::vec3 getColor();
 	Node      getNode();
+	bool      isShadowCaster();
 	
 	void setRadius(float radius);
 	void setColor(glm::vec3 color);
@@ -35,6 +37,10 @@ public:
 	void setShadowMapBias(float bias);
 	void setShadowSplitLambda(float splitLambda);
 	void setShadowMapCount(int shadowMapCount);
+	void setShadowCaster(bool enable);
+
+	const static std::string sName;
+	virtual const std::string getName();
 };
 
 #endif

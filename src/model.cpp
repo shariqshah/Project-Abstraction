@@ -1,8 +1,9 @@
 #include "model.h"
 
+const std::string Model::sName = "Model";
+
 Model::Model(Node parent, std::string name)
 {
-	mName = "Model";
 	mType = ComponentType::MODEL;
 	mFilename = name;
 	mResourceID = Renderer::Resources::get(ResourceType::MODEL, mFilename);
@@ -41,4 +42,9 @@ Resource Model::getResourceID()
 std::string Model::getFilename()
 {
 	return mFilename;
+}
+
+const std::string Model::getName()
+{
+	return sName;
 }

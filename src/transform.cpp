@@ -1,5 +1,7 @@
 #include "transform.h"
 
+const std::string Transform::sName = "Transform";
+
 Transform::Transform() : Transform(glm::vec3(0.f, 0.f, 15.f),
                                    glm::vec3(1.0f),
                                    glm::quat(),
@@ -22,7 +24,6 @@ Transform::Transform(glm::vec3 position,
     mLookAt = lookAt;
     mUp = up;
     mForward = forward;
-    mName = "Transform";
     mType = ComponentType::TRANSFORM;
     mNeedsSync = true;
 }
@@ -174,4 +175,9 @@ bool Transform::needsSync()
 void Transform::setSynced()
 {
 	mNeedsSync = false;
+}
+
+const std::string Transform::getName()
+{
+	return sName;
 }

@@ -1,22 +1,24 @@
 #include "light.h"
 
+const std::string Light::sName = "Light";
+
 Light::Light(Node parent, std::string name)
 {
 	mType = ComponentType::LIGHT;
-	mName = "Light";
 	mNode = Renderer::Light::create(parent, name);
 
 	if(mNode == 0)
 		mValid = false;
 	else
 	{
-		setRadius(100.f);
+		setRadius(75.f);
 		setColor(glm::vec3(1.f));             
 		setFov(90.f);                     
 		setIntensity(1.f);         
 		setShadowMapBias(0.005f);          
 		setShadowSplitLambda(0.5f);
 		setShadowMapCount(1);
+		setShadowCaster(true);
 	}
 }
 
@@ -24,6 +26,11 @@ Light::~Light()
 {
 	if(!Renderer::removeNode(mNode))
 		Log::warning("Light node does not exist so not removed!");
+}
+
+bool Light::isShadowCaster()
+{
+	return mCastShadow;
 }
 
 float Light::getRadius()
@@ -101,4 +108,23 @@ void Light::setShadowMapCount(int shadowMapCount)
 {
 	mShadowMapCount = shadowMapCount;
 	Renderer::Light::setShadowMapCount(mNode, mShadowMapCount);
+}
+
+void Light::setShadowCaster(bool enable)
+{
+	if(enable)
+	{
+		mCastShadow = true;
+		setShadowMapCount(mShadowMapCount);
+	}
+	else
+	{
+		mCastShadow = false;
+		setShadowMapCount(0);
+	}
+}
+
+const std::string Light::getName()
+{
+	return sName;
 }

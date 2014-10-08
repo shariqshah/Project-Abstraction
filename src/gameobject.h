@@ -37,25 +37,25 @@ public:
         return std::dynamic_pointer_cast<T>(addComponent(component));
     }
 
-    void removeComponent(const std::string& componentName);
     void setName(const std::string& value);
     void setComponentMask(long value);
-	void markForRemoval();
     void setTag(const std::string& value);
+	void markForRemoval();
+	void removeComponent(const std::string& componentName);
 	
     bool compareTag(const std::string& tagToCompare);
 	bool isMarkedForRemoval();
 	bool hasComponents(long componentMask);
 
     std::string getName() const;
-    long getComponentMask() const;
 	std::string getTag() const;
+    long getComponentMask() const;
 	Node getNode() const;
 
 	template<typename T>
-    std::shared_ptr<T> getComponent(std::string componentType)
+    std::shared_ptr<T> getComponent()
     {
-        return std::dynamic_pointer_cast<T>(getComponent(componentType));
+        return std::dynamic_pointer_cast<T>(getComponent(T::sName));
     }
 };
 

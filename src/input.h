@@ -69,7 +69,8 @@ namespace Input
 		RSHIFT = SDLK_RSHIFT,
 		LCTRL  = SDLK_LCTRL,
 		RCTRL  = SDLK_RCTRL,
-		SPACE  = SDLK_SPACE
+		SPACE  = SDLK_SPACE,
+		ENTER  = SDLK_RETURN
 	};
 
 	bool isPressed(Key key);

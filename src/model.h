@@ -17,6 +17,9 @@ public:
 	std::string getFilename();
 	Resource getResourceID();
 	Node getNode();
+
+	const static std::string sName;
+	virtual const std::string getName();
 };
 	
 #endif

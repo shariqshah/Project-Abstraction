@@ -7,10 +7,6 @@
 
 class Game
 {
-    H3DNode mKnightNode;
-    H3DRes mKnightModelRes;
-	H3DRes mFontMatRes;
-	H3DRes mPanelMatRes;
     std::string mContentFolderDir;
 public:
     Game(std::string path);

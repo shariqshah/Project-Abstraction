@@ -33,9 +33,17 @@ enum class Pipeline : int
 	HDR = 2
 };
 
+enum class DebugLevel : int
+{
+	NONE   = 0,
+	MEDIUM = 1,
+	HIGH   = 2
+};
+
 namespace Renderer
 {	
     void initialize();
+	void renderFrame();
 	void syncNodeTransform(glm::vec3 position,
 						   glm::vec3 rotation,
 						   glm::vec3 scale,
@@ -49,6 +57,7 @@ namespace Renderer
 	void setCurrentCamera(Node cameraNode);
 	void addText(std::string text);
 	void removeCamera(Node camera);
+	void setDebugLevel(DebugLevel level);
 	
 	bool removeNode(Node node);
 	bool setParent(Node child, Node parent);
@@ -57,6 +66,7 @@ namespace Renderer
     Node createCamera(std::string name, Node parent = H3DRootNode);
     Node createNode(Resource resource, Node parent = H3DRootNode);
     Node createGroupNode(std::string name, Node parent = H3DRootNode);
+	
 
 	namespace Camera
 	{

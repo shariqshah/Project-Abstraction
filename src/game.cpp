@@ -3,31 +3,20 @@
 Game::Game(std::string path)
 {	
 	Renderer::initialize();
+
+	GOPtr sponza = SceneManager::createGameObject("Sponza");
+	sponza->addComponent<Model>(sponza->getNode(),
+								"models/sponza/sponza.scene.xml");
 	
-	mKnightModelRes = Renderer::Resources::add(ResourceType::MODEL,
-											   "models/buddha/buddha.scene.xml");
-	H3DRes envRes = Renderer::Resources::add(ResourceType::MODEL,
-											 "models/sphere/sphere.scene.xml");
-	mFontMatRes = Renderer::Resources::add(ResourceType::MATERIAL,
-										   "overlays/font.material.xml");
-	mPanelMatRes = Renderer::Resources::add(ResourceType::MATERIAL,
-											"overlays/panel.material.xml");
-	Renderer::Resources::loadAddedResources();
-
-	mKnightNode = h3dAddNodes(H3DRootNode, mKnightModelRes);
-	h3dSetNodeTransform(mKnightNode,
-						0, 2, 0,
-						0, 0, 0,
-						1.f, 1.f, 1.f);
-
-	H3DNode env = h3dAddNodes(H3DRootNode, envRes);
-	h3dSetNodeTransform(env, 0, -20, 0, 0, 0, 0, 20, 20, 20);
+	GOPtr falcon = SceneManager::createGameObject("Falcon");
+	falcon->addComponent<Model>(falcon->getNode(),
+								"models/falcon/falcon.scene.xml");
 
 	GOPtr lightGO = SceneManager::createGameObject("LightGO");
 	lightGO->addComponent<Model>(lightGO->getNode(),
 								 "models/sphere/sphere.scene.xml");
 	auto goLight = lightGO->addComponent<Light>(lightGO->getNode(), "GOLight");
-	auto lTransform = lightGO->getComponent<Transform>("Transform");
+	auto lTransform = lightGO->getComponent<Transform>();
 
 	lTransform->setPosition(glm::vec3(-2, 15, 15));
 	goLight->setColor(glm::vec3(0, 0, 1));
@@ -37,10 +26,10 @@ Game::Game(std::string path)
 	auto camera = player->addComponent<Camera>(player->getNode());
 	Renderer::setCurrentCamera(camera->getCameraNode());
 
-	for(int i = 0; i < 50; i++)
+	for(int i = 0; i < 0; i++)
 	{
 		GOPtr suzanne = SceneManager::createGameObject("Suzanne" + std::to_string(i));
-		auto suzTransform = suzanne->getComponent<Transform>("Transform");
+		auto suzTransform = suzanne->getComponent<Transform>();
 
 		float radius = 7.f;
 		float width  = glm::sin((float)i) * radius;
@@ -77,14 +66,7 @@ void Game::update(float deltaTime)
 
 void Game::draw()
 {
-	h3dutShowFrameStats( mFontMatRes, mPanelMatRes, 1);
-
-	Renderer::drawText();
-	
-	h3dRender(Renderer::getCurrentCameraNode());
-	h3dFinalizeFrame();
-	h3dClearOverlays();
-	h3dutDumpMessages();
+	Renderer::renderFrame();
 }
 
 void Game::resize(int width, int height)

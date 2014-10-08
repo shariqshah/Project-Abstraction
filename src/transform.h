@@ -57,6 +57,9 @@ public:
     glm::vec3 getForward();
 	glm::mat4 getModelMatrix();
 	bool      needsSync();
+
+	virtual const std::string getName();
+	static const std::string sName;
 };
 
 #endif // TRANSFORM_H

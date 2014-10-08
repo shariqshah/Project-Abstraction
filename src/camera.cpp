@@ -1,5 +1,7 @@
 #include "camera.h"
 
+const std::string Camera::sName = "Camera";
+
 Camera::Camera(Node parent)
 {
 	initCamera(0.1f,
@@ -33,7 +35,6 @@ void Camera::initCamera(float nearZ,
 	mAspectRatio = aspectRatio;
 	mFov = fov;
 	mType = ComponentType::CAMERA;
-	mName = "Camera";
 	mPipeline = Pipeline::FORWARD;
 	mCamNode = Renderer::createCamera("CameraMainNode");
 
@@ -130,4 +131,9 @@ void Camera::resizeViewport(int width, int height)
 void Camera::setViewportPos(int x, int y)
 {
 	Renderer::Camera::setViewportPos(mCamNode, x, y);
+}
+
+const std::string Camera::getName()
+{
+	return sName;
 }

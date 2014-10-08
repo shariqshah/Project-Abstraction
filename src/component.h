@@ -6,17 +6,21 @@
 #include "componentTypes.h"
 
 class Component
-{
+{	
 protected:
-    std::string mName;
+	
     ComponentType mType;
-	bool mValid;
+	bool          mValid;
+	
 public:
     virtual ~Component();
     Component();
-    std::string getName() const;
+    
     ComponentType getType() const;
 	bool isValid();
+
+	virtual const std::string getName();
+	const static std::string sName;
 };
 
 #endif // COMPONENT_H

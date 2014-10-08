@@ -2,14 +2,22 @@
 
 namespace System
 {
-	void update(float deltaTime, GameObject *gameObject)
+	glm::vec3 generateRandom()
 	{
-		System::CameraSystem::updateFreeCamera(deltaTime, gameObject);
+		float r = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+		float g = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+		float b = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
 
+		return glm::vec3 (r, g, b);
+	}
+
+	void debug(float deltaTime, GameObject *gameObject)
+	{
+		auto transform = gameObject->getComponent<Transform>();
+		
 		if(gameObject->hasComponents((long)ComponentType::LIGHT))
 		{
-			auto transform = gameObject->getComponent<Transform>("Transform");
-			auto light = gameObject->getComponent<Light>("Light");
+			auto light = gameObject->getComponent<Light>();
 			
 			float increment = 5.f * deltaTime;
 			glm::vec3 translation(0.f);
@@ -78,7 +86,7 @@ namespace System
 			{
 				Resource mat = Renderer::Resources::get(ResourceType::MATERIAL,
 														"pipelines/globalSettings.material.xml");
-				glm::vec4 ambientLight(0.1f, 0.1f, 0.1f, 1.0f);
+				glm::vec4 ambientLight(0.12f, 0.12f, 0.16f, 1.0f);
 				bool ret = Renderer::Resources::setUniform(mat,
 														   "ambientLight",
 														   ambientLight);
@@ -92,7 +100,7 @@ namespace System
 
 		if(gameObject->hasComponents((long)ComponentType::CAMERA))
 		{
-			auto camera = gameObject->getComponent<Camera>("Camera");
+			auto camera = gameObject->getComponent<Camera>();
 			
 			if(Input::isReleased(Input::Key::K5))
 				camera->setPipeline(Pipeline::FORWARD);
@@ -100,9 +108,29 @@ namespace System
 				camera->setPipeline(Pipeline::DEFERRED);
 			if(Input::isReleased(Input::Key::K7))
 				camera->setPipeline(Pipeline::HDR);
+
+			if(Input::isReleased(Input::Key::ENTER))
+			{
+				GOPtr newLight = SceneManager::createGameObject("newLight");
+				auto light = newLight->addComponent<Light>(newLight->getNode(),
+														   "newLight");
+				light->setColor(generateRandom());
+				light->setShadowCaster(false);
+				auto lightTransform = newLight->getComponent<Transform>();
+				lightTransform->setPosition(transform->getPosition());
+				lightTransform->setForward(transform->getForward());
+			}
 		}
+	}
+	
+	void update(float deltaTime, GameObject *gameObject)
+	{
+		System::CameraSystem::updateFreeCamera(deltaTime, gameObject);
+
+		debug(deltaTime, gameObject);
 		
-		auto transform = gameObject->getComponent<Transform>("Transform");
+		auto transform = gameObject->getComponent<Transform>();
+		
 		if(transform->needsSync())
 		{
 			Renderer::setNodeTransform(gameObject->getNode(),

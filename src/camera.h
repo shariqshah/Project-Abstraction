@@ -40,6 +40,9 @@ public:
 	float    getNearZ();
 	float    getAspectRatio();
 	Pipeline getPipeline();
+
+	const static std::string sName;
+	virtual const std::string getName();
 };
 
 #endif

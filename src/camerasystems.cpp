@@ -23,8 +23,8 @@ namespace System
 				if(!Input::isCursorLocked())
 					Input::setCursorLock(true);
 				
-				auto transform = gameObject->getComponent<Transform>("Transform");
-				auto camera = gameObject->getComponent<Camera>("Camera");
+				auto transform = gameObject->getComponent<Transform>();
+				auto camera = gameObject->getComponent<Camera>();
 				
 				float increment = sMovSpeed * deltaTime;
 				glm::vec3 translation(0.f);

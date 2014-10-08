@@ -5,7 +5,7 @@ namespace Renderer
 	namespace
 	{
 		const  std::string cContentFolderDir = "../content";
-		static std::vector<std::string> sTextList(10);
+		static std::vector<std::string> sTextList;
 		static Resource sFontMat;
 		static Resource sPanelMat;
 		static Resource sDefaultPipeline;
@@ -15,6 +15,7 @@ namespace Renderer
 		static std::vector<Node> cameras;
 		static Resource sPipelines[3];
 		static Resource sLightMat;
+		static DebugLevel sDebugLevel;
 	}
 
 	void setNodeTransform(Node node, glm::mat4 transformMat)
@@ -45,7 +46,7 @@ namespace Renderer
 		h3dSetOption(H3DOptions::TexCompression, 0);
 		h3dSetOption(H3DOptions::FastAnimation, 0);
 		h3dSetOption(H3DOptions::MaxAnisotropy, 4);
-		h3dSetOption(H3DOptions::ShadowMapSize, 2048);
+		h3dSetOption(H3DOptions::ShadowMapSize, 1024);
 
 		sPipelines[0] = Resources::add(ResourceType::PIPELINE,
 									   "pipelines/forward.pipeline.xml",
@@ -73,12 +74,34 @@ namespace Renderer
 
 		sFontPos = glm::vec2(0.03, 0.25);
 		sFontSize = 0.026f;
+		sDebugLevel = DebugLevel::MEDIUM;
 	}
 
-	// Resource getCurrentPipline()
-	// {
-	// 	return sDefaultPipeline;
-	// }
+	void setDebugLevel(DebugLevel level)
+	{
+		sDebugLevel = level;
+	}
+
+	void renderFrame()
+	{
+		if(sDebugLevel != DebugLevel::NONE)
+		{
+			if(sDebugLevel == DebugLevel::MEDIUM)
+				h3dutShowFrameStats( sFontMat, sPanelMat, 1);
+			else if(sDebugLevel == DebugLevel::HIGH)
+				h3dutShowFrameStats( sFontMat, sPanelMat, 2);
+			
+			drawText();
+		}
+		else
+			sTextList.clear();
+		
+
+		h3dRender(sCurrentCamera);
+		h3dFinalizeFrame();
+		h3dClearOverlays();
+		h3dutDumpMessages();
+	}
 
 	Node createCamera(std::string name, Node parent)
 	{
@@ -300,6 +323,7 @@ namespace Renderer
 			}
 
 			return true;
+			
 		}
 	}
 
