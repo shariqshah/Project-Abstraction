@@ -53,6 +53,13 @@ Game::~Game()
 
 void Game::update(float deltaTime)
 {
+	if(Input::isReleased(Input::Key::F1))
+		Renderer::setDebugLevel(DebugLevel::NONE);
+	if(Input::isReleased(Input::Key::F2))
+		Renderer::setDebugLevel(DebugLevel::MEDIUM);
+	if(Input::isReleased(Input::Key::F3))
+		Renderer::setDebugLevel(DebugLevel::HIGH);
+
 	SceneObjectMap* sceneObjects = SceneManager::getSceneObjects();
 	for(SceneObjectMap::iterator it = sceneObjects->begin();
 		it != sceneObjects->end();

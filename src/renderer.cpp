@@ -74,12 +74,19 @@ namespace Renderer
 
 		sFontPos = glm::vec2(0.03, 0.25);
 		sFontSize = 0.026f;
-		sDebugLevel = DebugLevel::MEDIUM;
+		setDebugLevel(DebugLevel::MEDIUM);
 	}
 
 	void setDebugLevel(DebugLevel level)
 	{
 		sDebugLevel = level;
+
+		if(level == DebugLevel::NONE)
+			Log::message("Renderer debug level set to NONE");
+		if(level == DebugLevel::MEDIUM)
+			Log::message("Renderer debug level set to MEDIUM");
+		if(level == DebugLevel::HIGH)
+			Log::message("Renderer debug level set to HIGH");
 	}
 
 	void renderFrame()
