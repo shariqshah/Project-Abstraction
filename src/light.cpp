@@ -16,7 +16,7 @@ Light::Light(Node parent, std::string name)
 		setFov(90.f);                     
 		setIntensity(1.f);         
 		setShadowMapBias(0.005f);          
-		setShadowSplitLambda(0.5f);
+		setShadowSplitLambda(0.9f);
 		setShadowMapCount(1);
 		setShadowCaster(true);
 	}
@@ -108,6 +108,11 @@ void Light::setShadowMapCount(int shadowMapCount)
 {
 	mShadowMapCount = shadowMapCount;
 	Renderer::Light::setShadowMapCount(mNode, mShadowMapCount);
+
+	if(mShadowMapCount > 0 && !mCastShadow)
+		mCastShadow = true;
+	else if(mShadowMapCount == 0 && mCastShadow)
+		mCastShadow = false;
 }
 
 void Light::setShadowCaster(bool enable)

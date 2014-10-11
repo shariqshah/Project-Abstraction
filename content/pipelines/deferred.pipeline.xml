@@ -7,13 +7,13 @@
 	<CommandQueue>
 		<Stage id="Attribpass">
 			<SwitchTarget target="GBUFFER" />
-			<ClearTarget depthBuf="true" colBuf0="true" />
+			<ClearTarget depthBuf="true" colBuf0="true" col_R="0.5" col_G="0.5" col_B="0.7"/>
 			<DrawGeometry context="ATTRIBPASS" />
 		</Stage>
 		
 		<Stage id="Lighting" link="pipelines/globalSettings.material.xml">
 			<SwitchTarget target="" />
-			<ClearTarget colBuf0="true" />
+			<ClearTarget colBuf0="true" col_R="0.5" col_G="0.5" col_B="0.7"/>
 			
 			<!-- Copy depth buffer to allow occlusion culling of lights -->
 			<BindBuffer sampler="depthBuf" sourceRT="GBUFFER" bufIndex="32" />

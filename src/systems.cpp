@@ -19,9 +19,15 @@ namespace System
 		{
 			auto light = gameObject->getComponent<Light>();
 			
-			float increment = 5.f * deltaTime;
+			float increment = 10.f * deltaTime;
 			glm::vec3 translation(0.f);
-				
+
+			if(gameObject->compareTag("child"))
+				transform->rotate(glm::vec3(0, 1, 0), increment * 5);
+
+			if(Input::isReleased(Input::Key::V) && gameObject->compareTag("child"))
+				SceneManager::setParentAsRoot(gameObject);
+			
 			if(Input::isPressed(Input::Key::I))
 				translation.z -= increment;
 			if(Input::isPressed(Input::Key::K))
@@ -43,58 +49,22 @@ namespace System
 			if(Input::isPressed(Input::Key::N))
 				transform->rotate(glm::vec3(1, 0, 0), -5 * deltaTime);
 
-			if(Input::isReleased(Input::Key::G))
-				light->setShadowMapCount(1);
-			if(Input::isReleased(Input::Key::H))
-				light->setShadowMapCount(0);
-
 			if(Input::isReleased(Input::Key::K1))
 				light->setFov(90);
 			if(Input::isReleased(Input::Key::K2))
-				light->setFov(180);
+				light->setFov(1802);
 			if(Input::isReleased(Input::Key::K3))
 				light->setFov(270);
 			if(Input::isReleased(Input::Key::K4))
 				light->setFov(360);
 
-			if(Input::isReleased(Input::Key::V))
+			if(light->isShadowCaster())
 			{
-				if(gameObject->hasComponents((long)ComponentType::MODEL))
-					gameObject->removeComponent("Model");
-			}
-
-			if(Input::isReleased(Input::Key::C))
-		    {
-				auto suzanne = SceneManager::find(12);
-
-				if(suzanne)
-				{
-					auto light =suzanne->addComponent<Light>(suzanne->getNode(),
-						                                     "suzanneLight");
-					if(light)
-					{
-						light->setColor(glm::vec3(1, 0, 0));
-						light->setShadowMapCount(0);
-					}
-				}
-			}
-
-			if(Input::isReleased(Input::Key::SPACE))
-				transform->setLookAt(glm::vec3(0));
-
-			if(Input::isReleased(Input::Key::Z))
-			{
-				Resource mat = Renderer::Resources::get(ResourceType::MATERIAL,
-														"pipelines/globalSettings.material.xml");
-				glm::vec4 ambientLight(0.12f, 0.12f, 0.16f, 1.0f);
-				bool ret = Renderer::Resources::setUniform(mat,
-														   "ambientLight",
-														   ambientLight);
-
-				if(ret)
-					Log::message("changed!");
-				else
-					Log::message("fail");
+				if(Input::isReleased(Input::Key::NP_PLUS))
+					light->setShadowMapCount(light->getShadowMapCount() + 1);
+				if(Input::isReleased(Input::Key::NP_MINUS))
+					light->setShadowMapCount(light->getShadowMapCount() - 1);
+				Renderer::addText(std::to_string(light->getShadowMapCount()));
 			}
 		}
 
@@ -108,17 +78,30 @@ namespace System
 				camera->setPipeline(Pipeline::DEFERRED);
 			if(Input::isReleased(Input::Key::K7))
 				camera->setPipeline(Pipeline::HDR);
+			if(Input::isReleased(Input::Key::Z))
+				camera->setOcclusionCulling(true);
+			if(Input::isReleased(Input::Key::X))
+				camera->setOcclusionCulling(false);
 
 			if(Input::isReleased(Input::Key::ENTER))
 			{
 				GOPtr newLight = SceneManager::createGameObject("newLight");
+				newLight->setTag("child");
 				auto light = newLight->addComponent<Light>(newLight->getNode(),
 														   "newLight");
+				newLight->addComponent<Model>(newLight->getNode(),
+											  "models/test/test.scene.xml");
 				light->setColor(generateRandom());
 				light->setShadowCaster(false);
 				auto lightTransform = newLight->getComponent<Transform>();
-				lightTransform->setPosition(transform->getPosition());
-				lightTransform->setForward(transform->getForward());
+				//lightTransform->setPosition(transform->getPosition());
+				//lightTransform->setForward(transform->getForward());
+
+				auto falcon = SceneManager::find("Falcon");
+				bool success = SceneManager::setParent(newLight.get(), falcon.get());
+				lightTransform->setPosition(glm::vec3(0.f));
+				lightTransform->translate(glm::vec3(0, 20, 0));
+				success ? Log::message("success") : Log::message("fail");
 			}
 		}
 	}
@@ -137,5 +120,39 @@ namespace System
 									   transform->getModelMatrix());
 			transform->setSynced();
 		}
+	}
+
+	void update(float deltaTime)
+	{
+		if(Input::isReleased(Input::Key::F1))
+			Renderer::setDebugLevel(DebugLevel::NONE);
+		if(Input::isReleased(Input::Key::F2))
+			Renderer::setDebugLevel(DebugLevel::MEDIUM);
+		if(Input::isReleased(Input::Key::F3))
+			Renderer::setDebugLevel(DebugLevel::HIGH);
+		if(Input::isReleased(Input::Key::F4))
+			Renderer::toggleWireframe();
+		if(Input::isReleased(Input::Key::F5))
+			Renderer::toggleDebugView();
+		
+		GOMap* sceneObjects = SceneManager::getSceneObjects();
+		for(GOMap::iterator it = sceneObjects->begin();
+			it != sceneObjects->end();
+			it++)
+		{
+			update(deltaTime, it->second.get());
+		}
+
+		if(Input::isReleased(Input::Key::C))
+		{
+			SceneManager::remove("Falcon");
+			// auto parent = SceneManager::getParent(newLight.get());
+
+			// auto pT = parent->getComponent<Transform>();
+			// pT->rotate(glm::vec3(0, 1, 0), 10 * deltaTime);
+		}
+			
+
+		SceneManager::update();
 	}
 }

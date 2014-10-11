@@ -9,7 +9,7 @@
 	<CommandQueue>
 		<Stage id="Ambient" link="pipelines/globalSettings.material.xml">
 			<SwitchTarget target="HDRBUF" />
-			<ClearTarget depthBuf="true" colBuf0="true" />
+			<ClearTarget depthBuf="true" colBuf0="true" col_R="0.5" col_G="0.5" col_B="0.6"/>
 			
 			<DrawGeometry context="AMBIENT" class="~Translucent" />
 		</Stage>

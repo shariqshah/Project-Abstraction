@@ -34,6 +34,8 @@ public:
 	void resizeViewport(int width, int height);
 	void setViewportPos(int x, int y);
 	void setPipeline(Pipeline pipeline);
+	void setOrthographic(bool enable);
+	void setOcclusionCulling(bool enable);
 
 	float    getFOV();
 	float    getFarZ();

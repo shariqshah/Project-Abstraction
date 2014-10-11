@@ -59,7 +59,11 @@ public:
 	bool      needsSync();
 
 	virtual const std::string getName();
+
 	static const std::string sName;
+	static const glm::vec3 UNIT_X;
+	static const glm::vec3 UNIT_Y;
+	static const glm::vec3 UNIT_Z;
 };
 
 #endif // TRANSFORM_H

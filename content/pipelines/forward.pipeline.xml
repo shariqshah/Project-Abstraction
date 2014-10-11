@@ -2,7 +2,7 @@
 <Pipeline>
 	<CommandQueue>
 		<Stage id="Geometry" link="pipelines/globalSettings.material.xml">
-			<ClearTarget depthBuf="true" colBuf0="true" />
+			<ClearTarget depthBuf="true" colBuf0="true" col_R="0.5" col_G="0.5" col_B="0.6"/>
 			
 			<DrawGeometry context="AMBIENT" class="~Translucent" />
 			<DoForwardLightLoop class="~Translucent" />

@@ -16,6 +16,8 @@ namespace Renderer
 		static Resource sPipelines[3];
 		static Resource sLightMat;
 		static DebugLevel sDebugLevel;
+		static bool sRenderWireframe;
+		static bool sRenderDebugView;
 	}
 
 	void setNodeTransform(Node node, glm::mat4 transformMat)
@@ -75,6 +77,10 @@ namespace Renderer
 		sFontPos = glm::vec2(0.03, 0.25);
 		sFontSize = 0.026f;
 		setDebugLevel(DebugLevel::MEDIUM);
+		sRenderWireframe = sRenderDebugView = false;
+
+		h3dSetOption(H3DOptions::DebugViewMode, sRenderDebugView ? 1.0f : 0.0f);
+		h3dSetOption(H3DOptions::WireframeMode, sRenderWireframe ? 1.0f : 0.0f);
 	}
 
 	void setDebugLevel(DebugLevel level)
@@ -87,6 +93,26 @@ namespace Renderer
 			Log::message("Renderer debug level set to MEDIUM");
 		if(level == DebugLevel::HIGH)
 			Log::message("Renderer debug level set to HIGH");
+	}
+
+	void toggleDebugView()
+	{
+		if(sRenderDebugView)
+			sRenderDebugView = false;
+		else
+			sRenderDebugView = true;
+		
+		h3dSetOption(H3DOptions::DebugViewMode, sRenderDebugView ? 1.0f : 0.0f);
+	}
+
+	void toggleWireframe()
+	{
+		if(sRenderWireframe)
+			sRenderWireframe = false;
+		else
+			sRenderWireframe = true;
+		
+		h3dSetOption(H3DOptions::WireframeMode, sRenderWireframe ? 1.0f : 0.0f);
 	}
 
 	void renderFrame()
@@ -113,7 +139,7 @@ namespace Renderer
 	Node createCamera(std::string name, Node parent)
 	{
 		Node node = h3dAddCameraNode(parent, name.c_str(), sDefaultPipeline);
-
+		
 		if(node != 0)
 			cameras.push_back(node);
 		
@@ -177,6 +203,25 @@ namespace Renderer
 	void setCurrentCamera(Node cameraNode)
 	{
 		sCurrentCamera = cameraNode;
+	}
+	
+	Node getParent(Node node)
+	{
+		Node parent = h3dGetNodeParent(node);
+		return parent;
+	}
+
+	bool getNodeChildren(Node node, const std::string& name, NodeArray* children)
+	{
+		int childCount = h3dFindNodes(node, name.c_str(), H3DNodeTypes::Group);
+
+		if(childCount > 1)
+		{
+			for(int i = 1; i < childCount; i++)
+				children->push_back(h3dGetNodeFindResult(i));
+		}
+
+		return childCount > 1 ? true : false;
 	}
 
 	Node getCurrentCameraNode()
@@ -265,6 +310,16 @@ namespace Renderer
 			}
 
 			h3dSetNodeParamI(camera, H3DCamera::PipeResI, newPipeline);
+		}
+
+		void setOcclusionCulling(Node camera, bool enable)
+		{
+			h3dSetNodeParamI(camera, H3DCamera::OccCullingI, enable ? 1 : 0);
+		}
+
+		void setOrthgraphic(Node camera, bool enable)
+		{
+			h3dSetNodeParamI(camera, H3DCamera::OrthoI, enable ? 1 : 0);
 		}
 	}
 

@@ -4,7 +4,7 @@ namespace SceneManager
 {
 	namespace
 	{
-		static SceneObjectMap sSceneObjects;
+		static GOMap sSceneObjects;
 		static std::vector<Node> sRemovables;
 	}
 	
@@ -13,7 +13,7 @@ namespace SceneManager
 		Node node = newGameObject->getNode();
 		const std::string name = newGameObject->getName();
 		
-		std::pair<SceneObjectMap::iterator, bool> returnValue;
+		std::pair<GOMap::iterator, bool> returnValue;
 		returnValue = sSceneObjects.insert(std::make_pair(node, newGameObject));
 
 		if(returnValue.second)
@@ -28,15 +28,51 @@ namespace SceneManager
 			return false;
 		}
 	}
-	
-	bool remove(std::string name)
+
+	bool remove(Node node)
 	{
-		for(SceneObjectMap::iterator it = sSceneObjects.begin();
+		auto position = sSceneObjects.find(node);
+
+		if(position != sSceneObjects.end())
+		{
+			//Recursively remove all children first, if any.
+			GOArray children;
+			if(getChildren(position->second.get(), &children))
+			{
+				std::for_each(children.begin(), children.end(), [] (GOPtr child)
+  			    {
+				    remove(child->getNode());
+				});
+			}
+
+			sRemovables.push_back(node);
+			Log::message(position->second->getName() + " removed from scene");
+			return true;
+		}
+
+		Log::error(Log::ErrorLevel::LOW,
+				   "GO " + std::to_string(node) +
+				   " not found in scene so cannot be removed.");
+		return false;
+	}
+	
+	bool remove(const std::string& name)
+	{
+		for(GOMap::iterator it = sSceneObjects.begin();
 			it != sSceneObjects.end();
 			++it)
 		{
 			if(name == it->second->getName())
 			{
+				//Recursively remove all children first, if any.
+				GOArray children;
+				if(getChildren(it->second.get(), &children))
+				{
+					std::for_each(children.begin(), children.end(), [] (GOPtr child)
+					{
+					    remove(child->getNode());
+					});
+				}
 				sRemovables.push_back(it->first);
 				Log::message(name + " removed from scene");
 				return true;
@@ -47,27 +83,10 @@ namespace SceneManager
 				   name + " not found in scene so cannot be removed.");
 		return false;
 	}
-
-	bool remove(Node node)
-	{
-		auto position = sSceneObjects.find(node);
-
-		if(position != sSceneObjects.end())
-		{
-			sRemovables.push_back(node);
-			Log::message("GO " + std::to_string(node) + " removed from scene");
-			return true;
-		}
-
-		Log::error(Log::ErrorLevel::LOW,
-				   "GO " + std::to_string(node) +
-				   " not found in scene so cannot be removed.");
-		return false;
-	}
 	
-	GOPtr find(std::string name)
+	GOPtr find(const std::string& name)
 	{
-		for(SceneObjectMap::iterator it = sSceneObjects.begin();
+		for(GOMap::iterator it = sSceneObjects.begin();
 			it != sSceneObjects.end();
 			++it)
 		{
@@ -75,6 +94,7 @@ namespace SceneManager
 				return it->second;
 		}
 
+		Log::warning(name + " not found in scene");
 		return nullptr;
 	}
 
@@ -85,7 +105,7 @@ namespace SceneManager
 		if(it != sSceneObjects.end())
 			return it->second;
 
-		
+		Log::warning("GO " + std::to_string(node) + " not found in scene");
 		return nullptr;
 	}
 
@@ -112,7 +132,7 @@ namespace SceneManager
 			sRemovables.clear();
 	}
 
-	GOPtr createGameObject(const std::string name)
+	GOPtr createGameObject(const std::string& name)
 	{
 		GOPtr newObj = std::make_shared<GameObject>(name);
 		newObj->addComponent<Transform>();
@@ -121,8 +141,58 @@ namespace SceneManager
 		return newObj;
 	}
 
-	SceneObjectMap* getSceneObjects()
+	GOMap* getSceneObjects()
 	{
 		return &sSceneObjects;
+	}
+
+	GOPtr getParent(GameObject* gameObject)
+	{
+		if(gameObject)
+		{
+			Node parent = Renderer::getParent(gameObject->getNode());
+			
+			if(parent != 0)
+				return find(parent);
+		}
+		
+		return nullptr;
+	}
+
+	GOPtr getChild(GameObject* gameObject, const std::string& name)
+	{
+		GOArray children;
+
+		if(getChildren(gameObject, &children, name))
+			return children[0];
+		
+		return nullptr;
+	}
+
+	bool getChildren(GameObject* gameObject,
+					 GOArray* children,
+					 const std::string& name)
+	{
+		NodeArray childNodes;
+
+		if(Renderer::getNodeChildren(gameObject->getNode(), name, &childNodes))
+		{
+			for(Node child : childNodes)
+				children->push_back(find(child));
+
+			return true;
+		}
+		
+		return false;
+	}
+
+	bool setParent(GameObject* child, GameObject* parent)
+	{
+		return Renderer::setParent(child->getNode(), parent->getNode());
+	}
+
+	bool setParentAsRoot(GameObject* gameObject)
+	{
+		return Renderer::setParent(gameObject->getNode(), Renderer::Root);
 	}
 }

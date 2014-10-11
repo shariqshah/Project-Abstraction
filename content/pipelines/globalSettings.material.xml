@@ -1,4 +1,4 @@
 <Material>
 	<Sampler name="ambientMap" map="textures/ambientMap.dds" />
-	<Uniform name="ambientLight" a="0.2" b="0.2" c="0.28" d="1.0" />
+	<Uniform name="ambientLight" a="0.1" b="0.1" c="0.15" d="1.0" />
 </Material>

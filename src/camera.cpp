@@ -51,6 +51,7 @@ void Camera::initCamera(float nearZ,
 											  Settings::getWindowWidth(),
 											  Settings::getWindowHeight());
 			Renderer::Camera::setView(mCamNode, mFov, mAspectRatio, mNearZ, mFarZ);
+			setOcclusionCulling(true);
 		}
 	}	
 }
@@ -131,6 +132,16 @@ void Camera::resizeViewport(int width, int height)
 void Camera::setViewportPos(int x, int y)
 {
 	Renderer::Camera::setViewportPos(mCamNode, x, y);
+}
+
+void Camera::setOrthographic(bool enable)
+{
+	Renderer::Camera::setOrthgraphic(mCamNode, enable);
+}
+
+void Camera::setOcclusionCulling(bool enable)
+{
+	Renderer::Camera::setOcclusionCulling(mCamNode, enable);
 }
 
 const std::string Camera::getName()

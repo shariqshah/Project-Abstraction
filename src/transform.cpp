@@ -1,6 +1,9 @@
 #include "transform.h"
 
-const std::string Transform::sName = "Transform";
+const std::string Transform::sName   = "Transform";
+const glm::vec3   Transform::UNIT_X  = glm::vec3(1, 0, 0);
+const glm::vec3   Transform::UNIT_Y  = glm::vec3(0, 1, 0);
+const glm::vec3   Transform::UNIT_Z  = glm::vec3(0, 0, 1);
 
 Transform::Transform() : Transform(glm::vec3(0.f, 0.f, 15.f),
                                    glm::vec3(1.0f),
@@ -53,6 +56,7 @@ glm::vec3 Transform::getForward()
 
 void Transform::setForward(glm::vec3 direction)
 {
+	//TODO: Fix this function by comparing with jDoom
     glm::vec3 newForward = glm::normalize(direction);
     float angle = glm::dot(mForward, newForward);
     angle = glm::clamp(angle, -1.f, 1.f);
@@ -64,22 +68,18 @@ void Transform::setForward(glm::vec3 direction)
 
 void Transform::updateLookAt()
 {
-    glm::vec3 originalLookAt(0, 0, -1);
-    //glm::vec3 newLookAt = originalLookAt * mRotation;
-    glm::vec3 newLookAt = mRotation * originalLookAt;
+    glm::vec3 newLookAt = mRotation * -UNIT_Z;
     mLookAt = mPosition + newLookAt;
 }
 
 void Transform::updateUpVector()
 {
-    glm::vec3 originalUp(0, 1, 0);
-//    mUp = glm::normalize(originalUp * rotation);
-    mUp = glm::normalize(mRotation * originalUp);
+    mUp = glm::normalize(mRotation * UNIT_Y);
 }
 
 void Transform::updateForward()
 {
-    mForward = glm::normalize(mRotation * glm::vec3(0, 0, -1));
+    mForward = glm::normalize(mRotation * -UNIT_Z);
 }
 
 void Transform::rotate(glm::vec3 axis, float angle, Space transformSpace)

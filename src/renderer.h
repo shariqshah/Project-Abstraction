@@ -18,6 +18,7 @@
 
 typedef H3DNode Node;
 typedef H3DRes  Resource;
+typedef std::vector<Node> NodeArray;
 
 enum class ResourceType : int
 {
@@ -26,14 +27,14 @@ enum class ResourceType : int
 	PIPELINE = H3DResTypes::Pipeline
 };
 
-enum class Pipeline : int
+enum class Pipeline : uint8_t
 {
 	FORWARD = 0,
 	DEFERRED = 1,
 	HDR = 2
 };
 
-enum class DebugLevel : int
+enum class DebugLevel : uint8_t
 {
 	NONE   = 0,
 	MEDIUM = 1,
@@ -41,7 +42,9 @@ enum class DebugLevel : int
 };
 
 namespace Renderer
-{	
+{
+	const Node Root = H3DRootNode;
+	
     void initialize();
 	void renderFrame();
 	void syncNodeTransform(glm::vec3 position,
@@ -58,14 +61,18 @@ namespace Renderer
 	void addText(std::string text);
 	void removeCamera(Node camera);
 	void setDebugLevel(DebugLevel level);
+	void toggleDebugView();
+	void toggleWireframe();
 	
 	bool removeNode(Node node);
 	bool setParent(Node child, Node parent);
-	
+	bool getNodeChildren(Node node, const std::string& name, NodeArray* children);
+
+	Node getParent(Node node);
 	Node getCurrentCameraNode();
-    Node createCamera(std::string name, Node parent = H3DRootNode);
-    Node createNode(Resource resource, Node parent = H3DRootNode);
-    Node createGroupNode(std::string name, Node parent = H3DRootNode);
+    Node createCamera(std::string name, Node parent = Root);
+    Node createNode(Resource resource, Node parent = Root);
+    Node createGroupNode(std::string name, Node parent = Root);
 	
 
 	namespace Camera
@@ -78,6 +85,8 @@ namespace Renderer
 					 float nearZ,
 					 float farZ);
 		void setPipeline(Node camera, Pipeline pipeline);
+		void setOcclusionCulling(Node camera, bool enable);
+		void setOrthgraphic(Node camera, bool enable);
 	}
 
 	namespace Resources

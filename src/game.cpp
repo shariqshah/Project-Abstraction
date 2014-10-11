@@ -7,10 +7,14 @@ Game::Game(std::string path)
 	GOPtr sponza = SceneManager::createGameObject("Sponza");
 	sponza->addComponent<Model>(sponza->getNode(),
 								"models/sponza/sponza.scene.xml");
+	auto sponTran = sponza->getComponent<Transform>();
+	//sponTran->setScale(glm::vec3(20, 20, 20));
 	
 	GOPtr falcon = SceneManager::createGameObject("Falcon");
 	falcon->addComponent<Model>(falcon->getNode(),
 								"models/falcon/falcon.scene.xml");
+	auto falconTransform = falcon->getComponent<Transform>();
+	falconTransform->setScale(glm::vec3(3, 3, 3));
 
 	GOPtr lightGO = SceneManager::createGameObject("LightGO");
 	lightGO->addComponent<Model>(lightGO->getNode(),
@@ -18,12 +22,17 @@ Game::Game(std::string path)
 	auto goLight = lightGO->addComponent<Light>(lightGO->getNode(), "GOLight");
 	auto lTransform = lightGO->getComponent<Transform>();
 
-	lTransform->setPosition(glm::vec3(-2, 15, 15));
-	goLight->setColor(glm::vec3(0, 0, 1));
+	lTransform->setPosition(glm::vec3(-176, 319, 18));
+	lTransform->setLookAt(glm::vec3(0));
+	goLight->setColor(glm::vec3(0.8f, 0.8f, 0.5f));
+	goLight->setRadius(500);
 
 	GOPtr player = SceneManager::createGameObject("Player");
 	player->setTag("FreeCamera");
+	auto playerTrans = player->getComponent<Transform>();
 	auto camera = player->addComponent<Camera>(player->getNode());
+	playerTrans->setPosition(glm::vec3(-110, 85, 92));
+	//playerTrans->setLookAt(glm::vec3(0));
 	Renderer::setCurrentCamera(camera->getCameraNode());
 
 	for(int i = 0; i < 0; i++)
@@ -31,7 +40,7 @@ Game::Game(std::string path)
 		GOPtr suzanne = SceneManager::createGameObject("Suzanne" + std::to_string(i));
 		auto suzTransform = suzanne->getComponent<Transform>();
 
-		float radius = 7.f;
+		float radius = 70.f;
 		float width  = glm::sin((float)i) * radius;
 		float height = glm::cos((float)i) * radius;
 		if(i < 50)
@@ -39,7 +48,16 @@ Game::Game(std::string path)
 		else
 			suzTransform->setPosition(glm::vec3(0, height + 7, width));
 		
-		suzanne->addComponent<Model>(suzanne->getNode(), "models/test/test.scene.xml");
+		suzanne->addComponent<Model>(suzanne->getNode(),
+									 "models/test/test.scene.xml");
+		// auto sLight = suzanne->addComponent<Light>(suzanne->getNode(),
+		// 										   "light" + std::to_string(i));
+		// float r = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+		// float g = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+		// float b = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+
+		// sLight->setColor(glm::vec3(r, g, b));
+		// sLight->setShadowCaster(false);
 	}
 
 	Renderer::resizePipelineBuffers(Settings::getWindowWidth(),
@@ -52,23 +70,8 @@ Game::~Game()
 }
 
 void Game::update(float deltaTime)
-{
-	if(Input::isReleased(Input::Key::F1))
-		Renderer::setDebugLevel(DebugLevel::NONE);
-	if(Input::isReleased(Input::Key::F2))
-		Renderer::setDebugLevel(DebugLevel::MEDIUM);
-	if(Input::isReleased(Input::Key::F3))
-		Renderer::setDebugLevel(DebugLevel::HIGH);
-
-	SceneObjectMap* sceneObjects = SceneManager::getSceneObjects();
-	for(SceneObjectMap::iterator it = sceneObjects->begin();
-		it != sceneObjects->end();
-		++it)
-	{
-		System::update(deltaTime, it->second.get());
-	}
-
-	SceneManager::update();
+{		
+	System::update(deltaTime);
 }
 
 void Game::draw()

@@ -12,16 +12,14 @@ typedef std::shared_ptr<Component> ComponentPtr;
 
 class GameObject
 {
-    //TODO: Add measures for ensuring multiple instances of same component type
-    //cannot be added
 	//TODO: Add measures for getting child object if any
 protected:
-	Node mNode;
-    std::string mName;
-    std::string mTag;
+	Node         mNode;
+    std::string  mName;
+    std::string  mTag;
     ComponentMap mComponentMap;
-	bool mRemove;
-    long mComponentMask;
+	bool         mRemove;
+    long         mComponentMask;
 
     ComponentPtr getComponent(const std::string& componentType);
 	ComponentPtr addComponent(ComponentPtr component);
@@ -49,8 +47,8 @@ public:
 
     std::string getName() const;
 	std::string getTag() const;
-    long getComponentMask() const;
-	Node getNode() const;
+    long        getComponentMask() const;
+	Node        getNode() const;
 
 	template<typename T>
     std::shared_ptr<T> getComponent()
