@@ -135,7 +135,7 @@ namespace SceneManager
 	GOPtr createGameObject(const std::string& name)
 	{
 		GOPtr newObj = std::make_shared<GameObject>(name);
-		newObj->addComponent<Transform>();
+		newObj->addComponent<Transform>(newObj->getNode());
 		add(newObj);
 		
 		return newObj;
@@ -186,13 +186,39 @@ namespace SceneManager
 		return false;
 	}
 
+	void syncTransform(GameObject* gameObject)
+	{
+		glm::vec3 position, rotation, scale;
+		Renderer::getNodeTransform(gameObject->getNode(),
+								   &position,
+								   &rotation,
+								   &scale);
+			
+		auto transform = gameObject->getComponent<Transform>();
+		transform->setPosition(position, false);
+		transform->setRotation(glm::quat(rotation), false);
+		transform->setScale(scale, false);
+	}
+
 	bool setParent(GameObject* child, GameObject* parent)
 	{
-		return Renderer::setParent(child->getNode(), parent->getNode());
+		if(Renderer::setParent(child->getNode(), parent->getNode()))
+		{
+			syncTransform(child);
+			return true;
+		}
+
+		return false;
 	}
 
 	bool setParentAsRoot(GameObject* gameObject)
 	{
-		return Renderer::setParent(gameObject->getNode(), Renderer::Root);
+		if(Renderer::setParent(gameObject->getNode(), Renderer::Root))
+		{
+			syncTransform(gameObject);
+			return true;
+		}
+
+		return false;
 	}
 }

@@ -4,15 +4,15 @@ namespace Renderer
 {
 	namespace
 	{
-		const  std::string cContentFolderDir = "../content";
+		static const std::string cContentFolderDir = "../content";
 		static std::vector<std::string> sTextList;
+		static std::vector<Node> cameras;
+		static glm::vec2 sFontPos;
 		static Resource sFontMat;
 		static Resource sPanelMat;
 		static Resource sDefaultPipeline;
 		static Node sCurrentCamera;
-		static glm::vec2 sFontPos;
 		static float sFontSize;
-		static std::vector<Node> cameras;
 		static Resource sPipelines[3];
 		static Resource sLightMat;
 		static DebugLevel sDebugLevel;
@@ -25,30 +25,41 @@ namespace Renderer
 		h3dSetNodeTransMat(node, glm::value_ptr(transformMat));
 	}
 
-	void setNodeName(Node node, const std::string name)
+	void setNodeName(Node node, const std::string& name)
 	{
 		h3dSetNodeParamStr(node, H3DNodeParams::NameStr, name.c_str());
 	}
 	
-	void syncNodeTransform(glm::vec3 position,
-						   glm::vec3 rotation,
-						   glm::vec3 scale,
-						   H3DNode node)
+	void setNodeTransform(Node node,
+						  const glm::vec3 position,
+						  const glm::vec3 rotation,
+						  const glm::vec3 scale)
 	{	
-		h3dSetNodeTransform(node,						        // node
-							position.x, position.y, position.z, // position
-							rotation.x, rotation.y, rotation.z,	// rotation
-							scale.x   , scale.y   , scale.z);	// scale
+		h3dSetNodeTransform(node,						        
+							position.x, position.y, position.z,
+							rotation.x, rotation.y, rotation.z,
+							scale.x   , scale.y   , scale.z);	
+	}
+
+	void getNodeTransform(Node node,
+						  glm::vec3* position,
+						  glm::vec3* rotation,
+						  glm::vec3* scale)
+	{
+		h3dGetNodeTransform(node,						       
+							&position->x, &position->y, &position->z,
+							&rotation->x, &rotation->y, &rotation->z,
+							&scale->x   , &scale->y   , &scale->z);
 	}
 
 	void initialize()
 	{
 		// Set options
-		h3dSetOption(H3DOptions::LoadTextures, 1);
-		h3dSetOption(H3DOptions::TexCompression, 0);
-		h3dSetOption(H3DOptions::FastAnimation, 0);
-		h3dSetOption(H3DOptions::MaxAnisotropy, 4);
-		h3dSetOption(H3DOptions::ShadowMapSize, 1024);
+		h3dSetOption(H3DOptions::LoadTextures  ,  1);
+		h3dSetOption(H3DOptions::TexCompression,  0);
+		h3dSetOption(H3DOptions::FastAnimation ,  0);
+		h3dSetOption(H3DOptions::MaxAnisotropy ,  4);
+		h3dSetOption(H3DOptions::ShadowMapSize ,  1024);
 
 		sPipelines[0] = Resources::add(ResourceType::PIPELINE,
 									   "pipelines/forward.pipeline.xml",
@@ -76,8 +87,8 @@ namespace Renderer
 
 		sFontPos = glm::vec2(0.03, 0.25);
 		sFontSize = 0.026f;
-		setDebugLevel(DebugLevel::MEDIUM);
 		sRenderWireframe = sRenderDebugView = false;
+		setDebugLevel(DebugLevel::MEDIUM);
 
 		h3dSetOption(H3DOptions::DebugViewMode, sRenderDebugView ? 1.0f : 0.0f);
 		h3dSetOption(H3DOptions::WireframeMode, sRenderWireframe ? 1.0f : 0.0f);
@@ -136,7 +147,7 @@ namespace Renderer
 		h3dutDumpMessages();
 	}
 
-	Node createCamera(std::string name, Node parent)
+	Node createCamera(const std::string& name, Node parent)
 	{
 		Node node = h3dAddCameraNode(parent, name.c_str(), sDefaultPipeline);
 		
@@ -146,7 +157,7 @@ namespace Renderer
 		return node;
 	}
 	
-    Node createGroupNode(std::string name, Node parent)
+    Node createGroupNode(const std::string& name, Node parent)
 	{
 		Node node = h3dAddGroupNode(parent, name.c_str());
 		return node;
@@ -232,7 +243,7 @@ namespace Renderer
 	void drawText()
 	{
 		int count = 0;
-		for(std::string text : sTextList)
+		for(const std::string& text : sTextList)
 		{
 			h3dutShowText(text.c_str(),
 						  sFontPos.x,
@@ -246,7 +257,7 @@ namespace Renderer
 		sTextList.clear();	
 	}
 
-	void addText(std::string text)
+	void addText(const std::string& text)
     {
 		sTextList.push_back(text);
     }
@@ -343,13 +354,13 @@ namespace Renderer
 			return h3dIsResLoaded(resource);
 		}
 
-		Resource add(ResourceType type, std::string name, int flag)
+		Resource add(ResourceType type, const std::string& name, int flag)
 		{
 			Resource res = h3dAddResource((int)type, name.c_str(), flag);
 			return res;
 		}
 		
-		Resource get(ResourceType type, std::string name)
+		Resource get(ResourceType type, const std::string& name)
 		{
 			Resource res = h3dFindResource((int)type, name.c_str());
 
@@ -392,11 +403,12 @@ namespace Renderer
 	namespace Light
 	{
 		Node create(Node parent,
-					const std::string name,
+					const std::string& name,
 					Resource material,
-					const std::string lightContext,
-					const std::string shadowContext)
+					const std::string& lightContext,
+					const std::string& shadowContext)
 		{
+			//TODO: Fix light material related parameter
 			Node light = h3dAddLightNode(parent,
 										 name.c_str(),
 										 sLightMat,

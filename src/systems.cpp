@@ -21,9 +21,13 @@ namespace System
 			
 			float increment = 10.f * deltaTime;
 			glm::vec3 translation(0.f);
+			
+			if(Input::isReleased(Input::Key::P) && gameObject->compareTag("child"))
+				transform->setUpVector(glm::vec3(0, 1, 0));
 
-			if(gameObject->compareTag("child"))
-				transform->rotate(glm::vec3(0, 1, 0), increment * 5);
+			if(Input::isReleased(Input::Key::F) && gameObject->compareTag("child"))
+				transform->setLookAt(glm::vec3(0));
+				// transform->rotate(glm::vec3(0, 1, 0), increment * 5);
 
 			if(Input::isReleased(Input::Key::V) && gameObject->compareTag("child"))
 				SceneManager::setParentAsRoot(gameObject);
@@ -45,9 +49,9 @@ namespace System
 				transform->translate(translation, Transform::Space::LOCAL);
 
 			if(Input::isPressed(Input::Key::M))
-				transform->rotate(glm::vec3(1, 0, 0), 5 * deltaTime);
+				transform->rotate(glm::vec3(1, 0, 0),  increment * 5);
 			if(Input::isPressed(Input::Key::N))
-				transform->rotate(glm::vec3(1, 0, 0), -5 * deltaTime);
+				transform->rotate(glm::vec3(1, 0, 0), -increment * 5);
 
 			if(Input::isReleased(Input::Key::K1))
 				light->setFov(90);
@@ -111,15 +115,6 @@ namespace System
 		System::CameraSystem::updateFreeCamera(deltaTime, gameObject);
 
 		debug(deltaTime, gameObject);
-		
-		auto transform = gameObject->getComponent<Transform>();
-		
-		if(transform->needsSync())
-		{
-			Renderer::setNodeTransform(gameObject->getNode(),
-									   transform->getModelMatrix());
-			transform->setSynced();
-		}
 	}
 
 	void update(float deltaTime)

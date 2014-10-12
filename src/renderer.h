@@ -43,22 +43,26 @@ enum class DebugLevel : uint8_t
 
 namespace Renderer
 {
-	const Node Root = H3DRootNode;
+	static const Node Root = H3DRootNode;
 	
     void initialize();
 	void renderFrame();
-	void syncNodeTransform(glm::vec3 position,
-						   glm::vec3 rotation,
-						   glm::vec3 scale,
-						   Node node);
+	void setNodeTransform(Node node,
+						  const glm::vec3 position,
+						  const glm::vec3 rotation,
+						  const glm::vec3 scale);
+	void getNodeTransform(Node node,
+						  glm::vec3* position,
+						  glm::vec3* rotation,
+						  glm::vec3* scale);
 	void setNodeTransform(Node node, glm::mat4 transformMat);
     void setNodeParam(Node node, int param, int value);
     void setNodeParam(Node node, int param, int compID, float value);
-	void setNodeName(Node node, const std::string name);
+	void setNodeName(Node node, const std::string& name);
 	void drawText();
     void resizePipelineBuffers(int width, int height);
 	void setCurrentCamera(Node cameraNode);
-	void addText(std::string text);
+	void addText(const std::string& text);
 	void removeCamera(Node camera);
 	void setDebugLevel(DebugLevel level);
 	void toggleDebugView();
@@ -70,11 +74,10 @@ namespace Renderer
 
 	Node getParent(Node node);
 	Node getCurrentCameraNode();
-    Node createCamera(std::string name, Node parent = Root);
+    Node createCamera(const std::string& name, Node parent = Root);
     Node createNode(Resource resource, Node parent = Root);
-    Node createGroupNode(std::string name, Node parent = Root);
+    Node createGroupNode(const std::string& name, Node parent = Root);
 	
-
 	namespace Camera
 	{
 		void setViewportSize(Node camera, int width, int height);
@@ -91,8 +94,8 @@ namespace Renderer
 
 	namespace Resources
 	{
-		Resource add(ResourceType type, std::string name, int flag = 0);
-		Resource get(ResourceType type, std::string name);
+		Resource add(ResourceType type, const std::string& name, int flag = 0);
+		Resource get(ResourceType type, const std::string& name);
 
 		bool isLoaded(Resource resource);
 		bool remove(Resource resource);
@@ -103,10 +106,10 @@ namespace Renderer
 	namespace Light
 	{
 		Node create(Node parent,
-					const std::string name,
+					const std::string& name,
 					Resource material = 0,
-					const std::string lightContext  = "LIGHTING",
-					const std::string shadowContext = "SHADOWMAP");
+					const std::string& lightContext  = "LIGHTING",
+					const std::string& shadowContext = "SHADOWMAP");
 		
 		void setRadius(Node light, float radius);
 		void setColor(Node light, glm::vec3 color);
