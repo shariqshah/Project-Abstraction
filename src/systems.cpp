@@ -101,11 +101,15 @@ namespace System
 				//lightTransform->setPosition(transform->getPosition());
 				//lightTransform->setForward(transform->getForward());
 
-				auto falcon = SceneManager::find("Falcon");
-				bool success = SceneManager::setParent(newLight.get(), falcon.get());
-				lightTransform->setPosition(glm::vec3(0.f));
+				// auto falcon = SceneManager::find("Falcon");
+				// bool success = SceneManager::setParent(newLight.get(), falcon.get());
+				// lightTransform->setPosition(glm::vec3(0.f));
 				lightTransform->translate(glm::vec3(0, 20, 0));
-				success ? Log::message("success") : Log::message("fail");
+				// success ? Log::message("success") : Log::message("fail");
+
+				newLight->addComponent<RigidBody>(1.f, 1.f,
+												  lightTransform->getPosition(),
+												  lightTransform->getRotation());
 			}
 		}
 	}
@@ -113,8 +117,23 @@ namespace System
 	void update(float deltaTime, GameObject *gameObject)
 	{
 		System::CameraSystem::updateFreeCamera(deltaTime, gameObject);
-
+		
 		debug(deltaTime, gameObject);
+
+		if(gameObject->hasComponents((long)ComponentType::RIGIDBODY))
+		{
+			auto transform  = gameObject->getComponent<Transform>();
+			auto rBody      = gameObject->getComponent<RigidBody>();
+
+			glm::vec3 position;
+			glm::quat rotation;
+
+			rBody->getTransformation(&position, &rotation);
+
+			transform->setPosition(position);
+			transform->setRotation(rotation);
+		}
+		
 	}
 
 	void update(float deltaTime)

@@ -222,7 +222,7 @@ namespace Renderer
 		return parent;
 	}
 
-	bool getNodeChildren(Node node, const std::string& name, NodeArray* children)
+	bool getNodeChildren(Node node, const std::string& name, NodeList* children)
 	{
 		int childCount = h3dFindNodes(node, name.c_str(), H3DNodeTypes::Group);
 

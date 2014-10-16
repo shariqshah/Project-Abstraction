@@ -173,7 +173,7 @@ namespace SceneManager
 					 GOArray* children,
 					 const std::string& name)
 	{
-		NodeArray childNodes;
+		NodeList childNodes;
 
 		if(Renderer::getNodeChildren(gameObject->getNode(), name, &childNodes))
 		{

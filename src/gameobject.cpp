@@ -57,6 +57,7 @@ void GameObject::setTag(const std::string& tag)
 bool GameObject::compareTag(const std::string& tagToCompare)
 {
     if(mTag == tagToCompare)
+	//if(strcmp(mTag.c_str(), tagToCompare.c_str()) == 0)
         return true;
     else
         return false;

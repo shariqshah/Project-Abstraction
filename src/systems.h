@@ -5,6 +5,7 @@
 #include "camerasystems.h"
 #include "light.h"
 #include "model.h"
+#include "rigidbody.h"
 
 namespace System
 {

@@ -7,7 +7,8 @@ enum class ComponentType : long
 	TRANSFORM    = 1 << 0,
 	CAMERA       = 1 << 1,
 	MODEL        = 1 << 2,
-	LIGHT        = 1 << 3
+	LIGHT        = 1 << 3,
+	RIGIDBODY    = 1 << 4
 };
 
 #endif // COMPONENTTYPES_H

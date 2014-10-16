@@ -4,6 +4,7 @@
 #include "systems.h"
 #include "model.h"
 #include "scenemanager.h"
+#include "rigidbody.h"
 
 class Game
 {

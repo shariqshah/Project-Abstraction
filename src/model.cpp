@@ -2,7 +2,7 @@
 
 const std::string Model::sName = "Model";
 
-Model::Model(Node parent, std::string name)
+Model::Model(Node parent, const std::string& name)
 {
 	mType = ComponentType::MODEL;
 	mFilename = name;

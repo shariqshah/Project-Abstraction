@@ -2,6 +2,7 @@
 #define _input_H_
 
 #include <vector>
+#include <algorithm>
 
 #include "../include/SDL2/SDL.h"
 
@@ -25,16 +26,6 @@ namespace Input
 
 	enum class Key : SDL_Keycode
 	{
-		K0       = SDLK_0,
-		K1       = SDLK_1,
-		K2       = SDLK_2,
-		K3       = SDLK_3,
-		K4       = SDLK_4,
-		K5       = SDLK_5,
-		K6       = SDLK_6,
-		K7       = SDLK_7,
-		K8       = SDLK_8,
-		K9       = SDLK_9,
 		A        = SDLK_a,
 		B        = SDLK_b,
 		C        = SDLK_c,
@@ -61,6 +52,16 @@ namespace Input
 		X        = SDLK_x,
 		Y        = SDLK_y,
 		Z        = SDLK_z,
+		K0       = SDLK_0,
+		K1       = SDLK_1,
+		K2       = SDLK_2,
+		K3       = SDLK_3,
+		K4       = SDLK_4,
+		K5       = SDLK_5,
+		K6       = SDLK_6,
+		K7       = SDLK_7,
+		K8       = SDLK_8,
+		K9       = SDLK_9,
 		F1       = SDLK_F1,
 		F2       = SDLK_F2,
 		F3       = SDLK_F3,
@@ -107,7 +108,7 @@ namespace Input
 	Sint32 getMouseY();
 	Sint32 getMouseRelX();
 	Sint32 getMouseRelY();
-	void resetMouseRel();
+	void   resetMouseRel();
 }
 
 

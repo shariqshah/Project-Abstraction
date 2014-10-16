@@ -39,7 +39,7 @@ public:
 	void setShadowMapCount(int shadowMapCount);
 	void setShadowCaster(bool enable);
 
-	const static std::string sName;
+	const static  std::string sName;
 	virtual const std::string getName();
 };
 

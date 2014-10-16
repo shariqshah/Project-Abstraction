@@ -3,18 +3,19 @@
 Game::Game(std::string path)
 {	
 	Renderer::initialize();
-
+	Physics::initialize(glm::vec3(0.f, -9.8f, 0.f));
+	
 	GOPtr sponza = SceneManager::createGameObject("Sponza");
 	sponza->addComponent<Model>(sponza->getNode(),
 								"models/sponza/sponza.scene.xml");
 	auto sponTran = sponza->getComponent<Transform>();
 	//sponTran->setScale(glm::vec3(20, 20, 20));
 	
-	GOPtr falcon = SceneManager::createGameObject("Falcon");
-	falcon->addComponent<Model>(falcon->getNode(),
-								"models/falcon/falcon.scene.xml");
-	auto falconTransform = falcon->getComponent<Transform>();
-	falconTransform->setScale(glm::vec3(3, 3, 3));
+	// GOPtr falcon = SceneManager::createGameObject("Falcon");
+	// falcon->addComponent<Model>(falcon->getNode(),
+	// 							"models/falcon/falcon.scene.xml");
+	// auto falconTransform = falcon->getComponent<Transform>();
+	// falconTransform->setScale(glm::vec3(3, 3, 3));
 
 	GOPtr lightGO = SceneManager::createGameObject("LightGO");
 	lightGO->addComponent<Model>(lightGO->getNode(),
@@ -35,7 +36,7 @@ Game::Game(std::string path)
 	//playerTrans->setLookAt(glm::vec3(0));
 	Renderer::setCurrentCamera(camera->getCameraNode());
 
-	for(int i = 0; i < 0; i++)
+	for(int i = 0; i < 1; i++)
 	{
 		GOPtr suzanne = SceneManager::createGameObject("Suzanne" + std::to_string(i));
 		auto suzTransform = suzanne->getComponent<Transform>();
@@ -50,6 +51,8 @@ Game::Game(std::string path)
 		
 		suzanne->addComponent<Model>(suzanne->getNode(),
 									 "models/test/test.scene.xml");
+
+		suzanne->addComponent<RigidBody>();
 		// auto sLight = suzanne->addComponent<Light>(suzanne->getNode(),
 		// 										   "light" + std::to_string(i));
 		// float r = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
@@ -60,6 +63,9 @@ Game::Game(std::string path)
 		// sLight->setShadowCaster(false);
 	}
 
+	GOPtr plane = SceneManager::createGameObject("Floor");
+	plane->addComponent<RigidBody>(glm::vec3(0, 1, 0));
+
 	Renderer::resizePipelineBuffers(Settings::getWindowWidth(),
 									Settings::getWindowHeight());
 }
@@ -67,11 +73,13 @@ Game::Game(std::string path)
 Game::~Game()
 {
 	SceneManager::cleanup();
+	Physics::cleanup();
 }
 
 void Game::update(float deltaTime)
 {		
 	System::update(deltaTime);
+	Physics::update(deltaTime);
 }
 
 void Game::draw()

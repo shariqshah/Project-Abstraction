@@ -14,7 +14,7 @@ set(CMAKE_CXX_FLAGS	"-Wall -std=c++11 -O3 -ftree-vectorize")
 
 #include directories
 include_directories(${PROJECT_SOURCE_DIR}/include)
-#include_directories(${PROJECT_SOURCE_DIR}/include/bullet)
+include_directories(${PROJECT_SOURCE_DIR}/include/bullet)
 ##link directories
 #LINK_DIRECTORIES(${PROJECT_SOURCE_DIR}/lib)
 
@@ -23,11 +23,20 @@ include_directories(${PROJECT_SOURCE_DIR}/include)
 if(${CMAKE_BUILD_TYPE} MATCHES "Release")
   message("Release Build")
   target_link_libraries(${PROJECT_NAME} ${PROJECT_SOURCE_DIR}/lib/sdl2/libSDL2.so
+	                                    ${PROJECT_SOURCE_DIR}/lib/bullet/release/libBulletCollision.so
+										${PROJECT_SOURCE_DIR}/lib/bullet/release/libBulletDynamics.so
+										${PROJECT_SOURCE_DIR}/lib/bullet/release/libLinearMath.so
                                         ${PROJECT_SOURCE_DIR}/lib/horde3d/release/libHorde3D.so
 										${PROJECT_SOURCE_DIR}/lib/horde3d/release/libHorde3DUtils.so)
 else()
   message("Debug Build")
   target_link_libraries(${PROJECT_NAME} ${PROJECT_SOURCE_DIR}/lib/sdl2/libSDL2.so
+	                                    ${PROJECT_SOURCE_DIR}/lib/bullet/release/libBulletCollision.so
+										${PROJECT_SOURCE_DIR}/lib/bullet/release/libBulletDynamics.so
+										${PROJECT_SOURCE_DIR}/lib/bullet/release/libLinearMath.so
+	                                    # ${PROJECT_SOURCE_DIR}/lib/bullet/debug/libBulletCollision-d.so
+										# ${PROJECT_SOURCE_DIR}/lib/bullet/debug/libBulletDynamics-d.so
+										# ${PROJECT_SOURCE_DIR}/lib/bullet/debug/libLinearMath-d.so
                                         ${PROJECT_SOURCE_DIR}/lib/horde3d/debug/libHorde3D.so
 										${PROJECT_SOURCE_DIR}/lib/horde3d/debug/libHorde3DUtils.so)
 endif()

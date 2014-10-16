@@ -6,20 +6,21 @@
 
 class Model : public Component
 {
-	Resource mResourceID;
-	Node mNode;
+	Resource    mResourceID;
+	Node        mNode;
 	std::string mFilename;
 
 public:
-	Model(Node parent, std::string name);
+	Model(Node parent, const std::string& name);
 	~Model();
 	
 	std::string getFilename();
-	Resource getResourceID();
-	Node getNode();
+	Resource    getResourceID();
+	Node        getNode();
 
-	const static std::string sName;
-	virtual const std::string getName();
+	const   static std::string sName;
+	
+	virtual const  std::string getName();
 };
 	
 #endif

@@ -28,13 +28,6 @@ public:
 			   const std::string& tag  = "DefaultTag");
 	~GameObject();
 
-	template<typename T, typename... Args>
-    std::shared_ptr<T> addComponent(Args&&... args)
-    {
-		auto component = std::make_shared<T>(args...);
-        return std::dynamic_pointer_cast<T>(addComponent(component));
-    }
-
     void setName(const std::string& value);
     void setComponentMask(long value);
     void setTag(const std::string& value);
@@ -50,6 +43,13 @@ public:
     long        getComponentMask() const;
 	Node        getNode() const;
 
+	template<typename T, typename... Args>
+    std::shared_ptr<T> addComponent(Args... args)
+    {
+		auto component = std::make_shared<T>(args...);
+        return std::dynamic_pointer_cast<T>(addComponent(component));
+    }
+	
 	template<typename T>
     std::shared_ptr<T> getComponent()
     {

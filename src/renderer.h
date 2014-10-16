@@ -18,7 +18,7 @@
 
 typedef H3DNode Node;
 typedef H3DRes  Resource;
-typedef std::vector<Node> NodeArray;
+typedef std::vector<Node> NodeList;
 
 enum class ResourceType : int
 {
@@ -70,7 +70,7 @@ namespace Renderer
 	
 	bool removeNode(Node node);
 	bool setParent(Node child, Node parent);
-	bool getNodeChildren(Node node, const std::string& name, NodeArray* children);
+	bool getNodeChildren(Node node, const std::string& name, NodeList* children);
 
 	Node getParent(Node node);
 	Node getCurrentCameraNode();
