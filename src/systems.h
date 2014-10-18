@@ -9,8 +9,10 @@
 
 namespace System
 {
+	void initialize();
 	void update(float deltaTime, GameObject* gameObject);
 	void update(float deltaTime);
+	void cleanup();
 }
 
 #endif

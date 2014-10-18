@@ -25,18 +25,18 @@ namespace Utils
 
     btVector3 toBullet(glm::vec3 glmVec3)
     {
-        btVector3 bulletVec3(glmVec3.x,
-                             glmVec3.y,
-                             glmVec3.z);
+        btVector3 bulletVec3(btScalar(glmVec3.x),
+                             btScalar(glmVec3.y),
+                             btScalar(glmVec3.z));
         return bulletVec3;
     }
 
     btQuaternion toBullet(glm::quat glmQuat)
     {
-        btQuaternion bulletQuat(glmQuat.x,
-                                glmQuat.y,
-                                glmQuat.z,
-                                glmQuat.w);
+        btQuaternion bulletQuat(btScalar(glmQuat.x),
+                                btScalar(glmQuat.y),
+                                btScalar(glmQuat.z),
+                                btScalar(glmQuat.w));
         return bulletQuat;
     }
 
@@ -69,9 +69,9 @@ namespace Utils
 
 	btVector3 toBullet(const glm::vec3 *glmVec3)
     {
-        btVector3 bulletVec3(glmVec3->x,
-                             glmVec3->y,
-                             glmVec3->z);
+        btVector3 bulletVec3(btScalar(glmVec3->x),
+                             btScalar(glmVec3->y),
+                             btScalar(glmVec3->z));
         return bulletVec3;
     }
     

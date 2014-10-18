@@ -2,6 +2,18 @@
 
 namespace System
 {
+	namespace
+	{
+		static bool sPhysicsEnabled;
+		static Sphere *tmpShape = new Sphere(1.f);
+	}
+	
+	void initialize()
+	{
+		sPhysicsEnabled = true;
+		Physics::initialize(glm::vec3(0.f, -9.8f, 0.f));
+	}
+	
 	glm::vec3 generateRandom()
 	{
 		float r = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
@@ -113,7 +125,7 @@ namespace System
 				// success ? Log::message("success") : Log::message("fail");
 
 				auto rigidBody = newLight->addComponent<RigidBody>(lightTransform,
-																   1.f, 1.f);
+																   tmpShape);
 				rigidBody->applyForce(transform->getForward() * 2000.f);
 			}
 		}
@@ -143,14 +155,17 @@ namespace System
 			auto rBody = gameObject->getComponent<RigidBody>();
 			
 			if(Input::isReleased(Input::Key::G))
-				rBody->setMass(0.f);
+				rBody->setKinematic(true);
 			if(Input::isReleased(Input::Key::H))
-				rBody->setMass(1.f);
+				rBody->setKinematic(false);
 		}
 	}
 
 	void syncPhysicsTransform(GameObject* gameObject)
 	{
+		// check if the gameobject's transform has been modified by
+		// someone other than bullet. if so, then update rigidbody's
+		// transform and force it to activate.
 		if(gameObject->hasComponents((long)ComponentType::RIGIDBODY))
 		{
 			auto transform  = gameObject->getComponent<Transform>();
@@ -195,15 +210,16 @@ namespace System
 		}
 
 		if(Input::isReleased(Input::Key::C))
-		{
-			SceneManager::remove("Falcon");
-			// auto parent = SceneManager::getParent(newLight.get());
+			sPhysicsEnabled ? sPhysicsEnabled = false : sPhysicsEnabled = true;
 
-			// auto pT = parent->getComponent<Transform>();
-			// pT->rotate(glm::vec3(0, 1, 0), 10 * deltaTime);
-		}
-			
-
+		if(sPhysicsEnabled)
+			Physics::update(deltaTime);
+		
 		SceneManager::update();
+	}
+
+	void cleanup()
+	{
+		Physics::cleanup();
 	}
 }

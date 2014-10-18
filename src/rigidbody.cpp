@@ -3,23 +3,14 @@
 const std::string RigidBody::sName = "RigidBody";
 
 RigidBody::RigidBody(std::shared_ptr<Transform> transform,
-					 glm::vec3 normal,
-					 float     mass,
-					 float     restitution)
+					 CollisionShape* shape,
+					 float mass,
+					 float restitution)
 {
 	mType   = ComponentType::RIGIDBODY;
 	mMotionState = new MotionState(transform);
-	mHandle = Physics::createPlane(normal, mMotionState, mass, restitution);
-}
-
-RigidBody::RigidBody(std::shared_ptr<Transform> transform,
-					 float     radius,
-					 float     mass,
-					 float     restitution)
-{
-	mType   = ComponentType::RIGIDBODY;
-	mMotionState = new MotionState(transform);
-	mHandle = Physics::createSphere(radius, mMotionState, mass, restitution);
+	//mShape  = shape;
+	mHandle = Physics::createRigidBody(shape, mMotionState, mass, restitution);
 }
 
 RigidBody::~RigidBody()
@@ -55,4 +46,9 @@ void RigidBody::setMass(float mass)
 void RigidBody::setActivation(bool activation)
 {
 	Physics::setActivation(mHandle, activation);
+}
+
+void RigidBody::setKinematic(bool kinematic)
+{
+	Physics::setKinematic(mHandle, kinematic);
 }

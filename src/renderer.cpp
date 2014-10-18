@@ -468,4 +468,13 @@ namespace Renderer
 			h3dSetNodeParamF(light, H3DLight::ColorMultiplierF, 0, intensity);
 		}
 	}
+
+	namespace Model
+	{
+		float* getVertices(Node model)
+		{
+			
+		}
+	}
+
 }

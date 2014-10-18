@@ -12,8 +12,10 @@ namespace Physics
 		static btCollisionDispatcher*               sDispatcher;
 		static btSequentialImpulseConstraintSolver* sSolver;
 
-		static std::vector<RBHandle>    sFreeList;
-		static std::vector<btRigidBody*> sRigidBodies;
+		static std::vector<RBHandle>          sFreeList;
+		static std::vector<btRigidBody*>      sRigidBodies;
+		static std::vector<btCollisionShape*> sCollisionShapes;
+		static std::vector<CollisionShape*>   sShapes;
 	}
 
 	bool initialize(glm::vec3 gravity)
@@ -40,13 +42,14 @@ namespace Physics
 	void removeCollisionObject(btRigidBody *body)
     {
 		//btRigidBody *body = btRigidBody::upcast(obj);
+		sWorld->removeRigidBody(body);
 
 		if(body && body->getMotionState())
 			delete body->getMotionState();
 
-		sWorld->removeRigidBody(body);
+		
 
-		//body == NULL ? Log::message("RB is NULL") : delete body;
+		body == NULL ? Log::message("RB is NULL") : delete body;
 		//sWorld->removeCollisionObject(obj);
 		// if(obj)
 		// 	delete obj;
@@ -60,6 +63,18 @@ namespace Physics
 			btCollisionObject *obj = sWorld->getCollisionObjectArray()[i];
 			removeCollisionObject(btRigidBody::upcast(obj));
 		}
+
+		for(btCollisionShape* shape : sCollisionShapes)
+			delete shape;
+
+		for(CollisionShape* shape : sShapes)
+		{
+			if(shape)
+			{
+				shape->cleanup();
+				delete shape;
+			}
+		}
 		
 		delete sWorld;
 		delete sSolver;
@@ -68,6 +83,7 @@ namespace Physics
 		delete sBroadphase;
 
 		sRigidBodies.clear();
+		sCollisionShapes.clear();
 	}
 
 	void setGravity(glm::vec3 gravity)
@@ -81,57 +97,25 @@ namespace Physics
 		return Utils::toGlm(sGravity);
 	}
 
-	RBHandle initializeRigidBody(btVector3 inertia,
-								 btCollisionShape* shape,
-								 btDefaultMotionState* motionState,
-								 float mass,
-								 float restitution)
+	void addCollisionShape(CollisionShape* shape)
 	{
-		btRigidBody::btRigidBodyConstructionInfo constructionInfo(mass,
-																  motionState,
-																  shape,
-																  inertia);
-		btRigidBody* body = new btRigidBody(constructionInfo);
-		body->setGravity(btVector3(0, -9.8, 0));
-		body->setRestitution(restitution);
-		sWorld->addRigidBody(body);
-			
-		//delete shape;
-		//delete motionState;
-			
-		RBHandle rbHandle = 0;
-			
-		if(!sFreeList.empty())
-		{
-			rbHandle = sFreeList.back();
-			sFreeList.pop_back();
-
-			if(sRigidBodies[rbHandle] != NULL)
-				Log::warning("Overwriting Rigidbody!");
-			
-			sRigidBodies[rbHandle] = body;
-		}
-		else
-		{
-			sRigidBodies.push_back(body);
-			rbHandle = (uint32_t) (sRigidBodies.size() - 1);
-		}
-			
-		return rbHandle;
+		sShapes.push_back(shape);
 	}
 
-	RBHandle initializeRigidBody(btVector3 inertia,
-								 btCollisionShape* shape,
-								 btMotionState* motionState,
-								 float mass,
-								 float restitution)
+	RBHandle createRigidBody(CollisionShape* shape,
+							 MotionState*    motionState,
+							 float           mass,
+							 float           restitution)
 	{
-		btRigidBody::btRigidBodyConstructionInfo constructionInfo(mass,
-																  motionState,
-																  shape,
-																  inertia);
-		btRigidBody* body = new btRigidBody(constructionInfo);
-		body->setGravity(btVector3(0, -9.8, 0));
+		btVector3 inertia(0, 0, 0);
+		if(mass != 0)
+			shape->getCollisionShape()->calculateLocalInertia(mass, inertia);
+
+		btRigidBody::btRigidBodyConstructionInfo consInfo(mass,
+														  motionState,
+														  shape->getCollisionShape(),
+														  inertia);
+		btRigidBody* body = new btRigidBody(consInfo);
 		body->setRestitution(restitution);
 		sWorld->addRigidBody(body);
 			
@@ -155,37 +139,7 @@ namespace Physics
 			
 		return rbHandle;
 	}
-
-	RBHandle createPlane(glm::vec3    normal,         
-						 MotionState* motionState,
-						 float        mass,  
-						 float        restitution)
-						 
-	{
-		btCollisionShape* shape = new btStaticPlaneShape(Utils::toBullet(normal),
-														 btScalar(0.1));
-
-		btVector3 inertia(0, 0, 0);
-		if(mass != 0)
-			shape->calculateLocalInertia(mass, inertia);
-
-		return initializeRigidBody(inertia, shape, motionState, mass, restitution);
-	}
-
-	RBHandle createSphere(float        radius,         
-						  MotionState* motionState,
-						  float        mass,  
-						  float        restitution)
-	{
-		btCollisionShape* shape = new btSphereShape(btScalar(radius));
-
-		btVector3 inertia(0, 0, 0);
-		if(mass != 0)
-			shape->calculateLocalInertia(mass, inertia);
-
-		return initializeRigidBody(inertia, shape, motionState, mass, restitution);
-	}
-
+	
 	void setTransform(RBHandle body, glm::mat4 transformMat)
 	{
 		btTransform transform;
@@ -226,6 +180,22 @@ namespace Physics
 		}
 		else
 			Log::warning("RigidBody " + std::to_string(body) + "does not exist so not removed");
+	}
+
+	void setKinematic(RBHandle body, bool kinematic)
+	{
+		if(kinematic)
+		{
+			sRigidBodies[body]->setFlags(sRigidBodies[body]->getFlags() |
+										 btCollisionObject::CF_KINEMATIC_OBJECT);
+			sRigidBodies[body]->setActivationState(DISABLE_DEACTIVATION);
+		}
+		else
+		{
+			sRigidBodies[body]->setFlags(~btCollisionObject::CF_KINEMATIC_OBJECT);
+			sRigidBodies[body]->setActivationState(~DISABLE_DEACTIVATION);
+		}
+		
 	}
 
 	void setMass(RBHandle body, const float mass)

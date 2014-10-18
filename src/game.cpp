@@ -3,7 +3,7 @@
 Game::Game(std::string path)
 {	
 	Renderer::initialize();
-	Physics::initialize(glm::vec3(0.f, -9.8f, 0.f));
+	System::initialize();
 	
 	GOPtr sponza = SceneManager::createGameObject("Sponza");
 	sponza->addComponent<Model>(sponza->getNode(),
@@ -36,6 +36,7 @@ Game::Game(std::string path)
 	//playerTrans->setLookAt(glm::vec3(0));
 	Renderer::setCurrentCamera(camera->getCameraNode());
 
+	Sphere* sphere = new Sphere(1);
 	for(int i = 0; i < 10; i++)
 	{
 		GOPtr suzanne = SceneManager::createGameObject("Suzanne" + std::to_string(i));
@@ -52,7 +53,7 @@ Game::Game(std::string path)
 		suzanne->addComponent<Model>(suzanne->getNode(),
 									 "models/test/test.scene.xml");
 
-		suzanne->addComponent<RigidBody>(suzTransform);
+		suzanne->addComponent<RigidBody>(suzTransform, sphere);
 		suzanne->setTag("suzanne");
 		// auto sLight = suzanne->addComponent<Light>(suzanne->getNode(),
 		// 										   "light" + std::to_string(i));
@@ -66,7 +67,7 @@ Game::Game(std::string path)
 
 	GOPtr plane = SceneManager::createGameObject("Floor");
 	plane->addComponent<RigidBody>(plane->getComponent<Transform>(),
-								   glm::vec3(0, 1, 0));
+								   new Plane(glm::vec3(0, 1, 0), 0.04f), 0.f);
 
 	Renderer::resizePipelineBuffers(Settings::getWindowWidth(),
 									Settings::getWindowHeight());
@@ -75,13 +76,12 @@ Game::Game(std::string path)
 Game::~Game()
 {
 	SceneManager::cleanup();
-	Physics::cleanup();
+	System::cleanup();
 }
 
 void Game::update(float deltaTime)
 {		
 	System::update(deltaTime);
-	Physics::update(deltaTime);
 }
 
 void Game::draw()

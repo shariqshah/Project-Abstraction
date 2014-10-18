@@ -9,15 +9,11 @@ class RigidBody : public Component
 	RBHandle     mHandle;
 	MotionState *mMotionState;
 public:
-	RigidBody(std::shared_ptr<Transform> transform,
-			  float radius       = 1.f,
-			  float mass         = 1.f,
-			  float restitution  = 1.f);
 
 	RigidBody(std::shared_ptr<Transform> transform,
-			  glm::vec3 normal,
-			  float mass         = 0.f,
-			  float restitution  = 0.5f);
+			  CollisionShape* shape,
+			  float mass        = 1.f,
+			  float restitution = 0.5f);
 	
 	~RigidBody();
 
@@ -26,6 +22,7 @@ public:
 	void applyForce(const glm::vec3& force, const glm::vec3& relPos = glm::vec3(0));
 	void setMass(float mass);
 	void setActivation(bool activation);
+	void setKinematic(bool kinematic);
 	
 	const static  std::string sName;
 	virtual const std::string getName();

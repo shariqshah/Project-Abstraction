@@ -121,6 +121,11 @@ namespace Renderer
 		void setIntensity(Node light, float intensity);
 		void setShadowSplitLambda(Node light, float splitLambda);
 	}
+
+	namespace Model
+	{
+		float* getVertices(Node model);
+	}
 }
 
 #endif
