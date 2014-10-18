@@ -32,22 +32,26 @@ namespace System
 			if(Input::isReleased(Input::Key::V) && gameObject->compareTag("child"))
 				SceneManager::setParentAsRoot(gameObject);
 			
-			if(Input::isPressed(Input::Key::I))
-				translation.z -= increment;
-			if(Input::isPressed(Input::Key::K))
-				translation.z += increment;
-			if(Input::isPressed(Input::Key::J))
-				translation.x -= increment;
-			if(Input::isPressed(Input::Key::L))
-				translation.x += increment;
-			if(Input::isPressed(Input::Key::U))
-				translation.y += increment;
-			if(Input::isPressed(Input::Key::O))
-				translation.y -= increment;
+			if(gameObject->compareTag("suzanne"))
+			{
+				if(Input::isPressed(Input::Key::I))
+					translation.z -= increment;
+				if(Input::isPressed(Input::Key::K))
+					translation.z += increment;
+				if(Input::isPressed(Input::Key::J))
+					translation.x -= increment;
+				if(Input::isPressed(Input::Key::L))
+					translation.x += increment;
+				if(Input::isPressed(Input::Key::U))
+					translation.y += increment;
+				if(Input::isPressed(Input::Key::O))
+					translation.y -= increment;
+			
 
-			if(translation.x != 0 || translation.y != 0 || translation.z != 0)
-				transform->translate(translation, Transform::Space::LOCAL);
-
+				if(translation.x != 0 || translation.y != 0 || translation.z != 0)
+					transform->translate(translation, Transform::Space::LOCAL);
+			}
+			
 			if(Input::isPressed(Input::Key::M))
 				transform->rotate(glm::vec3(1, 0, 0),  increment * 5);
 			if(Input::isPressed(Input::Key::N))
@@ -103,37 +107,70 @@ namespace System
 
 				// auto falcon = SceneManager::find("Falcon");
 				// bool success = SceneManager::setParent(newLight.get(), falcon.get());
-				// lightTransform->setPosition(glm::vec3(0.f));
-				lightTransform->translate(glm::vec3(0, 20, 0));
+				lightTransform->setPosition(transform->getPosition());
+				lightTransform->setForward(transform->getForward());
+				//lightTransform->translate(glm::vec3(0, 20, 0));
 				// success ? Log::message("success") : Log::message("fail");
 
-				newLight->addComponent<RigidBody>(1.f, 1.f,
-												  lightTransform->getPosition(),
-												  lightTransform->getRotation());
+				auto rigidBody = newLight->addComponent<RigidBody>(lightTransform,
+																   1.f, 1.f);
+				rigidBody->applyForce(transform->getForward() * 2000.f);
 			}
 		}
-	}
-	
-	void update(float deltaTime, GameObject *gameObject)
-	{
-		System::CameraSystem::updateFreeCamera(deltaTime, gameObject);
-		
-		debug(deltaTime, gameObject);
 
+		if(gameObject->compareTag("suzanne"))
+		{
+			glm::vec3 translation(0.f);
+			float increment = 10.f * deltaTime;
+				
+			if(Input::isPressed(Input::Key::I))
+				translation.z -= increment;
+			if(Input::isPressed(Input::Key::K))
+				translation.z += increment;
+			if(Input::isPressed(Input::Key::J))
+				translation.x -= increment;
+			if(Input::isPressed(Input::Key::L))
+				translation.x += increment;
+			if(Input::isPressed(Input::Key::U))
+				translation.y += increment;
+			if(Input::isPressed(Input::Key::O))
+				translation.y -= increment;
+			
+
+			if(translation.x != 0 || translation.y != 0 || translation.z != 0)
+				transform->translate(translation, Transform::Space::LOCAL);
+
+			auto rBody = gameObject->getComponent<RigidBody>();
+			
+			if(Input::isReleased(Input::Key::G))
+				rBody->setMass(0.f);
+			if(Input::isReleased(Input::Key::H))
+				rBody->setMass(1.f);
+		}
+	}
+
+	void syncPhysicsTransform(GameObject* gameObject)
+	{
 		if(gameObject->hasComponents((long)ComponentType::RIGIDBODY))
 		{
 			auto transform  = gameObject->getComponent<Transform>();
 			auto rBody      = gameObject->getComponent<RigidBody>();
 
-			glm::vec3 position;
-			glm::quat rotation;
-
-			rBody->getTransformation(&position, &rotation);
-
-			transform->setPosition(position);
-			transform->setRotation(rotation);
+			if(Renderer::isTransformed(gameObject->getNode()))
+			{
+				glm::mat4 transformMat = transform->getTransformMat();
+				rBody->setTransform(transformMat);
+				rBody->setActivation(true);
+			}
 		}
+	}
+	
+	void update(float deltaTime, GameObject* gameObject)
+	{
+		System::CameraSystem::updateFreeCamera(deltaTime, gameObject);
 		
+		debug(deltaTime, gameObject);
+		syncPhysicsTransform(gameObject);	
 	}
 
 	void update(float deltaTime)

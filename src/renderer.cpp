@@ -235,6 +235,16 @@ namespace Renderer
 		return childCount > 1 ? true : false;
 	}
 
+	bool isTransformed(Node node)
+	{
+		return h3dCheckNodeTransFlag(node, false);
+	}
+
+	void resetTransformFlag(Node node)
+	{
+		h3dCheckNodeTransFlag(node, true);
+	}
+
 	Node getCurrentCameraNode()
 	{
 		return sCurrentCamera;

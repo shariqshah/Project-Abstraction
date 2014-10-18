@@ -32,8 +32,8 @@ public:
         WORLD
     };
 	
-    Transform(Node node);
-    Transform(Node node,
+    Transform(Node      node);
+    Transform(Node      node,
 			  glm::vec3 position,
               glm::vec3 scale,
               glm::quat rotation,
@@ -49,6 +49,7 @@ public:
     void setUpVector(glm::vec3 up);
     void setRotation(glm::quat newRotation, bool updateTransMat = true);
     void setForward(glm::vec3 direction);
+	void resetTransformFlag();
 	
     glm::vec3 getPosition();
     glm::vec3 getScale();
@@ -57,6 +58,7 @@ public:
     glm::quat getRotation();
 	glm::vec3 getRotationVector();
     glm::vec3 getForward();
+	glm::mat4 getTransformMat();
 
 	virtual const std::string getName();
 

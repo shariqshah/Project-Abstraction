@@ -67,10 +67,12 @@ namespace Renderer
 	void setDebugLevel(DebugLevel level);
 	void toggleDebugView();
 	void toggleWireframe();
+	void resetTransformFlag(Node node);
 	
 	bool removeNode(Node node);
 	bool setParent(Node child, Node parent);
 	bool getNodeChildren(Node node, const std::string& name, NodeList* children);
+	bool isTransformed(Node node);
 
 	Node getParent(Node node);
 	Node getCurrentCameraNode();

@@ -1,17 +1,19 @@
 #include "game.h"
 #include "settings.h"
 
-//======================================> Globals
-SDL_Window *window = NULL;
+//========================================================> Globals
+SDL_Window*   window = NULL;
 SDL_GLContext context;
-Game *game;
+Game*         game;
 
-//======================================> Function Prototypes
-bool init(char *pFullPath);
-void close();
-void handleKeyboard(SDL_Event event, float deltaTime, bool *quit);
+//========================================================> Function Prototypes
+bool        init(char *pFullPath);
+
+void        close();
+void        handleKeyboard(SDL_Event event, float deltaTime, bool *quit);
+void        handleWindowEvent(SDL_WindowEvent event);
+
 std::string extractAppPath( char *pFullPath );
-void handleWindowEvent(SDL_WindowEvent event);
 
 int main(int argc, char** args)
 {

@@ -189,7 +189,17 @@ glm::quat Transform::getRotation()
 glm::vec3 Transform::getRotationVector()
 {
 	return glm::degrees(glm::eulerAngles(mRotation));
-}  
+}
+
+glm::mat4 Transform::getTransformMat()
+{
+	return mTransformMatrix;
+}
+
+void Transform::resetTransformFlag()
+{
+	Renderer::resetTransformFlag(mNode);
+}
 
 const std::string Transform::getName()
 {

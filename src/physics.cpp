@@ -96,8 +96,8 @@ namespace Physics
 		body->setRestitution(restitution);
 		sWorld->addRigidBody(body);
 			
-		// delete shape;
-		// delete motionState;
+		//delete shape;
+		//delete motionState;
 			
 		RBHandle rbHandle = 0;
 			
@@ -120,43 +120,68 @@ namespace Physics
 		return rbHandle;
 	}
 
-	RBHandle createSphere(float     radius,
-						  glm::vec3 position,
-						  glm::quat rotation,
-						  float     mass,
-						  float     restitution)
+	RBHandle initializeRigidBody(btVector3 inertia,
+								 btCollisionShape* shape,
+								 btMotionState* motionState,
+								 float mass,
+								 float restitution)
+	{
+		btRigidBody::btRigidBodyConstructionInfo constructionInfo(mass,
+																  motionState,
+																  shape,
+																  inertia);
+		btRigidBody* body = new btRigidBody(constructionInfo);
+		body->setGravity(btVector3(0, -9.8, 0));
+		body->setRestitution(restitution);
+		sWorld->addRigidBody(body);
+			
+		RBHandle rbHandle = 0;
+			
+		if(!sFreeList.empty())
+		{
+			rbHandle = sFreeList.back();
+			sFreeList.pop_back();
+
+			if(sRigidBodies[rbHandle] != NULL)
+				Log::warning("Overwriting Rigidbody!");
+			
+			sRigidBodies[rbHandle] = body;
+		}
+		else
+		{
+			sRigidBodies.push_back(body);
+			rbHandle = (uint32_t) (sRigidBodies.size() - 1);
+		}
+			
+		return rbHandle;
+	}
+
+	RBHandle createPlane(glm::vec3    normal,         
+						 MotionState* motionState,
+						 float        mass,  
+						 float        restitution)
+						 
+	{
+		btCollisionShape* shape = new btStaticPlaneShape(Utils::toBullet(normal),
+														 btScalar(0.1));
+
+		btVector3 inertia(0, 0, 0);
+		if(mass != 0)
+			shape->calculateLocalInertia(mass, inertia);
+
+		return initializeRigidBody(inertia, shape, motionState, mass, restitution);
+	}
+
+	RBHandle createSphere(float        radius,         
+						  MotionState* motionState,
+						  float        mass,  
+						  float        restitution)
 	{
 		btCollisionShape* shape = new btSphereShape(btScalar(radius));
 
 		btVector3 inertia(0, 0, 0);
 		if(mass != 0)
 			shape->calculateLocalInertia(mass, inertia);
-
-		btVector3 btPosition = Utils::toBullet(position);
-		btQuaternion btRotation = Utils::toBullet(rotation);
-		btTransform transform(btRotation, btPosition);
-		btDefaultMotionState *motionState = new btDefaultMotionState(transform);
-
-		return initializeRigidBody(inertia, shape, motionState, mass, restitution);
-	}
-
-	RBHandle createPlane(glm::vec3 normal,
-						 glm::vec3 position,
-						 glm::quat rotation,
-						 float     mass,
-						 float     restitution)
-	{
-		btCollisionShape* shape = new btStaticPlaneShape(Utils::toBullet(normal),
-														 btScalar(1));
-
-		btVector3 inertia(0, 0, 0);
-		if(mass != 0)
-			shape->calculateLocalInertia(mass, inertia);
-
-		btVector3 btPosition = Utils::toBullet(position);
-		btQuaternion btRotation = Utils::toBullet(rotation);
-		btTransform transform(btRotation, btPosition);
-		btDefaultMotionState *motionState = new btDefaultMotionState(transform);
 
 		return initializeRigidBody(inertia, shape, motionState, mass, restitution);
 	}
@@ -165,23 +190,30 @@ namespace Physics
 	{
 		btTransform transform;
 		transform.setFromOpenGLMatrix(glm::value_ptr(transformMat));
+		sRigidBodies[body]->setWorldTransform(transform);
+	}
 
+	void setActivation(RBHandle body, bool activation)
+	{
+		sRigidBodies[body]->activate(activation);
+	}
+
+	void setTransform(RBHandle body, glm::vec3 position, glm::quat rotation)
+	{
+		btTransform transform;
+		transform.setOrigin(Utils::toBullet(position));
+		transform.setRotation(Utils::toBullet(rotation));
 		sRigidBodies[body]->setWorldTransform(transform);
 	}
 
 	void getTransform(RBHandle body, glm::vec3* position, glm::quat* rotation)
 	{
-		btTransform transform;
-		if(sRigidBodies[body])
-		{
-			sRigidBodies[body]->getMotionState()->getWorldTransform(transform);
+		btTransform transform = sRigidBodies[body]->getWorldTransform();
 
+		if(position)
 			*position = Utils::toGlm(transform.getOrigin());
+		if(rotation)
 			*rotation = Utils::toGlm(transform.getRotation());
-		}
-		else
-			Log::message("Not Found!");
-		
 	}
 
 	void removeRigidBody(RBHandle body)
@@ -194,5 +226,21 @@ namespace Physics
 		}
 		else
 			Log::warning("RigidBody " + std::to_string(body) + "does not exist so not removed");
+	}
+
+	void setMass(RBHandle body, const float mass)
+	{
+		auto shape = sRigidBodies[body]->getCollisionShape();
+		btVector3 inertia(0, 0, 0);
+		if(mass != 0)
+			shape->calculateLocalInertia(mass, inertia);
+
+		sRigidBodies[body]->setMassProps(mass, inertia);
+	}
+
+	void applyForce(RBHandle body, glm::vec3 force, glm::vec3 relPos)
+	{
+		sRigidBodies[body]->applyForce(Utils::toBullet(force),
+									   Utils::toBullet(relPos));
 	}
 }

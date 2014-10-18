@@ -36,12 +36,12 @@ Game::Game(std::string path)
 	//playerTrans->setLookAt(glm::vec3(0));
 	Renderer::setCurrentCamera(camera->getCameraNode());
 
-	for(int i = 0; i < 1; i++)
+	for(int i = 0; i < 10; i++)
 	{
 		GOPtr suzanne = SceneManager::createGameObject("Suzanne" + std::to_string(i));
 		auto suzTransform = suzanne->getComponent<Transform>();
 
-		float radius = 70.f;
+		float radius = 20.f;
 		float width  = glm::sin((float)i) * radius;
 		float height = glm::cos((float)i) * radius;
 		if(i < 50)
@@ -52,7 +52,8 @@ Game::Game(std::string path)
 		suzanne->addComponent<Model>(suzanne->getNode(),
 									 "models/test/test.scene.xml");
 
-		suzanne->addComponent<RigidBody>();
+		suzanne->addComponent<RigidBody>(suzTransform);
+		suzanne->setTag("suzanne");
 		// auto sLight = suzanne->addComponent<Light>(suzanne->getNode(),
 		// 										   "light" + std::to_string(i));
 		// float r = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
@@ -64,7 +65,8 @@ Game::Game(std::string path)
 	}
 
 	GOPtr plane = SceneManager::createGameObject("Floor");
-	plane->addComponent<RigidBody>(glm::vec3(0, 1, 0));
+	plane->addComponent<RigidBody>(plane->getComponent<Transform>(),
+								   glm::vec3(0, 1, 0));
 
 	Renderer::resizePipelineBuffers(Settings::getWindowWidth(),
 									Settings::getWindowHeight());

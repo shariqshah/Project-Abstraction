@@ -9,7 +9,7 @@
 
 namespace System
 {
-	void update(float deltaTime, GameObject *gameObject);
+	void update(float deltaTime, GameObject* gameObject);
 	void update(float deltaTime);
 }
 
