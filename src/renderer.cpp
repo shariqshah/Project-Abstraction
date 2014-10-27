@@ -94,6 +94,24 @@ namespace Renderer
 		h3dSetOption(H3DOptions::WireframeMode, sRenderWireframe ? 1.0f : 0.0f);
 	}
 
+	void drawText()
+	{
+		int count = 0;
+		for(const std::string& text : sTextList)
+		{
+			h3dutShowText(text.c_str(),
+						  sFontPos.x,
+						  sFontPos.y + (sFontSize * count),
+						  sFontSize,
+						  1, 1, 1,
+						  sFontMat);
+			count++;
+		}
+
+		sTextList.clear();	
+	}
+
+
 	void setDebugLevel(DebugLevel level)
 	{
 		sDebugLevel = level;
@@ -248,23 +266,6 @@ namespace Renderer
 	Node getCurrentCameraNode()
 	{
 		return sCurrentCamera;
-	}
-
-	void drawText()
-	{
-		int count = 0;
-		for(const std::string& text : sTextList)
-		{
-			h3dutShowText(text.c_str(),
-						  sFontPos.x,
-						  sFontPos.y + (sFontSize * count),
-						  sFontSize,
-						  1, 1, 1,
-						  sFontMat);
-			count++;
-		}
-
-		sTextList.clear();	
 	}
 
 	void addText(const std::string& text)
@@ -473,7 +474,9 @@ namespace Renderer
 	{
 		float* getVertices(Node model)
 		{
-			
+			// 1. Get Mesh
+			// 2. For each mesh, get the geometry
+			// 3. For each geometry get the vertices
 		}
 	}
 

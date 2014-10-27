@@ -10,6 +10,7 @@ namespace Log
     void message(const std::string& message);
     void error(ErrorLevel level, const std::string& error);
 	void warning(const std::string& warningMessage);
+	void setEnabled(bool enabled);
 }
 
 

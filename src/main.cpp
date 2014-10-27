@@ -64,12 +64,22 @@ int main(int argc, char** args)
 			
 
             //Render to screen
+			float timeBeforeUpdate = SDL_GetTicks();
 			game->update(deltaTime);
+			float timeAfterUpdate = SDL_GetTicks();
+			float updateTime = timeAfterUpdate - timeBeforeUpdate;
+			
+			float timeBeforeDraw = SDL_GetTicks();
 			game->draw();
-
+			float timeAfterDraw = SDL_GetTicks();
+			float drawTime = timeAfterDraw - timeBeforeDraw;
+			
 			//Set released keys back to inactive
 			Input::updateReleasedKeys();
 			Input::resetMouseRel();
+
+			Renderer::addText("Update Time : " + std::to_string(updateTime));
+			Renderer::addText("Draw Time : " + std::to_string(drawTime));
 			
             //Swap Buffers and update screen
             SDL_GL_SwapWindow(window);

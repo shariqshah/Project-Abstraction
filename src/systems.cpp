@@ -107,12 +107,12 @@ namespace System
 			{
 				GOPtr newLight = SceneManager::createGameObject("newLight");
 				newLight->setTag("child");
-				auto light = newLight->addComponent<Light>(newLight->getNode(),
-														   "newLight");
+				// auto light = newLight->addComponent<Light>(newLight->getNode(),
+				// 										   "newLight");
 				newLight->addComponent<Model>(newLight->getNode(),
 											  "models/test/test.scene.xml");
-				light->setColor(generateRandom());
-				light->setShadowCaster(false);
+				// light->setColor(generateRandom());
+				// light->setShadowCaster(false);
 				auto lightTransform = newLight->getComponent<Transform>();
 				//lightTransform->setPosition(transform->getPosition());
 				//lightTransform->setForward(transform->getForward());
@@ -200,6 +200,11 @@ namespace System
 			Renderer::toggleWireframe();
 		if(Input::isReleased(Input::Key::F5))
 			Renderer::toggleDebugView();
+		if(Input::isReleased(Input::Key::F6))
+			Log::setEnabled(true);
+		if(Input::isReleased(Input::Key::F7))
+			Log::setEnabled(false);
+		
 		
 		GOMap* sceneObjects = SceneManager::getSceneObjects();
 		for(GOMap::iterator it = sceneObjects->begin();

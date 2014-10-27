@@ -59,7 +59,6 @@ namespace Renderer
     void setNodeParam(Node node, int param, int value);
     void setNodeParam(Node node, int param, int compID, float value);
 	void setNodeName(Node node, const std::string& name);
-	void drawText();
     void resizePipelineBuffers(int width, int height);
 	void setCurrentCamera(Node cameraNode);
 	void addText(const std::string& text);
