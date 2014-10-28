@@ -6,12 +6,18 @@ namespace System
 	{
 		static bool sPhysicsEnabled;
 		static Sphere *tmpShape = new Sphere(1.f);
+		static std::shared_ptr<Model> suzanneModel;
+		static CollisionShape* statCollMesh;
+		static CollisionShape* hullCollMesh;
 	}
 	
 	void initialize()
 	{
 		sPhysicsEnabled = true;
 		Physics::initialize(glm::vec3(0.f, -9.8f, 0.f));
+		suzanneModel = std::make_shared<Model>("models/test/test.scene.xml");
+		statCollMesh = new CollisionMesh(suzanneModel, true);
+		hullCollMesh = new CollisionMesh(suzanneModel, false);
 	}
 	
 	glm::vec3 generateRandom()
@@ -109,24 +115,38 @@ namespace System
 				newLight->setTag("child");
 				// auto light = newLight->addComponent<Light>(newLight->getNode(),
 				// 										   "newLight");
-				newLight->addComponent<Model>(newLight->getNode(),
-											  "models/test/test.scene.xml");
+				auto model = newLight->addComponent<Model>(newLight->getNode(),
+														   "models/test/test.scene.xml");
 				// light->setColor(generateRandom());
 				// light->setShadowCaster(false);
 				auto lightTransform = newLight->getComponent<Transform>();
-				//lightTransform->setPosition(transform->getPosition());
-				//lightTransform->setForward(transform->getForward());
-
+				
 				// auto falcon = SceneManager::find("Falcon");
 				// bool success = SceneManager::setParent(newLight.get(), falcon.get());
 				lightTransform->setPosition(transform->getPosition());
 				lightTransform->setForward(transform->getForward());
 				//lightTransform->translate(glm::vec3(0, 20, 0));
 				// success ? Log::message("success") : Log::message("fail");
-
-				auto rigidBody = newLight->addComponent<RigidBody>(lightTransform,
-																   tmpShape);
-				rigidBody->applyForce(transform->getForward() * 2000.f);
+				if(Input::isPressed(Input::Key::LCTRL))
+				{
+					auto rigidBody = newLight->addComponent<RigidBody>(lightTransform,
+																	   statCollMesh,
+																	   0.f);
+					rigidBody->applyForce(transform->getForward() * 2000.f);
+				}
+				else if(Input::isPressed(Input::Key::LSHIFT))
+				{
+					auto rigidBody = newLight->addComponent<RigidBody>(lightTransform,
+																	   hullCollMesh);
+					rigidBody->applyForce(transform->getForward() * 2000.f);
+				}
+				else
+				{
+					auto rigidBody = newLight->addComponent<RigidBody>(lightTransform,
+																	   tmpShape);
+					rigidBody->applyForce(transform->getForward() * 2000.f);
+				}
+					
 			}
 		}
 
@@ -158,6 +178,13 @@ namespace System
 				rBody->setKinematic(true);
 			if(Input::isReleased(Input::Key::H))
 				rBody->setKinematic(false);
+
+		    auto model = gameObject->getComponent<Model>();
+
+			float* verts = model->getVertices();
+
+			if(verts == NULL)
+				Log::message("There's a bug to hunt");
 		}
 	}
 
@@ -226,5 +253,6 @@ namespace System
 	void cleanup()
 	{
 		Physics::cleanup();
+		suzanneModel.reset();
 	}
 }

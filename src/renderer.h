@@ -24,14 +24,24 @@ enum class ResourceType : int
 {
 	MODEL    = H3DResTypes::SceneGraph,
 	MATERIAL = H3DResTypes::Material,
-	PIPELINE = H3DResTypes::Pipeline
+	PIPELINE = H3DResTypes::Pipeline,
+	GEOMETRY = H3DResTypes::Geometry
+};
+
+enum class NodeType : int
+{
+	GROUP  = H3DNodeTypes::Group,
+	MESH   = H3DNodeTypes::Mesh,
+	CAMERA = H3DNodeTypes::Camera,
+	LIGHT  = H3DNodeTypes::Light,
+	MODEL  = H3DNodeTypes::Model
 };
 
 enum class Pipeline : uint8_t
 {
-	FORWARD = 0,
+	FORWARD  = 0,
 	DEFERRED = 1,
-	HDR = 2
+	HDR      = 2
 };
 
 enum class DebugLevel : uint8_t
@@ -43,9 +53,9 @@ enum class DebugLevel : uint8_t
 
 namespace Renderer
 {
-	static const Node Root = H3DRootNode;
+	static const Node ROOT_NODE = H3DRootNode;
 	
-    void initialize();
+    void initialize(const std::string& path);
 	void renderFrame();
 	void setNodeTransform(Node node,
 						  const glm::vec3 position,
@@ -70,14 +80,17 @@ namespace Renderer
 	
 	bool removeNode(Node node);
 	bool setParent(Node child, Node parent);
-	bool getNodeChildren(Node node, const std::string& name, NodeList* children);
+	bool getNodeChildren(Node node,
+						 const std::string& name,
+						 NodeList* children,
+						 NodeType  childType = NodeType::GROUP);
 	bool isTransformed(Node node);
 
 	Node getParent(Node node);
 	Node getCurrentCameraNode();
-    Node createCamera(const std::string& name, Node parent = Root);
-    Node createNode(Resource resource, Node parent = Root);
-    Node createGroupNode(const std::string& name, Node parent = Root);
+    Node createCamera(const std::string& name, Node parent = ROOT_NODE);
+    Node createNode(Resource resource, Node parent = ROOT_NODE);
+    Node createGroupNode(const std::string& name, Node parent = ROOT_NODE);
 	
 	namespace Camera
 	{
@@ -124,6 +137,7 @@ namespace Renderer
 	namespace Model
 	{
 		float* getVertices(Node model);
+		int    getVertexCount(Node model);
 	}
 }
 

@@ -19,6 +19,18 @@ Model::Model(Node parent, const std::string& name)
 	}
 }
 
+Model::Model(const std::string& name)
+{
+	// If model is created without a parent node then it cannot be added to
+	// gameobjects. It can only be used to provide collision mesh
+	mType = ComponentType::MODEL;
+	mFilename = name;
+	mResourceID = Renderer::Resources::get(ResourceType::MODEL, mFilename);
+	mValid = false;
+	mNode = Renderer::createNode(mResourceID, Renderer::ROOT_NODE);
+}
+
+
 Model::~Model()
 {
 	if(mResourceID != 0 && Renderer::Resources::isLoaded(mResourceID))
@@ -42,6 +54,16 @@ Resource Model::getResourceID()
 std::string Model::getFilename()
 {
 	return mFilename;
+}
+
+float* Model::getVertices()
+{
+	return Renderer::Model::getVertices(mNode);
+}
+
+int Model::getVertexCount()
+{
+	return Renderer::Model::getVertexCount(mNode);
 }
 
 const std::string Model::getName()

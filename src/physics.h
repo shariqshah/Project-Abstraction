@@ -1,15 +1,15 @@
 #ifndef PHYSICS_H
 #define PHYSICS_H
 
-#include <vector>
 #include <memory>
 
 #define GLM_FORCE_RADIANS
 #include "../include/glm/gtc/type_ptr.hpp"
+#include "../include/bullet/BulletCollision/CollisionShapes/btShapeHull.h"
 
 #include "utilities.h"
-#include "log.h"
 #include "transform.h"
+#include "model.h"
 
 typedef btDiscreteDynamicsWorld PhysicsWorld;
 typedef uint32_t                RBHandle;
@@ -217,6 +217,56 @@ public:
 			mShape = new btCylinderShapeZ(Utils::toBullet(mHalfExtent));
 
 		Physics::addCollisionShape(this);
+	}
+};
+
+class CollisionMesh : public CollisionShape
+{
+	std::weak_ptr<Model> mModel;
+	bool mTriMesh;
+public:
+
+	CollisionMesh(std::shared_ptr<Model> model, bool isTriMesh)
+	{
+		mModel   = model;
+		mTriMesh = isTriMesh;
+		initialize();
+	}
+
+	void initialize()
+	{
+		if(auto model = mModel.lock())
+		{
+			float* vertices = model->getVertices();
+			btTriangleMesh *triMesh = new btTriangleMesh();
+
+			for(int i = 0; i < model->getVertexCount(); i += 9)
+			{
+				btVector3 v1(vertices[i],     vertices[i + 1], vertices[i + 2]);
+				btVector3 v2(vertices[i + 3], vertices[i + 4], vertices[i + 5]);
+				btVector3 v3(vertices[i + 6], vertices[i + 7], vertices[i + 8]);
+
+				triMesh->addTriangle(v1, v2, v3);
+			}
+
+			if(this->mTriMesh)
+			{
+				mShape = new btBvhTriangleMeshShape(triMesh, true);
+			}
+			else
+			{
+				btConvexShape *tempConShape = new btConvexTriangleMeshShape(triMesh);
+				btShapeHull *hull = new btShapeHull(tempConShape);
+				btScalar margin = tempConShape->getMargin();
+				hull->buildHull(margin);
+				tempConShape->setUserPointer(hull);
+				mShape = new btConvexHullShape(&(hull->getVertexPointer()->getX()),
+											   hull->numVertices());
+				delete tempConShape;
+			}
+
+			Physics::addCollisionShape(this);
+		}
 	}
 };
 

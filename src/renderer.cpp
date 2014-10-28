@@ -4,7 +4,7 @@ namespace Renderer
 {
 	namespace
 	{
-		static const std::string cContentFolderDir = "../content";
+		static std::string cContentFolderDir;
 		static std::vector<std::string> sTextList;
 		static std::vector<Node> cameras;
 		static glm::vec2 sFontPos;
@@ -52,8 +52,10 @@ namespace Renderer
 							&scale->x   , &scale->y   , &scale->z);
 	}
 
-	void initialize()
+	void initialize(const std::string& path)
 	{
+		cContentFolderDir = path + "../content";
+		
 		// Set options
 		h3dSetOption(H3DOptions::LoadTextures  ,  1);
 		h3dSetOption(H3DOptions::TexCompression,  0);
@@ -240,9 +242,12 @@ namespace Renderer
 		return parent;
 	}
 
-	bool getNodeChildren(Node node, const std::string& name, NodeList* children)
+	bool getNodeChildren(Node node,
+						 const std::string& name,
+						 NodeList* children,
+						 NodeType  childType)
 	{
-		int childCount = h3dFindNodes(node, name.c_str(), H3DNodeTypes::Group);
+		int childCount = h3dFindNodes(node, name.c_str(), (int)childType);
 
 		if(childCount > 1)
 		{
@@ -477,6 +482,28 @@ namespace Renderer
 			// 1. Get Mesh
 			// 2. For each mesh, get the geometry
 			// 3. For each geometry get the vertices
+			// std::vector<Node> meshes;
+
+			Resource geo = h3dGetNodeParamI(model,H3DModel::GeoResI);
+			float* vertices = (float *)h3dMapResStream(geo,
+													   H3DGeoRes::GeometryElem,
+													   0,
+													   H3DGeoRes::GeoVertPosStream,
+													   true,
+													   false);
+
+			h3dUnmapResStream(geo);
+			return vertices;
+		}
+
+		int getVertexCount(Node model)
+		{
+			Resource geo = h3dGetNodeParamI(model,H3DModel::GeoResI);
+			int vertexCount = h3dGetResParamI(geo,
+											  H3DGeoRes::GeometryElem,
+											  0,
+											  H3DGeoRes::GeoVertexCountI);
+			return vertexCount;
 		}
 	}
 

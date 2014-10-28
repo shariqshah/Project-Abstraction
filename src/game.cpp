@@ -2,20 +2,24 @@
 
 Game::Game(std::string path)
 {	
-	Renderer::initialize();
+	Renderer::initialize(path);
 	System::initialize();
 	
 	GOPtr sponza = SceneManager::createGameObject("Sponza");
-	sponza->addComponent<Model>(sponza->getNode(),
-								"models/sponza/sponza.scene.xml");
+	auto sponMod = sponza->addComponent<Model>(sponza->getNode(),
+											   "models/terrain/terrain.scene.xml");
 	auto sponTran = sponza->getComponent<Transform>();
+	sponza->addComponent<RigidBody>(sponTran,
+									new CollisionMesh(sponMod, true), 0.f);
 	//sponTran->setScale(glm::vec3(20, 20, 20));
 	
-	// GOPtr falcon = SceneManager::createGameObject("Falcon");
-	// falcon->addComponent<Model>(falcon->getNode(),
-	// 							"models/falcon/falcon.scene.xml");
-	// auto falconTransform = falcon->getComponent<Transform>();
-	// falconTransform->setScale(glm::vec3(3, 3, 3));
+	GOPtr falcon = SceneManager::createGameObject("Falcon");
+	auto falMod = falcon->addComponent<Model>(falcon->getNode(),
+											  "models/falcon/falcon.scene.xml");
+	auto falconTransform = falcon->getComponent<Transform>();
+    falcon->addComponent<RigidBody>(falconTransform,
+									new CollisionMesh(falMod, false), 5.f);
+	//falconTransform->setScale(glm::vec3(3, 3, 3));
 
 	GOPtr lightGO = SceneManager::createGameObject("LightGO");
 	lightGO->addComponent<Model>(lightGO->getNode(),

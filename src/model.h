@@ -12,12 +12,15 @@ class Model : public Component
 
 public:
 	Model(Node parent, const std::string& name);
+	Model(const std::string& name);
 	~Model();
 	
 	std::string getFilename();
 	Resource    getResourceID();
 	Node        getNode();
-
+	float*      getVertices();
+	int         getVertexCount();
+	
 	const   static std::string sName;
 	
 	virtual const  std::string getName();

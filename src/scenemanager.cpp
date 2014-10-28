@@ -213,7 +213,7 @@ namespace SceneManager
 
 	bool setParentAsRoot(GameObject* gameObject)
 	{
-		if(Renderer::setParent(gameObject->getNode(), Renderer::Root))
+		if(Renderer::setParent(gameObject->getNode(), Renderer::ROOT_NODE))
 		{
 			syncTransform(gameObject);
 			return true;

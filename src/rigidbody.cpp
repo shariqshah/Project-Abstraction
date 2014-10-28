@@ -13,6 +13,7 @@ RigidBody::RigidBody(std::shared_ptr<Transform> transform,
 	mHandle = Physics::createRigidBody(shape, mMotionState, mass, restitution);
 }
 
+
 RigidBody::~RigidBody()
 {
 	Physics::removeRigidBody(mHandle);
