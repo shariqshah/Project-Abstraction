@@ -91,6 +91,7 @@ void Game::update(float deltaTime)
 void Game::draw()
 {
 	Renderer::renderFrame();
+	Physics::draw();
 }
 
 void Game::resize(int width, int height)

@@ -15,6 +15,15 @@ set(CMAKE_CXX_FLAGS	"-Wall -std=c++11 -O3 -ftree-vectorize")
 #include directories
 include_directories(${PROJECT_SOURCE_DIR}/include)
 include_directories(${PROJECT_SOURCE_DIR}/include/bullet)
+
+# OpenGL
+find_package(OpenGL REQUIRED)
+include_directories(${OPENGL_INCLUDE_DIR})
+if (OPENGL_FOUND)
+  target_link_libraries(${PROJECT_NAME} ${OPENGL_LIBRARIES})
+  target_link_libraries(${PROJECT_NAME} m)  # if you use maths.h
+endif()
+
 ##link directories
 #LINK_DIRECTORIES(${PROJECT_SOURCE_DIR}/lib)
 
@@ -22,6 +31,7 @@ include_directories(${PROJECT_SOURCE_DIR}/include/bullet)
 
 if(${CMAKE_BUILD_TYPE} MATCHES "Release")
   message("Release Build")
+  set(CMAKE_CXX_FLAGS	"-Wall -std=c++11 -O3 -ftree-vectorize")
   target_link_libraries(${PROJECT_NAME} ${PROJECT_SOURCE_DIR}/lib/sdl2/libSDL2.so
 	                                    ${PROJECT_SOURCE_DIR}/lib/bullet/release/libBulletCollision.so
 										${PROJECT_SOURCE_DIR}/lib/bullet/release/libBulletDynamics.so
@@ -30,6 +40,7 @@ if(${CMAKE_BUILD_TYPE} MATCHES "Release")
 										${PROJECT_SOURCE_DIR}/lib/horde3d/release/libHorde3DUtils.so)
 else()
   message("Debug Build")
+  set(CMAKE_CXX_FLAGS	"-Wall -std=c++11")
   target_link_libraries(${PROJECT_NAME} ${PROJECT_SOURCE_DIR}/lib/sdl2/libSDL2.so
 	                                    ${PROJECT_SOURCE_DIR}/lib/bullet/release/libBulletCollision.so
 										${PROJECT_SOURCE_DIR}/lib/bullet/release/libBulletDynamics.so

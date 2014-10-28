@@ -7,9 +7,11 @@
 #include "../include/glm/gtc/type_ptr.hpp"
 #include "../include/bullet/BulletCollision/CollisionShapes/btShapeHull.h"
 
+#include "physicsdebugdrawer.h"
 #include "utilities.h"
 #include "transform.h"
 #include "model.h"
+#include "scenemanager.h"
 
 typedef btDiscreteDynamicsWorld PhysicsWorld;
 typedef uint32_t                RBHandle;
@@ -19,6 +21,26 @@ class CollisionShape;
 
 namespace Physics
 {
+	enum class DBG_Mode : int
+	{
+		NONE             = btIDebugDraw::DBG_NoDebug,
+		WIREFRAME        = btIDebugDraw::DBG_DrawWireframe,
+		AABB             = btIDebugDraw::DBG_DrawAabb,
+		CONTACTS         = btIDebugDraw::DBG_DrawContactPoints,
+		FEATURES_TEXT    = btIDebugDraw::DBG_DrawFeaturesText,
+		NO_DEACTIVATION  = btIDebugDraw::DBG_NoDeactivation,
+		NO_HELP_TEXT     = btIDebugDraw::DBG_NoHelpText,
+		TEXT             = btIDebugDraw::DBG_DrawText,
+		PROFIEL_TIMING   = btIDebugDraw::DBG_ProfileTimings,
+		ENABLE_SAT_COMP  = btIDebugDraw::DBG_EnableSatComparison,
+		DISABLE_LCP      = btIDebugDraw::DBG_DisableBulletLCP,
+		ENABLE_CCD       = btIDebugDraw::DBG_EnableCCD,
+		CONSTRAINTS      = btIDebugDraw::DBG_DrawConstraints,
+		CONSTRAINT_LIMIT = btIDebugDraw::DBG_DrawConstraintLimits,
+        NORMALS          = btIDebugDraw::DBG_DrawNormals,
+		MAX              = btIDebugDraw::DBG_MAX_DEBUG_DRAW_MODE
+	};
+	
 	bool initialize(glm::vec3 gravity);
 
 	RBHandle createRigidBody(CollisionShape* shape,
@@ -27,8 +49,12 @@ namespace Physics
 							 float           restitution);
 
 	void update(float deltaTime);
+    void draw();
 	void cleanup();
 	void setGravity(glm::vec3 gravity);
+    void enableDebugDraw(bool enable);
+	void nextDebugMode();
+	void setDebugMode(DBG_Mode debugMode);
 	
 	void setTransform(RBHandle body, glm::vec3  position, glm::quat  rotation);
 	void getTransform(RBHandle body, glm::vec3* position, glm::quat* rotation);
@@ -42,7 +68,6 @@ namespace Physics
 
 	const glm::vec3 getGravity();
 }
-
 
 class MotionState : public btMotionState
 {

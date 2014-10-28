@@ -1,4 +1,5 @@
 #include "physics.h"
+#include "camera.h"
 
 namespace Physics
 {
@@ -16,6 +17,10 @@ namespace Physics
 		static std::vector<btRigidBody*>      sRigidBodies;
 		static std::vector<btCollisionShape*> sCollisionShapes;
 		static std::vector<CollisionShape*>   sShapes;
+
+		static DebugDrawer* sDebugDrawer;
+		static bool         sEnableDebugDraw;
+		static DBG_Mode     sCurrentDebugMode;
 	}
 
 	bool initialize(glm::vec3 gravity)
@@ -32,11 +37,100 @@ namespace Physics
 															  sSolver,
 															  sCollisionConfiguration);
 		sWorld->setGravity(sGravity);
+
+		sCurrentDebugMode = DBG_Mode::AABB;
+		sDebugDrawer = new Physics::DebugDrawer();
+		sDebugDrawer->setDebugMode((int)sCurrentDebugMode);
+		sWorld->setDebugDrawer(sDebugDrawer);
+		sEnableDebugDraw = false;
 	}
 
 	void update(float deltaTime)
 	{
 		sWorld->stepSimulation(deltaTime);
+	}
+
+	void draw()
+	{
+		if(sEnableDebugDraw)
+		{
+			auto cameraObj = SceneManager::find("Player");
+			auto cameraComp = cameraObj->getComponent<Camera>();
+			auto camTransform = cameraObj->getComponent<Transform>();
+		
+			glm::mat4 camTranMat = camTransform->getTransformMat();
+			glm::mat4 camProjMat;
+		
+			h3dGetCameraProjMat(cameraComp->getCameraNode(),
+								glm::value_ptr(camProjMat));
+
+			glPushAttrib(GL_ALL_ATTRIB_BITS);
+			glMatrixMode(GL_MODELVIEW);
+			glPushMatrix();
+			glLoadMatrixf(glm::value_ptr(glm::inverse(camTranMat)));
+		
+			glMatrixMode(GL_PROJECTION);
+			glPushMatrix();
+			glLoadMatrixf(glm::value_ptr(camProjMat));
+
+			glMatrixMode(GL_MODELVIEW);
+		
+			sWorld->debugDrawWorld();
+
+			glMatrixMode(GL_PROJECTION);
+			glPopMatrix();
+
+			glMatrixMode(GL_MODELVIEW);
+			glPopMatrix();
+			glPopAttrib();
+		}
+		
+	}
+
+	void enableDebugDraw(bool enable)
+	{
+		sEnableDebugDraw = enable;
+	}
+
+	void setDebugMode(DBG_Mode debugMode)
+	{
+		sCurrentDebugMode = debugMode;
+		sWorld->getDebugDrawer()->setDebugMode((int)sCurrentDebugMode);
+	}
+
+	void nextDebugMode()
+	{
+		DBG_Mode tempMode;
+		
+		switch(sCurrentDebugMode)
+		{
+		case DBG_Mode::NONE:
+			tempMode = DBG_Mode::AABB;
+			break;
+		case DBG_Mode::AABB:
+			tempMode = DBG_Mode::WIREFRAME;
+			break;
+		case DBG_Mode::WIREFRAME:
+			tempMode = DBG_Mode::NORMALS;
+			break;
+		case DBG_Mode::NORMALS:
+			tempMode = DBG_Mode::CONTACTS;
+			break;
+		case DBG_Mode::CONTACTS:
+			tempMode = DBG_Mode::CONSTRAINTS;
+			break;
+		case DBG_Mode::CONSTRAINTS:
+			tempMode = DBG_Mode::CONSTRAINT_LIMIT;
+			break;
+		case DBG_Mode::CONSTRAINT_LIMIT:
+			tempMode = DBG_Mode::MAX;
+			break;
+		case DBG_Mode::MAX:
+			tempMode = DBG_Mode::NONE;
+			break;
+		};
+
+		setDebugMode(tempMode);
 	}
 
 	void removeCollisionObject(btRigidBody *body)
@@ -81,7 +175,8 @@ namespace Physics
 		delete sDispatcher;
 		delete sCollisionConfiguration;
 		delete sBroadphase;
-
+		delete sDebugDrawer;
+		
 		sRigidBodies.clear();
 		sCollisionShapes.clear();
 	}

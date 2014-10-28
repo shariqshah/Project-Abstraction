@@ -228,8 +228,14 @@ namespace System
 		if(Input::isReleased(Input::Key::F5))
 			Renderer::toggleDebugView();
 		if(Input::isReleased(Input::Key::F6))
-			Log::setEnabled(true);
+			Physics::enableDebugDraw(true);
 		if(Input::isReleased(Input::Key::F7))
+			Physics::enableDebugDraw(false);
+		if(Input::isReleased(Input::Key::F8))
+			Physics::nextDebugMode();
+		if(Input::isReleased(Input::Key::F9))
+			Log::setEnabled(true);
+		if(Input::isReleased(Input::Key::F10))
 			Log::setEnabled(false);
 		
 		

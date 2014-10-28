@@ -73,7 +73,7 @@ namespace Renderer
 									   "pipelines/hdr.pipeline.xml",
 									   0);
 
-		sDefaultPipeline = sPipelines[(int)Pipeline::FORWARD];
+		sDefaultPipeline = sPipelines[(int)Pipeline::HDR];
 		
 		sFontMat = Resources::add(ResourceType::MATERIAL,
 								  "overlays/font.material.xml",
