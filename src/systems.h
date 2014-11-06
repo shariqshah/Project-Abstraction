@@ -6,6 +6,7 @@
 #include "light.h"
 #include "model.h"
 #include "rigidbody.h"
+#include "scriptengine.h"
 
 namespace System
 {

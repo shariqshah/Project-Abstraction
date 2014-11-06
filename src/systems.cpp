@@ -18,6 +18,11 @@ namespace System
 		suzanneModel = std::make_shared<Model>("models/test/test.scene.xml");
 		statCollMesh = new CollisionMesh(suzanneModel, true);
 		hullCollMesh = new CollisionMesh(suzanneModel, false);
+
+		ScriptEngine::initialize();
+		Sqrat::Table logTable(ScriptEngine::getVM());
+		logTable.Func("message", &Log::message);
+		Sqrat::RootTable(ScriptEngine::getVM()).Bind("Log", logTable);
 	}
 	
 	glm::vec3 generateRandom()
@@ -49,26 +54,6 @@ namespace System
 
 			if(Input::isReleased(Input::Key::V) && gameObject->compareTag("child"))
 				SceneManager::setParentAsRoot(gameObject);
-			
-			if(gameObject->compareTag("suzanne"))
-			{
-				if(Input::isPressed(Input::Key::I))
-					translation.z -= increment;
-				if(Input::isPressed(Input::Key::K))
-					translation.z += increment;
-				if(Input::isPressed(Input::Key::J))
-					translation.x -= increment;
-				if(Input::isPressed(Input::Key::L))
-					translation.x += increment;
-				if(Input::isPressed(Input::Key::U))
-					translation.y += increment;
-				if(Input::isPressed(Input::Key::O))
-					translation.y -= increment;
-			
-
-				if(translation.x != 0 || translation.y != 0 || translation.z != 0)
-					transform->translate(translation, Transform::Space::LOCAL);
-			}
 			
 			if(Input::isPressed(Input::Key::M))
 				transform->rotate(glm::vec3(1, 0, 0),  increment * 5);
@@ -150,7 +135,7 @@ namespace System
 			}
 		}
 
-		if(gameObject->compareTag("suzanne"))
+		if(gameObject->compareTag("Falcon"))
 		{
 			glm::vec3 translation(0.f);
 			float increment = 10.f * deltaTime;
@@ -178,13 +163,6 @@ namespace System
 				rBody->setKinematic(true);
 			if(Input::isReleased(Input::Key::H))
 				rBody->setKinematic(false);
-
-		    auto model = gameObject->getComponent<Model>();
-
-			float* verts = model->getVertices();
-
-			if(verts == NULL)
-				Log::message("There's a bug to hunt");
 		}
 	}
 
@@ -254,11 +232,15 @@ namespace System
 			Physics::update(deltaTime);
 		
 		SceneManager::update();
+
+		if(Input::isReleased(Input::Key::K0))
+		   ScriptEngine::runScript("../content/scripts/test.nut");
 	}
 
 	void cleanup()
 	{
 		Physics::cleanup();
 		suzanneModel.reset();
+		ScriptEngine::cleanup();
 	}
 }

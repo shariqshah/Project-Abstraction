@@ -279,17 +279,42 @@ namespace Physics
 
 	void setKinematic(RBHandle body, bool kinematic)
 	{
+		btRigidBody* temp = sRigidBodies[body];
+		sWorld->removeRigidBody(temp);
+
 		if(kinematic)
 		{
-			sRigidBodies[body]->setFlags(sRigidBodies[body]->getFlags() |
-										 btCollisionObject::CF_KINEMATIC_OBJECT);
-			sRigidBodies[body]->setActivationState(DISABLE_DEACTIVATION);
+			temp->setFlags(sRigidBodies[body]->getFlags() |
+										 btCollisionObject::CF_KINEMATIC_OBJECT |
+										 btCollisionObject::CF_NO_CONTACT_RESPONSE);
+			temp->setActivationState(DISABLE_DEACTIVATION);
 		}
 		else
 		{
-			sRigidBodies[body]->setFlags(~btCollisionObject::CF_KINEMATIC_OBJECT);
-			sRigidBodies[body]->setActivationState(~DISABLE_DEACTIVATION);
+			//sRigidBodies[body]->setFlags(~btCollisionObject::CF_KINEMATIC_OBJECT);
+			temp->setFlags(sRigidBodies[body]->getFlags() |
+						   btCollisionObject::CF_STATIC_OBJECT);
+			temp->setActivationState(WANTS_DEACTIVATION);
+				//sRigidBodies[body]->activate(true);
 		}
+
+		sWorld->addRigidBody(temp);
+		// if(kinematic)
+		// {
+		// 	sRigidBodies[body]->setFlags(sRigidBodies[body]->getFlags() |
+		// 								 btCollisionObject::CF_KINEMATIC_OBJECT |
+		// 								 btCollisionObject::CF_NO_CONTACT_RESPONSE);
+		// 	sRigidBodies[body]->setActivationState(DISABLE_DEACTIVATION);
+		// }
+		// else
+		// {
+		// 	//sRigidBodies[body]->setFlags(~btCollisionObject::CF_KINEMATIC_OBJECT);
+		// 	sRigidBodies[body]->setFlags(sRigidBodies[body]->getFlags() |
+		// 								 ~(btCollisionObject::CF_KINEMATIC_OBJECT) |
+		// 								 btCollisionObject::CF_STATIC_OBJECT);
+		// 	sRigidBodies[body]->setActivationState(WANTS_DEACTIVATION);
+		// 	//sRigidBodies[body]->activate(true);
+		// }
 		
 	}
 

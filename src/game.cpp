@@ -5,20 +5,21 @@ Game::Game(std::string path)
 	Renderer::initialize(path);
 	System::initialize();
 	
-	GOPtr sponza = SceneManager::createGameObject("Sponza");
-	auto sponMod = sponza->addComponent<Model>(sponza->getNode(),
-											   "models/terrain/terrain.scene.xml");
-	auto sponTran = sponza->getComponent<Transform>();
-	sponza->addComponent<RigidBody>(sponTran,
-									new CollisionMesh(sponMod, true), 0.f);
+	// GOPtr sponza = SceneManager::createGameObject("Sponza");
+	// auto sponMod = sponza->addComponent<Model>(sponza->getNode(),
+	// 										   "models/terrain/terrain.scene.xml");
+	// auto sponTran = sponza->getComponent<Transform>();
+	// sponza->addComponent<RigidBody>(sponTran,
+	// 								new CollisionMesh(sponMod, true), 0.f);
 	//sponTran->setScale(glm::vec3(20, 20, 20));
 	
 	GOPtr falcon = SceneManager::createGameObject("Falcon");
+	falcon->setTag("Falcon");
 	auto falMod = falcon->addComponent<Model>(falcon->getNode(),
 											  "models/falcon/falcon.scene.xml");
 	auto falconTransform = falcon->getComponent<Transform>();
     falcon->addComponent<RigidBody>(falconTransform,
-									new CollisionMesh(falMod, false), 5.f);
+									new CollisionMesh(falMod, false), 10.f);
 	//falconTransform->setScale(glm::vec3(3, 3, 3));
 
 	GOPtr lightGO = SceneManager::createGameObject("LightGO");
@@ -37,7 +38,7 @@ Game::Game(std::string path)
 	auto playerTrans = player->getComponent<Transform>();
 	auto camera = player->addComponent<Camera>(player->getNode());
 	playerTrans->setPosition(glm::vec3(-110, 85, 92));
-	//playerTrans->setLookAt(glm::vec3(0));
+	
 	Renderer::setCurrentCamera(camera->getCameraNode());
 
 	Sphere* sphere = new Sphere(1);

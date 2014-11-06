@@ -6,6 +6,7 @@
 #define GLM_FORCE_RADIANS
 #include "../include/glm/gtc/type_ptr.hpp"
 #include "../include/bullet/BulletCollision/CollisionShapes/btShapeHull.h"
+#include "../include/bullet/btGImpactConvexDecompositionShape.h"
 
 #include "physicsdebugdrawer.h"
 #include "utilities.h"
@@ -276,7 +277,8 @@ public:
 
 			if(this->mTriMesh)
 			{
-				mShape = new btBvhTriangleMeshShape(triMesh, true);
+				mShape = new btBvhTriangleMeshShape(triMesh, false);
+				// mShape = new btGImpactConvexDecompositionShape(triMesh, btVector3(1, 1, 1), btScalar(0.1f), true);
 			}
 			else
 			{
