@@ -2,11 +2,10 @@
 #define _systems_H
 
 #include "scenemanager.h"
-#include "camerasystems.h"
-#include "light.h"
-#include "model.h"
-#include "rigidbody.h"
+#include "componentmanager.h"
 #include "scriptengine.h"
+#include "input.h"
+#include "camerasystems.h"
 
 namespace System
 {

@@ -1,24 +1,22 @@
 #ifndef PHYSICS_H
 #define PHYSICS_H
 
-#include <memory>
-
 #define GLM_FORCE_RADIANS
 #include "../include/glm/gtc/type_ptr.hpp"
 #include "../include/bullet/BulletCollision/CollisionShapes/btShapeHull.h"
-#include "../include/bullet/btGImpactConvexDecompositionShape.h"
+// #include "../include/bullet/btGImpactConvexDecompositionShape.h"
 
 #include "physicsdebugdrawer.h"
 #include "utilities.h"
 #include "transform.h"
 #include "model.h"
-#include "scenemanager.h"
 
 typedef btDiscreteDynamicsWorld PhysicsWorld;
-typedef uint32_t                RBHandle;
+typedef int32_t                CRigidBody;
 
-class MotionState;
-class CollisionShape;
+class  MotionState;
+class  CollisionShape;
+struct CCamera;
 
 namespace Physics
 {
@@ -42,68 +40,36 @@ namespace Physics
 		MAX              = btIDebugDraw::DBG_MAX_DEBUG_DRAW_MODE
 	};
 	
-	bool initialize(glm::vec3 gravity);
-
-	RBHandle createRigidBody(CollisionShape* shape,
-							 MotionState*    motionState,
-							 float           mass,
-							 float           restitution);
-
+	void initialize(Vec3 gravity);
 	void update(float deltaTime);
-    void draw();
+    void draw(CTransform* viewerTransform, CCamera* viewerCamera);
 	void cleanup();
-	void setGravity(glm::vec3 gravity);
+	void setGravity(Vec3 gravity);
     void enableDebugDraw(bool enable);
 	void nextDebugMode();
 	void setDebugMode(DBG_Mode debugMode);
-	
-	void setTransform(RBHandle body, glm::vec3  position, glm::quat  rotation);
-	void getTransform(RBHandle body, glm::vec3* position, glm::quat* rotation);
-	void setTransform(RBHandle body, glm::mat4 transformMat);
-	void applyForce(RBHandle body, glm::vec3 force, glm::vec3 relPos);
-	void removeRigidBody(RBHandle body);
-	void setActivation(RBHandle body, bool activation);
-	void setMass(RBHandle body, const float mass);
-	void setKinematic(RBHandle body, bool kinematic);
 	void addCollisionShape(CollisionShape* shape);
+	
+	const Vec3 getGravity();
 
-	const glm::vec3 getGravity();
+
+	namespace RigidBody
+	{
+		CRigidBody create(CollisionShape* shape,
+						  btMotionState*  motionState,
+						  float           mass,
+						  float           restitution);
+		void setTransform(CRigidBody body, Vec3  position, Quat  rotation);
+		void getTransform(CRigidBody body, Vec3* position, Quat* rotation);
+		void setTransform(CRigidBody body, Mat4 transformMat);
+		void applyForce(CRigidBody body, Vec3 force, Vec3 relPos = Vec3(0.f));
+		void remove(CRigidBody body);
+		void setActivation(CRigidBody body, bool activation);
+		void setMass(CRigidBody body, const float mass);
+		void setKinematic(CRigidBody body, bool kinematic);
+	}
 }
 
-class MotionState : public btMotionState
-{
-	std::weak_ptr<Transform> mTransformPtr;
-
-public:
-	MotionState(std::shared_ptr<Transform> transform)
-	{
-		mTransformPtr = transform;
-	}
-
-	virtual ~MotionState() {}
-
-	virtual void getWorldTransform(btTransform& worldTrans) const
-	{
-		if(auto transform = mTransformPtr.lock())
-		{
-			glm::mat4 transformMat = transform->getTransformMat();
-			worldTrans.setFromOpenGLMatrix(glm::value_ptr(transformMat));
-		}
-	}
-
-	virtual void setWorldTransform(const btTransform& worldTrans)
-	{
-		if(auto transform = mTransformPtr.lock())
-		{
-			// update transform and reset renderer's transformation
-			// flag, indicating that transform has been updated by bullet
-			transform->setPosition(Utils::toGlm(worldTrans.getOrigin()));
-			transform->setRotation(Utils::toGlm(worldTrans.getRotation()));
-			transform->resetTransformFlag();
-		}
-	}
-   
-};
 
 class CollisionShape
 {
@@ -142,10 +108,10 @@ public:
 
 class Box : public CollisionShape
 {
-	glm::vec3 mHalfExtent;
+	Vec3 mHalfExtent;
 public:
 	
-	Box(glm::vec3 halfExtent)
+	Box(Vec3 halfExtent)
 	{
 		mHalfExtent = halfExtent;
 		initialize();
@@ -181,12 +147,12 @@ public:
 
 class Plane : public CollisionShape
 {
-	float     mMargin;
-	glm::vec3 mNormal;
+	float mMargin;
+	Vec3  mNormal;
 
 public:
 
-	Plane(glm::vec3 normal, float margin)
+	Plane(Vec3 normal, float margin)
 	{
 		mNormal = normal;
 		mMargin = margin;
@@ -222,11 +188,11 @@ public:
 
 class Cylinder : public CollisionShape
 {
-	glm::vec3 mHalfExtent;
-	glm::vec3 mAxis;
+	Vec3 mHalfExtent;
+	Vec3 mAxis;
 public:
 
-	Cylinder(glm::vec3 halfExtent, glm::vec3 axis)
+	Cylinder(Vec3 halfExtent, Vec3 axis)
 	{
 		mHalfExtent = halfExtent;
 		mAxis       = axis;
@@ -235,11 +201,11 @@ public:
 
 	void initialize()
 	{
-		if(mAxis == glm::vec3(0, 1, 0))
+		if(mAxis == Vec3(0, 1, 0))
 			mShape = new btCylinderShape(Utils::toBullet(mHalfExtent));
-		else if(mAxis == glm::vec3(1, 0, 0))
+		else if(mAxis == Vec3(1, 0, 0))
 			mShape = new btCylinderShapeX(Utils::toBullet(mHalfExtent));
-		else if(mAxis == glm::vec3(0, 0, 1))
+		else if(mAxis == Vec3(0, 0, 1))
 			mShape = new btCylinderShapeZ(Utils::toBullet(mHalfExtent));
 
 		Physics::addCollisionShape(this);
@@ -248,11 +214,11 @@ public:
 
 class CollisionMesh : public CollisionShape
 {
-	std::weak_ptr<Model> mModel;
-	bool mTriMesh;
+	CModel* mModel;
+	bool    mTriMesh;
 public:
 
-	CollisionMesh(std::shared_ptr<Model> model, bool isTriMesh)
+	CollisionMesh(CModel* model, bool isTriMesh)
 	{
 		mModel   = model;
 		mTriMesh = isTriMesh;
@@ -261,12 +227,14 @@ public:
 
 	void initialize()
 	{
-		if(auto model = mModel.lock())
+		if(mModel)
 		{
-			float* vertices = model->getVertices();
+			float* vertices = Renderer::Model::getVertices(mModel);
+			int vertexCount = Renderer::Model::getVertexCount(mModel);
+			
 			btTriangleMesh *triMesh = new btTriangleMesh();
 
-			for(int i = 0; i < model->getVertexCount(); i += 9)
+			for(int i = 0; i < vertexCount; i += 9)
 			{
 				btVector3 v1(vertices[i],     vertices[i + 1], vertices[i + 2]);
 				btVector3 v2(vertices[i + 3], vertices[i + 4], vertices[i + 5]);
@@ -294,8 +262,9 @@ public:
 
 			Physics::addCollisionShape(this);
 		}
+		else
+			Log::warning("Model provided for collision mesh is NULL");
 	}
 };
-
 
 #endif

@@ -6,89 +6,106 @@ namespace System
 	{
 		namespace
 		{
-			const float cMaxUpDownRot = 80.f;
-			const long cValidComponents = ((long)ComponentType::TRANSFORM |
-										   (long) ComponentType::CAMERA);
+			const static  float cMaxUpDownRot   = 80.f;
 			static float sTotalUpDownRot = 0.f;
-			static float sMovSpeed = 20.f;
-			static float sRotSpeed = 1.2f;
-			static float sSprintFactor = 3.f;
+			static float sMovSpeed       = 20.f;
+			static float sRotSpeed       = 1.2f;
+			static float sSprintFactor   = 3.f;
+			
+			static GameObject* activeObject = NULL;
 		}
 
-		void updateFreeCamera(float deltaTime, GameObject *gameObject)
+		void setActiveObject(GameObject* gameObject)
 		{
-			if(gameObject->hasComponents(cValidComponents) &&
-			   gameObject->compareTag("FreeCamera"))
+			if(GO::hasComponent(gameObject, ComponentType::TRANSFORM) &&
+			   GO::hasComponent(gameObject, ComponentType::CAMERA)    &&
+			   gameObject->tag == "FreeCamera")
 			{
-				if(!Input::isCursorLocked())
-					Input::setCursorLock(true);
+				activeObject = gameObject;
+				Log::message("Free camera system initailized with "
+							 + activeObject->name);
+			}
+		}
+
+		void updateFreeCamera(float deltaTime)
+		{
+			auto transform = CompManager::getTransform(activeObject);
+			auto camera    = CompManager::getCamera(activeObject);
+			// if(!Input::isCursorLocked())
+			// 	Input::setCursorLock(true);
+					
+			float increment = sMovSpeed * deltaTime;
+			Vec3 translation(0.f);
+
+			float upDownRot = 0.f; 
+			float leftRightRot = 0.f;
+
+			upDownRot = Input::getMouseRelY() * sRotSpeed * deltaTime;
+			leftRightRot = Input::getMouseRelX() * sRotSpeed * deltaTime;
 				
-				auto transform = gameObject->getComponent<Transform>();
-				auto camera = gameObject->getComponent<Camera>();
-				
-				float increment = sMovSpeed * deltaTime;
-				glm::vec3 translation(0.f);
+			if(Input::isPressed(Input::Key::W))
+				translation.z -= increment;
+			if(Input::isPressed(Input::Key::S))
+				translation.z += increment;
+			if(Input::isPressed(Input::Key::A))
+				translation.x -= increment;
+			if(Input::isPressed(Input::Key::D))
+				translation.x += increment;
+			if(Input::isPressed(Input::Key::Q))
+				translation.y += increment;
+			if(Input::isPressed(Input::Key::E))
+				translation.y -= increment;
+			if(Input::isPressed(Input::Key::LSHIFT))
+				translation *= sSprintFactor;
 
-				float upDownRot = 0.f; 
-				float leftRightRot = 0.f;
+			if(Input::isPressed(Input::Key::LEFT))
+				leftRightRot -= sRotSpeed * deltaTime;
+			if(Input::isPressed(Input::Key::RIGHT))
+				leftRightRot += sRotSpeed * deltaTime;
 
-				upDownRot = Input::getMouseRelY() * sRotSpeed * deltaTime;
-				leftRightRot = Input::getMouseRelX() * sRotSpeed * deltaTime;
-				
-				if(Input::isPressed(Input::Key::W))
-					translation.z -= increment;
-				if(Input::isPressed(Input::Key::S))
-					translation.z += increment;
-				if(Input::isPressed(Input::Key::A))
-					translation.x -= increment;
-				if(Input::isPressed(Input::Key::D))
-					translation.x += increment;
-				if(Input::isPressed(Input::Key::Q))
-					translation.y += increment;
-				if(Input::isPressed(Input::Key::E))
-					translation.y -= increment;
-				if(Input::isPressed(Input::Key::LSHIFT))
-					translation *= sSprintFactor;
-
-				if(Input::isPressed(Input::Key::LEFT))
-					leftRightRot -= sRotSpeed * deltaTime;
-				if(Input::isPressed(Input::Key::RIGHT))
-					leftRightRot += sRotSpeed * deltaTime;
-
-				if(Input::isPressed(Input::Key::UP))
-					upDownRot -= sRotSpeed * deltaTime;
-				if(Input::isPressed(Input::Key::DOWN))
-					upDownRot += sRotSpeed * deltaTime;
+			if(Input::isPressed(Input::Key::UP))
+				upDownRot -= sRotSpeed * deltaTime;
+			if(Input::isPressed(Input::Key::DOWN))
+				upDownRot += sRotSpeed * deltaTime;
 				
 
-				leftRightRot = glm::degrees(leftRightRot);
-				upDownRot = glm::degrees(upDownRot);
-				sTotalUpDownRot += upDownRot;
+			leftRightRot = glm::degrees(leftRightRot);
+			upDownRot = glm::degrees(upDownRot);
+			sTotalUpDownRot += upDownRot;
 			    
-				if(sTotalUpDownRot >= cMaxUpDownRot)
-				{
-					sTotalUpDownRot = cMaxUpDownRot;
-					upDownRot = 0.f;
-				}
-				else if(sTotalUpDownRot <= -cMaxUpDownRot)
-				{
-					sTotalUpDownRot = -cMaxUpDownRot;
-					upDownRot = 0.f;
-				}
+			if(sTotalUpDownRot >= cMaxUpDownRot)
+			{
+				sTotalUpDownRot = cMaxUpDownRot;
+				upDownRot = 0.f;
+			}
+			else if(sTotalUpDownRot <= -cMaxUpDownRot)
+			{
+				sTotalUpDownRot = -cMaxUpDownRot;
+				upDownRot = 0.f;
+			}
 
-				transform->rotate(glm::vec3(-1, 0, 0),
+			float epsilon = 0.0001;
+			if(upDownRot > epsilon || upDownRot < -epsilon)
+			{
+				Transform::rotate(transform,
+								  Vec3(-1, 0, 0),
 								  upDownRot,
 								  Transform::Space::LOCAL);
-				
-				transform->rotate(glm::vec3(0, 1, 0),
+			} 
+			
+			if(leftRightRot > epsilon || leftRightRot < -epsilon)
+			{
+				Transform::rotate(transform,
+								  Vec3(0, 1, 0),
 								  -leftRightRot,
 								  Transform::Space::WORLD);
-
-				if(translation.x != 0 || translation.y != 0 || translation.z != 0)
-					transform->translate(translation, Transform::Space::LOCAL);
-
-				Renderer::addText(Utils::toString(transform->getPosition()));
 			}
+			
+
+			if(translation.x != 0 || translation.y != 0 || translation.z != 0)
+				Transform::translate(transform, translation, Transform::Space::LOCAL);
+			
+			Renderer::addText(Utils::toString(transform->position));
 		}
 	}
 }

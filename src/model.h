@@ -1,29 +1,26 @@
-#ifndef _model_h
-#define _model_h
+#ifndef _model_H_
+#define _model_H_
 
-#include "component.h"
+#include "componentTypes.h"
 #include "renderer.h"
 
-class Model : public Component
+struct CModel
 {
-	Resource    mResourceID;
-	Node        mNode;
-	std::string mFilename;
-
-public:
-	Model(Node parent, const std::string& name);
-	Model(const std::string& name);
-	~Model();
-	
-	std::string getFilename();
-	Resource    getResourceID();
-	Node        getNode();
-	float*      getVertices();
-	int         getVertexCount();
-	
-	const   static std::string sName;
-	
-	virtual const  std::string getName();
+	Resource    resourceID = 0;
+	Node        node       = 0;
+	std::string filename   = "NOT_INITIALIZED";
+	bool        valid      = true;
 };
+
+namespace Renderer
+{
+	namespace Model
+	{
+		float*  getVertices(CModel* model);
+		int     getVertexCount(CModel* model);
+		void    remove(const CModel& model);
+		CModel* create(const std::string& filename);
+	}
+}
 	
 #endif

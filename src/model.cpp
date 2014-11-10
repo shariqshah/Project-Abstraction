@@ -1,72 +1,76 @@
 #include "model.h"
 
-const std::string Model::sName = "Model";
 
-Model::Model(Node parent, const std::string& name)
+namespace Renderer
 {
-	mType = ComponentType::MODEL;
-	mFilename = name;
-	mResourceID = Renderer::Resources::get(ResourceType::MODEL, mFilename);
-
-	if(mResourceID == 0)
-		mValid = false;
-	else
+	namespace Model
 	{
-		mNode = Renderer::createNode(mResourceID, parent);
-
-		if(mNode == 0)
-			mValid = false;
-	}
-}
-
-Model::Model(const std::string& name)
-{
-	// If model is created without a parent node then it cannot be added to
-	// gameobjects. It can only be used to provide collision mesh
-	mType = ComponentType::MODEL;
-	mFilename = name;
-	mResourceID = Renderer::Resources::get(ResourceType::MODEL, mFilename);
-	mValid = false;
-	mNode = Renderer::createNode(mResourceID, Renderer::ROOT_NODE);
-}
-
-
-Model::~Model()
-{
-	if(mResourceID != 0 && Renderer::Resources::isLoaded(mResourceID))
-	{
-		if(!Renderer::Resources::remove(mResourceID))
-			Log::warning("Resource not removed for Model Component!");
-
-		if(mNode != 0)
+		float* getVertices(CModel* model)
 		{
-			if(!Renderer::removeNode(mNode))
-				Log::warning("Node not removed for Model Component");
+			Resource geo = h3dGetNodeParamI(model->node, H3DModel::GeoResI);
+			float* vertices = (float *)h3dMapResStream(geo,
+													   H3DGeoRes::GeometryElem,
+													   0,
+													   H3DGeoRes::GeoVertPosStream,
+													   true,
+													   false);
+
+			h3dUnmapResStream(geo);
+			return vertices;
+		}
+
+		int getVertexCount(CModel* model)
+		{
+			Resource geo = h3dGetNodeParamI(model->node, H3DModel::GeoResI);
+			int vertexCount = h3dGetResParamI(geo,
+											  H3DGeoRes::GeometryElem,
+											  0,
+											  H3DGeoRes::GeoVertexCountI);
+			return vertexCount;
+		}
+
+		void remove(const CModel& model)
+		{
+			if(model.resourceID != 0 &&
+			   Renderer::Resources::isLoaded(model.resourceID))
+			{
+				if(!Renderer::Resources::remove(model.resourceID))
+					Log::warning("Resource not removed for Model!");
+
+				if(model.node != 0)
+				{
+					if(!Renderer::removeNode(model.node))
+						Log::warning("Node not removed for Model");
+				}
+			}
+		}
+
+		CModel* create(const std::string& filename)
+		{
+			// If model is created without a parent node then it cannot be
+			// added to gameobjects. It can only be used to provide collision
+			// mesh.
+			
+			CModel* newModel = new CModel;
+			
+			newModel->filename = filename;
+			newModel->resourceID = Renderer::Resources::get(ResourceType::MODEL,
+													   newModel->filename);
+
+			if(newModel->resourceID == 0)
+				Log::warning("Model resource could not be created. Check renderer logs.");
+			else
+			{
+				newModel->node = Renderer::createNode(newModel->resourceID,
+												  Renderer::ROOT_NODE);
+
+				if(newModel->node == 0)
+					Log::warning("Model resource could not be parented to Root. Check renderer logs.");
+			}
+
+			newModel->valid = false;
+			return newModel;
 		}
 	}
 }
 
-Resource Model::getResourceID()
-{
-	return mResourceID;
-}
-
-std::string Model::getFilename()
-{
-	return mFilename;
-}
-
-float* Model::getVertices()
-{
-	return Renderer::Model::getVertices(mNode);
-}
-
-int Model::getVertexCount()
-{
-	return Renderer::Model::getVertexCount(mNode);
-}
-
-const std::string Model::getName()
-{
-	return sName;
-}

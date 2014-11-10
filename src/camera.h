@@ -1,50 +1,42 @@
 #ifndef _camera_H_
 #define _camera_H_
 
-#include "component.h"
+#include "componentTypes.h"
 #include "renderer.h"
 
-class Camera : public Component
+struct CCamera
 {
-private:
-	Node  mCamNode;
-	float mNearZ, mFarZ, mFov, mAspectRatio;
-	Pipeline mPipeline;
-	
-	void initCamera(float nearZ,
-					float farZ,
-					float aspectRatio,
-					float fov,
-					Node Parent);
-public:
-	Camera(Node parent);
-	Camera(float nearZ,
-		   float farZ,
-		   float aspectRatio,
-		   float fov,
-		   Node Parent);
-	~Camera();
-	
-	Node getCameraNode();
-
-	void setFOV(float fov);
-	void setNearZ(float nearZ);
-	void setFarZ(float farZ);
-	void setAspectRatio(float aspectRatio);
-	void resizeViewport(int width, int height);
-	void setViewportPos(int x, int y);
-	void setPipeline(Pipeline pipeline);
-	void setOrthographic(bool enable);
-	void setOcclusionCulling(bool enable);
-
-	float    getFOV();
-	float    getFarZ();
-	float    getNearZ();
-	float    getAspectRatio();
-	Pipeline getPipeline();
-
-	const static std::string sName;
-	virtual const std::string getName();
+	Node     node        = 0;
+	float    nearZ       = 0.1f;
+	float    farZ        = 1000.f;
+	float    fov         = 75.f;
+	float    aspectRatio = 4.f/3.f;
+	Pipeline pipeline    = Pipeline::HDR;
+	bool     valid       = true;
 };
+
+namespace Renderer
+{
+	namespace Camera
+	{
+		void initialize();
+		void setViewportSize(CCamera* camera, int width, int height);
+		void setViewportPos(CCamera* camera, int x, int y);
+		void setPipeline(CCamera* camera, Pipeline pipeline);
+		void setOcclusionCulling(CCamera* camera, bool enable);
+		void setOrthgraphic(CCamera* camera, bool enable);
+		void updateView(CCamera* camera);
+		void removeCamera(const CCamera& camera);
+		void resizePipelineBuffers(int width, int height);
+		void setPipeline(CCamera* camera, Pipeline pipeline);
+		void setAspectRatio(CCamera* camera, float aspectRatio);
+		void setFov(CCamera* camera, float fov);
+		void setNearZ(CCamera* camera, float nearZ);
+		void setFarZ(CCamera* camera, float farZ);
+
+		CCamera create(const std::string& name, Node parent);
+		
+	}
+}
 
 #endif

@@ -1,46 +1,41 @@
-#ifndef _light_H
-#define _light_H
+#ifndef _light_H_
+#define _light_H_
 
 #include "renderer.h"
-#include "component.h"
+#include "componentTypes.h"
 
-class Light : public Component
+struct CLight
 {
-	float     mRadius;
-	float     mFov;
-	float     mIntensity;
-	float     mShadowMapBias;
-	float     mShadowSplitLambda;
-	int       mShadowMapCount;
-	glm::vec3 mColor;
-	Node      mNode;
-	bool      mCastShadow;
-
-public:	
-	Light(Node parent, std::string name);
-	~Light();
-	
-	float     getRadius();
-	float     getFov();
-	float     getIntensity();
-	float     getShadowMapBias();
-	float     getShadowSplitLambda();
-	int       getShadowMapCount();
-	glm::vec3 getColor();
-	Node      getNode();
-	bool      isShadowCaster();
-	
-	void setRadius(float radius);
-	void setColor(glm::vec3 color);
-	void setFov(float fov);
-	void setIntensity(float intensity);
-	void setShadowMapBias(float bias);
-	void setShadowSplitLambda(float splitLambda);
-	void setShadowMapCount(int shadowMapCount);
-	void setShadowCaster(bool enable);
-
-	const static  std::string sName;
-	virtual const std::string getName();
+	float radius            = 75.f;
+	float fov               = 90.f;
+	float intensity         = 1.f;
+	float shadowmapBias     = 0.005f;
+	float shadowSplitLambda = 0.9f;
+	int   shadowmapCount    = 1;
+	Vec3  color             = Vec3(1.f);
+	Node  node              = 0;
+	bool  castShadow        = false;
+	bool  valid             = false;
 };
+
+namespace Renderer
+{
+	namespace Light
+	{
+		CLight create(Node parent,
+					  const std::string& name,
+					  const std::string& lightContext  = "LIGHTING",
+					  const std::string& shadowContext = "SHADOWMAP");
+		void setRadius(CLight* light, float radius);
+		void setColor(CLight* light, Vec3 color);
+		void setFov(CLight* light, float fov);
+		void setIntensity(CLight* light, float intensity);
+		void setShadowMapBias(CLight* light, float bias);
+		void setShadowSplitLambda(CLight* light, float splitLambda);
+		void setShadowMapCount(CLight* light, int shadowMapCount);
+		void setShadowCaster(CLight* light, bool enable);
+	}
+}
+
 
 #endif

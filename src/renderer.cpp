@@ -6,14 +6,10 @@ namespace Renderer
 	{
 		static std::string cContentFolderDir;
 		static std::vector<std::string> sTextList;
-		static std::vector<Node> cameras;
 		static glm::vec2 sFontPos;
 		static Resource sFontMat;
 		static Resource sPanelMat;
-		static Resource sDefaultPipeline;
-		static Node sCurrentCamera;
 		static float sFontSize;
-		static Resource sPipelines[3];
 		static Resource sLightMat;
 		static DebugLevel sDebugLevel;
 		static bool sRenderWireframe;
@@ -62,18 +58,6 @@ namespace Renderer
 		h3dSetOption(H3DOptions::FastAnimation ,  0);
 		h3dSetOption(H3DOptions::MaxAnisotropy ,  4);
 		h3dSetOption(H3DOptions::ShadowMapSize ,  1024);
-
-		sPipelines[0] = Resources::add(ResourceType::PIPELINE,
-									   "pipelines/forward.pipeline.xml",
-									   0);
-		sPipelines[1] = Resources::add(ResourceType::PIPELINE,
-									   "pipelines/deferred.pipeline.xml",
-									   0);
-		sPipelines[2] = Resources::add(ResourceType::PIPELINE,
-									   "pipelines/hdr.pipeline.xml",
-									   0);
-
-		sDefaultPipeline = sPipelines[(int)Pipeline::HDR];
 		
 		sFontMat = Resources::add(ResourceType::MATERIAL,
 								  "overlays/font.material.xml",
@@ -95,7 +79,7 @@ namespace Renderer
 		h3dSetOption(H3DOptions::DebugViewMode, sRenderDebugView ? 1.0f : 0.0f);
 		h3dSetOption(H3DOptions::WireframeMode, sRenderWireframe ? 1.0f : 0.0f);
 	}
-
+	
 	void drawText()
 	{
 		int count = 0;
@@ -146,7 +130,7 @@ namespace Renderer
 		h3dSetOption(H3DOptions::WireframeMode, sRenderWireframe ? 1.0f : 0.0f);
 	}
 
-	void renderFrame()
+	void renderFrame(Node activeCamera)
 	{
 		if(sDebugLevel != DebugLevel::NONE)
 		{
@@ -160,21 +144,10 @@ namespace Renderer
 		else
 			sTextList.clear();
 		
-
-		h3dRender(sCurrentCamera);
+		h3dRender(activeCamera);
 		h3dFinalizeFrame();
 		h3dClearOverlays();
 		h3dutDumpMessages();
-	}
-
-	Node createCamera(const std::string& name, Node parent)
-	{
-		Node node = h3dAddCameraNode(parent, name.c_str(), sDefaultPipeline);
-		
-		if(node != 0)
-			cameras.push_back(node);
-		
-		return node;
 	}
 	
     Node createGroupNode(const std::string& name, Node parent)
@@ -189,31 +162,6 @@ namespace Renderer
 		return node;
 	}
 
-	void removeCamera(Node cameraToRemove)
-	{
-		if(!cameras.empty())
-		{
-			cameras.erase(std::find(cameras.begin(),
-									cameras.end(),
-									cameraToRemove),
-						  cameras.end());
-
-			if(cameraToRemove == sCurrentCamera)
-			{
-				if(!cameras.empty())
-					sCurrentCamera = cameras.front();
-				else
-				{
-					Log::warning("No active cameras left in the scene!");
-					sCurrentCamera = 0;
-				}
-			}
-		}
-	    else
-			Log::error(Log::ErrorLevel::MEDIUM,
-					   "Could not remove camera. No cameras in scene!");
-	}
-
 	void setNodeParam(Node node, int param, int value)
 	{
 		h3dSetNodeParamI(node, param, value);
@@ -222,18 +170,6 @@ namespace Renderer
     void setNodeParam(Node node, int param, int compID, float value)
 	{
 		h3dSetNodeParamF(node, param, compID,  value);
-	}
-
-	void resizePipelineBuffers(int width, int height)
-	{
-		h3dResizePipelineBuffers(sPipelines[(int)Pipeline::FORWARD], width, height);
-		h3dResizePipelineBuffers(sPipelines[(int)Pipeline::DEFERRED], width, height);
-		h3dResizePipelineBuffers(sPipelines[(int)Pipeline::HDR], width, height);
-	}
-
-	void setCurrentCamera(Node cameraNode)
-	{
-		sCurrentCamera = cameraNode;
 	}
 	
 	Node getParent(Node node)
@@ -268,11 +204,6 @@ namespace Renderer
 		h3dCheckNodeTransFlag(node, true);
 	}
 
-	Node getCurrentCameraNode()
-	{
-		return sCurrentCamera;
-	}
-
 	void addText(const std::string& text)
     {
 		sTextList.push_back(text);
@@ -294,60 +225,6 @@ namespace Renderer
 			return true;
 		else
 			return false;
-	}
-
-	namespace Camera
-	{
-		void setViewportSize(Node camera, int width, int height)
-		{
-			h3dSetNodeParamI(camera, H3DCamera::ViewportWidthI, width);
-			h3dSetNodeParamI(camera, H3DCamera::ViewportHeightI, height);
-	    }
-
-		void setViewportPos(Node camera, int x, int y)
-		{
-			h3dSetNodeParamI(camera, H3DCamera::ViewportXI, x);
-			h3dSetNodeParamI(camera, H3DCamera::ViewportYI, y);
-		}
-
-		void setView(Node  cameraNode,
-					 float fov,
-					 float aspect,
-					 float nearZ,
-					 float farZ)
-		{
-			h3dSetupCameraView(cameraNode, fov, aspect, nearZ, farZ);
-		}
-
-		void setPipeline(Node camera, Pipeline pipeline)
-		{
-			Resource newPipeline = sDefaultPipeline;
-			
-			switch(pipeline)
-			{
-			case Pipeline::FORWARD:
-				newPipeline = sPipelines[(int)Pipeline::FORWARD];
-				break;
-			case Pipeline::DEFERRED:
-				newPipeline = sPipelines[(int)Pipeline::DEFERRED];
-				break;
-			case Pipeline::HDR:
-				newPipeline = sPipelines[(int)Pipeline::HDR];
-				break;
-			}
-
-			h3dSetNodeParamI(camera, H3DCamera::PipeResI, newPipeline);
-		}
-
-		void setOcclusionCulling(Node camera, bool enable)
-		{
-			h3dSetNodeParamI(camera, H3DCamera::OccCullingI, enable ? 1 : 0);
-		}
-
-		void setOrthgraphic(Node camera, bool enable)
-		{
-			h3dSetNodeParamI(camera, H3DCamera::OrthoI, enable ? 1 : 0);
-		}
 	}
 
 	namespace Resources
@@ -413,97 +290,6 @@ namespace Renderer
 
 			return true;
 			
-		}
-	}
-
-	namespace Light
-	{
-		Node create(Node parent,
-					const std::string& name,
-					Resource material,
-					const std::string& lightContext,
-					const std::string& shadowContext)
-		{
-			//TODO: Fix light material related parameter
-			Node light = h3dAddLightNode(parent,
-										 name.c_str(),
-										 sLightMat,
-										 lightContext.c_str(),
-										 shadowContext.c_str());
-
-			if(light == 0)
-				Log::error(Log::ErrorLevel::LOW, name + " node not created!");
-
-			return light;
-		}
-		
-		void setRadius(Node light, float radius)
-		{
-			h3dSetNodeParamF(light, H3DLight::RadiusF, 0, radius);
-		}
-		
-		void setColor(Node light, glm::vec3 color)
-		{
-			h3dSetNodeParamF(light, H3DLight::ColorF3, 0, color.r);
-			h3dSetNodeParamF(light, H3DLight::ColorF3, 1, color.g);
-			h3dSetNodeParamF(light, H3DLight::ColorF3, 2, color.b);
-		}
-		
-		void setFov(Node light, float fov)
-		{
-			h3dSetNodeParamF(light, H3DLight::FovF, 0, fov);
-		}
-		
-		void setShadowMapCount(Node light, int count)
-		{
-			h3dSetNodeParamI(light, H3DLight::ShadowMapCountI, count);
-		}
-		
-		void setShadowMapBias(Node light, float bias)
-		{
-			h3dSetNodeParamF(light, H3DLight::ShadowMapBiasF, 0, bias);
-		}
-
-		void setShadowSplitLambda(Node light, float splitLambda)
-		{
-			h3dSetNodeParamF(light, H3DLight::ShadowSplitLambdaF, 0, splitLambda);
-		}
-		
-		void setIntensity(Node light, float intensity)
-		{
-			h3dSetNodeParamF(light, H3DLight::ColorMultiplierF, 0, intensity);
-		}
-	}
-
-	namespace Model
-	{
-		float* getVertices(Node model)
-		{
-			// 1. Get Mesh
-			// 2. For each mesh, get the geometry
-			// 3. For each geometry get the vertices
-			// std::vector<Node> meshes;
-
-			Resource geo = h3dGetNodeParamI(model,H3DModel::GeoResI);
-			float* vertices = (float *)h3dMapResStream(geo,
-													   H3DGeoRes::GeometryElem,
-													   0,
-													   H3DGeoRes::GeoVertPosStream,
-													   true,
-													   false);
-
-			h3dUnmapResStream(geo);
-			return vertices;
-		}
-
-		int getVertexCount(Node model)
-		{
-			Resource geo = h3dGetNodeParamI(model,H3DModel::GeoResI);
-			int vertexCount = h3dGetResParamI(geo,
-											  H3DGeoRes::GeometryElem,
-											  0,
-											  H3DGeoRes::GeoVertexCountI);
-			return vertexCount;
 		}
 	}
 

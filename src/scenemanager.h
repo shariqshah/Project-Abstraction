@@ -2,11 +2,11 @@
 #define _scenemanager_H
 
 #include <algorithm>
+#include <unordered_map>
 
-#include "gameobject.h"
-#include "transform.h"
+#include "componentmanager.h"
 
-typedef std::shared_ptr<GameObject>     GOPtr;
+typedef GameObject*                     GOPtr;
 typedef std::unordered_map<Node, GOPtr> GOMap;
 typedef std::vector<GOPtr>              GOArray;
 

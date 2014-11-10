@@ -20,6 +20,8 @@ typedef H3DNode Node;
 typedef H3DRes  Resource;
 typedef std::vector<Node> NodeList;
 
+typedef glm::vec3 Vec3;
+
 enum class ResourceType : int
 {
 	MODEL    = H3DResTypes::SceneGraph,
@@ -56,15 +58,15 @@ namespace Renderer
 	static const Node ROOT_NODE = H3DRootNode;
 	
     void initialize(const std::string& path);
-	void renderFrame();
+	void renderFrame(Node activeCamera);
 	void setNodeTransform(Node node,
-						  const glm::vec3 position,
-						  const glm::vec3 rotation,
-						  const glm::vec3 scale);
+						  const Vec3 position,
+						  const Vec3 rotation,
+						  const Vec3 scale);
 	void getNodeTransform(Node node,
-						  glm::vec3* position,
-						  glm::vec3* rotation,
-						  glm::vec3* scale);
+						  Vec3* position,
+						  Vec3* rotation,
+						  Vec3* scale);
 	void setNodeTransform(Node node, glm::mat4 transformMat);
     void setNodeParam(Node node, int param, int value);
     void setNodeParam(Node node, int param, int compID, float value);
@@ -91,20 +93,6 @@ namespace Renderer
     Node createCamera(const std::string& name, Node parent = ROOT_NODE);
     Node createNode(Resource resource, Node parent = ROOT_NODE);
     Node createGroupNode(const std::string& name, Node parent = ROOT_NODE);
-	
-	namespace Camera
-	{
-		void setViewportSize(Node camera, int width, int height);
-		void setViewportPos(Node camera, int x, int y);
-		void setView(Node  cameraNode,
-					 float fov,
-					 float aspect,
-					 float nearZ,
-					 float farZ);
-		void setPipeline(Node camera, Pipeline pipeline);
-		void setOcclusionCulling(Node camera, bool enable);
-		void setOrthgraphic(Node camera, bool enable);
-	}
 
 	namespace Resources
 	{
@@ -115,29 +103,6 @@ namespace Renderer
 		bool remove(Resource resource);
 		bool loadAddedResources();
 		bool setUniform(Resource material, const std::string& name, glm::vec4 value);
-	}
-
-	namespace Light
-	{
-		Node create(Node parent,
-					const std::string& name,
-					Resource material = 0,
-					const std::string& lightContext  = "LIGHTING",
-					const std::string& shadowContext = "SHADOWMAP");
-		
-		void setRadius(Node light, float radius);
-		void setColor(Node light, glm::vec3 color);
-		void setFov(Node light, float fov);
-		void setShadowMapCount(Node light, int count);
-		void setShadowMapBias(Node light, float bias);
-		void setIntensity(Node light, float intensity);
-		void setShadowSplitLambda(Node light, float splitLambda);
-	}
-
-	namespace Model
-	{
-		float* getVertices(Node model);
-		int    getVertexCount(Node model);
 	}
 }
 

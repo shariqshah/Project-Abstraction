@@ -6,12 +6,25 @@ namespace SceneManager
 	{
 		static GOMap sSceneObjects;
 		static std::vector<Node> sRemovables;
+
+		void removeGameObject(GOPtr gameObject)
+		{
+			for(int i = 1; i < (int)ComponentType::NUM_COMPONENTS; i++)
+			{
+				if(gameObject->compIndices[i] != -1)
+				{
+					CompManager::removeComponent(gameObject, (ComponentType)i);
+				}
+			}
+
+			delete gameObject;
+		}
 	}
 	
 	bool add(GOPtr newGameObject)
 	{
-		Node node = newGameObject->getNode();
-		const std::string name = newGameObject->getName();
+		Node node = newGameObject->node;
+		const std::string name = newGameObject->name;
 		
 		std::pair<GOMap::iterator, bool> returnValue;
 		returnValue = sSceneObjects.insert(std::make_pair(node, newGameObject));
@@ -37,16 +50,16 @@ namespace SceneManager
 		{
 			//Recursively remove all children first, if any.
 			GOArray children;
-			if(getChildren(position->second.get(), &children))
+			if(getChildren(position->second, &children))
 			{
 				std::for_each(children.begin(), children.end(), [] (GOPtr child)
   			    {
-				    remove(child->getNode());
+				    remove(child->node);
 				});
 			}
 
 			sRemovables.push_back(node);
-			Log::message(position->second->getName() + " removed from scene");
+			Log::message(position->second->name + " removed from scene");
 			return true;
 		}
 
@@ -62,15 +75,15 @@ namespace SceneManager
 			it != sSceneObjects.end();
 			++it)
 		{
-			if(name == it->second->getName())
+			if(name == it->second->name)
 			{
 				//Recursively remove all children first, if any.
 				GOArray children;
-				if(getChildren(it->second.get(), &children))
+				if(getChildren(it->second, &children))
 				{
 					std::for_each(children.begin(), children.end(), [] (GOPtr child)
 					{
-					    remove(child->getNode());
+					    remove(child->node);
 					});
 				}
 				sRemovables.push_back(it->first);
@@ -90,7 +103,7 @@ namespace SceneManager
 			it != sSceneObjects.end();
 			++it)
 		{
-			if(name == it->second->getName())
+			if(name == it->second->name)
 				return it->second;
 		}
 
@@ -114,6 +127,8 @@ namespace SceneManager
 		//Remove Marked GOs
 		for(Node node : sRemovables)
 		{
+			GOPtr gameObject = find(node);
+			removeGameObject(gameObject);
 			int removed = sSceneObjects.erase(node);
 			if(removed == 0)
 				Log::warning("GO marked for removal could not be removed!");
@@ -125,6 +140,16 @@ namespace SceneManager
 	void cleanup()
 	{
 		std::cout<<"Size before : "<<sSceneObjects.size()<<std::endl;
+
+		update();
+		
+		for(GOMap::iterator it = sSceneObjects.begin();
+			it != sSceneObjects.end();
+			++it)
+		{
+			removeGameObject(it->second);
+		}
+
 		sSceneObjects.clear();
 		std::cout<<"Size after : "<<sSceneObjects.size()<<std::endl;
 
@@ -134,8 +159,10 @@ namespace SceneManager
 
 	GOPtr createGameObject(const std::string& name)
 	{
-		GOPtr newObj = std::make_shared<GameObject>(name);
-		newObj->addComponent<Transform>(newObj->getNode());
+		GOPtr newObj = new GameObject;
+		newObj->name = name;
+		newObj->node = Renderer::createGroupNode(name);
+		CompManager::addTransform(newObj);
 		add(newObj);
 		
 		return newObj;
@@ -150,7 +177,7 @@ namespace SceneManager
 	{
 		if(gameObject)
 		{
-			Node parent = Renderer::getParent(gameObject->getNode());
+			Node parent = Renderer::getParent(gameObject->node);
 			
 			if(parent != 0)
 				return find(parent);
@@ -175,7 +202,7 @@ namespace SceneManager
 	{
 		NodeList childNodes;
 
-		if(Renderer::getNodeChildren(gameObject->getNode(), name, &childNodes))
+		if(Renderer::getNodeChildren(gameObject->node, name, &childNodes))
 		{
 			for(Node child : childNodes)
 				children->push_back(find(child));
@@ -188,21 +215,22 @@ namespace SceneManager
 
 	void syncTransform(GameObject* gameObject)
 	{
-		glm::vec3 position, rotation, scale;
-		Renderer::getNodeTransform(gameObject->getNode(),
+		Vec3 position, rotation, scale;
+		Renderer::getNodeTransform(gameObject->node,
 								   &position,
 								   &rotation,
 								   &scale);
-			
-		auto transform = gameObject->getComponent<Transform>();
-		transform->setPosition(position, false);
-		transform->setRotation(glm::quat(rotation), false);
-		transform->setScale(scale, false);
+
+		
+		auto transform = CompManager::getTransform(gameObject);
+		Transform::setPosition(transform, position, false);
+		Transform::setRotation(transform, Quat(rotation), false);
+		Transform::setScale(transform, scale, false);
 	}
 
 	bool setParent(GameObject* child, GameObject* parent)
 	{
-		if(Renderer::setParent(child->getNode(), parent->getNode()))
+		if(Renderer::setParent(child->node, parent->node))
 		{
 			syncTransform(child);
 			return true;
@@ -213,7 +241,7 @@ namespace SceneManager
 
 	bool setParentAsRoot(GameObject* gameObject)
 	{
-		if(Renderer::setParent(gameObject->getNode(), Renderer::ROOT_NODE))
+		if(Renderer::setParent(gameObject->node, Renderer::ROOT_NODE))
 		{
 			syncTransform(gameObject);
 			return true;

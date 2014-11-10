@@ -1,71 +1,73 @@
-#ifndef TRANSFORM_H
-#define TRANSFORM_H
+#ifndef _transform_H_
+#define _transform_H_
 
 #define GLM_FORCE_RADIANS
 #include "../include/glm/gtx/transform.hpp"
 #include "../include/glm/gtx/quaternion.hpp"
 
-#include "component.h"
+#include "componentTypes.h"
 #include "renderer.h"
 
-class Transform : public Component
+typedef glm::vec3 Vec3;
+typedef glm::vec2 Vec2;
+typedef glm::mat4 Mat4;
+typedef glm::quat Quat;
+
+struct CTransform
 {
-    glm::vec3 mPosition;
-    glm::vec3 mScale;
-    glm::vec3 mLookAt;
-    glm::vec3 mUp;
-    glm::vec3 mForward;
-    glm::quat mRotation;
-	glm::mat4 mTransformMatrix;
-	Node      mNode;
+    Vec3 position = Vec3(0.f);
+    Vec3 scale    = Vec3(1.f);
+    Vec3 lookAt   = Vec3(0.f, 0.f, -5.f);
+    Vec3 up       = Vec3(0.f, 1.f, 0.f);
+    Vec3 forward  = Vec3(0.f, 0.f, 1.f);
+    Quat rotation = Quat();
+	Node node     = 0;
+	Mat4 transMat = Mat4();
+	bool valid    = true;
+};
 
-	void updateTransformMatrix();
-    void updateLookAt();
-    void updateUpVector();
-    void updateForward();
-
-	static const float epsilon;
-public:
-    enum class Space
+namespace Transform
+{
+	static const Vec3 UNIT_X = Vec3(1, 0, 0);
+	static const Vec3 UNIT_Y = Vec3(0, 1, 0);
+	static const Vec3 UNIT_Z = Vec3(0, 0, 1);
+	
+	enum class Space
     {
         LOCAL = 0,
         WORLD
     };
+
+	void setPosition(CTransform* transform,
+					 Vec3        position,
+					 bool        updateTransMat = true);
 	
-    Transform(Node      node);
-    Transform(Node      node,
-			  glm::vec3 position,
-              glm::vec3 scale,
-              glm::quat rotation,
-              glm::vec3 lookAt,
-              glm::vec3 up,
-			  glm::vec3 forward);
-
-    void setPosition(glm::vec3 position, bool updateTransMat = true);
-    void translate(glm::vec3 offset, Space transformSpace = Space::WORLD);
-    void rotate(glm::vec3 axis, float angle, Space transformSpace = Space::WORLD);
-    void setScale(glm::vec3 newScale, bool updateTransMat = true);
-    void setLookAt(glm::vec3 lookAt);
-    void setUpVector(glm::vec3 up);
-    void setRotation(glm::quat newRotation, bool updateTransMat = true);
-    void setForward(glm::vec3 direction);
-	void resetTransformFlag();
+    void translate(CTransform* transform,
+				   Vec3        offset,
+				   Space       transformSpace = Space::WORLD);
 	
-    glm::vec3 getPosition();
-    glm::vec3 getScale();
-    glm::vec3 getLookAt();
-    glm::vec3 getUpVector();
-    glm::quat getRotation();
-	glm::vec3 getRotationVector();
-    glm::vec3 getForward();
-	glm::mat4 getTransformMat();
+    void rotate(CTransform* transform,
+				Vec3        axis,
+				float       angle,
+				Space       transformSpace = Space::WORLD);
+	
+    void setScale(CTransform* transform,
+				  Vec3        newScale,
+				  bool        updateTransMat = true);
+	
+    void setLookAt(CTransform* transform, Vec3 lookAt);
 
-	virtual const std::string getName();
+	void setUpVector(CTransform* transform, Vec3 up);
 
-	static const std::string sName;
-	static const glm::vec3   UNIT_X;
-	static const glm::vec3   UNIT_Y;
-	static const glm::vec3   UNIT_Z;
-};
+	void setRotation(CTransform* transform,
+					 Quat        newRotation,
+					 bool        updateTransMat = true);
+	
+    void setForward(CTransform* transform, Vec3 direction);
+	
+	void resetTransformFlag(CTransform* transform);
 
-#endif // TRANSFORM_H
+	void updateTransformMatrix(CTransform* transform);
+}
+
+#endif

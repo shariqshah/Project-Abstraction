@@ -57,5 +57,3 @@ else()
 										${PROJECT_SOURCE_DIR}/lib/squirrel/libsquirrel.a
 										${PROJECT_SOURCE_DIR}/lib/squirrel/libsqstdlib.a)
 endif()
-
-target_link_libraries(${PROJECT_NAME} dl) #Added after including chaiscript

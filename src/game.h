@@ -2,13 +2,11 @@
 #define _game_H_
 
 #include "systems.h"
-#include "model.h"
-#include "scenemanager.h"
-#include "rigidbody.h"
 
 class Game
 {
     std::string mContentFolderDir;
+	GOPtr mCurrentViewer;
 public:
     Game(std::string path);
 	~Game();

@@ -1,150 +1,187 @@
 #include "camera.h"
 
-const std::string Camera::sName = "Camera";
-
-Camera::Camera(Node parent)
+namespace Renderer
 {
-	initCamera(0.1f,
-			   1000.f,
-			   4.f / 3.f,
-			   75.f,
-			   parent);
-}
-
-Camera::Camera(float nearZ,
-			   float farZ,
-			   float aspectRatio,
-			   float fov,
-			   Node  parent)
-{
-	initCamera(nearZ,
-			   farZ,
-			   aspectRatio,
-			   fov,
-			   parent);
-}
-
-void Camera::initCamera(float nearZ,
-						float farZ,
-						float aspectRatio,
-						float fov,
-						Node  parent)
-{
-	mNearZ = nearZ;
-	mFarZ = farZ;
-	mAspectRatio = aspectRatio;
-	mFov = fov;
-	mType = ComponentType::CAMERA;
-	mPipeline = Pipeline::FORWARD;
-	mCamNode = Renderer::createCamera("CameraMainNode");
-
-	if(mCamNode == 0)
-		mValid = false;
-	else
+	namespace
 	{
-		if(!Renderer::setParent(mCamNode, parent))
-			mValid = false;
-		else
-		{
-			Renderer::Camera::setViewportPos(mCamNode, 0, 0);
-			Renderer::Camera::setViewportSize(mCamNode,
-											  Settings::getWindowWidth(),
-											  Settings::getWindowHeight());
-			Renderer::Camera::setView(mCamNode, mFov, mAspectRatio, mNearZ, mFarZ);
-			setOcclusionCulling(true);
-		}
-	}	
-}
-
-Camera::~Camera()
-{
-	Renderer::removeCamera(mCamNode);
+		static std::vector<Node> cameras;
+		
+		static Resource    sDefaultPipeline;
+		static Resource    sPipelines[3];
+	}
 	
-	if(!Renderer::removeNode(mCamNode))
-		Log::warning("Camera node does not exist so not removed!");
+	namespace Camera
+	{
+		void initialize()
+		{
+			sPipelines[0] = Resources::add(ResourceType::PIPELINE,
+										   "pipelines/forward.pipeline.xml",
+										   0);
+			sPipelines[1] = Resources::add(ResourceType::PIPELINE,
+										   "pipelines/deferred.pipeline.xml",
+										   0);
+			sPipelines[2] = Resources::add(ResourceType::PIPELINE,
+										   "pipelines/hdr.pipeline.xml",
+										   0);
+
+			Resources::loadAddedResources();
+
+			sDefaultPipeline = sPipelines[(int)Pipeline::HDR];
+		}
+
+		CCamera create(const std::string& name, Node parent)
+		{
+			CCamera newCamera;
+			Node node = h3dAddCameraNode(parent,
+										 name.c_str(),
+										 sDefaultPipeline);
+			if(node != 0)
+			{
+				cameras.push_back(node);
+				newCamera.node = node;
+
+				setViewportPos(&newCamera, 0, 0);
+				setViewportSize(&newCamera,
+								Settings::getWindowWidth(),
+								Settings::getWindowHeight());
+				updateView(&newCamera);
+				setOcclusionCulling(&newCamera, true);
+
+				return newCamera;
+			}
+			
+			newCamera.valid = false;
+			return newCamera;
+		}
+
+		void removeCamera(const CCamera& camera)
+		{
+			if(!cameras.empty())
+			{
+				cameras.erase(std::find(cameras.begin(),
+										cameras.end(),
+										camera.node),
+							  cameras.end());
+
+				// if(camera.node == sCurrentCamera->node)
+				// {
+				// 	if(cameras.empty())
+				// 	{
+				// 		Log::warning("No active cameras left in the scene!");
+				// 		sCurrentCamera = NULL;
+				// 	}
+				// }
+
+				Renderer::removeNode(camera.node);
+			}
+			else
+				Log::error(Log::ErrorLevel::MEDIUM,
+						   "Could not remove camera. No cameras in scene!");
+		}
+
+		void resizePipelineBuffers(int width, int height)
+		{
+			h3dResizePipelineBuffers(sPipelines[(int)Pipeline::FORWARD],
+									 width,
+									 height);
+			
+			h3dResizePipelineBuffers(sPipelines[(int)Pipeline::DEFERRED],
+									 width,
+									 height);
+			
+			h3dResizePipelineBuffers(sPipelines[(int)Pipeline::HDR],
+									 width,
+									 height);
+		}
+
+		// void setCurrentViewer(GameObject* viewer)
+		// {
+		// 	if(viewer && GO::hasComponent(viewer, ComponentType::CAMERA))
+		// 		sCurrentViewer = viewer;
+		// }
+		
+		void setViewportSize(CCamera* camera, int width, int height)
+		{
+			h3dSetNodeParamI(camera->node, H3DCamera::ViewportWidthI, width);
+			h3dSetNodeParamI(camera->node, H3DCamera::ViewportHeightI, height);
+	    }
+
+		void setViewportPos(CCamera* camera, int x, int y)
+		{
+			h3dSetNodeParamI(camera->node, H3DCamera::ViewportXI, x);
+			h3dSetNodeParamI(camera->node, H3DCamera::ViewportYI, y);
+		}
+
+		void updateView(CCamera* camera)
+		{
+			h3dSetupCameraView(camera->node,
+							   camera->fov,
+							   camera->aspectRatio,
+							   camera->nearZ,
+							   camera->farZ);
+		}
+
+		void setFarZ(CCamera* camera, float farZ)
+		{
+			camera->farZ = farZ;
+			updateView(camera);
+		}
+
+		void setNearZ(CCamera* camera, float nearZ)
+		{
+			camera->nearZ = nearZ;
+			updateView(camera);
+		}
+
+		void setFov(CCamera* camera, float fov)
+		{
+			camera->fov = fov;
+			updateView(camera);
+		}
+
+		void setAspectRatio(CCamera* camera, float aspectRatio)
+		{
+			camera->aspectRatio = aspectRatio;
+			updateView(camera);
+		}
+
+		void setPipeline(CCamera* camera, Pipeline pipeline)
+		{
+			Resource newPipeline = sDefaultPipeline;
+			camera->pipeline = pipeline;
+			
+			switch(pipeline)
+			{
+			case Pipeline::FORWARD:
+				newPipeline = sPipelines[(int)Pipeline::FORWARD];
+				break;
+			case Pipeline::DEFERRED:
+				newPipeline = sPipelines[(int)Pipeline::DEFERRED];
+				break;
+			case Pipeline::HDR:
+				newPipeline = sPipelines[(int)Pipeline::HDR];
+				break;
+			}
+
+			h3dSetNodeParamI(camera->node, H3DCamera::PipeResI, newPipeline);
+		}
+
+		void setOcclusionCulling(CCamera* camera, bool enable)
+		{
+			h3dSetNodeParamI(camera->node, H3DCamera::OccCullingI, enable ? 1 : 0);
+		}
+
+		void setOrthgraphic(CCamera* camera, bool enable)
+		{
+			h3dSetNodeParamI(camera->node, H3DCamera::OrthoI, enable ? 1 : 0);
+		}
+
+		// CCamera* getCurrentCamera()
+		// {
+		// 	auto currentCamera = CompManager::getCamera(sCurrentViewer);
+		// 	return currentCamera;
+		// }
+
+	}
 }
 
-Node Camera::getCameraNode()
-{
-	return mCamNode;
-}
-
-void Camera::setFOV(float fov)
-{
-	mFov = fov;
-	Renderer::Camera::setView(mCamNode, mFov, mAspectRatio, mNearZ, mFarZ);
-}
-
-void Camera::setNearZ(float nearZ)
-{
-	mNearZ = nearZ;
-	Renderer::Camera::setView(mCamNode, mFov, mAspectRatio, mNearZ, mFarZ);
-}
-
-void Camera::setFarZ(float farZ)
-{
-	mFarZ = farZ;
-	Renderer::Camera::setView(mCamNode, mFov, mAspectRatio, mNearZ, mFarZ);
-}
-
-void Camera::setAspectRatio(float aspectRatio)
-{
-	mAspectRatio = aspectRatio;
-	Renderer::Camera::setView(mCamNode, mFov, mAspectRatio, mNearZ, mFarZ);
-}
-
-void Camera::setPipeline(Pipeline pipeline)
-{
-	mPipeline = pipeline;
-	Renderer::Camera::setPipeline(mCamNode, pipeline);
-}
-
-float Camera::getFOV()
-{
-	return mFov;
-}
-
-float Camera::getFarZ()
-{
-	return mFarZ;
-}
-
-float Camera::getNearZ()
-{
-	return mNearZ;
-}
-
-float Camera::getAspectRatio()
-{
-	return mAspectRatio;
-}
-
-Pipeline Camera::getPipeline()
-{
-	return mPipeline;
-}
-
-void Camera::resizeViewport(int width, int height)
-{
-	Renderer::Camera::setViewportSize(mCamNode, width, height);
-}
-
-void Camera::setViewportPos(int x, int y)
-{
-	Renderer::Camera::setViewportPos(mCamNode, x, y);
-}
-
-void Camera::setOrthographic(bool enable)
-{
-	Renderer::Camera::setOrthgraphic(mCamNode, enable);
-}
-
-void Camera::setOcclusionCulling(bool enable)
-{
-	Renderer::Camera::setOcclusionCulling(mCamNode, enable);
-}
-
-const std::string Camera::getName()
-{
-	return sName;
-}

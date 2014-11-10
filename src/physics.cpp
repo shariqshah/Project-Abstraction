@@ -13,7 +13,7 @@ namespace Physics
 		static btCollisionDispatcher*               sDispatcher;
 		static btSequentialImpulseConstraintSolver* sSolver;
 
-		static std::vector<RBHandle>          sFreeList;
+		static std::vector<CRigidBody>          sFreeList;
 		static std::vector<btRigidBody*>      sRigidBodies;
 		static std::vector<btCollisionShape*> sCollisionShapes;
 		static std::vector<CollisionShape*>   sShapes;
@@ -23,7 +23,7 @@ namespace Physics
 		static DBG_Mode     sCurrentDebugMode;
 	}
 
-	bool initialize(glm::vec3 gravity)
+	void initialize(glm::vec3 gravity)
 	{
 		sGravity = Utils::toBullet(gravity);
 
@@ -50,18 +50,14 @@ namespace Physics
 		sWorld->stepSimulation(deltaTime);
 	}
 
-	void draw()
+	void draw(CTransform* viewerTransform, CCamera* viewerCamera)
 	{
-		if(sEnableDebugDraw)
+		if(sEnableDebugDraw && viewerTransform != NULL && viewerCamera != NULL)
 		{
-			auto cameraObj = SceneManager::find("Player");
-			auto cameraComp = cameraObj->getComponent<Camera>();
-			auto camTransform = cameraObj->getComponent<Transform>();
+			Mat4 camTranMat = viewerTransform->transMat;
+			Mat4 camProjMat;
 		
-			glm::mat4 camTranMat = camTransform->getTransformMat();
-			glm::mat4 camProjMat;
-		
-			h3dGetCameraProjMat(cameraComp->getCameraNode(),
+			h3dGetCameraProjMat(viewerCamera->node,
 								glm::value_ptr(camProjMat));
 
 			glPushAttrib(GL_ALL_ATTRIB_BITS);
@@ -197,140 +193,144 @@ namespace Physics
 		sShapes.push_back(shape);
 	}
 
-	RBHandle createRigidBody(CollisionShape* shape,
-							 MotionState*    motionState,
-							 float           mass,
-							 float           restitution)
+	namespace RigidBody
 	{
-		btVector3 inertia(0, 0, 0);
-		if(mass != 0)
-			shape->getCollisionShape()->calculateLocalInertia(mass, inertia);
-
-		btRigidBody::btRigidBodyConstructionInfo consInfo(mass,
-														  motionState,
-														  shape->getCollisionShape(),
-														  inertia);
-		btRigidBody* body = new btRigidBody(consInfo);
-		body->setRestitution(restitution);
-		sWorld->addRigidBody(body);
-			
-		RBHandle rbHandle = 0;
-			
-		if(!sFreeList.empty())
+		CRigidBody create(CollisionShape* shape,
+						  btMotionState*  motionState,
+						  float           mass,
+						  float           restitution)
 		{
-			rbHandle = sFreeList.back();
-			sFreeList.pop_back();
+			btVector3 inertia(0, 0, 0);
+			if(mass != 0)
+				shape->getCollisionShape()->calculateLocalInertia(mass, inertia);
 
-			if(sRigidBodies[rbHandle] != NULL)
-				Log::warning("Overwriting Rigidbody!");
+			//MotionState* motionState = new MotionState(transform);
+			btRigidBody::btRigidBodyConstructionInfo consInfo(mass,
+															  motionState,
+															  shape->getCollisionShape(),
+															  inertia);
+			btRigidBody* body = new btRigidBody(consInfo);
+			body->setRestitution(restitution);
+			sWorld->addRigidBody(body);
 			
-			sRigidBodies[rbHandle] = body;
-		}
-		else
-		{
-			sRigidBodies.push_back(body);
-			rbHandle = (uint32_t) (sRigidBodies.size() - 1);
-		}
+			CRigidBody rbHandle = -1;
 			
-		return rbHandle;
-	}
+			if(!sFreeList.empty())
+			{
+				rbHandle = sFreeList.back();
+				sFreeList.pop_back();
+
+				if(sRigidBodies[rbHandle] != NULL)
+					Log::warning("Overwriting Rigidbody!");
+			
+				sRigidBodies[rbHandle] = body;
+			}
+			else
+			{
+				sRigidBodies.push_back(body);
+				rbHandle = (int32_t) (sRigidBodies.size() - 1);
+			}
+			
+			return rbHandle;
+		}
 	
-	void setTransform(RBHandle body, glm::mat4 transformMat)
-	{
-		btTransform transform;
-		transform.setFromOpenGLMatrix(glm::value_ptr(transformMat));
-		sRigidBodies[body]->setWorldTransform(transform);
-	}
-
-	void setActivation(RBHandle body, bool activation)
-	{
-		sRigidBodies[body]->activate(activation);
-	}
-
-	void setTransform(RBHandle body, glm::vec3 position, glm::quat rotation)
-	{
-		btTransform transform;
-		transform.setOrigin(Utils::toBullet(position));
-		transform.setRotation(Utils::toBullet(rotation));
-		sRigidBodies[body]->setWorldTransform(transform);
-	}
-
-	void getTransform(RBHandle body, glm::vec3* position, glm::quat* rotation)
-	{
-		btTransform transform = sRigidBodies[body]->getWorldTransform();
-
-		if(position)
-			*position = Utils::toGlm(transform.getOrigin());
-		if(rotation)
-			*rotation = Utils::toGlm(transform.getRotation());
-	}
-
-	void removeRigidBody(RBHandle body)
-	{
-		if(sRigidBodies[body])
+		void setTransform(CRigidBody body, glm::mat4 transformMat)
 		{
-			removeCollisionObject(sRigidBodies[body]);
-			sRigidBodies[body] = NULL;
-			sFreeList.push_back(body);
+			btTransform transform;
+			transform.setFromOpenGLMatrix(glm::value_ptr(transformMat));
+			sRigidBodies[body]->setWorldTransform(transform);
 		}
-		else
-			Log::warning("RigidBody " + std::to_string(body) + "does not exist so not removed");
-	}
 
-	void setKinematic(RBHandle body, bool kinematic)
-	{
-		btRigidBody* temp = sRigidBodies[body];
-		sWorld->removeRigidBody(temp);
-
-		if(kinematic)
+		void setActivation(CRigidBody body, bool activation)
 		{
-			temp->setFlags(sRigidBodies[body]->getFlags() |
-										 btCollisionObject::CF_KINEMATIC_OBJECT |
-										 btCollisionObject::CF_NO_CONTACT_RESPONSE);
-			temp->setActivationState(DISABLE_DEACTIVATION);
+			sRigidBodies[body]->activate(activation);
 		}
-		else
+
+		void setTransform(CRigidBody body, glm::vec3 position, glm::quat rotation)
 		{
-			//sRigidBodies[body]->setFlags(~btCollisionObject::CF_KINEMATIC_OBJECT);
-			temp->setFlags(sRigidBodies[body]->getFlags() |
-						   btCollisionObject::CF_STATIC_OBJECT);
-			temp->setActivationState(WANTS_DEACTIVATION);
+			btTransform transform;
+			transform.setOrigin(Utils::toBullet(position));
+			transform.setRotation(Utils::toBullet(rotation));
+			sRigidBodies[body]->setWorldTransform(transform);
+		}
+
+		void getTransform(CRigidBody body, glm::vec3* position, glm::quat* rotation)
+		{
+			btTransform transform = sRigidBodies[body]->getWorldTransform();
+
+			if(position)
+				*position = Utils::toGlm(transform.getOrigin());
+			if(rotation)
+				*rotation = Utils::toGlm(transform.getRotation());
+		}
+
+		void remove(CRigidBody body)
+		{
+			if(sRigidBodies[body])
+			{
+				removeCollisionObject(sRigidBodies[body]);
+				sRigidBodies[body] = NULL;
+				sFreeList.push_back(body);
+			}
+			else
+				Log::warning("RigidBody " + std::to_string(body) + "does not exist so not removed");
+		}
+
+		void setKinematic(CRigidBody body, bool kinematic)
+		{
+			btRigidBody* temp = sRigidBodies[body];
+			sWorld->removeRigidBody(temp);
+
+			if(kinematic)
+			{
+				temp->setFlags(sRigidBodies[body]->getFlags() |
+							   btCollisionObject::CF_KINEMATIC_OBJECT |
+							   btCollisionObject::CF_NO_CONTACT_RESPONSE);
+				temp->setActivationState(DISABLE_DEACTIVATION);
+			}
+			else
+			{
+				//sRigidBodies[body]->setFlags(~btCollisionObject::CF_KINEMATIC_OBJECT);
+				temp->setFlags(sRigidBodies[body]->getFlags() |
+							   btCollisionObject::CF_STATIC_OBJECT);
+				temp->setActivationState(WANTS_DEACTIVATION);
 				//sRigidBodies[body]->activate(true);
+			}
+
+			sWorld->addRigidBody(temp);
+			// if(kinematic)
+			// {
+			// 	sRigidBodies[body]->setFlags(sRigidBodies[body]->getFlags() |
+			// 								 btCollisionObject::CF_KINEMATIC_OBJECT |
+			// 								 btCollisionObject::CF_NO_CONTACT_RESPONSE);
+			// 	sRigidBodies[body]->setActivationState(DISABLE_DEACTIVATION);
+			// }
+			// else
+			// {
+			// 	//sRigidBodies[body]->setFlags(~btCollisionObject::CF_KINEMATIC_OBJECT);
+			// 	sRigidBodies[body]->setFlags(sRigidBodies[body]->getFlags() |
+			// 								 ~(btCollisionObject::CF_KINEMATIC_OBJECT) |
+			// 								 btCollisionObject::CF_STATIC_OBJECT);
+			// 	sRigidBodies[body]->setActivationState(WANTS_DEACTIVATION);
+			// 	//sRigidBodies[body]->activate(true);
+			// }
+		
 		}
 
-		sWorld->addRigidBody(temp);
-		// if(kinematic)
-		// {
-		// 	sRigidBodies[body]->setFlags(sRigidBodies[body]->getFlags() |
-		// 								 btCollisionObject::CF_KINEMATIC_OBJECT |
-		// 								 btCollisionObject::CF_NO_CONTACT_RESPONSE);
-		// 	sRigidBodies[body]->setActivationState(DISABLE_DEACTIVATION);
-		// }
-		// else
-		// {
-		// 	//sRigidBodies[body]->setFlags(~btCollisionObject::CF_KINEMATIC_OBJECT);
-		// 	sRigidBodies[body]->setFlags(sRigidBodies[body]->getFlags() |
-		// 								 ~(btCollisionObject::CF_KINEMATIC_OBJECT) |
-		// 								 btCollisionObject::CF_STATIC_OBJECT);
-		// 	sRigidBodies[body]->setActivationState(WANTS_DEACTIVATION);
-		// 	//sRigidBodies[body]->activate(true);
-		// }
-		
-	}
+		void setMass(CRigidBody body, const float mass)
+		{
+			auto shape = sRigidBodies[body]->getCollisionShape();
+			btVector3 inertia(0, 0, 0);
+			if(mass != 0)
+				shape->calculateLocalInertia(mass, inertia);
 
-	void setMass(RBHandle body, const float mass)
-	{
-		auto shape = sRigidBodies[body]->getCollisionShape();
-		btVector3 inertia(0, 0, 0);
-		if(mass != 0)
-			shape->calculateLocalInertia(mass, inertia);
+			sRigidBodies[body]->setMassProps(mass, inertia);
+		}
 
-		sRigidBodies[body]->setMassProps(mass, inertia);
-	}
-
-	void applyForce(RBHandle body, glm::vec3 force, glm::vec3 relPos)
-	{
-		sRigidBodies[body]->applyForce(Utils::toBullet(force),
-									   Utils::toBullet(relPos));
+		void applyForce(CRigidBody body, glm::vec3 force, glm::vec3 relPos)
+		{
+			sRigidBodies[body]->applyForce(Utils::toBullet(force),
+										   Utils::toBullet(relPos));
+		}
 	}
 }

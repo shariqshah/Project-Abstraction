@@ -1,60 +1,26 @@
-#ifndef GAMEOBJECT_H
-#define GAMEOBJECT_H
+#ifndef _gameobject_H_
+#define _gameobject_H_
 
-#include <memory>
-#include <unordered_map>
+#include <array>
 
-#include "component.h"
 #include "renderer.h"
+#include "componentTypes.h"
 
-typedef std::unordered_map<std::string, std::shared_ptr<Component>> ComponentMap;
-typedef std::shared_ptr<Component> ComponentPtr;
+static const int EMPTY_INDEX = -1;
 
-class GameObject
+struct GameObject
 {
-	//TODO: Add measures for getting child object if any
-protected:
-	Node         mNode;
-    std::string  mName;
-    std::string  mTag;
-    ComponentMap mComponentMap;
-	bool         mRemove;
-    long         mComponentMask;
-
-    ComponentPtr getComponent(const std::string& componentType);
-	ComponentPtr addComponent(ComponentPtr component);
-public:
-    GameObject(const std::string& name = "Defaultgameobjectname",
-			   const std::string& tag  = "DefaultTag");
-	~GameObject();
-
-    void setName(const std::string& value);
-    void setComponentMask(long value);
-    void setTag(const std::string& value);
-	void markForRemoval();
-	void removeComponent(const std::string& componentName);
-	
-    bool compareTag(const std::string& tagToCompare);
-	bool isMarkedForRemoval();
-	bool hasComponents(long componentMask);
-
-    std::string getName() const;
-	std::string getTag() const;
-    long        getComponentMask() const;
-	Node        getNode() const;
-
-	template<typename T, typename... Args>
-    std::shared_ptr<T> addComponent(Args... args)
-    {
-		auto component = std::make_shared<T>(args...);
-        return std::dynamic_pointer_cast<T>(addComponent(component));
-    }
-	
-	template<typename T>
-    std::shared_ptr<T> getComponent()
-    {
-        return std::dynamic_pointer_cast<T>(getComponent(T::sName));
-    }
+	Node        node   = 0;
+	std::string name   = "DefaultGameobjectName";
+	std::string tag    = "DefaultTag";
+	bool        remove = false;
+	// std::array<int, (size_t)ComponentType::NUM_COMPONENTS> compIndices{{EMPTY_INDEX}};
+	int compIndices[6] = {-1, -1, -1, -1, -1, -1};
 };
 
-#endif // GAMEOBJECT_H
+namespace GO
+{
+    bool hasComponent(GameObject* gameOjbject, ComponentType type);
+}
+
+#endif

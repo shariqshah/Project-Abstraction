@@ -3,79 +3,68 @@
 Game::Game(std::string path)
 {	
 	Renderer::initialize(path);
+	Renderer::Camera::initialize();
 	System::initialize();
 	
-	// GOPtr sponza = SceneManager::createGameObject("Sponza");
-	// auto sponMod = sponza->addComponent<Model>(sponza->getNode(),
-	// 										   "models/terrain/terrain.scene.xml");
-	// auto sponTran = sponza->getComponent<Transform>();
-	// sponza->addComponent<RigidBody>(sponTran,
-	// 								new CollisionMesh(sponMod, true), 0.f);
-	//sponTran->setScale(glm::vec3(20, 20, 20));
-	
 	GOPtr falcon = SceneManager::createGameObject("Falcon");
-	falcon->setTag("Falcon");
-	auto falMod = falcon->addComponent<Model>(falcon->getNode(),
-											  "models/falcon/falcon.scene.xml");
-	auto falconTransform = falcon->getComponent<Transform>();
-    falcon->addComponent<RigidBody>(falconTransform,
-									new CollisionMesh(falMod, false), 10.f);
-	//falconTransform->setScale(glm::vec3(3, 3, 3));
+	falcon->tag = "Falcon";
+	auto falMod = CompManager::addModel(falcon, "models/falcon/falcon.scene.xml");
+	auto falconTransform = CompManager::getTransform(falcon);
+	CompManager::addRigidBody(falcon, new CollisionMesh(falMod, false), 10);
 
 	GOPtr lightGO = SceneManager::createGameObject("LightGO");
-	lightGO->addComponent<Model>(lightGO->getNode(),
-								 "models/sphere/sphere.scene.xml");
-	auto goLight = lightGO->addComponent<Light>(lightGO->getNode(), "GOLight");
-	auto lTransform = lightGO->getComponent<Transform>();
+	CompManager::addModel(lightGO, "models/sphere/sphere.scene.xml");
+	auto goLight = CompManager::addLight(lightGO, "GOLight");
+	auto lTransform = CompManager::getTransform(lightGO);
 
-	lTransform->setPosition(glm::vec3(-176, 319, 18));
-	lTransform->setLookAt(glm::vec3(0));
-	goLight->setColor(glm::vec3(0.8f, 0.8f, 0.5f));
-	goLight->setRadius(500);
+	Transform::setPosition(lTransform, Vec3(-176, 319, 18));
+	Transform::setLookAt(lTransform, Vec3(0));
+	Renderer::Light::setColor(goLight, Vec3(0.8f, 0.8f, 0.5f));
+	Renderer::Light::setRadius(goLight, 500);
 
 	GOPtr player = SceneManager::createGameObject("Player");
-	player->setTag("FreeCamera");
-	auto playerTrans = player->getComponent<Transform>();
-	auto camera = player->addComponent<Camera>(player->getNode());
-	playerTrans->setPosition(glm::vec3(-110, 85, 92));
-	
-	Renderer::setCurrentCamera(camera->getCameraNode());
+	player->tag = "FreeCamera";
+	auto playerTrans = CompManager::getTransform(player);
+	auto camera = CompManager::addCamera(player, "playerCamera");
+	Transform::setPosition(playerTrans, Vec3(-110, 85, 92));
+	System::CameraSystem::setActiveObject(player);
+	mCurrentViewer = player;
 
 	Sphere* sphere = new Sphere(1);
 	for(int i = 0; i < 10; i++)
 	{
-		GOPtr suzanne = SceneManager::createGameObject("Suzanne" + std::to_string(i));
-		auto suzTransform = suzanne->getComponent<Transform>();
+		GOPtr suzanne = SceneManager::createGameObject("Suzanne" +
+													   std::to_string(i));
+		suzanne->tag = "suzanne";
+		auto suzTransform = CompManager::getTransform(suzanne);
 
 		float radius = 20.f;
 		float width  = glm::sin((float)i) * radius;
 		float height = glm::cos((float)i) * radius;
 		if(i < 50)
-			suzTransform->setPosition(glm::vec3(width, 5, height));
+			Transform::setPosition(suzTransform, Vec3(width, 5, height));
 		else
-			suzTransform->setPosition(glm::vec3(0, height + 7, width));
+			Transform::setPosition(suzTransform, Vec3(0, height + 7, width));
 		
-		suzanne->addComponent<Model>(suzanne->getNode(),
-									 "models/test/test.scene.xml");
+		CompManager::addModel(suzanne, "models/test/test.scene.xml");
+		CompManager::addRigidBody(suzanne, sphere);
 
-		suzanne->addComponent<RigidBody>(suzTransform, sphere);
-		suzanne->setTag("suzanne");
-		// auto sLight = suzanne->addComponent<Light>(suzanne->getNode(),
-		// 										   "light" + std::to_string(i));
-		// float r = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
-		// float g = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
-		// float b = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+		auto suzLight = CompManager::addLight(suzanne,
+											  "light" + std::to_string(i));
+		
+		float r = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+		float g = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+		float b = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
 
-		// sLight->setColor(glm::vec3(r, g, b));
-		// sLight->setShadowCaster(false);
+		Renderer::Light::setColor(suzLight, Vec3(r, g, b));
+		Renderer::Light::setShadowCaster(suzLight, false);
 	}
 
 	GOPtr plane = SceneManager::createGameObject("Floor");
-	plane->addComponent<RigidBody>(plane->getComponent<Transform>(),
-								   new Plane(glm::vec3(0, 1, 0), 0.04f), 0.f);
+	CompManager::addRigidBody(plane, new Plane(Vec3(0, 1, 0), 0.04f), 0.f);
 
-	Renderer::resizePipelineBuffers(Settings::getWindowWidth(),
-									Settings::getWindowHeight());
+	Renderer::Camera::resizePipelineBuffers(Settings::getWindowWidth(),
+											Settings::getWindowHeight());
 }
 
 Game::~Game()
@@ -85,20 +74,23 @@ Game::~Game()
 }
 
 void Game::update(float deltaTime)
-{		
+{
 	System::update(deltaTime);
 }
 
 void Game::draw()
 {
-	Renderer::renderFrame();
-	Physics::draw();
+	auto activeCamera = CompManager::getCamera(mCurrentViewer);
+	auto activeTrans  = CompManager::getTransform(mCurrentViewer);
+	Renderer::renderFrame(activeCamera->node);
+	Physics::draw(activeTrans, activeCamera);
 }
 
 void Game::resize(int width, int height)
 {
-	Renderer::resizePipelineBuffers(width, height);
-	Renderer::Camera::setViewportSize(Renderer::getCurrentCameraNode(),
+	auto activeCamera = CompManager::getCamera(mCurrentViewer);
+	Renderer::Camera::resizePipelineBuffers(width, height);
+	Renderer::Camera::setViewportSize(activeCamera,
 									  width,
 									  height);
 }

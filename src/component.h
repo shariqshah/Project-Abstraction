@@ -1,26 +1,26 @@
 #ifndef COMPONENT_H
 #define COMPONENT_H
 
-#include <iostream>
+// #include <iostream>
 
-#include "componentTypes.h"
+// #include "componentTypes.h"
 
-class Component
-{	
-protected:
+// class Component
+// {	
+// protected:
 	
-    ComponentType mType;
-	bool          mValid;
+//     ComponentType mType;
+// 	bool          mValid;
 	
-public:
-    virtual ~Component();
-    Component();
+// public:
+//     virtual ~Component();
+//     Component();
     
-    ComponentType getType() const;
-	bool isValid();
+//     ComponentType getType() const;
+// 	bool isValid();
 
-	virtual const std::string getName();
-	const static std::string sName;
-};
+// 	virtual const std::string getName();
+// 	const static std::string sName;
+// };
 
 #endif // COMPONENT_H

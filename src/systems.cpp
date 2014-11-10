@@ -5,8 +5,8 @@ namespace System
 	namespace
 	{
 		static bool sPhysicsEnabled;
-		static Sphere *tmpShape = new Sphere(1.f);
-		static std::shared_ptr<Model> suzanneModel;
+		static Sphere* tmpShape = new Sphere(1.f);
+		static CModel* suzanneModel;
 		static CollisionShape* statCollMesh;
 		static CollisionShape* hullCollMesh;
 	}
@@ -14,8 +14,8 @@ namespace System
 	void initialize()
 	{
 		sPhysicsEnabled = true;
-		Physics::initialize(glm::vec3(0.f, -9.8f, 0.f));
-		suzanneModel = std::make_shared<Model>("models/test/test.scene.xml");
+		Physics::initialize(Vec3(0.f, -9.8f, 0.f));
+		suzanneModel = Renderer::Model::create("models/test/test.scene.xml");
 		statCollMesh = new CollisionMesh(suzanneModel, true);
 		hullCollMesh = new CollisionMesh(suzanneModel, false);
 
@@ -25,145 +25,142 @@ namespace System
 		Sqrat::RootTable(ScriptEngine::getVM()).Bind("Log", logTable);
 	}
 	
-	glm::vec3 generateRandom()
+	Vec3 generateRandom()
 	{
 		float r = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
 		float g = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
 		float b = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
 
-		return glm::vec3 (r, g, b);
+		return Vec3 (r, g, b);
 	}
 
 	void debug(float deltaTime, GameObject *gameObject)
 	{
-		auto transform = gameObject->getComponent<Transform>();
+		auto transform = CompManager::getTransform(gameObject);
 		
-		if(gameObject->hasComponents((long)ComponentType::LIGHT))
+	// 	if(gameObject->hasComponents((long)ComponentType::LIGHT))
+	// 	{
+	// 		auto light = gameObject->getComponent<Light>();
+			
+	// 		float increment = 10.f * deltaTime;
+	// 		Vec3 translation(0.f);
+			
+	// 		if(Input::isReleased(Input::Key::P) && gameObject->compareTag("child"))
+	// 			transform->setUpVector(Vec3(0, 1, 0));
+
+	// 		if(Input::isReleased(Input::Key::F) && gameObject->compareTag("child"))
+	// 			transform->setLookAt(Vec3(0));
+	// 			// transform->rotate(Vec3(0, 1, 0), increment * 5);
+
+	// 		if(Input::isReleased(Input::Key::V) && gameObject->compareTag("child"))
+	// 			SceneManager::setParentAsRoot(gameObject);
+			
+	// 		if(Input::isPressed(Input::Key::M))
+	// 			transform->rotate(Vec3(1, 0, 0),  increment * 5);
+	// 		if(Input::isPressed(Input::Key::N))
+	// 			transform->rotate(Vec3(1, 0, 0), -increment * 5);
+
+	// 		if(Input::isReleased(Input::Key::K1))
+	// 			light->setFov(90);
+	// 		if(Input::isReleased(Input::Key::K2))
+	// 			light->setFov(1802);
+	// 		if(Input::isReleased(Input::Key::K3))
+	// 			light->setFov(270);
+	// 		if(Input::isReleased(Input::Key::K4))
+	// 			light->setFov(360);
+
+	// 		if(light->isShadowCaster())
+	// 		{
+	// 			if(Input::isReleased(Input::Key::NP_PLUS))
+	// 				light->setShadowMapCount(light->getShadowMapCount() + 1);
+	// 			if(Input::isReleased(Input::Key::NP_MINUS))
+	// 				light->setShadowMapCount(light->getShadowMapCount() - 1);
+	// 			Renderer::addText(std::to_string(light->getShadowMapCount()));
+	// 		}
+	// 	}
+
+		if(GO::hasComponent(gameObject, ComponentType::CAMERA))
 		{
-			auto light = gameObject->getComponent<Light>();
-			
-			float increment = 10.f * deltaTime;
-			glm::vec3 translation(0.f);
-			
-			if(Input::isReleased(Input::Key::P) && gameObject->compareTag("child"))
-				transform->setUpVector(glm::vec3(0, 1, 0));
-
-			if(Input::isReleased(Input::Key::F) && gameObject->compareTag("child"))
-				transform->setLookAt(glm::vec3(0));
-				// transform->rotate(glm::vec3(0, 1, 0), increment * 5);
-
-			if(Input::isReleased(Input::Key::V) && gameObject->compareTag("child"))
-				SceneManager::setParentAsRoot(gameObject);
-			
-			if(Input::isPressed(Input::Key::M))
-				transform->rotate(glm::vec3(1, 0, 0),  increment * 5);
-			if(Input::isPressed(Input::Key::N))
-				transform->rotate(glm::vec3(1, 0, 0), -increment * 5);
-
-			if(Input::isReleased(Input::Key::K1))
-				light->setFov(90);
-			if(Input::isReleased(Input::Key::K2))
-				light->setFov(1802);
-			if(Input::isReleased(Input::Key::K3))
-				light->setFov(270);
-			if(Input::isReleased(Input::Key::K4))
-				light->setFov(360);
-
-			if(light->isShadowCaster())
-			{
-				if(Input::isReleased(Input::Key::NP_PLUS))
-					light->setShadowMapCount(light->getShadowMapCount() + 1);
-				if(Input::isReleased(Input::Key::NP_MINUS))
-					light->setShadowMapCount(light->getShadowMapCount() - 1);
-				Renderer::addText(std::to_string(light->getShadowMapCount()));
-			}
-		}
-
-		if(gameObject->hasComponents((long)ComponentType::CAMERA))
-		{
-			auto camera = gameObject->getComponent<Camera>();
+			auto camera = CompManager::getCamera(gameObject);
 			
 			if(Input::isReleased(Input::Key::K5))
-				camera->setPipeline(Pipeline::FORWARD);
+				Renderer::Camera::setPipeline(camera, Pipeline::FORWARD);
 			if(Input::isReleased(Input::Key::K6))
-				camera->setPipeline(Pipeline::DEFERRED);
+				Renderer::Camera::setPipeline(camera, Pipeline::DEFERRED);
 			if(Input::isReleased(Input::Key::K7))
-				camera->setPipeline(Pipeline::HDR);
-			if(Input::isReleased(Input::Key::Z))
-				camera->setOcclusionCulling(true);
-			if(Input::isReleased(Input::Key::X))
-				camera->setOcclusionCulling(false);
+				Renderer::Camera::setPipeline(camera, Pipeline::HDR);
 
 			if(Input::isReleased(Input::Key::ENTER))
 			{
 				GOPtr newLight = SceneManager::createGameObject("newLight");
-				newLight->setTag("child");
+				newLight->tag = "child";
 				// auto light = newLight->addComponent<Light>(newLight->getNode(),
 				// 										   "newLight");
-				auto model = newLight->addComponent<Model>(newLight->getNode(),
-														   "models/test/test.scene.xml");
+				auto model = CompManager::addModel(newLight, "models/test/test.scene.xml");
 				// light->setColor(generateRandom());
 				// light->setShadowCaster(false);
-				auto lightTransform = newLight->getComponent<Transform>();
+				auto lightTransform = CompManager::getTransform(newLight);
 				
 				// auto falcon = SceneManager::find("Falcon");
 				// bool success = SceneManager::setParent(newLight.get(), falcon.get());
-				lightTransform->setPosition(transform->getPosition());
-				lightTransform->setForward(transform->getForward());
-				//lightTransform->translate(glm::vec3(0, 20, 0));
+				Transform::setPosition(lightTransform, transform->position);
+				Transform::setForward(lightTransform, transform->forward);
+				//lightTransform->translate(Vec3(0, 20, 0));
 				// success ? Log::message("success") : Log::message("fail");
+
+				CRigidBody rigidBody = -1;
 				if(Input::isPressed(Input::Key::LCTRL))
 				{
-					auto rigidBody = newLight->addComponent<RigidBody>(lightTransform,
-																	   statCollMesh,
-																	   0.f);
-					rigidBody->applyForce(transform->getForward() * 2000.f);
+					rigidBody = CompManager::addRigidBody(newLight,
+														  statCollMesh,
+														  0.f);
 				}
 				else if(Input::isPressed(Input::Key::LSHIFT))
 				{
-					auto rigidBody = newLight->addComponent<RigidBody>(lightTransform,
-																	   hullCollMesh);
-					rigidBody->applyForce(transform->getForward() * 2000.f);
+					rigidBody = CompManager::addRigidBody(newLight,
+														  hullCollMesh);
 				}
 				else
 				{
-					auto rigidBody = newLight->addComponent<RigidBody>(lightTransform,
-																	   tmpShape);
-					rigidBody->applyForce(transform->getForward() * 2000.f);
+					rigidBody = CompManager::addRigidBody(newLight,
+														  tmpShape);
 				}
+
+				Physics::RigidBody::applyForce(rigidBody,
+											   transform->forward * 2000.f);
 					
 			}
 		}
 
-		if(gameObject->compareTag("Falcon"))
-		{
-			glm::vec3 translation(0.f);
-			float increment = 10.f * deltaTime;
+	// 	if(gameObject->compareTag("Falcon"))
+	// 	{
+	// 		Vec3 translation(0.f);
+	// 		float increment = 10.f * deltaTime;
 				
-			if(Input::isPressed(Input::Key::I))
-				translation.z -= increment;
-			if(Input::isPressed(Input::Key::K))
-				translation.z += increment;
-			if(Input::isPressed(Input::Key::J))
-				translation.x -= increment;
-			if(Input::isPressed(Input::Key::L))
-				translation.x += increment;
-			if(Input::isPressed(Input::Key::U))
-				translation.y += increment;
-			if(Input::isPressed(Input::Key::O))
-				translation.y -= increment;
+	// 		if(Input::isPressed(Input::Key::I))
+	// 			translation.z -= increment;
+	// 		if(Input::isPressed(Input::Key::K))
+	// 			translation.z += increment;
+	// 		if(Input::isPressed(Input::Key::J))
+	// 			translation.x -= increment;
+	// 		if(Input::isPressed(Input::Key::L))
+	// 			translation.x += increment;
+	// 		if(Input::isPressed(Input::Key::U))
+	// 			translation.y += increment;
+	// 		if(Input::isPressed(Input::Key::O))
+	// 			translation.y -= increment;
 			
 
-			if(translation.x != 0 || translation.y != 0 || translation.z != 0)
-				transform->translate(translation, Transform::Space::LOCAL);
+	// 		if(translation.x != 0 || translation.y != 0 || translation.z != 0)
+	// 			transform->translate(translation, Transform::Space::LOCAL);
 
-			auto rBody = gameObject->getComponent<RigidBody>();
+	// 		auto rBody = gameObject->getComponent<RigidBody>();
 			
-			if(Input::isReleased(Input::Key::G))
-				rBody->setKinematic(true);
-			if(Input::isReleased(Input::Key::H))
-				rBody->setKinematic(false);
-		}
+	// 		if(Input::isReleased(Input::Key::G))
+	// 			rBody->setKinematic(true);
+	// 		if(Input::isReleased(Input::Key::H))
+	// 			rBody->setKinematic(false);
+	// 	}
 	}
 
 	void syncPhysicsTransform(GameObject* gameObject)
@@ -171,24 +168,22 @@ namespace System
 		// check if the gameobject's transform has been modified by
 		// someone other than bullet. if so, then update rigidbody's
 		// transform and force it to activate.
-		if(gameObject->hasComponents((long)ComponentType::RIGIDBODY))
+		if(GO::hasComponent(gameObject, ComponentType::RIGIDBODY))
 		{
-			auto transform  = gameObject->getComponent<Transform>();
-			auto rBody      = gameObject->getComponent<RigidBody>();
+			auto transform  = CompManager::getTransform(gameObject);
+			auto rBody      = CompManager::getRigidBody(gameObject);
 
-			if(Renderer::isTransformed(gameObject->getNode()))
+			if(Renderer::isTransformed(gameObject->node))
 			{
-				glm::mat4 transformMat = transform->getTransformMat();
-				rBody->setTransform(transformMat);
-				rBody->setActivation(true);
+				Mat4 transformMat = transform->transMat;
+				Physics::RigidBody::setTransform(rBody, transformMat);
+				Physics::RigidBody::setActivation(rBody, true);
 			}
 		}
 	}
 	
 	void update(float deltaTime, GameObject* gameObject)
-	{
-		System::CameraSystem::updateFreeCamera(deltaTime, gameObject);
-		
+	{	
 		debug(deltaTime, gameObject);
 		syncPhysicsTransform(gameObject);	
 	}
@@ -216,13 +211,14 @@ namespace System
 		if(Input::isReleased(Input::Key::F10))
 			Log::setEnabled(false);
 		
+		System::CameraSystem::updateFreeCamera(deltaTime);
 		
 		GOMap* sceneObjects = SceneManager::getSceneObjects();
 		for(GOMap::iterator it = sceneObjects->begin();
 			it != sceneObjects->end();
 			it++)
 		{
-			update(deltaTime, it->second.get());
+			update(deltaTime, it->second);
 		}
 
 		if(Input::isReleased(Input::Key::C))
@@ -240,7 +236,8 @@ namespace System
 	void cleanup()
 	{
 		Physics::cleanup();
-		suzanneModel.reset();
+		Renderer::Model::remove(*suzanneModel);
+		delete suzanneModel;
 		ScriptEngine::cleanup();
 	}
 }

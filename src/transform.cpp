@@ -1,207 +1,135 @@
 #include "transform.h"
 
-const std::string Transform::sName   = "Transform";
-const glm::vec3   Transform::UNIT_X  = glm::vec3(1, 0, 0);
-const glm::vec3   Transform::UNIT_Y  = glm::vec3(0, 1, 0);
-const glm::vec3   Transform::UNIT_Z  = glm::vec3(0, 0, 1);
-const float       Transform::epsilon = 0.005;
 
-Transform::Transform(Node node) : Transform(node,
-											glm::vec3(0.f, 0.f, 15.f),
-											glm::vec3(1.0f),
-											glm::quat(),
-											glm::vec3(0.f, 0.f, -5.f),
-											glm::vec3(0.f, 1.f, 0.f),
-											glm::vec3(0.f, 0.f, -1.f))
-{}
-
-
-Transform::Transform(Node node,
-					 glm::vec3 position,
-                     glm::vec3 scale,
-                     glm::quat rotation,
-                     glm::vec3 lookAt,
-                     glm::vec3 up,
-                     glm::vec3 forward)
+namespace Transform
 {
-	mNode = node;
-    mPosition = position;
-    mScale = scale;
-    mRotation = rotation;
-    mLookAt = lookAt;
-    mUp = up;
-    mForward = forward;
-    mType = ComponentType::TRANSFORM;
-
-	updateTransformMatrix();
-}
-
-void Transform::setPosition(glm::vec3 position, bool updateTransMat)
-{
-    mPosition = position;
-
-	if(updateTransMat)
-		updateTransformMatrix();
-}
-
-void Transform::translate(glm::vec3 offset, Space transformSpace)
-{
-    if(transformSpace == Space::LOCAL)
-    {
-        offset = mRotation * offset;
-    }
-    mPosition += offset;
-
-    updateLookAt();
-	updateTransformMatrix();
-}
-
-glm::vec3 Transform::getForward()
-{
-    return mForward;
-}
-
-void Transform::setForward(glm::vec3 direction)
-{
-	//TODO: Fix this function by comparing with jDoom
-    glm::vec3 newForward = glm::normalize(direction);
-    float     angle      = glm::dot(mForward, newForward);
-	
-    //angle = glm::clamp(angle, -1.f, 1.f);
-    angle = glm::acos(angle);
-	angle = glm::degrees(-angle);
-
-	if(angle > epsilon || angle < -epsilon)
+	namespace
 	{
-		glm::vec3 rotationAxis = glm::cross(newForward, mForward);
-		rotate(glm::normalize(rotationAxis), angle);
+		static const float epsilon = 0.005f;
 	}
-}
 
-void Transform::updateLookAt()
-{
-    glm::vec3 newLookAt = mRotation * -UNIT_Z;
-    mLookAt = mPosition + newLookAt;
-}
-
-void Transform::updateUpVector()
-{
-    mUp = glm::normalize(mRotation * UNIT_Y);
-}
-
-void Transform::updateForward()
-{
-    mForward = glm::normalize(mRotation * -UNIT_Z);
-}
-
-void Transform::rotate(glm::vec3 axis, float angle, Space transformSpace)
-{
-	angle = glm::radians(angle);
-    if(transformSpace == Space::LOCAL)
-        mRotation *= glm::normalize(glm::angleAxis(angle, axis));
-    else
-        mRotation  = glm::normalize(glm::angleAxis(angle, axis))
-                         * mRotation;
-
-    updateUpVector();
-    updateLookAt();
-    updateForward();
-
-	updateTransformMatrix();
-}
-
-void Transform::setScale(glm::vec3 newScale, bool updateTransMat)
-{
-    mScale = newScale;
-
-	if(updateTransMat)
-		updateTransformMatrix();
-}
-
-void Transform::setLookAt(glm::vec3 lookAt)
-{
-	glm::vec3 direction = lookAt - mPosition;	
-	setForward(glm::normalize(direction));
-}
-
-void Transform::setUpVector(glm::vec3 up)
-{
-    glm::vec3 newUp = glm::normalize(up);
-    float     angle = glm::dot(mUp, newUp);
-
-    angle = glm::acos(angle);
-	angle = glm::degrees(-angle);
-	
-	if(angle > epsilon || angle < -epsilon)
+	void updateTransformMatrix(CTransform* transform)
 	{
-		glm::vec3 rotationAxis = glm::cross(newUp, mUp);
-		rotate(glm::normalize(rotationAxis), angle);
+		Mat4 translationMat = glm::translate(Mat4(1.0f), transform->position);
+		Mat4 scaleMat       = glm::scale(Mat4(1.0f), transform->scale);
+		Mat4 rotationMat    = glm::toMat4(glm::normalize(transform->rotation));
+
+		transform->transMat = translationMat * rotationMat * scaleMat;
+		Renderer::setNodeTransform(transform->node, transform->transMat);
 	}
-}
 
-void Transform::setRotation(glm::quat newRotation, bool updateTransMat)
-{
-    mRotation = newRotation;
+	void updateLookAt(CTransform* transform)
+	{
+		Vec3 newLookAt = transform->rotation * -UNIT_Z;
+		transform->lookAt = transform->position + newLookAt;
+	}
 
-    updateUpVector();
-    updateLookAt();
-    updateForward();
+	void updateUpVector(CTransform* transform)
+	{
+		transform->up = glm::normalize(transform->rotation * UNIT_Y);
+	}
 
-	if(updateTransMat)
-		updateTransformMatrix();
-}
+	void updateForward(CTransform* transform)
+	{
+		transform->forward = glm::normalize(transform->rotation * -UNIT_Z);
+	}
 
-void Transform::updateTransformMatrix()
-{
-    glm::mat4 translationMat = glm::translate(glm::mat4(1.0f), mPosition);
-    glm::mat4 scaleMat       = glm::scale(glm::mat4(1.0f), mScale);
-    glm::mat4 rotationMat    = glm::toMat4(glm::normalize(mRotation));
+	void setPosition(CTransform* transform, Vec3 position, bool updateTransMat)
+	{
+		transform->position = position;
 
-    mTransformMatrix = translationMat * rotationMat * scaleMat;
-	Renderer::setNodeTransform(mNode, mTransformMatrix);
-}
+		if(updateTransMat)
+			updateTransformMatrix(transform);
+	}
 
-glm::vec3 Transform::getPosition()
-{
-    return mPosition;
-}
+	void translate(CTransform* transform, Vec3 offset, Space transformSpace)
+	{
+		if(transformSpace == Space::LOCAL)
+			offset = transform->rotation * offset;
+		
+		transform->position += offset;
 
-glm::vec3 Transform::getScale()
-{
-    return mScale;
-}
+		updateLookAt(transform);
+		updateTransformMatrix(transform);
+	}
 
-glm::vec3 Transform::getLookAt()
-{
-    return mLookAt;
-}
+	void setForward(CTransform* transform, Vec3 direction)
+	{
+		//TODO: Fix this function by comparing with jDoom
+		Vec3  newForward = glm::normalize(direction);
+		float angle      = glm::dot(transform->forward, newForward);
+	
+		//angle = glm::clamp(angle, -1.f, 1.f);
+		angle = glm::acos(angle);
+		angle = glm::degrees(-angle);
 
-glm::vec3 Transform::getUpVector()
-{
-    return mUp;
-}
+		if(angle > epsilon || angle < -epsilon)
+		{
+			Vec3 rotationAxis = glm::cross(newForward, transform->forward);
+			rotate(transform, glm::normalize(rotationAxis), angle);
+		}
+	}
 
-glm::quat Transform::getRotation()
-{
-    return mRotation;
-}
+	void rotate(CTransform* transform, Vec3 axis, float angle, Space transformSpace)
+	{
+		angle = glm::radians(angle);
+		if(transformSpace == Space::LOCAL)
+			transform->rotation *= glm::normalize(glm::angleAxis(angle, axis));
+		else
+			transform->rotation  = glm::normalize(glm::angleAxis(angle, axis))*
+				                   transform->rotation;
 
-glm::vec3 Transform::getRotationVector()
-{
-	return glm::degrees(glm::eulerAngles(mRotation));
-}
+		updateUpVector(transform);
+		updateLookAt(transform);
+		updateForward(transform);
 
-glm::mat4 Transform::getTransformMat()
-{
-	return mTransformMatrix;
-}
+		updateTransformMatrix(transform);
+	}
 
-void Transform::resetTransformFlag()
-{
-	Renderer::resetTransformFlag(mNode);
-}
+	void setScale(CTransform* transform, Vec3 newScale, bool updateTransMat)
+	{
+		transform->scale = newScale;
 
-const std::string Transform::getName()
-{
-	return sName;
+		if(updateTransMat)
+			updateTransformMatrix(transform);
+	}
+
+	void setLookAt(CTransform* transform, Vec3 lookAt)
+	{
+		Vec3 direction = lookAt - transform->position;	
+		setForward(transform, glm::normalize(direction));
+	}
+
+	void setUpVector(CTransform* transform, Vec3 up)
+	{
+		Vec3  newUp = glm::normalize(up);
+		float angle = glm::dot(transform->up, newUp);
+
+		angle = glm::acos(angle);
+		angle = glm::degrees(-angle);
+	
+		if(angle > epsilon || angle < -epsilon)
+		{
+			Vec3 rotationAxis = glm::cross(newUp, transform->up);
+			rotate(transform, glm::normalize(rotationAxis), angle);
+		}
+	}
+
+	void setRotation(CTransform* transform, Quat newRotation, bool updateTransMat)
+	{
+		transform->rotation = newRotation;
+
+		updateUpVector(transform);
+		updateLookAt(transform);
+		updateForward(transform);
+
+		if(updateTransMat)
+			updateTransformMatrix(transform);
+	}
+
+	void resetTransformFlag(CTransform* transform)
+	{
+		Renderer::resetTransformFlag(transform->node);
+	}
+
 }

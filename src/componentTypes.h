@@ -1,14 +1,15 @@
 #ifndef COMPONENTTYPES_H
 #define COMPONENTTYPES_H
 
-enum class ComponentType : long
+enum class ComponentType : int
 {
-    NO_COMPONENT = 0,
-	TRANSFORM    = 1 << 0,
-	CAMERA       = 1 << 1,
-	MODEL        = 1 << 2,
-	LIGHT        = 1 << 3,
-	RIGIDBODY    = 1 << 4
+    EMPTY          = -1,
+	TRANSFORM      =  1,
+	CAMERA         =  2,
+	MODEL          =  3,
+	LIGHT          =  4,
+	RIGIDBODY      =  5,
+	NUM_COMPONENTS =  6
 };
 
 #endif // COMPONENTTYPES_H
