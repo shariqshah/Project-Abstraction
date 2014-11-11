@@ -1,4 +1,15 @@
 #include "game.h"
+#include "systems.h"
+#include "renderer.h"
+#include "camera.h"
+#include "model.h"
+#include "physics.h"
+#include "light.h"
+#include "transform.h"
+#include "scenemanager.h"
+#include "gameobject.h"
+#include "componentmanager.h"
+#include "camerasystems.h"
 
 Game::Game(std::string path)
 {	

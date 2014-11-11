@@ -1,4 +1,8 @@
 #include "scenemanager.h"
+#include "gameobject.h"
+#include "renderer.h"
+#include "componentmanager.h"
+#include "transform.h"
 
 namespace SceneManager
 {

@@ -5,18 +5,20 @@
 #include "../include/glm/gtc/type_ptr.hpp"
 #include "../include/bullet/BulletCollision/CollisionShapes/btShapeHull.h"
 // #include "../include/bullet/btGImpactConvexDecompositionShape.h"
+#include "../include/bullet/btBulletDynamicsCommon.h"
 
 #include "physicsdebugdrawer.h"
 #include "utilities.h"
-#include "transform.h"
 #include "model.h"
 
-typedef btDiscreteDynamicsWorld PhysicsWorld;
-typedef int32_t                CRigidBody;
-
-class  MotionState;
+class  btDiscreteDynamicsWorld;
+class  btMotionState;
 class  CollisionShape;
 struct CCamera;
+struct CTransform;
+
+typedef btDiscreteDynamicsWorld PhysicsWorld;
+typedef int32_t                 CRigidBody;
 
 namespace Physics
 {

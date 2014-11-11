@@ -1,5 +1,12 @@
 #include "componentmanager.h"
 #include "motionstate.h"
+#include "gameobject.h"
+#include "camera.h"
+#include "model.h"
+#include "light.h"
+#include "physics.h"
+#include "transform.h"
+#include "renderer.h"
 
 namespace CompManager
 {

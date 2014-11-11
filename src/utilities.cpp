@@ -1,8 +1,9 @@
 #include "utilities.h"
+#include "../include/bullet/btBulletDynamicsCommon.h"
 
 namespace Utils
 {	
-    const std::string toString(glm::vec3 vector)
+    const std::string toString(const Vec3 vector)
     {
         std::string vectorString;
         vectorString = "(" + std::to_string(vector.x) + ", " +
@@ -12,7 +13,7 @@ namespace Utils
         return vectorString;
     }
 
-	const std::string toString(glm::quat quat)
+	const std::string toString(const Quat quat)
 	{
 		std::string quatString;
         quatString = "(" + std::to_string(quat.x) + ", " +
@@ -23,7 +24,7 @@ namespace Utils
         return quatString;
 	}
 
-    btVector3 toBullet(glm::vec3 glmVec3)
+    btVector3 toBullet(const Vec3 glmVec3)
     {
         btVector3 bulletVec3(btScalar(glmVec3.x),
                              btScalar(glmVec3.y),
@@ -31,7 +32,7 @@ namespace Utils
         return bulletVec3;
     }
 
-    btQuaternion toBullet(glm::quat glmQuat)
+    btQuaternion toBullet(const Quat glmQuat)
     {
         btQuaternion bulletQuat(btScalar(glmQuat.x),
                                 btScalar(glmQuat.y),
@@ -40,24 +41,24 @@ namespace Utils
         return bulletQuat;
     }
 
-    glm::vec3 toGlm(btVector3 bulletVec3)
+    Vec3 toGlm(const btVector3 bulletVec3)
     {
-        glm::vec3 glmVec3(bulletVec3.x(),
+        Vec3 glmVec3(bulletVec3.x(),
                           bulletVec3.y(),
                           bulletVec3.z());
         return glmVec3;
     }
 
-    glm::quat toGlm(btQuaternion bulletQuat)
+    Quat toGlm(const btQuaternion bulletQuat)
     {
-        glm::quat glmQuat(bulletQuat.w(),
+        Quat glmQuat(bulletQuat.w(),
                           bulletQuat.x(),
                           bulletQuat.y(),
                           bulletQuat.z());
         return glmQuat;
     }
 
-    const std::string toString(btVector3 vector)
+    const std::string toString(const btVector3 vector)
     {
         std::string vectorString;
         vectorString = "(" + std::to_string(vector.x()) + ", " +
@@ -67,7 +68,7 @@ namespace Utils
         return vectorString;
     }
 
-	btVector3 toBullet(const glm::vec3 *glmVec3)
+	btVector3 toBullet(const Vec3 *glmVec3)
     {
         btVector3 bulletVec3(btScalar(glmVec3->x),
                              btScalar(glmVec3->y),
@@ -75,7 +76,7 @@ namespace Utils
         return bulletVec3;
     }
     
-    const std::string toString(glm::vec4 vector)
+    const std::string toString(const Vec4 vector)
     {
         std::string vectorString;
         vectorString = "(" + std::to_string(vector.x) + ", " +
@@ -86,7 +87,7 @@ namespace Utils
         return vectorString;
     }
 
-    const std::string toString(const glm::vec3 *vector)
+    const std::string toString(const Vec3 *vector)
     {
         std::string vectorString;
         vectorString = "(" + std::to_string(vector->x) + ", " +

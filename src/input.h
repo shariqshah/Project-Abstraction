@@ -1,9 +1,6 @@
 #ifndef _input_H_
 #define _input_H_
 
-#include <vector>
-#include <algorithm>
-
 #include "../include/SDL2/SDL.h"
 
 namespace Input

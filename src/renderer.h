@@ -2,10 +2,10 @@
 #define RENDERER_H
 
 #define GLM_FORCE_RADIANS
-
 #include "../include/glm/glm.hpp"
 #include "../include/glm/gtc/quaternion.hpp"
 #include "../include/glm/gtc/type_ptr.hpp"
+
 #include "../include/horde3d/Horde3D.h"
 #include "../include/horde3d/Horde3DUtils.h"
 

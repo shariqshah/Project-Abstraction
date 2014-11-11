@@ -1,8 +1,7 @@
 #ifndef _camerasystems_h
 #define _camerasystems_h
 
-#include "componentmanager.h"
-#include "input.h"
+struct GameObject;
 
 namespace System
 {

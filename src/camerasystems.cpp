@@ -1,4 +1,10 @@
 #include "camerasystems.h"
+#include "componentmanager.h"
+#include "input.h"
+#include "transform.h"
+#include "gameobject.h"
+#include "renderer.h"
+#include "utilities.h"
 
 namespace System
 {
@@ -7,6 +13,7 @@ namespace System
 		namespace
 		{
 			const static  float cMaxUpDownRot   = 80.f;
+			
 			static float sTotalUpDownRot = 0.f;
 			static float sMovSpeed       = 20.f;
 			static float sRotSpeed       = 1.2f;

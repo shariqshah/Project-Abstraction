@@ -4,8 +4,11 @@
 #include <algorithm>
 #include <unordered_map>
 
-#include "componentmanager.h"
+#include "../include/horde3d/Horde3D.h"
 
+struct GameObject;
+
+typedef H3DNode                         Node;
 typedef GameObject*                     GOPtr;
 typedef std::unordered_map<Node, GOPtr> GOMap;
 typedef std::vector<GOPtr>              GOArray;

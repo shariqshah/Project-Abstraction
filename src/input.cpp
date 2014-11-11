@@ -1,3 +1,6 @@
+#include <vector>
+#include <algorithm>
+
 #include "input.h"
 
 namespace Input

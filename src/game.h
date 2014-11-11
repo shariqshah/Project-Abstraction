@@ -1,7 +1,11 @@
 #ifndef _game_H_
 #define _game_H_
 
-#include "systems.h"
+#include <iostream>
+
+struct GameObject;
+
+typedef GameObject* GOPtr;
 
 class Game
 {

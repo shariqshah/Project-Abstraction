@@ -1,5 +1,7 @@
 #include "game.h"
 #include "settings.h"
+#include "input.h"
+#include "renderer.h"
 
 //========================================================> Globals
 SDL_Window*   window = NULL;
@@ -87,8 +89,8 @@ int main(int argc, char** args)
     }
 
     //Free resources
-	std::cout<<"Program exiting!"<<std::endl;
     close();
+	std::cout<<"Program exiting!"<<std::endl;
 
     return 0;
 }

@@ -6,21 +6,29 @@
 #define GLM_FORCE_RADIANS
 #include "../include/glm/glm.hpp"
 #include "../include/glm/gtc/quaternion.hpp"
-#include "../include/bullet/btBulletDynamicsCommon.h"
+
+typedef glm::vec2 Vec2;
+typedef glm::vec3 Vec3;
+typedef glm::vec4 Vec4;
+typedef glm::mat4 Mat4;
+typedef glm::quat Quat;
+
+class btVector3;
+class btQuaternion;
 
 namespace Utils
 {   
-    const std::string toString(glm::vec3 vector);
-    const std::string toString(const glm::vec3 *vector);
-    const std::string toString(glm::vec4 vector);
-	const std::string toString(glm::quat quat);
-    const std::string toString(btVector3 vector);
+    const std::string toString(const Vec3  vector);
+    const std::string toString(const Vec3* vector);
+    const std::string toString(const Vec4  vector);
+	const std::string toString(const Quat  quat);
+    const std::string toString(const btVector3 vector);
 
-    btVector3    toBullet(glm::vec3 glmVec3);
-    btQuaternion toBullet(glm::quat glmQuat);
+    btVector3    toBullet(const Vec3 glmVec3);
+    btQuaternion toBullet(const Quat glmQuat);
 
-    glm::vec3    toGlm(btVector3 bulletVec3);
-    glm::quat    toGlm(btQuaternion bulletQuat);
+    Vec3 toGlm(const btVector3 bulletVec3);
+    Quat toGlm(const btQuaternion bulletQuat);
 }
 
 #endif // UTILITIES_H

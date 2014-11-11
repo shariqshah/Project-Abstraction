@@ -1,11 +1,17 @@
 #ifndef _componentmanager_H_
 #define _componentmanager_H_
 
-#include "gameobject.h"
-#include "camera.h"
-#include "model.h"
-#include "light.h"
-#include "physics.h"
+#include <iostream>
+#include "componentTypes.h"
+
+typedef int32_t CRigidBody;
+
+struct CCamera;
+struct CTransform;
+struct CModel;
+struct CLight;
+struct GameObject;
+class  CollisionShape;
 
 namespace CompManager
 {	
@@ -18,8 +24,8 @@ namespace CompManager
 	CLight*     addLight(GameObject* gameObject, const std::string& name);
 	CRigidBody  addRigidBody(GameObject* gameObject,
 							 CollisionShape* shape,
-							 float mass        = 1.f,
-							 float restitution = 0.5f);
+							 const float mass        = 1.f,
+							 const float restitution = 0.5f);
 	
 	CTransform* getTransform(GameObject* gameObject);
 	CCamera*    getCamera(GameObject* gameObject);

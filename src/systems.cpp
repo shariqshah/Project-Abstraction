@@ -1,4 +1,16 @@
 #include "systems.h"
+#include "scenemanager.h"
+#include "componentmanager.h"
+#include "scriptengine.h"
+#include "input.h"
+#include "camerasystems.h"
+#include "physics.h"
+#include "gameobject.h"
+#include "light.h"
+#include "model.h"
+#include "transform.h"
+#include "renderer.h"
+#include "camera.h"
 
 namespace System
 {
@@ -15,6 +27,7 @@ namespace System
 	{
 		sPhysicsEnabled = true;
 		Physics::initialize(Vec3(0.f, -9.8f, 0.f));
+		CompManager::initailize();
 		suzanneModel = Renderer::Model::create("models/test/test.scene.xml");
 		statCollMesh = new CollisionMesh(suzanneModel, true);
 		hullCollMesh = new CollisionMesh(suzanneModel, false);
@@ -185,7 +198,9 @@ namespace System
 	void update(float deltaTime, GameObject* gameObject)
 	{	
 		debug(deltaTime, gameObject);
-		syncPhysicsTransform(gameObject);	
+		syncPhysicsTransform(gameObject); // Should be the last thing so as to
+		                                  // do to let other systems modify the
+		                                  // transform then sync Physics.
 	}
 
 	void update(float deltaTime)
@@ -235,6 +250,7 @@ namespace System
 
 	void cleanup()
 	{
+		CompManager::cleanup();
 		Physics::cleanup();
 		Renderer::Model::remove(*suzanneModel);
 		delete suzanneModel;
