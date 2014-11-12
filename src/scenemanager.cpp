@@ -40,8 +40,7 @@ namespace SceneManager
 		}
 		else
 		{
-			Log::error(Log::ErrorLevel::MEDIUM,
-					   name + " could not be added to scene");
+			Log::error("SceneManager", name + " could not be added to scene");
 			return false;
 		}
 	}
@@ -67,8 +66,7 @@ namespace SceneManager
 			return true;
 		}
 
-		Log::error(Log::ErrorLevel::LOW,
-				   "GO " + std::to_string(node) +
+		Log::error("SceneManager", "GO " + std::to_string(node) +
 				   " not found in scene so cannot be removed.");
 		return false;
 	}
@@ -96,8 +94,7 @@ namespace SceneManager
 			}
 		}
 
-		Log::error(Log::ErrorLevel::LOW,
-				   name + " not found in scene so cannot be removed.");
+		Log::error("SceneManager", name + " not found in scene so cannot be removed.");
 		return false;
 	}
 	

@@ -20,7 +20,7 @@ namespace Renderer
 											shadowContext.c_str());
 
 			if(newLight.node == 0)
-				Log::error(Log::ErrorLevel::LOW, name + " node not created!");
+				Log::error("Light", name + " node not created!");
 			else
 			{
 				setRadius(&newLight, newLight.radius);

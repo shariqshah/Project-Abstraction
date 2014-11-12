@@ -63,20 +63,10 @@ namespace Renderer
 										camera.node),
 							  cameras.end());
 
-				// if(camera.node == sCurrentCamera->node)
-				// {
-				// 	if(cameras.empty())
-				// 	{
-				// 		Log::warning("No active cameras left in the scene!");
-				// 		sCurrentCamera = NULL;
-				// 	}
-				// }
-
 				Renderer::removeNode(camera.node);
 			}
 			else
-				Log::error(Log::ErrorLevel::MEDIUM,
-						   "Could not remove camera. No cameras in scene!");
+				Log::error("Camera", "Could not remove camera. No cameras in scene!");
 		}
 
 		void resizePipelineBuffers(int width, int height)
@@ -93,12 +83,6 @@ namespace Renderer
 									 width,
 									 height);
 		}
-
-		// void setCurrentViewer(GameObject* viewer)
-		// {
-		// 	if(viewer && GO::hasComponent(viewer, ComponentType::CAMERA))
-		// 		sCurrentViewer = viewer;
-		// }
 		
 		void setViewportSize(CCamera* camera, int width, int height)
 		{
@@ -175,13 +159,6 @@ namespace Renderer
 		{
 			h3dSetNodeParamI(camera->node, H3DCamera::OrthoI, enable ? 1 : 0);
 		}
-
-		// CCamera* getCurrentCamera()
-		// {
-		// 	auto currentCamera = CompManager::getCamera(sCurrentViewer);
-		// 	return currentCamera;
-		// }
-
 	}
 }
 

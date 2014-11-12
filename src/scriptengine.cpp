@@ -1,4 +1,7 @@
 #include "scriptengine.h"
+#include <stdarg.h>
+
+#include "log.h"
 
 namespace ScriptEngine
 {
@@ -29,6 +32,7 @@ namespace ScriptEngine
 		vm = new Sqrat::SqratVM(1024);
 		vm->SetPrintFunc(printfunc, errorfunc);
 		sVmInstance = vm->GetVM();
+		Sqrat::DefaultVM::Set(vm->GetVM());
 	}
 
 	void cleanup()
@@ -44,16 +48,16 @@ namespace ScriptEngine
 
 	void runScript(const std::string& scriptName)
 	{
-		try
+		Sqrat::Script script(sVmInstance);
+		std::string error;
+		
+		if(script.CompileFile(scriptName, error))
 		{
-			Sqrat::Script script(sVmInstance);
-			script.CompileFile(scriptName);
-			script.Run();
+			if(!script.Run(error))
+				Log::error("Script Runtime", error);
 		}
-		catch(Sqrat::Error& e)
-		{
-			Log::error(Log::ErrorLevel::LOW, e.Message(sVmInstance));
-		}
+		else
+			Log::error("Script Compile", error);
 	}
 
 	

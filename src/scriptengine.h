@@ -1,13 +1,9 @@
-#ifndef _scriptengine_H_
-#define _scriptengine_H_
+#ifndef _scriptengine_H
+#define _scriptengine_H
 
-#include <iostream>
-#include <stdarg.h>
 #include <sqrat.h>
 #include <sqrat/sqratVM.h>
-
-#include "log.h"
-
+#include <iostream>
 
 typedef HSQUIRRELVM VM;
 

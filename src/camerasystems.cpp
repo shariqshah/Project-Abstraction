@@ -37,7 +37,6 @@ namespace System
 		void updateFreeCamera(float deltaTime)
 		{
 			auto transform = CompManager::getTransform(activeObject);
-			auto camera    = CompManager::getCamera(activeObject);
 			// if(!Input::isCursorLocked())
 			// 	Input::setCursorLock(true);
 					

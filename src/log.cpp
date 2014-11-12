@@ -13,21 +13,10 @@ namespace Log
 			std::cout<<"MESSAGE : " + message<<std::endl;
     }
 
-    void error(Log::ErrorLevel level, const std::string& error)
+    void error(const std::string& context, const std::string& error)
     {
 		if(isEnabled)
-		{
-			std::string levelString = "";
-
-			if(level == Log::ErrorLevel::LOW)
-				levelString = "LOW";
-			else if(level == Log::ErrorLevel::MEDIUM)
-				levelString = "MEDIUM";
-			else if(level == Log::ErrorLevel::CRITICAL)
-				levelString = "CRITICAL";
-
-			std::cout<<"ERROR " + levelString + " : " + error<<std::endl;
-		}
+			std::cout<<"ERROR " + context + " : " + error<<std::endl;
     }
 
 	void warning(const std::string& warningMessage)

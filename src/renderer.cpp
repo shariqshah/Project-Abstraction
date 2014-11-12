@@ -263,7 +263,7 @@ namespace Renderer
 				res = add(type, name);
 				
 				if(!loadAddedResources())
-					Log::error(Log::ErrorLevel::LOW, name + " not found!");
+					Log::error("Renderer", name + " not found!");
 				else
 					Log::message(name + " has been loaded!");
 			}
@@ -283,8 +283,7 @@ namespace Renderer
 												 value.w);
 			if(!success)
 			{
-				Log::error(Log::ErrorLevel::LOW,
-						   "could not set value for uniform " + name);
+				Log::error("Renderer", "could not set value for uniform " + name);
 				return false;
 			}
 

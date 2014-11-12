@@ -1,5 +1,5 @@
 #include "transform.h"
-
+#include "scriptengine.h"
 
 namespace Transform
 {
@@ -132,4 +132,45 @@ namespace Transform
 		Renderer::resetTransformFlag(transform->node);
 	}
 
+	void initialize()
+	{
+		Sqrat::RootTable().Bind("Vec3", Sqrat::Class<glm::vec3>()
+								.Var("x", &glm::vec3::x)
+								.Var("y", &glm::vec3::y)
+								.Var("z", &glm::vec3::z)
+								.Ctor()
+								.Ctor<float>()
+								.Ctor<int>()
+								.Ctor<int, int, int>()
+								.Ctor<float, float, float>());
+
+		Sqrat::RootTable().Bind("Quat", Sqrat::Class<glm::quat>()
+								.Var("x", &glm::quat::x)
+								.Var("y", &glm::quat::y)
+								.Var("z", &glm::quat::z)
+								.Var("w", &glm::quat::w));
+		
+		Sqrat::RootTable().Bind("CTransform", Sqrat::Class<CTransform>()
+								.Var("position", &CTransform::position)
+								.Var("scale",    &CTransform::scale)
+								.Var("rotation", &CTransform::rotation)
+								.Var("lookAt",   &CTransform::lookAt)
+								.Var("up",       &CTransform::up)
+								.Var("forawrd",  &CTransform::forward));
+
+		Sqrat::ConstTable().Enum("Space", Sqrat::Enumeration ()
+								 .Const("LOCAL", 0)
+								 .Const("WORLD", 1));
+
+		Sqrat::RootTable().Bind("Transform", Sqrat::Table(ScriptEngine::getVM())
+								.Func("translate", &translate)
+								.Func("rotate", &rotate)
+								.Func("scale", &setScale)
+								.Func("setLookAt", &setLookAt)
+								.Func("setRotation", &setRotation)
+								.Func("setUpVector", &setUpVector)
+								.Func("setForward", &setForward)
+								.Func("resetTransformFlag", &resetTransformFlag)
+								.Func("updateTransformMatrix", &updateTransformMatrix));
+	}
 }

@@ -16,11 +16,11 @@ namespace System
 {
 	namespace
 	{
-		static bool sPhysicsEnabled;
-		static Sphere* tmpShape = new Sphere(1.f);
-		static CModel* suzanneModel;
-		static CollisionShape* statCollMesh;
-		static CollisionShape* hullCollMesh;
+		static bool    sPhysicsEnabled      = true;
+		static Sphere* tmpShape             = NULL;
+		static CModel* suzanneModel         = NULL;
+		static CollisionShape* statCollMesh = NULL;
+		static CollisionShape* hullCollMesh = NULL;
 	}
 	
 	void initialize()
@@ -31,11 +31,14 @@ namespace System
 		suzanneModel = Renderer::Model::create("models/test/test.scene.xml");
 		statCollMesh = new CollisionMesh(suzanneModel, true);
 		hullCollMesh = new CollisionMesh(suzanneModel, false);
+		tmpShape = new Sphere(1.f);
 
 		ScriptEngine::initialize();
 		Sqrat::Table logTable(ScriptEngine::getVM());
 		logTable.Func("message", &Log::message);
 		Sqrat::RootTable(ScriptEngine::getVM()).Bind("Log", logTable);
+
+		Transform::initialize();
 	}
 	
 	Vec3 generateRandom()

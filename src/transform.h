@@ -1,5 +1,5 @@
-#ifndef _transform_H_
-#define _transform_H_
+#ifndef _transform_H
+#define _transform_H
 
 #define GLM_FORCE_RADIANS
 #include "../include/glm/gtx/transform.hpp"
@@ -32,7 +32,7 @@ namespace Transform
 	static const Vec3 UNIT_Y = Vec3(0, 1, 0);
 	static const Vec3 UNIT_Z = Vec3(0, 0, 1);
 	
-	enum class Space
+	enum Space
     {
         LOCAL = 0,
         WORLD
@@ -54,20 +54,17 @@ namespace Transform
     void setScale(CTransform* transform,
 				  Vec3        newScale,
 				  bool        updateTransMat = true);
-	
-    void setLookAt(CTransform* transform, Vec3 lookAt);
-
-	void setUpVector(CTransform* transform, Vec3 up);
 
 	void setRotation(CTransform* transform,
 					 Quat        newRotation,
 					 bool        updateTransMat = true);
 	
+    void setLookAt(CTransform* transform, Vec3 lookAt);
+	void setUpVector(CTransform* transform, Vec3 up);
     void setForward(CTransform* transform, Vec3 direction);
-	
 	void resetTransformFlag(CTransform* transform);
-
 	void updateTransformMatrix(CTransform* transform);
+	void initialize();
 }
 
 #endif

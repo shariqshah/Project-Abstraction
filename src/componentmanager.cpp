@@ -109,9 +109,8 @@ namespace CompManager
 
 		if(newLight.node == 0)
 		{
-			Log::error(Log::ErrorLevel::LOW,
-					   "Light could not be added to " + gameObject->name + \
-					   ". Check renderer logs.");
+			Log::error("CompManager", "Light could not be added to "
+					   + gameObject->name +	". Check renderer logs.");
 			return NULL;
 		}
 		else
@@ -146,8 +145,7 @@ namespace CompManager
 
 		if(newModel.resourceID == 0)
 		{
-			Log::error(Log::ErrorLevel::LOW,
-					   "Model could not be added to gameobject. Check renderer logs.");
+			Log::error("CompManager", "Model could not be added to gameobject. Check renderer logs.");
 			return NULL;
 		}
 		else
@@ -156,8 +154,7 @@ namespace CompManager
 												 gameObject->node);
 			if(newModel.node == 0)
 			{
-				Log::error(Log::ErrorLevel::LOW,
-						   "Model node could not be parented to GameObject. Check renderer logs.");
+				Log::error("CompManager", "Model node could not be parented to GameObject. Check renderer logs.");
 				return NULL;
 			}
 			else
@@ -214,8 +211,8 @@ namespace CompManager
 				}
 				else
 				{
-					Log::error(Log::ErrorLevel::LOW,
-							   "Camera could not be added to " + gameObject->name + " because of some renderer error. Check logs.");
+					Log::error("CompManager", "Camera could not be added to "
+							   + gameObject->name + " because of some renderer error. Check logs.");
 					return NULL;
 				}
 			}
@@ -228,8 +225,7 @@ namespace CompManager
 		}
 		else
 		{
-			Log::error(Log::ErrorLevel::LOW,
-					   "Camera could not be added to gameobject because it is NULL");
+			Log::error("CompManager", "Camera could not be added to gameobject because it is NULL");
 			return NULL;
 		}
 	}
@@ -270,8 +266,7 @@ namespace CompManager
 		}
 		else
 		{
-			Log::error(Log::ErrorLevel::LOW,
-					   "Transform could not be added to gameobject because it is NULL");
+			Log::error("CompManager", "Transform could not be added to gameobject because it is NULL");
 			return NULL;
 		} 
 		
@@ -325,12 +320,10 @@ namespace CompManager
 					sRigidBodyEmptyList.push_back(index);
 					break;
 				case ComponentType::NUM_COMPONENTS:
-					Log::error(Log::ErrorLevel::LOW, "Cannot remove invalid \
-                                                      component type");
+					Log::error("CompManager", "Cannot remove invalid component type");
 					break;
 				case ComponentType::EMPTY:
-					Log::error(Log::ErrorLevel::LOW, "Cannot remove invalid \
-                                                      component type");
+					Log::error("CompManager", "Cannot remove invalid component type");
 					break;
 				}
 			}
