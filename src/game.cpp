@@ -17,13 +17,13 @@ Game::Game(std::string path)
 	Renderer::Camera::initialize();
 	System::initialize();
 	
-	GOPtr falcon = SceneManager::createGameObject("Falcon");
+	GOPtr falcon = SceneManager::create("Falcon");
 	falcon->tag = "Falcon";
 	auto falMod = CompManager::addModel(falcon, "models/falcon/falcon.scene.xml");
 	auto falconTransform = CompManager::getTransform(falcon);
-	CompManager::addRigidBody(falcon, new CollisionMesh(falMod, false), 10);
+	CompManager::addRigidBody(falcon, new CollisionMesh(*falMod, false), 10);
 
-	GOPtr lightGO = SceneManager::createGameObject("LightGO");
+	GOPtr lightGO = SceneManager::create("LightGO");
 	CompManager::addModel(lightGO, "models/sphere/sphere.scene.xml");
 	auto goLight = CompManager::addLight(lightGO, "GOLight");
 	auto lTransform = CompManager::getTransform(lightGO);
@@ -33,10 +33,12 @@ Game::Game(std::string path)
 	Renderer::Light::setColor(goLight, Vec3(0.8f, 0.8f, 0.5f));
 	Renderer::Light::setRadius(goLight, 500);
 
-	GOPtr player = SceneManager::createGameObject("Player");
+	GOPtr player = SceneManager::create("Player");
 	player->tag = "FreeCamera";
 	auto playerTrans = CompManager::getTransform(player);
-	auto camera = CompManager::addCamera(player, "playerCamera");
+	auto playerLight = CompManager::addLight(player, "playerLight");
+	CompManager::addCamera(player, "playerCamera");
+	Renderer::Light::setColor(playerLight, Vec3(1, 0, 0));
 	Transform::setPosition(playerTrans, Vec3(-110, 85, 92));
 	System::CameraSystem::setActiveObject(player);
 	mCurrentViewer = player;
@@ -44,7 +46,7 @@ Game::Game(std::string path)
 	Sphere* sphere = new Sphere(1);
 	for(int i = 0; i < 10; i++)
 	{
-		GOPtr suzanne = SceneManager::createGameObject("Suzanne" +
+		GOPtr suzanne = SceneManager::create("Suzanne" +
 													   std::to_string(i));
 		suzanne->tag = "suzanne";
 		auto suzTransform = CompManager::getTransform(suzanne);
@@ -71,7 +73,7 @@ Game::Game(std::string path)
 		Renderer::Light::setShadowCaster(suzLight, false);
 	}
 
-	GOPtr plane = SceneManager::createGameObject("Floor");
+	GOPtr plane = SceneManager::create("Floor");
 	CompManager::addRigidBody(plane, new Plane(Vec3(0, 1, 0), 0.04f), 0.f);
 
 	Renderer::Camera::resizePipelineBuffers(Settings::getWindowWidth(),

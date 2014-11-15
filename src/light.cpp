@@ -1,13 +1,11 @@
 #include "light.h"
+#include "scriptengine.h"
 
 namespace Renderer
 {
 	namespace Light
 	{
-		CLight create(Node parent,
-					  const std::string& name,
-					  const std::string& lightContext,
-					  const std::string& shadowContext)
+		CLight create(Node parent, const std::string& name)
 		{
 			//TODO: Fix light material related parameter
 			CLight newLight;
@@ -16,8 +14,8 @@ namespace Renderer
 			newLight.node = h3dAddLightNode(parent,
 											name.c_str(),
 											lightMat,
-											lightContext.c_str(),
-											shadowContext.c_str());
+											"LIGHTING",
+											"SHADOWMAP");
 
 			if(newLight.node == 0)
 				Log::error("Light", name + " node not created!");
@@ -102,6 +100,28 @@ namespace Renderer
 		{
 			light->intensity = intensity;
 			h3dSetNodeParamF(light->node, H3DLight::ColorMultiplierF, 0, intensity);
+		}
+
+		void generateBindings()
+		{
+			Sqrat::RootTable().Bind("CLight", Sqrat::Class<CLight>()
+								.Var("radius", &CLight::radius)
+								.Var("fov",    &CLight::fov)
+								.Var("intensity", &CLight::intensity)
+								.Var("shadowmapBias", &CLight::shadowmapBias)
+								.Var("shadowmapSplitLambda", &CLight::shadowSplitLambda)
+								.Var("shadowmapCount", &CLight::shadowmapCount)
+								.Var("color",  &CLight::color)
+								.Var("castShadow",  &CLight::castShadow));
+
+			Sqrat::RootTable().Bind("Light", Sqrat::Table(ScriptEngine::getVM())
+								.Func("setRadius", &setRadius)
+								.Func("setColor", &setColor)
+								.Func("setIntensity", &setIntensity)
+								.Func("setShadowBias", &setShadowMapBias)
+								.Func("setShadowLambda", &setShadowSplitLambda)
+								.Func("setShadowmapCount", &setShadowMapCount)
+								.Func("setShadowCaster", &setShadowCaster));
 		}
 	}
 

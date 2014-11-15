@@ -1,5 +1,5 @@
-#ifndef _camera_H_
-#define _camera_H_
+#ifndef _camera_H
+#define _camera_H
 
 #include "componentTypes.h"
 #include "renderer.h"
@@ -22,9 +22,8 @@ namespace Renderer
 		void initialize();
 		void setViewportSize(CCamera* camera, int width, int height);
 		void setViewportPos(CCamera* camera, int x, int y);
-		void setPipeline(CCamera* camera, Pipeline pipeline);
 		void setOcclusionCulling(CCamera* camera, bool enable);
-		void setOrthgraphic(CCamera* camera, bool enable);
+		void setOrthographic(CCamera* camera, bool enable);
 		void updateView(CCamera* camera);
 		void removeCamera(const CCamera& camera);
 		void resizePipelineBuffers(int width, int height);
@@ -33,7 +32,8 @@ namespace Renderer
 		void setFov(CCamera* camera, float fov);
 		void setNearZ(CCamera* camera, float nearZ);
 		void setFarZ(CCamera* camera, float farZ);
-
+		void generateBindings();
+		
 		CCamera create(const std::string& name, Node parent);
 		
 	}

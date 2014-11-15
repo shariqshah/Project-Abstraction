@@ -7,7 +7,7 @@
 // 					 float mass,
 // 					 float restitution)
 // {
-// 	mType   = ComponentType::RIGIDBODY;
+// 	mType   = Component::RIGIDBODY;
 // 	mMotionState = new MotionState(transform);
 // 	//mShape  = shape;
 // 	mHandle = Physics::createRigidBody(shape, mMotionState, mass, restitution);

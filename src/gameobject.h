@@ -14,13 +14,14 @@ struct GameObject
 	std::string name   = "DefaultGameobjectName";
 	std::string tag    = "DefaultTag";
 	bool        remove = false;
-	// std::array<int, (size_t)ComponentType::NUM_COMPONENTS> compIndices{{EMPTY_INDEX}};
+	// std::array<int, (size_t)Component::NUM_COMPONENTS> compIndices{{EMPTY_INDEX}};
 	int compIndices[6] = {-1, -1, -1, -1, -1, -1};
 };
 
 namespace GO
 {
-    bool hasComponent(GameObject* gameOjbject, ComponentType type);
+    bool hasComponent(GameObject* gameOjbject, Component type);
+	void generateBindings();
 }
 
 #endif

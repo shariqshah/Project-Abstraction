@@ -29,16 +29,23 @@ namespace System
 		Physics::initialize(Vec3(0.f, -9.8f, 0.f));
 		CompManager::initailize();
 		suzanneModel = Renderer::Model::create("models/test/test.scene.xml");
-		statCollMesh = new CollisionMesh(suzanneModel, true);
-		hullCollMesh = new CollisionMesh(suzanneModel, false);
+		statCollMesh = new CollisionMesh(*suzanneModel, true);
+		hullCollMesh = new CollisionMesh(*suzanneModel, false);
 		tmpShape = new Sphere(1.f);
 
 		ScriptEngine::initialize();
-		Sqrat::Table logTable(ScriptEngine::getVM());
-		logTable.Func("message", &Log::message);
-		Sqrat::RootTable(ScriptEngine::getVM()).Bind("Log", logTable);
 
-		Transform::initialize();
+		Log::generateBindings();
+		Input::generateBindings();
+		Transform::generateBindings();
+		Renderer::Model::generateBindings();
+		Renderer::Light::generateBindings();
+		Renderer::Camera::generateBindings();
+		GO::generateBindings();
+		CompManager::generateBindings();
+		Physics::generateBindings();
+		Physics::RigidBody::generateBindings();
+		SceneManager::generateBindings();
 	}
 	
 	Vec3 generateRandom()
@@ -54,7 +61,7 @@ namespace System
 	{
 		auto transform = CompManager::getTransform(gameObject);
 		
-	// 	if(gameObject->hasComponents((long)ComponentType::LIGHT))
+	// 	if(gameObject->hasComponents((long)Component::LIGHT))
 	// 	{
 	// 		auto light = gameObject->getComponent<Light>();
 			
@@ -95,7 +102,7 @@ namespace System
 	// 		}
 	// 	}
 
-		if(GO::hasComponent(gameObject, ComponentType::CAMERA))
+		if(GO::hasComponent(gameObject, Component::CAMERA))
 		{
 			auto camera = CompManager::getCamera(gameObject);
 			
@@ -108,11 +115,11 @@ namespace System
 
 			if(Input::isReleased(Input::Key::ENTER))
 			{
-				GOPtr newLight = SceneManager::createGameObject("newLight");
+				GOPtr newLight = SceneManager::create("newLight");
 				newLight->tag = "child";
 				// auto light = newLight->addComponent<Light>(newLight->getNode(),
 				// 										   "newLight");
-				auto model = CompManager::addModel(newLight, "models/test/test.scene.xml");
+				CompManager::addModel(newLight, "models/test/test.scene.xml");
 				// light->setColor(generateRandom());
 				// light->setShadowCaster(false);
 				auto lightTransform = CompManager::getTransform(newLight);
@@ -184,7 +191,7 @@ namespace System
 		// check if the gameobject's transform has been modified by
 		// someone other than bullet. if so, then update rigidbody's
 		// transform and force it to activate.
-		if(GO::hasComponent(gameObject, ComponentType::RIGIDBODY))
+		if(GO::hasComponent(gameObject, Component::RIGIDBODY))
 		{
 			auto transform  = CompManager::getTransform(gameObject);
 			auto rBody      = CompManager::getRigidBody(gameObject);

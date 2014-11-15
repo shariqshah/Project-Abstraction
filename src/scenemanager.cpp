@@ -3,6 +3,7 @@
 #include "renderer.h"
 #include "componentmanager.h"
 #include "transform.h"
+#include "scriptengine.h"
 
 namespace SceneManager
 {
@@ -13,11 +14,11 @@ namespace SceneManager
 
 		void removeGameObject(GOPtr gameObject)
 		{
-			for(int i = 1; i < (int)ComponentType::NUM_COMPONENTS; i++)
+			for(int i = 1; i < (int)Component::NUM_COMPONENTS; i++)
 			{
 				if(gameObject->compIndices[i] != -1)
 				{
-					CompManager::removeComponent(gameObject, (ComponentType)i);
+					CompManager::removeComponent(gameObject, (Component)i);
 				}
 			}
 
@@ -158,7 +159,7 @@ namespace SceneManager
 			sRemovables.clear();
 	}
 
-	GOPtr createGameObject(const std::string& name)
+	GOPtr create(const std::string& name)
 	{
 		GOPtr newObj = new GameObject;
 		newObj->name = name;
@@ -249,5 +250,39 @@ namespace SceneManager
 		}
 
 		return false;
+	}
+
+	bool removeByName(const std::string& name)
+	{
+		return remove(name);
+	}
+
+	bool removeByNode(Node node)
+	{
+		return remove(node);
+	}
+
+	GOPtr findByName(const std::string& name)
+	{
+		return find(name);
+	}
+	
+	GOPtr findByNode(Node node)
+	{
+		return find(node);
+	}
+
+	void generateBindings()
+	{
+		Sqrat::RootTable().Bind("SceneManager", Sqrat::Table(ScriptEngine::getVM())
+								.Func("add",             &add)
+								.Func("removeByNode",    &removeByNode)
+								.Func("removeByName",    &removeByName)
+								.Func("setParent",       &setParent)
+								.Func("setParentAsRoot", &setParentAsRoot)
+								.Func("findByNode",      &findByNode)
+								.Func("findByName",      &findByName)
+								.Func("getChild",        &getChild)
+								.Func("create",          &create));
 	}
 }

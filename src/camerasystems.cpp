@@ -24,8 +24,8 @@ namespace System
 
 		void setActiveObject(GameObject* gameObject)
 		{
-			if(GO::hasComponent(gameObject, ComponentType::TRANSFORM) &&
-			   GO::hasComponent(gameObject, ComponentType::CAMERA)    &&
+			if(GO::hasComponent(gameObject, Component::TRANSFORM) &&
+			   GO::hasComponent(gameObject, Component::CAMERA)    &&
 			   gameObject->tag == "FreeCamera")
 			{
 				activeObject = gameObject;

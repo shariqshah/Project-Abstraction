@@ -132,7 +132,7 @@ namespace Transform
 		Renderer::resetTransformFlag(transform->node);
 	}
 
-	void initialize()
+	void generateBindings()
 	{
 		Sqrat::RootTable().Bind("Vec3", Sqrat::Class<glm::vec3>()
 								.Var("x", &glm::vec3::x)
@@ -167,6 +167,7 @@ namespace Transform
 								.Func("rotate", &rotate)
 								.Func("scale", &setScale)
 								.Func("setLookAt", &setLookAt)
+								.Func("setPosition", &setPosition)
 								.Func("setRotation", &setRotation)
 								.Func("setUpVector", &setUpVector)
 								.Func("setForward", &setForward)

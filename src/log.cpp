@@ -1,4 +1,5 @@
 #include "log.h"
+#include "scriptengine.h"
 
 namespace Log
 {
@@ -28,5 +29,14 @@ namespace Log
 	void setEnabled(bool enabled)
 	{
 		isEnabled = enabled;
+	}
+
+	void generateBindings()
+	{
+		Sqrat::RootTable().Bind("Log", Sqrat::Table(ScriptEngine::getVM())
+								.Func("message", &message)
+								.Func("error", &error)
+								.Func("warning", &warning)
+								.Func("setEnabled", &setEnabled));
 	}
 }

@@ -5,13 +5,13 @@
 
 namespace Input
 {
-   	enum class MouseButton : Uint8
+   	enum MouseButton : Uint8
 	{
-		LEFT   = SDL_BUTTON_LEFT,
-		RIGHT  = SDL_BUTTON_RIGHT,
-		MIDDLE = SDL_BUTTON_MIDDLE,
-		X1     = SDL_BUTTON_X1,
-		X2     = SDL_BUTTON_X2
+		M_LEFT   = SDL_BUTTON_LEFT,
+		M_RIGHT  = SDL_BUTTON_RIGHT,
+		M_MIDDLE = SDL_BUTTON_MIDDLE,
+		M_X1     = SDL_BUTTON_X1,
+		M_X2     = SDL_BUTTON_X2
 	};
 
 	enum class KeyState : Uint8
@@ -21,7 +21,7 @@ namespace Input
 		INACTIVE = Uint8(3)
 	};
 
-	enum class Key : SDL_Keycode
+	enum Key : SDL_Keycode
 	{
 		A        = SDLK_a,
 		B        = SDLK_b,
@@ -106,6 +106,8 @@ namespace Input
 	Sint32 getMouseRelX();
 	Sint32 getMouseRelY();
 	void   resetMouseRel();
+
+	void generateBindings();
 }
 
 

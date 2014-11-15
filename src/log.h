@@ -9,6 +9,7 @@ namespace Log
     void error(const std::string& context, const std::string& error);
 	void warning(const std::string& warningMessage);
 	void setEnabled(bool enabled);
+	void generateBindings();
 }
 
 

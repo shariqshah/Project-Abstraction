@@ -39,7 +39,7 @@ enum class NodeType : int
 	MODEL  = H3DNodeTypes::Model
 };
 
-enum class Pipeline : uint8_t
+enum Pipeline : uint8_t
 {
 	FORWARD  = 0,
 	DEFERRED = 1,

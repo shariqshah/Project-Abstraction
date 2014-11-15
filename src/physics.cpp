@@ -1,6 +1,7 @@
 #include "physics.h"
 #include "camera.h"
 #include "transform.h"
+#include "scriptengine.h"
 
 namespace Physics
 {
@@ -16,7 +17,6 @@ namespace Physics
 
 		static std::vector<CRigidBody>          sFreeList;
 		static std::vector<btRigidBody*>      sRigidBodies;
-		static std::vector<btCollisionShape*> sCollisionShapes;
 		static std::vector<CollisionShape*>   sShapes;
 
 		static DebugDrawer* sDebugDrawer;
@@ -155,14 +155,11 @@ namespace Physics
 			removeCollisionObject(btRigidBody::upcast(obj));
 		}
 
-		for(btCollisionShape* shape : sCollisionShapes)
-			delete shape;
-
 		for(CollisionShape* shape : sShapes)
 		{
 			if(shape)
 			{
-				shape->cleanup();
+				//shape->cleanup();
 				delete shape;
 			}
 		}
@@ -175,7 +172,6 @@ namespace Physics
 		delete sDebugDrawer;
 		
 		sRigidBodies.clear();
-		sCollisionShapes.clear();
 	}
 
 	void setGravity(glm::vec3 gravity)
@@ -192,6 +188,70 @@ namespace Physics
 	void addCollisionShape(CollisionShape* shape)
 	{
 		sShapes.push_back(shape);
+	}
+
+	namespace CollisionShapes
+	{
+		Sphere* createSphere(float radius)
+		{
+			return new Sphere(radius);
+		}
+
+		Box* createBox(Vec3 halfExtent)
+		{
+			return new Box(halfExtent);
+		}
+
+		Capsule* createCapsule(float radius, float height)
+		{
+			return new Capsule(radius, height);
+		}
+
+		Plane* createPlane(Vec3 normal, float margin)
+		{
+			return new Plane(normal, margin);
+		}
+
+		Cylinder* createCylinder(Vec3 halfExtent, Vec3 axis)
+		{
+			return new Cylinder(halfExtent, axis);
+		}
+
+		CollisionMesh* createCollisionMesh(CModel& model, bool isTriMesh)
+		{
+			return new CollisionMesh(model, isTriMesh);
+		}
+	}
+
+	void generateBindings()
+	{
+		Sqrat::Class<CollisionShape> collisionShape(ScriptEngine::getVM());
+		Sqrat::RootTable().Bind("CollisionShape", collisionShape);
+		
+		Sqrat::RootTable().Bind("Sphere", Sqrat::DerivedClass<Sphere, CollisionShape>()
+								.Ctor<float>());
+		Sqrat::RootTable().Bind("Box", Sqrat::DerivedClass<Box, CollisionShape>()
+								.Ctor<Vec3>());
+		Sqrat::RootTable().Bind("Capsule", Sqrat::DerivedClass<Capsule, CollisionShape>()
+								.Ctor<float, float>());
+		Sqrat::RootTable().Bind("Plane", Sqrat::DerivedClass<Plane, CollisionShape>()
+								.Ctor<Vec3, float>());
+		Sqrat::RootTable().Bind("Cone", Sqrat::DerivedClass<Cone, CollisionShape>()
+								.Ctor<float, float>());
+		Sqrat::RootTable().Bind("Cylinder", Sqrat::DerivedClass<Cylinder, CollisionShape>()
+								.Ctor<Vec3, Vec3>());
+		Sqrat::RootTable().Bind("CollisionMesh",
+								Sqrat::DerivedClass<CollisionMesh, CollisionShape>()
+								.Ctor<CModel, bool>());
+
+		Sqrat::RootTable().Bind("CollisionShapes", Sqrat::Table (ScriptEngine::getVM())
+								.Func("createSphere", &CollisionShapes::createSphere)
+								.Func("createBox", &CollisionShapes::createBox)
+								.Func("createCapsule", &CollisionShapes::createCapsule)
+								.Func("createPlane", &CollisionShapes::createPlane)
+								.Func("createCylinder", &CollisionShapes::createCylinder)
+								.Func("createMesh", &CollisionShapes::createCollisionMesh));
+		
 	}
 
 	namespace RigidBody
@@ -328,10 +388,19 @@ namespace Physics
 			sRigidBodies[body]->setMassProps(mass, inertia);
 		}
 
-		void applyForce(CRigidBody body, glm::vec3 force, glm::vec3 relPos)
+		void applyForce(CRigidBody body, Vec3 force, Vec3 relPos)
 		{
 			sRigidBodies[body]->applyForce(Utils::toBullet(force),
 										   Utils::toBullet(relPos));
+		}
+
+		void generateBindings()
+		{
+			Sqrat::RootTable().Bind("RigidBody", Sqrat::Table(ScriptEngine::getVM())
+									.Func("applyForce", &applyForce)
+									.Func("remove", &remove)
+									.Func("setMass", &setMass)
+									.Func("setKinematic", &setKinematic));
 		}
 	}
 }

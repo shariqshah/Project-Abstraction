@@ -12,11 +12,11 @@
 
 // Component::Component()
 // {
-//     mType  = ComponentType::NO_COMPONENT;
+//     mType  = Component::NO_COMPONENT;
 // 	mValid = true;
 // }
 
-// ComponentType Component::getType() const
+// Component Component::getType() const
 // {
 //     return mType;
 // }

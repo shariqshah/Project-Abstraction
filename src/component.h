@@ -9,14 +9,14 @@
 // {	
 // protected:
 	
-//     ComponentType mType;
+//     Component mType;
 // 	bool          mValid;
 	
 // public:
 //     virtual ~Component();
 //     Component();
     
-//     ComponentType getType() const;
+//     Component getType() const;
 // 	bool isValid();
 
 // 	virtual const std::string getName();

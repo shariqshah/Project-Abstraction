@@ -26,12 +26,13 @@ namespace SceneManager
 	
 	GOPtr  find(const std::string& name);
 	GOPtr  find(Node node);
-	GOPtr  createGameObject(const std::string& name);
+	GOPtr  create(const std::string& name);
 	GOPtr  getParent(GameObject* gameObject);
 	GOPtr  getChild(GameObject* gameObject, const std::string& name);
 	
 	void   update();
 	void   cleanup();
+	void   generateBindings();
 
 	GOMap* getSceneObjects();
 }

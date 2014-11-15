@@ -64,7 +64,7 @@ namespace Transform
     void setForward(CTransform* transform, Vec3 direction);
 	void resetTransformFlag(CTransform* transform);
 	void updateTransformMatrix(CTransform* transform);
-	void initialize();
+	void generateBindings();
 }
 
 #endif

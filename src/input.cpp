@@ -1,6 +1,6 @@
 #include <vector>
 #include <algorithm>
-
+#include "scriptengine.h"
 #include "input.h"
 
 namespace Input
@@ -170,5 +170,110 @@ namespace Input
 	{
 		sMouseRelX = sMouseRelY = 0;
 	}
-		
+
+	bool isKeyPressed(Key key)
+	{
+		return isPressed(key);
+	}
+
+	bool isKeyReleased(Key key)
+	{
+		return isReleased(key);
+	}
+
+	bool isMousePressed(MouseButton button)
+	{
+		return isPressed(button);
+	}
+
+	bool isMouseReleased(MouseButton button)
+	{
+		return isReleased(button);
+	}
+
+	void generateBindings()
+	{
+		Sqrat::ConstTable().Enum("Key", Sqrat::Enumeration()
+								 .Const("A", Key::A)
+								 .Const("B", Key::B)
+								 .Const("C", Key::C)
+								 .Const("D", Key::D)
+								 .Const("E", Key::E)
+								 .Const("F", Key::F)
+								 .Const("G", Key::G)
+								 .Const("H", Key::H)
+								 .Const("I", Key::I)
+								 .Const("J", Key::J)
+								 .Const("K", Key::K)
+								 .Const("L", Key::L)
+								 .Const("M", Key::M)
+								 .Const("N", Key::N)
+								 .Const("O", Key::O)
+								 .Const("P", Key::P)
+								 .Const("Q", Key::Q)
+								 .Const("R", Key::R)
+								 .Const("S", Key::S)
+								 .Const("T", Key::T)
+								 .Const("U", Key::U)
+								 .Const("V", Key::V)
+								 .Const("W", Key::W)
+								 .Const("X", Key::X)
+								 .Const("Y", Key::Y)
+								 .Const("Z", Key::Z)
+								 .Const("K0", Key::K0)
+								 .Const("K1", Key::K1)
+								 .Const("K2", Key::K2)
+								 .Const("K3", Key::K3)
+								 .Const("K4", Key::K4)
+								 .Const("K5", Key::K5)
+								 .Const("K6", Key::K6)
+								 .Const("K7", Key::K7)
+								 .Const("K8", Key::K8)
+								 .Const("K9", Key::K9)
+								 .Const("F1", Key::F1)
+								 .Const("F2", Key::F2)
+								 .Const("F3", Key::F3)
+								 .Const("F4", Key::F4)
+								 .Const("F5", Key::F5)
+								 .Const("F6", Key::F6)
+								 .Const("F7", Key::F7)
+								 .Const("F8", Key::F8)
+								 .Const("F9", Key::F9)
+								 .Const("F10", Key::F10)
+								 .Const("F11", Key::F11)
+								 .Const("F12", Key::F12)
+								 .Const("UP", Key::UP)
+								 .Const("DOWN", Key::DOWN)
+								 .Const("LEFT", Key::LEFT)
+								 .Const("RIGHT", Key::RIGHT)
+								 .Const("LSHIFT", Key::LSHIFT)
+								 .Const("RSHIFT", Key::RSHIFT)
+								 .Const("LCTRL", Key::LCTRL)
+								 .Const("RCTRL", Key::RCTRL)
+								 .Const("SPACE", Key::SPACE)
+								 .Const("ENTER", Key::ENTER)
+								 .Const("NP_PLUS", Key::NP_PLUS)
+								 .Const("NP_MINUS", Key::NP_MINUS));
+
+		Sqrat::ConstTable().Enum("MouseButton", Sqrat::Enumeration()
+								 .Const("M_LEFT",   MouseButton::M_LEFT)
+								 .Const("M_RIGHT",  MouseButton::M_RIGHT)
+								 .Const("M_MIDDLE", MouseButton::M_MIDDLE)
+								 .Const("M_X1",     MouseButton::M_X1)
+								 .Const("M_X2",     MouseButton::M_X2));
+
+		Sqrat::RootTable().Bind("Input", Sqrat::Table(ScriptEngine::getVM())
+								.Func("getMouseX",       &getMouseX)
+								.Func("getMouseY",       &getMouseY)
+								.Func("getMouseRelX",    &getMouseRelX)
+								.Func("getMouseRelY",    &getMouseRelY)
+								.Func("isKeyPressed",    &isKeyPressed)
+								.Func("isKeyReleased",   &isKeyReleased)
+								.Func("isMousePressed",  &isMousePressed)
+								.Func("isMouseReleased", &isMouseReleased)
+								.Func("showCursor",      &showCursor)
+								.Func("lockCursor",      &setCursorLock)
+								.Func("isCursorVisible", &isCursorVisible)
+								.Func("isCursorLocked",  &isCursorLocked));
+	}
 }

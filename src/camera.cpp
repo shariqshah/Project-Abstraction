@@ -1,4 +1,5 @@
 #include "camera.h"
+#include "scriptengine.h"
 
 namespace Renderer
 {
@@ -155,9 +156,38 @@ namespace Renderer
 			h3dSetNodeParamI(camera->node, H3DCamera::OccCullingI, enable ? 1 : 0);
 		}
 
-		void setOrthgraphic(CCamera* camera, bool enable)
+		void setOrthographic(CCamera* camera, bool enable)
 		{
 			h3dSetNodeParamI(camera->node, H3DCamera::OrthoI, enable ? 1 : 0);
+		}
+
+		void generateBindings()
+		{
+			Sqrat::ConstTable().Enum("Pipeline", Sqrat::Enumeration ()
+									 .Const("FORWARD",  Pipeline::FORWARD)
+									 .Const("DEFERRED", Pipeline::DEFERRED)
+									 .Const("HDR",      Pipeline::HDR));
+
+			Sqrat::RootTable().Bind("CCamera", Sqrat::Class<CCamera>()
+								.Var("node",        &CCamera::node)
+								.Var("nearZ",       &CCamera::nearZ)
+								.Var("farZ",        &CCamera::farZ)
+								.Var("fov",         &CCamera::fov)
+								.Var("aspectRatio", &CCamera::aspectRatio)
+								.Var("pipeline",    &CCamera::pipeline));
+
+			Sqrat::RootTable().Bind("Camera", Sqrat::Table(ScriptEngine::getVM())
+								.Func("setViewportSize", &setViewportSize)
+								.Func("setViewportPos", &setViewportPos)
+								.Func("setPipeline", &setPipeline)
+								.Func("setCulling", &setOcclusionCulling)
+								.Func("setOrthgraphic", &setOrthographic)
+								.Func("setAspectratio", &setAspectRatio)
+								.Func("setFov", &setFov)
+								.Func("setNearZ", &setNearZ)
+								.Func("updateView", &updateView)
+								.Func("removeCamera", &removeCamera)
+								.Func("setFarZ", &setFarZ));
 		}
 	}
 }

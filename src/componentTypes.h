@@ -1,7 +1,7 @@
 #ifndef COMPONENTTYPES_H
 #define COMPONENTTYPES_H
 
-enum class ComponentType : int
+enum Component : int
 {
     EMPTY          = -1,
 	TRANSFORM      =  1,

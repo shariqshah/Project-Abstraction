@@ -17,9 +17,10 @@ namespace Renderer
 	namespace Model
 	{
 		float*  getVertices(CModel* model);
+		CModel* create(const std::string& filename);
 		int     getVertexCount(CModel* model);
 		void    remove(const CModel& model);
-		CModel* create(const std::string& filename);
+		void    generateBindings();
 	}
 }
 	

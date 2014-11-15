@@ -51,6 +51,7 @@ namespace Physics
 	void nextDebugMode();
 	void setDebugMode(DBG_Mode debugMode);
 	void addCollisionShape(CollisionShape* shape);
+	void generateBindings();
 	
 	const Vec3 getGravity();
 
@@ -69,6 +70,7 @@ namespace Physics
 		void setActivation(CRigidBody body, bool activation);
 		void setMass(CRigidBody body, const float mass);
 		void setKinematic(CRigidBody body, bool kinematic);
+		void generateBindings();
 	}
 }
 
@@ -76,7 +78,7 @@ namespace Physics
 class CollisionShape
 {
 protected:
-	btCollisionShape *mShape;
+	btCollisionShape* mShape;
 	
 public:
 	btCollisionShape* getCollisionShape()
@@ -85,10 +87,14 @@ public:
 	}
 
 	CollisionShape() : mShape(NULL) {}
-
-	void cleanup() { if(mShape) delete mShape; }
 	
-	virtual void initialize() = 0;
+	virtual void initialize() {}
+	
+	~CollisionShape()
+	{
+		if(mShape)
+			delete mShape;
+	}
 };
 
 class Sphere : public CollisionShape
@@ -216,11 +222,11 @@ public:
 
 class CollisionMesh : public CollisionShape
 {
-	CModel* mModel;
-	bool    mTriMesh;
+	CModel mModel;
+	bool   mTriMesh;
 public:
 
-	CollisionMesh(CModel* model, bool isTriMesh)
+	CollisionMesh(CModel& model, bool isTriMesh)
 	{
 		mModel   = model;
 		mTriMesh = isTriMesh;
@@ -229,10 +235,10 @@ public:
 
 	void initialize()
 	{
-		if(mModel)
+		if(mModel.node != 0)
 		{
-			float* vertices = Renderer::Model::getVertices(mModel);
-			int vertexCount = Renderer::Model::getVertexCount(mModel);
+			float* vertices = Renderer::Model::getVertices(&mModel);
+			int vertexCount = Renderer::Model::getVertexCount(&mModel);
 			
 			btTriangleMesh *triMesh = new btTriangleMesh();
 
@@ -265,7 +271,7 @@ public:
 			Physics::addCollisionShape(this);
 		}
 		else
-			Log::warning("Model provided for collision mesh is NULL");
+			Log::warning("Model provided for collision mesh is Invalid");
 	}
 };
 

@@ -1,5 +1,5 @@
 #include "model.h"
-
+#include "scriptengine.h"
 
 namespace Renderer
 {
@@ -70,6 +70,20 @@ namespace Renderer
 
 			newModel->valid = false;
 			return newModel;
+		}
+
+		void generateBindings()
+		{
+			Sqrat::RootTable().Bind("CModel", Sqrat::Class<CModel>()
+								.Var("node",     &CModel::node)
+								.Var("filename", &CModel::filename)
+								.Var("resource", &CModel::resourceID));
+
+			Sqrat::RootTable().Bind("Model", Sqrat::Table(ScriptEngine::getVM())
+								.Func("getVertices", &getVertices)
+								.Func("create", &create)
+								.Func("getVertexcount", &getVertexCount)
+								.Func("remove", &remove));
 		}
 	}
 }

@@ -1,5 +1,5 @@
-#ifndef _light_H_
-#define _light_H_
+#ifndef _light_H
+#define _light_H
 
 #include "renderer.h"
 #include "componentTypes.h"
@@ -22,10 +22,8 @@ namespace Renderer
 {
 	namespace Light
 	{
-		CLight create(Node parent,
-					  const std::string& name,
-					  const std::string& lightContext  = "LIGHTING",
-					  const std::string& shadowContext = "SHADOWMAP");
+		CLight create(Node parent, const std::string& name);
+		
 		void setRadius(CLight* light, float radius);
 		void setColor(CLight* light, Vec3 color);
 		void setFov(CLight* light, float fov);
@@ -34,6 +32,7 @@ namespace Renderer
 		void setShadowSplitLambda(CLight* light, float splitLambda);
 		void setShadowMapCount(CLight* light, int shadowMapCount);
 		void setShadowCaster(CLight* light, bool enable);
+		void generateBindings();
 	}
 }
 

@@ -33,7 +33,8 @@ namespace CompManager
 	CLight*     getLight(GameObject* gameObject);
 	CRigidBody  getRigidBody(GameObject* gameObject);
 
-	void removeComponent(GameObject* gameObject, ComponentType type);
+	void removeComponent(GameObject* gameObject, Component type);
+	void generateBindings();
 }
 
 #endif
