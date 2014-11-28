@@ -15,7 +15,7 @@ class  CollisionShape;
 
 namespace CompManager
 {	
-	void initailize();
+    void initialize();
 	void cleanup();
 
 	CTransform* addTransform(GameObject* gameObject);

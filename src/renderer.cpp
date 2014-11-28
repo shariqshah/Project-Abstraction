@@ -6,7 +6,7 @@ namespace Renderer
 	{
 		static std::string cContentFolderDir;
 		static std::vector<std::string> sTextList;
-		static glm::vec2 sFontPos;
+		static Vec2 sFontPos;
 		static Resource sFontMat;
 		static Resource sPanelMat;
 		static float sFontSize;
@@ -27,9 +27,9 @@ namespace Renderer
 	}
 	
 	void setNodeTransform(Node node,
-						  const glm::vec3 position,
-						  const glm::vec3 rotation,
-						  const glm::vec3 scale)
+						  const Vec3 position,
+						  const Vec3 rotation,
+						  const Vec3 scale)
 	{	
 		h3dSetNodeTransform(node,						        
 							position.x, position.y, position.z,
@@ -38,9 +38,9 @@ namespace Renderer
 	}
 
 	void getNodeTransform(Node node,
-						  glm::vec3* position,
-						  glm::vec3* rotation,
-						  glm::vec3* scale)
+						  Vec3* position,
+						  Vec3* rotation,
+						  Vec3* scale)
 	{
 		h3dGetNodeTransform(node,						       
 							&position->x, &position->y, &position->z,

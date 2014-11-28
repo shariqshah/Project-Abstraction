@@ -20,7 +20,7 @@ Game::Game(std::string path)
 	GOPtr falcon = SceneManager::create("Falcon");
 	falcon->tag = "Falcon";
 	auto falMod = CompManager::addModel(falcon, "models/falcon/falcon.scene.xml");
-	auto falconTransform = CompManager::getTransform(falcon);
+	//auto falconTransform = CompManager::getTransform(falcon);
 	CompManager::addRigidBody(falcon, new CollisionMesh(*falMod, false), 10);
 
 	GOPtr lightGO = SceneManager::create("LightGO");

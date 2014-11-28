@@ -29,7 +29,7 @@ namespace CompManager
 		static std::vector<int>        sRigidBodyEmptyList;
 	}
 
-	void initailize()
+    void initialize()
 	{
 		
 	}

@@ -27,7 +27,7 @@ namespace System
 	{
 		sPhysicsEnabled = true;
 		Physics::initialize(Vec3(0.f, -9.8f, 0.f));
-		CompManager::initailize();
+		CompManager::initialize();
 		suzanneModel = Renderer::Model::create("models/test/test.scene.xml");
 		statCollMesh = new CollisionMesh(*suzanneModel, true);
 		hullCollMesh = new CollisionMesh(*suzanneModel, false);
@@ -46,6 +46,9 @@ namespace System
 		Physics::generateBindings();
 		Physics::RigidBody::generateBindings();
 		SceneManager::generateBindings();
+
+		ScriptEngine::createScript("../content/scripts/scriptManager.nut");
+		//ScriptEngine::runScript("../content/scripts/player.nut");
 	}
 	
 	Vec3 generateRandom()
@@ -237,6 +240,7 @@ namespace System
 			Log::setEnabled(false);
 		
 		System::CameraSystem::updateFreeCamera(deltaTime);
+		ScriptEngine::executeFunction("updateObjects", deltaTime);
 		
 		GOMap* sceneObjects = SceneManager::getSceneObjects();
 		for(GOMap::iterator it = sceneObjects->begin();
@@ -254,8 +258,25 @@ namespace System
 		
 		SceneManager::update();
 
-		if(Input::isReleased(Input::Key::K0))
-		   ScriptEngine::runScript("../content/scripts/test.nut");
+		// if(Input::isReleased(Input::Key::K0))
+		// 	ScriptEngine::createScript("../content/scripts/scriptManager.nut");
+		// if(Input::isReleased(Input::Key::K9))
+		// 	ScriptEngine::executeFunction("updateObjects", deltaTime);
+		if(Input::isReleased(Input::Key::K8))
+		{
+			auto player = SceneManager::find("Player");
+			ScriptEngine::executeFunction("attachScript",
+										  player,
+										  "PlayerBehaviour");
+		}
+
+		if(Input::isReleased(Input::Key::K9))
+		{
+			auto player = SceneManager::find("Player");
+			ScriptEngine::executeFunction("reloadScript",
+										  player,
+										  "PlayerBehaviour");
+		}
 	}
 
 	void cleanup()
