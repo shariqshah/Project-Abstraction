@@ -47,8 +47,9 @@ namespace System
 		Physics::RigidBody::generateBindings();
 		SceneManager::generateBindings();
 
-		ScriptEngine::createScript("../content/scripts/scriptManager.nut");
-		//ScriptEngine::runScript("../content/scripts/player.nut");
+		//ScriptEngine::createScript("../content/scripts/scriptManager.nut");
+		ScriptEngine::runScript("../content/scripts/scriptManager.nut");
+		ScriptEngine::runScript("../content/scripts/init.nut");
 	}
 	
 	Vec3 generateRandom()
@@ -281,6 +282,7 @@ namespace System
 
 	void cleanup()
 	{
+		SceneManager::cleanup();
 		CompManager::cleanup();
 		Physics::cleanup();
 		Renderer::Model::remove(*suzanneModel);

@@ -17,7 +17,7 @@ namespace Log
     void error(const std::string& context, const std::string& error)
     {
 		if(isEnabled)
-			std::cout<<"ERROR " + context + " : " + error<<std::endl;
+			std::cerr<<"ERROR " + context + " : " + error<<std::endl;
     }
 
 	void warning(const std::string& warningMessage)

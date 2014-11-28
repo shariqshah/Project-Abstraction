@@ -6,7 +6,7 @@
 #include "renderer.h"
 #include "componentTypes.h"
 
-static const int EMPTY_INDEX = -1;
+const static int EMPTY_INDEX = -1;
 
 struct GameObject
 {
@@ -16,7 +16,6 @@ struct GameObject
 	bool        remove = false;
 	
 	int compIndices[6] = {-1, -1, -1, -1, -1, -1};
-	std::vector<int> scripts;
 };
 
 namespace GO
@@ -24,7 +23,9 @@ namespace GO
     bool hasComponent(GameObject* gameOjbject, Component type);
 	void generateBindings();
 	void attachScript(GameObject* gameObject, const std::string& name);
-	void updateScripts(GameObject* gameObject, float deltaTime);
+	void reloadScript(GameObject* gameObject, const std::string& name);
+	void removeScript(GameObject* gameObject, const std::string& name);
+	void reloadAllScripts(GameObject* gameObject);
 }
 
 #endif

@@ -82,7 +82,6 @@ Game::Game(std::string path)
 
 Game::~Game()
 {
-	SceneManager::cleanup();
 	System::cleanup();
 }
 

@@ -10,23 +10,7 @@ namespace GO
 		else
 			return true;
 	}
-
-	void attachScript(GameObject* gameObject, const std::string& name)
-	{
-		int scriptHandle = ScriptEngine::createScript(name);
-		
-		if(scriptHandle >= 0)
-		{
-			gameObject->scripts.push_back(scriptHandle);
-			Log::message("Script " + name + " added to " + gameObject->name);
-		}
-		else
-		{
-			Log::error("GameObject", "Could not attach script " + name +
-					   "to " + gameObject->name);
-		}
-	}
-
+	
 	void generateBindings()
 	{
 		Sqrat::RootTable().Bind("GameObject", Sqrat::Class<GameObject>()
@@ -39,9 +23,23 @@ namespace GO
 								.Func("hasComponent", &hasComponent));
 	}
 
-	void updateScripts(GameObject* gameObject, float deltaTime)
+	void attachScript(GameObject* gameObject, const std::string& name)
 	{
-		// for(int script : gameObject->scripts)
-		// 	ScriptEngine::exectuteScriptFunction(script, "update", deltaTime);
+		ScriptEngine::executeFunction("attachScript", gameObject, name);
+	}
+
+	void reloadScript(GameObject* gameObject, const std::string& name)
+	{
+		ScriptEngine::executeFunction("reload", gameObject, name);
+	}
+	
+	void removeScript(GameObject* gameObject, const std::string& name)
+	{
+		ScriptEngine::executeFunction("removeScript", gameObject, name);
+	}
+	
+	void reloadAllScripts(GameObject* gameObject)
+	{
+		ScriptEngine::executeFunction("reloadAllScripts", gameObject);
 	}
 }

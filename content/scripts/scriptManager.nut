@@ -1,24 +1,30 @@
 class GOContainer
 {
 	gameObject = null;
-	behaviourList = [];
+	behaviourList = null;
 
 	constructor(gameObjectToStore)
 	{
 		if(gameObjectToStore)
 			gameObject = gameObjectToStore;
+
+		behaviourList = [];
 	}
 
 	function update(deltaTime)
 	{
+		if(Input.isKeyReleased(Key.V) && gameObject.name == "Player")
+		{
+			foreach(scriptObject in behaviourList)
+			    Log.message(scriptObject.type);
+		}
+		
 		foreach(scriptObject in behaviourList)
 		    scriptObject.update(deltaTime);
 	}
 }
 
 this.objectList <- [];
-//this.objectList.append(PlayerBehaviour("Dummy"));
-
 
 this.updateObjects <- function(deltaTime)
 {	
@@ -26,22 +32,21 @@ this.updateObjects <- function(deltaTime)
 	    object.update(deltaTime);
 }
 
-
 this.findGameObjectContainer <- function(objToFind)
 {
 	assert(objToFind != null);
 	
-	local gameObject = null;
+	local gameObjectContainer = null;
 	foreach(object in this.objectList)
 	{
 		if(objToFind.node == object.gameObject.node)
 		{
-			gameObject = object;
+			gameObjectContainer = object;
 			break;
 		}
 	}
 
-	return gameObject;
+	return gameObjectContainer;
 }
 
 this.getScriptIndex <- function(goContainer, scriptName)
@@ -82,7 +87,7 @@ this.addScript <- function(gameObject, scriptObj)
 		goContainer.behaviourList.append(scriptObj);
 	}
 
-	Log.message("PlayerBehaviour script added to " + gameObject.name);
+	Log.message(scriptObj.type + " script added to " + gameObject.name);
 }
 
 this.attachScript <- function(gameObject, scriptName)
@@ -90,7 +95,7 @@ this.attachScript <- function(gameObject, scriptName)
 	try
 	{
 		assert(gameObject != null);
-
+				
 		local initFunc = dofile(this.scriptPath + scriptName + ".nut", true);
 
 		if(initFunc)
@@ -125,7 +130,7 @@ this.removeGameObject <- function(gameObject)
 		
 		foreach(currentIndex, object in this.objectList)
 		{
-			if(objToFind.node == object.gameObject.node)
+			if(gameObject.node == object.gameObject.node)
 			{
 				index = currentIndex;
 				foundObject = object;
@@ -137,11 +142,12 @@ this.removeGameObject <- function(gameObject)
 		{
 			foundObject.behaviourList.clear();
 			this.objectList.remove(index);
+			Log.message("ScriptManager : Removed " + gameObject.name);
 		}
-		else
-		{
-			Log.warning("GameObject " + gameObject.name + " not found!");
-		}
+		// else
+		// {
+		// 	Log.warning("ScriptManager : " + gameObject.name + " not registered so not removed");
+		// }
 	}
 	catch(error)
 	{

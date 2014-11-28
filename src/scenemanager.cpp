@@ -14,6 +14,7 @@ namespace SceneManager
 
 		void removeGameObject(GOPtr gameObject)
 		{
+			//remove components
 			for(int i = 1; i < (int)Component::NUM_COMPONENTS; i++)
 			{
 				if(gameObject->compIndices[i] != -1)
@@ -22,6 +23,8 @@ namespace SceneManager
 				}
 			}
 
+			//remove scripts
+			ScriptEngine::executeFunction("removeGameObject", gameObject);
 			delete gameObject;
 		}
 	}
@@ -63,7 +66,7 @@ namespace SceneManager
 			}
 
 			sRemovables.push_back(node);
-			Log::message(position->second->name + " removed from scene");
+			Log::message(position->second->name + " marked for removal");
 			return true;
 		}
 
@@ -90,7 +93,7 @@ namespace SceneManager
 					});
 				}
 				sRemovables.push_back(it->first);
-				Log::message(name + " removed from scene");
+				Log::message(name + " marked for removal");
 				return true;
 			}
 		}

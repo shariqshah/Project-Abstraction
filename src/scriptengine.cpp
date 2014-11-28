@@ -107,22 +107,22 @@ namespace ScriptEngine
 		
 	}
 
-	void executeFunction(const std::string& functionName, const float argument)
+	void executeFunction(const std::string& name, const float argument)
 	{
-		Sqrat::Function function = Sqrat::RootTable().GetFunction(functionName.c_str());
+		Sqrat::Function function = Sqrat::RootTable().GetFunction(name.c_str());
 
 		if(function.IsNull())
-			Log::error("executefunction", "Could not find function!");
+			Log::error("executefunction", "Could not find function called : " + name);
 		else
 			function.Execute(argument);
 	}
 
-	void executeFunction(const std::string& functionName)
+	void executeFunction(const std::string& name)
 	{
-		Sqrat::Function function = Sqrat::RootTable().GetFunction(functionName.c_str());
+		Sqrat::Function function = Sqrat::RootTable().GetFunction(name.c_str());
 
 		if(function.IsNull())
-			Log::error("executefunction", "Could not find function!");
+			Log::error("executefunction", "Could not find function called : " + name);
 		else
 			function.Execute();
 	}
@@ -132,8 +132,18 @@ namespace ScriptEngine
 		Sqrat::Function function = Sqrat::RootTable().GetFunction(name.c_str());
 
 		if(function.IsNull())
-			Log::error("executefunction", "Could not find function!");
+			Log::error("executefunction", "Could not find function called : " + name);
 		else
 			function.Execute(gameObject, script);
+	}
+
+	void executeFunction(const std::string& name, GOPtr gameObject)
+	{
+		Sqrat::Function function = Sqrat::RootTable().GetFunction(name.c_str());
+
+		if(function.IsNull())
+			Log::error("executefunction", "Could not find function called : " + name);
+		else
+			function.Execute(gameObject);
 	}
 }
