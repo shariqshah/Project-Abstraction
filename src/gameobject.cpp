@@ -30,7 +30,7 @@ namespace GO
 
 	void reloadScript(GameObject* gameObject, const std::string& name)
 	{
-		ScriptEngine::executeFunction("reload", gameObject, name);
+		ScriptEngine::executeFunction("reloadScript", gameObject, name);
 	}
 	
 	void removeScript(GameObject* gameObject, const std::string& name)

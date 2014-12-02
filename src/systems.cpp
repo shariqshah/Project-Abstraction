@@ -263,20 +263,18 @@ namespace System
 		// 	ScriptEngine::createScript("../content/scripts/scriptManager.nut");
 		// if(Input::isReleased(Input::Key::K9))
 		// 	ScriptEngine::executeFunction("updateObjects", deltaTime);
-		if(Input::isReleased(Input::Key::K8))
-		{
-			auto player = SceneManager::find("Player");
-			ScriptEngine::executeFunction("attachScript",
-										  player,
-										  "PlayerBehaviour");
-		}
+		// if(Input::isReleased(Input::Key::K8))
+		// {
+		// 	auto player = SceneManager::find("Player");
+		// 	ScriptEngine::executeFunction("attachScript",
+		// 								  player,
+		// 								  "PlayerBehaviour");
+		// }
 
 		if(Input::isReleased(Input::Key::K9))
 		{
 			auto player = SceneManager::find("Player");
-			ScriptEngine::executeFunction("reloadScript",
-										  player,
-										  "PlayerBehaviour");
+			GO::reloadScript(player, "PlayerBehaviour");
 		}
 	}
 

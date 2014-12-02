@@ -13,12 +13,6 @@ class GOContainer
 
 	function update(deltaTime)
 	{
-		if(Input.isKeyReleased(Key.V) && gameObject.name == "Player")
-		{
-			foreach(scriptObject in behaviourList)
-			    Log.message(scriptObject.type);
-		}
-		
 		foreach(scriptObject in behaviourList)
 		    scriptObject.update(deltaTime);
 	}

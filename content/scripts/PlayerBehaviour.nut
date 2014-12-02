@@ -11,7 +11,7 @@ class PlayerBehaviour extends BaseBehaviourScript
 	{
 		if(Input.isKeyReleased(Key.V))
 		{
-			SceneManager.removeByName("TestOBJ");
+			SceneManager.removeByName("TestOBJ");			
 		}
 	}
 }

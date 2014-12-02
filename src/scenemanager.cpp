@@ -27,6 +27,34 @@ namespace SceneManager
 			ScriptEngine::executeFunction("removeGameObject", gameObject);
 			delete gameObject;
 		}
+
+		bool markForDeletion(Node nodeToMark)
+		{
+			// bool done = false;
+			// while(!done)
+			// {
+			// 	auto position = std::find(sRemovables.begin(), sRemovables.end(), nodeToMark);
+				
+			// 	if(position == sRemovables.end())
+			// 		done = true;
+			// 	else
+			// 		sRemovables.erase(position);
+			// }
+
+			// sRemovables.push_back(nodeToMark);
+			
+			// Check if node is already marked, if it is then return false otherwise
+			// mark it as removable by adding to list and return true
+
+			for(Node node : sRemovables)
+			{
+				if(node == nodeToMark)
+					return false;
+			}
+
+			sRemovables.push_back(nodeToMark);
+			return true;
+		}
 	}
 	
 	bool add(GOPtr newGameObject)
@@ -65,8 +93,11 @@ namespace SceneManager
 				});
 			}
 
-			sRemovables.push_back(node);
-			Log::message(position->second->name + " marked for removal");
+			if(markForDeletion(node))
+				Log::message(position->second->name + " marked for removal");
+			else
+				Log::message(position->second->name + " already marked for removal");
+			
 			return true;
 		}
 
@@ -92,8 +123,12 @@ namespace SceneManager
 					    remove(child->node);
 					});
 				}
-				sRemovables.push_back(it->first);
-				Log::message(name + " marked for removal");
+				
+				if(markForDeletion(it->first))
+					Log::message(name + " marked for removal");
+				else
+					Log::message(name + " already marked for removal");
+				
 				return true;
 			}
 		}

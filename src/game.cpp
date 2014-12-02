@@ -41,6 +41,7 @@ Game::Game(std::string path)
 	Renderer::Light::setColor(playerLight, Vec3(1, 0, 0));
 	Transform::setPosition(playerTrans, Vec3(-110, 85, 92));
 	System::CameraSystem::setActiveObject(player);
+	GO::attachScript(player, "PlayerBehaviour");
 	mCurrentViewer = player;
 
 	Sphere* sphere = new Sphere(1);

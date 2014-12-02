@@ -11,12 +11,11 @@ class Test extends BaseBehaviourScript
 	{
 		local transform = CompManager.getTransform(gameObject);
 		Transform.rotate(transform, Vec3(0, 1, 0), 10 * deltaTime, Space.WORLD);
-		//Log.message("Test is alive!");
 
-		// if(Input.isKeyReleased(Key.V))
-		// {
-		// 	Log.message("Hi");
-		// }
+		if(Input.isKeyReleased(Key.V))
+		{
+			SceneManager.removeByName("TestOBJ");
+		}
 	}
 }
 
