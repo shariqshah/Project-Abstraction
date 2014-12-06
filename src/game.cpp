@@ -47,8 +47,7 @@ Game::Game(std::string path)
 	Sphere* sphere = new Sphere(1);
 	for(int i = 0; i < 10; i++)
 	{
-		GOPtr suzanne = SceneManager::create("Suzanne" +
-													   std::to_string(i));
+		GOPtr suzanne = SceneManager::create("Suzanne" + std::to_string(i));
 		suzanne->tag = "suzanne";
 		auto suzTransform = CompManager::getTransform(suzanne);
 

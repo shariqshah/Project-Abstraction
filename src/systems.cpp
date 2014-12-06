@@ -259,22 +259,11 @@ namespace System
 		
 		SceneManager::update();
 
-		// if(Input::isReleased(Input::Key::K0))
-		// 	ScriptEngine::createScript("../content/scripts/scriptManager.nut");
-		// if(Input::isReleased(Input::Key::K9))
-		// 	ScriptEngine::executeFunction("updateObjects", deltaTime);
-		// if(Input::isReleased(Input::Key::K8))
-		// {
-		// 	auto player = SceneManager::find("Player");
-		// 	ScriptEngine::executeFunction("attachScript",
-		// 								  player,
-		// 								  "PlayerBehaviour");
-		// }
-
 		if(Input::isReleased(Input::Key::K9))
 		{
-			auto player = SceneManager::find("Player");
-			GO::reloadScript(player, "PlayerBehaviour");
+			// auto test = SceneManager::find("TestOBJ");
+			// GO::reloadScript(test, "Test");
+			GO::reloadScriptByName("TestOBJ", "Test");
 		}
 	}
 

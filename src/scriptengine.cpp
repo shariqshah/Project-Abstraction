@@ -146,4 +146,16 @@ namespace ScriptEngine
 		else
 			function.Execute(gameObject);
 	}
+
+	void executeFunction(const std::string& name,
+						 const std::string& goName,
+						 const std::string& scriptName)
+	{
+		Sqrat::Function function = Sqrat::RootTable().GetFunction(name.c_str());
+
+		if(function.IsNull())
+			Log::error("executefunction", "Could not find function called : " + name);
+		else
+			function.Execute(goName, scriptName);
+	}
 }

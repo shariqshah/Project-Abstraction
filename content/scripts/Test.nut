@@ -10,12 +10,13 @@ class Test extends BaseBehaviourScript
 	function update(deltaTime)
 	{
 		local transform = CompManager.getTransform(gameObject);
-		Transform.rotate(transform, Vec3(0, 1, 0), 10 * deltaTime, Space.WORLD);
+		Transform.rotate(transform, Vec3(0, 1, 0), 50 * deltaTime, Space.WORLD);
 
-		if(Input.isKeyReleased(Key.V))
-		{
-			SceneManager.removeByName("TestOBJ");
-		}
+		// if(Input.isKeyReleased(Key.V))
+		// {
+		// 	local player = SceneManager.findByName("Player")
+		// 	this.reloadScriptByName(player, "PlayerBehaviour")
+		// }
 	}
 }
 

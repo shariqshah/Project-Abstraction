@@ -26,6 +26,22 @@ this.updateObjects <- function(deltaTime)
 	    object.update(deltaTime);
 }
 
+this.findGameObjectContainerByName <- function(goName)
+{
+	local gameObjectContainer = null;
+	foreach(object in this.objectList)
+	{
+		if(goName == object.gameObject.name)
+		{
+			gameObjectContainer = object;
+			Log.message(goName + " found!")
+			break;
+		}
+	}
+
+	return gameObjectContainer;
+}
+
 this.findGameObjectContainer <- function(objToFind)
 {
 	assert(objToFind != null);
@@ -89,7 +105,8 @@ this.attachScript <- function(gameObject, scriptName)
 	try
 	{
 		assert(gameObject != null);
-				
+		assert(dofile(this.scriptPath + scriptName + ".nut", true));
+		
 		local initFunc = dofile(this.scriptPath + scriptName + ".nut", true);
 
 		if(initFunc)
@@ -181,6 +198,41 @@ this.reloadScript <- function(gameObject, scriptName)
 	catch(error)
 	{
 		printStack("ReloadScript : " + error);
+	}
+}
+
+this.reloadScriptByName <- function(goName, scriptName)
+{
+	try
+	{
+		assert(goName != null);
+		assert(dofile(this.scriptPath + scriptName + ".nut", true));
+		
+		local goContainer = findGameObjectContainerByName(goName);
+
+		if(goContainer)
+		{
+			local scriptIndex = getScriptIndex(goContainer, scriptName);
+			if(scriptIndex != -1)
+			{
+				Log.message("Reloading " + scriptName + " for " + goName + "...");
+				goContainer.behaviourList.remove(scriptIndex);
+				attachScript(goContainer.gameObject, scriptName);
+			}
+			else
+			{
+				Log.error("ReloadScriptByName", scriptName + " is not attached to "
+						  + goName);
+			}
+		}
+		else
+		{
+			Log.error("ReloadScriptByName", goName + "Not registered to ScriptEngine!");
+		}
+	}
+	catch(error)
+	{
+		printStack("ReloadScriptByName : " + error);
 	}
 }
 

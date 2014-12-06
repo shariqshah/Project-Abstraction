@@ -25,6 +25,7 @@ namespace GO
 	void attachScript(GameObject* gameObject, const std::string& name);
 	void reloadScript(GameObject* gameObject, const std::string& name);
 	void removeScript(GameObject* gameObject, const std::string& name);
+	void reloadScriptByName(const std::string& goName, const std::string& name);
 	void reloadAllScripts(GameObject* gameObject);
 }
 

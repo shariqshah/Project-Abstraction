@@ -9,11 +9,28 @@ class PlayerBehaviour extends BaseBehaviourScript
 
 	function update(deltaTime)
 	{
+		local pTransform = CompManager.getTransform(gameObject);
+		// local translation  = Vec3(0.0, 0.0, 0.0);
+		// local speed = 5.0;
+
+		// if(Input.isKeyPressed(Key.I))
+		// 	translation.x += deltaTime * speed
+		//Log.message("Player Alive!")
+
 		if(Input.isKeyReleased(Key.V))
 		{
-			SceneManager.removeByName("TestOBJ");			
+			// local test = SceneManager.findByName("TestOBJ");
+			// reloadScriptByName(test, "Test");
+			count++;
+			local testobj = SceneManager.create("TestOBJ" + count)
+			CompManager.addModel(testobj, "models/test/test.scene.xml")
+			local transform = CompManager.getTransform(testobj)
+			Transform.setPosition(transform, pTransform.position, true)
+			GO.attachScript(testobj, "Test")
 		}
 	}
+
+	count = 0
 }
 
 function init(gameObject)
