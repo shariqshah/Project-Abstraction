@@ -28,7 +28,8 @@ namespace GO
 	void reloadAllScripts(GameObject* gameObject);
 	void reloadAllScripts(const std::string& goName);
 	void reloadScriptType(const std::string& typeName);
-	void removeScript(GameObject* gameObject, const std::string& name);	
+	void removeScript(GameObject* gameObject, const std::string& name);
+	void removeScript(const std::string& goName, const std::string& name);
 }
 
 #endif

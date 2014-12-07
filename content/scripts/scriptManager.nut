@@ -155,6 +155,36 @@ this.attachScript <- function(gameObject, scriptName)
 	}
 }
 
+this.getScript <- function(goIdentifier, scriptName)
+{
+	try
+	{
+		assert(goIdentifier != null);
+		local goContainer = findGameObjectContainer(goIdentifier);
+
+		if(goContainer)
+		{
+			local scriptIndex = getScriptIndex(goContainer.behaviourList, scriptName);
+			
+			if(scriptIndex != -1)
+				return goContainer.behaviourList[scriptIndex];
+			else
+				Log.error("GetScript", scriptName + " not found on " + goContainer.gameObject.name);
+		}
+		else
+		{
+			if((typeof goIdentifier) != "string")
+				Log.error("GetScript", "No scripts attached to " + goIdentifier.name);
+			else
+				Log.error("GetScript", "No scripts attached to " + goIdentifier);
+		}
+	}
+	catch(error)
+	{
+		printStack("GetScript : " + error);
+	}
+}
+
 this.removeGameObject <- function(gameObject)
 {
 	try

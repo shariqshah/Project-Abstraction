@@ -53,6 +53,11 @@ namespace GO
 		ScriptEngine::executeFunction("removeScript", gameObject, name);
 	}
 
+	void removeScript(const std::string& goName, const std::string& name)
+	{
+		ScriptEngine::executeFunction("removeScript", goName, name);
+	}
+
 	void reloadScriptType(const std::string& typeName)
 	{
 		ScriptEngine::executeFunction("reloadScriptType", typeName);

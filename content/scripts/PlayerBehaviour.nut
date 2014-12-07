@@ -40,7 +40,8 @@ class PlayerBehaviour extends BaseBehaviourScript </ type = "PlayerBehaviour" />
 			//GO.reloadAllScripts(test);
 			//GO.reloadScriptType("Test")
 			
-			::disableScript(test, "Test");
+			local script = ::getScript(test, "Test");
+			script.speed = 50.0;
 		}
 
 		if(Input.isKeyReleased(Key.R))
