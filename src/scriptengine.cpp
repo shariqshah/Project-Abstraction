@@ -117,6 +117,16 @@ namespace ScriptEngine
 			function.Execute(argument);
 	}
 
+	void executeFunction(const std::string& name, const std::string& argument)
+	{
+		Sqrat::Function function = Sqrat::RootTable().GetFunction(name.c_str());
+
+		if(function.IsNull())
+			Log::error("executefunction", "Could not find function called : " + name);
+		else
+			function.Execute(argument);
+	}
+
 	void executeFunction(const std::string& name)
 	{
 		Sqrat::Function function = Sqrat::RootTable().GetFunction(name.c_str());

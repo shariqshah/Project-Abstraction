@@ -236,6 +236,25 @@ this.reloadScriptByName <- function(goName, scriptName)
 	}
 }
 
+this.reloadScriptType <- function(scriptName)
+{
+	foreach(goContainer in this.objectList)
+	{
+		foreach(script in  goContainer.behaviourList)
+		{
+			// Get class level attributes
+			local classVar = script.getclass();
+			local attribs = classVar.getattributes(null);
+
+			if(scriptName == attribs.type)
+			{
+				reloadScript(goContainer.gameObject, scriptName);
+				break;
+			}
+		}
+	}
+}
+
 this.printStack <- function(error)
 {
 	local level = 0;

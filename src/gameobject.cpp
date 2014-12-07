@@ -20,9 +20,10 @@ namespace GO
 								.Var("remove", &GameObject::remove));
 
 		Sqrat::RootTable().Bind("GO", Sqrat::Table (ScriptEngine::getVM())
-								.Func("hasComponent", &hasComponent)
-								.Func("attachScript", &attachScript)
-								.Func("reloadScript", &reloadScript)
+								.Func("hasComponent",       &hasComponent)
+								.Func("attachScript",       &attachScript)
+								.Func("reloadScript",       &reloadScript)
+								.Func("reloadScriptType",   &reloadScriptType)
 								.Func("reloadScriptByName", &reloadScriptByName));
 	}
 
@@ -49,5 +50,10 @@ namespace GO
 	void reloadAllScripts(GameObject* gameObject)
 	{
 		ScriptEngine::executeFunction("reloadAllScripts", gameObject);
+	}
+
+	void reloadScriptType(const std::string& typeName)
+	{
+		ScriptEngine::executeFunction("reloadScriptType", typeName);
 	}
 }

@@ -19,6 +19,7 @@ namespace ScriptEngine
 	void runScript(const std::string& scriptName);
 	int  createScript(const std::string& name);
 	void executeFunction(const std::string& name);
+	void executeFunction(const std::string& name, const std::string& argument);
 	void executeFunction(const std::string& name, GOPtr gameObject);
 	void executeFunction(const std::string& functionName, const float argument);
 	void executeFunction(const std::string& name, GOPtr gameObject, const std::string& script);

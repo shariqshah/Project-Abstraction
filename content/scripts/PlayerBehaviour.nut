@@ -1,10 +1,11 @@
 dofile("../content/scripts/BaseBehaviour.nut", true);
 
-class PlayerBehaviour extends BaseBehaviourScript
+class PlayerBehaviour extends BaseBehaviourScript </ type = "PlayerBehaviour" />
 {	
 	constructor(attachedObj)
 	{
 		base.constructor(attachedObj, "PlayerBehaviour");
+		count = 0;
 	}
 
 	function update(deltaTime)
@@ -22,15 +23,20 @@ class PlayerBehaviour extends BaseBehaviourScript
 			// local test = SceneManager.findByName("TestOBJ");
 			// reloadScriptByName(test, "Test");
 			count++;
-			local testobj = SceneManager.create("TestOBJ" + count)
-			CompManager.addModel(testobj, "models/test/test.scene.xml")
-			local transform = CompManager.getTransform(testobj)
-			Transform.setPosition(transform, pTransform.position, true)
-			GO.attachScript(testobj, "Test")
+			local testobj = SceneManager.create("TestOBJ" + count);
+			CompManager.addModel(testobj, "models/test/test.scene.xml");
+			local transform = CompManager.getTransform(testobj);
+			Transform.setPosition(transform, pTransform.position, true);
+			GO.attachScript(testobj, "Test");
+		}
+
+		if(Input.isKeyReleased(Key.B))
+		{
+			GO.reloadScriptType("Test");
 		}
 	}
 
-	count = 0
+	count = null;
 }
 
 function init(gameObject)

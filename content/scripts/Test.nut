@@ -1,6 +1,6 @@
 dofile("../content/scripts/BaseBehaviour.nut", true);
 
-class Test extends BaseBehaviourScript
+class Test extends BaseBehaviourScript </ type = "Test" />
 {
 	constructor(attachedObj)
 	{
@@ -10,7 +10,7 @@ class Test extends BaseBehaviourScript
 	function update(deltaTime)
 	{
 		local transform = CompManager.getTransform(gameObject);
-		Transform.rotate(transform, Vec3(0, 1, 0), 50 * deltaTime, Space.WORLD);
+		Transform.rotate(transform, Vec3(0, 1, 0), 5 * deltaTime, Space.WORLD);
 
 		// if(Input.isKeyReleased(Key.V))
 		// {
