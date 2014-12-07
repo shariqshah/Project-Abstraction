@@ -1,18 +1,11 @@
-class BaseBehaviourScript
+class BaseBehaviourScript </ type = "BaseBehaviourScript" />
 {
 	gameObject = null;
-	type       = null;
 	
-	constructor(attachedObj, typeName)
+	constructor(attachedObj)
 	{
 		assert(attachedObj != null);
 		
 		gameObject = attachedObj;
-		type       = typeName;
-	}
-
-	function start()
-	{
-		Log.message("Base start called!");
 	}
 }

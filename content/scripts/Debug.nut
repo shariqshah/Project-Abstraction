@@ -1,6 +1,6 @@
 dofile("../content/scripts/BaseBehaviour.nut", true);
 
-class Test extends BaseBehaviourScript </ type = "Test" />
+class Debug extends BaseBehaviourScript </ type = "Debug" />
 {
 	constructor(attachedObj)
 	{
@@ -10,7 +10,7 @@ class Test extends BaseBehaviourScript </ type = "Test" />
 	function update(deltaTime)
 	{
 		local transform = CompManager.getTransform(gameObject);
-		Transform.rotate(transform, Vec3(0, 1, 0), 50 * deltaTime, Space.WORLD);
+		Transform.rotate(transform, Vec3(1, 0, 0), 50 * deltaTime, Space.WORLD);
 
 		// if(Input.isKeyReleased(Key.V))
 		// {
@@ -24,12 +24,12 @@ function init(gameObject)
 {
 	if(!gameObject)
 	{
-		Log.error("Test Init", "Invalid gameObject!");
+		Log.error("Debug Init", "Invalid gameObject!");
 		return null;
 	}
 	else
 	{
-		return Test(gameObject);
+		return Debug(gameObject);
 	}
 }
 

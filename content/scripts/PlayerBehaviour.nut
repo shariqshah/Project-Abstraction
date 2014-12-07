@@ -4,7 +4,7 @@ class PlayerBehaviour extends BaseBehaviourScript </ type = "PlayerBehaviour" />
 {	
 	constructor(attachedObj)
 	{
-		base.constructor(attachedObj, "PlayerBehaviour");
+		base.constructor(attachedObj);
 		count = 0;
 	}
 
@@ -32,7 +32,16 @@ class PlayerBehaviour extends BaseBehaviourScript </ type = "PlayerBehaviour" />
 
 		if(Input.isKeyReleased(Key.B))
 		{
-			GO.reloadScriptType("Test");
+			local test = SceneManager.findByName("TestOBJ");
+			local light = CompManager.addLight(test, "TestOBJLight");
+			Light.setColor(light, Vec3(0, 1, 0));
+			// GO.attachScript(test, "Debug");
+			// GO.reloadAllScriptsByName("TestOBJ");
+		}
+
+		if(Input.isKeyReleased(Key.R))
+		{
+			GO.reloadScript(gameObject, "PlayerBehaviour");
 		}
 	}
 

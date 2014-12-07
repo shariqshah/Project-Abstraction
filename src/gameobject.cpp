@@ -20,11 +20,13 @@ namespace GO
 								.Var("remove", &GameObject::remove));
 
 		Sqrat::RootTable().Bind("GO", Sqrat::Table (ScriptEngine::getVM())
-								.Func("hasComponent",       &hasComponent)
-								.Func("attachScript",       &attachScript)
-								.Func("reloadScript",       &reloadScript)
-								.Func("reloadScriptType",   &reloadScriptType)
-								.Func("reloadScriptByName", &reloadScriptByName));
+								.Func("hasComponent",           &hasComponent)
+								.Func("attachScript",           &attachScript)
+								.Func("reloadScript",           &reloadScript)
+								.Func("reloadAllScripts",       &reloadAllScripts)
+								.Func("reloadScriptType",       &reloadScriptType)
+								.Func("reloadAllScriptsByName", &reloadAllScriptsByName)
+								.Func("reloadScriptByName",     &reloadScriptByName));
 	}
 
 	void attachScript(GameObject* gameObject, const std::string& name)
@@ -37,19 +39,24 @@ namespace GO
 		ScriptEngine::executeFunction("reloadScript", gameObject, name);
 	}
 
+	void reloadAllScripts(GameObject* gameObject)
+	{
+		ScriptEngine::executeFunction("reloadAllScripts", gameObject);
+	}
+
 	void reloadScriptByName(const std::string& goName, const std::string& name)
 	{
 		ScriptEngine::executeFunction("reloadScriptByName", goName, name);
+	}
+
+	void reloadAllScriptsByName(const std::string& goName)
+	{
+		ScriptEngine::executeFunction("reloadAllScriptsByName", goName);
 	}
 	
 	void removeScript(GameObject* gameObject, const std::string& name)
 	{
 		ScriptEngine::executeFunction("removeScript", gameObject, name);
-	}
-	
-	void reloadAllScripts(GameObject* gameObject)
-	{
-		ScriptEngine::executeFunction("reloadAllScripts", gameObject);
 	}
 
 	void reloadScriptType(const std::string& typeName)
