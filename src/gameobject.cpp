@@ -46,12 +46,12 @@ namespace GO
 
 	void reloadScriptByName(const std::string& goName, const std::string& name)
 	{
-		ScriptEngine::executeFunction("reloadScriptByName", goName, name);
+		ScriptEngine::executeFunction("reloadScript", goName, name);
 	}
 
 	void reloadAllScriptsByName(const std::string& goName)
 	{
-		ScriptEngine::executeFunction("reloadAllScriptsByName", goName);
+		ScriptEngine::executeFunction("reloadAllScripts", goName);
 	}
 	
 	void removeScript(GameObject* gameObject, const std::string& name)

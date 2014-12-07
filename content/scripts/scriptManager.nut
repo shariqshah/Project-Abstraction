@@ -2,13 +2,15 @@ class GOContainer
 {
 	gameObject = null;
 	behaviourList = null;
-
+	disabledList  = null;
+	
 	constructor(gameObjectToStore)
 	{
 		if(gameObjectToStore)
 			gameObject = gameObjectToStore;
 
 		behaviourList = [];
+		disabledList  = [];
 	}
 
 	function update(deltaTime)
@@ -26,33 +28,34 @@ this.updateObjects <- function(deltaTime)
 	    object.update(deltaTime);
 }
 
-this.findGameObjectContainerByName <- function(goName)
+this.findGameObjectContainer <- function(goIdentifier)
 {
+	assert(goIdentifier != null);	
 	local gameObjectContainer = null;
-	foreach(object in this.objectList)
-	{
-		if(goName == object.gameObject.name)
-		{
-			gameObjectContainer = object;
-			break;
-		}
-	}
+	local compareNode = false;
 
-	return gameObjectContainer;
-}
-
-this.findGameObjectContainer <- function(objToFind)
-{
-	assert(objToFind != null);
+	if((typeof goIdentifier) != "string")
+		compareNode = true;
 	
-	local gameObjectContainer = null;
 	foreach(object in this.objectList)
 	{
-		if(objToFind.node == object.gameObject.node)
+		if(compareNode)
 		{
-			gameObjectContainer = object;
-			break;
+			if(goIdentifier.node == object.gameObject.node)
+			{
+				gameObjectContainer = object;
+				break;
+			}
 		}
+		else
+		{
+			if(goIdentifier == object.gameObject.name)
+			{
+				gameObjectContainer = object;
+				break;
+			}
+		}
+		
 	}
 
 	return gameObjectContainer;
@@ -65,11 +68,11 @@ this.getScriptType <- function(object)
 	return classAttribs.type;
 }
 
-this.getScriptIndex <- function(goContainer, scriptName)
+this.getScriptIndex <- function(scriptList, scriptName)
 {
 	local scriptIndex = -1;
 	
-	foreach(index, scriptObj in goContainer.behaviourList)
+	foreach(index, scriptObj in scriptList)
 	{
 		if(getScriptType(scriptObj) == scriptName)
 		{
@@ -94,14 +97,29 @@ this.addScript <- function(gameObject, scriptObj)
 	}
 	else
 	{
-		local scriptIndex = getScriptIndex(goContainer, typeName);
+		local scriptIndex = getScriptIndex(goContainer.behaviourList, typeName);
 		if(scriptIndex != -1)
 		{
 			Log.warning("Removing previous instance of " + typeName +
 						" from " + gameObject.name);
 			goContainer.behaviourList.remove(scriptIndex);
+			goContainer.behaviourList.append(scriptObj);
 		}
-		goContainer.behaviourList.append(scriptObj);
+		else
+		{
+			scriptIndex = getScriptIndex(goContainer.disabledList, typeName);
+			if(scriptIndex != -1)
+			{
+				Log.warning("Removing previous instance of " + typeName +
+						" from " + gameObject.name);
+				goContainer.disabledList.remove(scriptIndex);
+				goContainer.disabledList.append(scriptObj);
+			}
+			else
+			{
+				goContainer.behaviourList.append(scriptObj);
+			}
+		}
 	}
 
 	Log.message(typeName + " script added to " + gameObject.name);
@@ -162,10 +180,6 @@ this.removeGameObject <- function(gameObject)
 			this.objectList.remove(index);
 			Log.message("ScriptManager : Removed " + gameObject.name);
 		}
-		// else
-		// {
-		// 	Log.warning("ScriptManager : " + gameObject.name + " not registered so not removed");
-		// }
 	}
 	catch(error)
 	{
@@ -173,73 +187,114 @@ this.removeGameObject <- function(gameObject)
 	}
 }
 
-this.reloadScript <- function(gameObject, scriptName)
+this.enableScript <- function(goIdentifier, scriptName)
 {
 	try
 	{
-		assert(gameObject != null);
-		assert(dofile(this.scriptPath + scriptName + ".nut", true));
-		
-		local goContainer = findGameObjectContainer(gameObject);
+		assert(goIdentifier != null);
+		local goContainer = findGameObjectContainer(goIdentifier);
 
 		if(goContainer)
 		{
-			local scriptIndex = getScriptIndex(goContainer, scriptName);
+			local scriptIndex = getScriptIndex(goContainer.disabledList, scriptName);
 			if(scriptIndex != -1)
 			{
-				Log.message("Reloading " + scriptName + " for " + gameObject.name + "...");
-				goContainer.behaviourList.remove(scriptIndex);
-				attachScript(gameObject, scriptName);
+				local disabledScript = goContainer.disabledList[scriptIndex];
+				goContainer.behaviourList.append(disabledScript);
+				goContainer.disabledList.remove(scriptIndex);
+				Log.message(scriptName + " enabled for " + goContainer.gameObject.name);
 			}
 			else
 			{
-				Log.error("ReloadScript", scriptName + " is not attached to "
-						  + gameObject.name);
+				Log.error("EnableScript", scriptName + " cannot be enabled because it was not attached to  " + goContainer.gameObject.name);
 			}
 		}
 		else
 		{
-			Log.error("ReloadScript", "No scripts attached to " + gameObject.name);
+			if((typeof goIdentifier) != "string")
+				Log.error("EnableScript", "No scripts attached to " + goIdentifier.name);
+			else
+				Log.error("EnableScript", "No scripts attached to " + goIdentifier);
 		}
 	}
 	catch(error)
 	{
-		printStack("ReloadScript : " + error);
+		printStack("EnableScript : " + error);
 	}
 }
 
-this.reloadScriptByName <- function(goName, scriptName)
+
+this.disableScript <- function(goIdentifier, scriptName)
 {
 	try
 	{
-		assert(goName != null);
-		assert(dofile(this.scriptPath + scriptName + ".nut", true));
-		
-		local goContainer = findGameObjectContainerByName(goName);
+		assert(goIdentifier != null);
+		local goContainer = findGameObjectContainer(goIdentifier);
 
 		if(goContainer)
 		{
-			local scriptIndex = getScriptIndex(goContainer, scriptName);
+			local scriptIndex = getScriptIndex(goContainer.behaviourList, scriptName);
 			if(scriptIndex != -1)
 			{
-				Log.message("Reloading " + scriptName + " for " + goName + "...");
+				local script = goContainer.behaviourList[scriptIndex];
+				goContainer.disabledList.append(script);
+				goContainer.behaviourList.remove(scriptIndex);
+				Log.message(scriptName + " disabled for " + goContainer.gameObject.name);
+			}
+			else
+			{
+				Log.error("DisableScript", scriptName + " is not attached to "
+						  + goContainer.gameObject.name);
+			}
+		}
+		else
+		{
+			if((typeof goIdentifier) != "string")
+				Log.error("DisableScript", "No scripts attached to " + goIdentifier.name);
+			else
+				Log.error("DisableScript", "No scripts attached to " + goIdentifier);
+		}
+	}
+	catch(error)
+	{
+		printStack("DisableScript : " + error);
+	}
+}
+
+this.reloadScript <- function(goIdentifier, scriptName)
+{
+	try
+	{
+		assert(goIdentifier != null);
+		assert(dofile(this.scriptPath + scriptName + ".nut", true));
+		local goContainer = findGameObjectContainer(goIdentifier);
+
+		if(goContainer)
+		{
+			local scriptIndex = getScriptIndex(goContainer.behaviourList, scriptName);
+			if(scriptIndex != -1)
+			{
+				Log.message("Reloading " + scriptName + " for " + goContainer.gameObject.name);
 				goContainer.behaviourList.remove(scriptIndex);
 				attachScript(goContainer.gameObject, scriptName);
 			}
 			else
 			{
-				Log.error("ReloadScriptByName", scriptName + " is not attached to "
-						  + goName);
+				Log.error("ReloadScript", scriptName + " is not attached to "
+						  + goContainer.gameObject.name);
 			}
 		}
 		else
 		{
-			Log.error("ReloadScriptByName", goName + "Not registered to ScriptEngine!");
+			if((typeof goIdentifier) != "string")
+				Log.error("ReloadScript", "No scripts attached to " + goIdentifier.name);
+			else
+				Log.error("ReloadScript", "No scripts attached to " + goIdentifier);
 		}
 	}
 	catch(error)
 	{
-		printStack("ReloadScriptByName : " + error);
+		printStack("ReloadScript : " + error);
 	}
 }
 
@@ -258,12 +313,12 @@ this.reloadScriptType <- function(scriptName)
 	}
 }
 
-this.reloadAllScripts <- function(gameObject)
+this.reloadAllScripts <- function(goIdentifier)
 {
 	try
 	{
-		assert(gameObject != null);
-		local goContainer = findGameObjectContainer(gameObject);
+		assert(goIdentifier != null);
+		local goContainer = findGameObjectContainer(goIdentifier);
 
 		if(goContainer != null)
 		{
@@ -277,11 +332,14 @@ this.reloadAllScripts <- function(gameObject)
 
 			//reload each script
 			foreach(scriptType in attachedScripts)
-     			reloadScript(gameObject, scriptType);
+     			reloadScript(goContainer.gameObject, scriptType);
 		}
 		else
 		{
-			Log.error("ReloadAllScripts", gameObject.name + " not registered to ScriptEngine");
+			if((typeof goIdentifier) != "string")
+				Log.error("ReloadAllScripts", goIdentifier.name + " not registered to ScriptEngine");
+			else
+				Log.error("ReloadAllScripts", goIdentifier + " not registered to ScriptEngine")
 		}
 	}
 	catch(error)
@@ -289,39 +347,6 @@ this.reloadAllScripts <- function(gameObject)
 		printStack("ReloadAllScripts : " + error);
 	}
 }
-
-this.reloadAllScriptsByName <- function(goName)
-{
-	try
-	{
-		assert(goName != null);
-		local goContainer = findGameObjectContainerByName(goName);
-
-		if(goContainer != null)
-		{
-			//get attached scripts in array
-			local attachedScripts = [];
-			foreach(script in goContainer.behaviourList)
-			{
-				local typeName = getScriptType(script);
-				attachedScripts.append(typeName);
-			}
-
-			//reload each script
-			foreach(scriptType in attachedScripts)
-     			reloadScriptByName(goName, scriptType);
-		}
-		else
-		{
-			Log.error("ReloadAllScripts", goName.name + " not registered to ScriptEngine");
-		}
-	}
-	catch(error)
-	{
-		printStack("ReloadAllScripts : " + error);
-	}
-}
-
 
 this.printStack <- function(error)
 {

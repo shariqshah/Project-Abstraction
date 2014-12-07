@@ -33,15 +33,19 @@ class PlayerBehaviour extends BaseBehaviourScript </ type = "PlayerBehaviour" />
 		if(Input.isKeyReleased(Key.B))
 		{
 			local test = SceneManager.findByName("TestOBJ");
-			local light = CompManager.addLight(test, "TestOBJLight");
-			Light.setColor(light, Vec3(0, 1, 0));
+			// local light = CompManager.addLight(test, "TestOBJLight");
+			// Light.setColor(light, Vec3(0, 1, 0));
 			// GO.attachScript(test, "Debug");
 			// GO.reloadAllScriptsByName("TestOBJ");
+			//GO.reloadAllScripts(test);
+			//GO.reloadScriptType("Test")
+			
+			::enableScript(test, "Test");
 		}
 
 		if(Input.isKeyReleased(Key.R))
 		{
-			GO.reloadScript(gameObject, "PlayerBehaviour");
+			GO.reloadScriptByName("Player", "PlayerBehaviour");
 		}
 	}
 
