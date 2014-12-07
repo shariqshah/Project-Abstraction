@@ -24,12 +24,11 @@ namespace GO
 	void generateBindings();
 	void attachScript(GameObject* gameObject, const std::string& name);
 	void reloadScript(GameObject* gameObject, const std::string& name);
-	void removeScript(GameObject* gameObject, const std::string& name);
+	void reloadScript(const std::string& goName, const std::string& name);
 	void reloadAllScripts(GameObject* gameObject);
-	void reloadScriptByName(const std::string& goName, const std::string& name);
-	void reloadAllScriptsByName(const std::string& goName);
+	void reloadAllScripts(const std::string& goName);
 	void reloadScriptType(const std::string& typeName);
-	void reloadAllScripts(GameObject* gameObject);
+	void removeScript(GameObject* gameObject, const std::string& name);	
 }
 
 #endif

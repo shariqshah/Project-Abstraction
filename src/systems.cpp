@@ -263,7 +263,7 @@ namespace System
 		{
 			// auto test = SceneManager::find("TestOBJ");
 			// GO::reloadScript(test, "Test");
-			GO::reloadScriptByName("TestOBJ", "Test");
+			GO::reloadScript("TestOBJ", "Test");
 		}
 	}
 

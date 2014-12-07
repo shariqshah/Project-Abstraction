@@ -27,7 +27,7 @@ class PlayerBehaviour extends BaseBehaviourScript </ type = "PlayerBehaviour" />
 			CompManager.addModel(testobj, "models/test/test.scene.xml");
 			local transform = CompManager.getTransform(testobj);
 			Transform.setPosition(transform, pTransform.position, true);
-			GO.attachScript(testobj, "Test");
+			::attachScript(testobj, "Test");
 		}
 
 		if(Input.isKeyReleased(Key.B))
@@ -40,12 +40,12 @@ class PlayerBehaviour extends BaseBehaviourScript </ type = "PlayerBehaviour" />
 			//GO.reloadAllScripts(test);
 			//GO.reloadScriptType("Test")
 			
-			::enableScript(test, "Test");
+			::disableScript(test, "Test");
 		}
 
 		if(Input.isKeyReleased(Key.R))
 		{
-			GO.reloadScriptByName("Player", "PlayerBehaviour");
+			::reloadScript("Player", "PlayerBehaviour");
 		}
 	}
 

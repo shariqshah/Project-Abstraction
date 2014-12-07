@@ -206,7 +206,7 @@ this.enableScript <- function(goIdentifier, scriptName)
 			}
 			else
 			{
-				Log.error("EnableScript", scriptName + " cannot be enabled because it was not attached to  " + goContainer.gameObject.name);
+				Log.error("EnableScript", scriptName + " is not disabled on " + goContainer.gameObject.name);
 			}
 		}
 		else
@@ -223,6 +223,46 @@ this.enableScript <- function(goIdentifier, scriptName)
 	}
 }
 
+this.removeScript <- function(goIdentifier, scriptName)
+{
+	try
+	{
+		assert(goIdentifier != null);
+		local goContainer = findGameObjectContainer(goIdentifier);
+
+		if(goContainer)
+		{
+			local scriptIndex = getScriptIndex(goContainer.behaviourList, scriptName);
+			if(scriptIndex != -1)
+			{
+				goContainer.behaviourList.remove(scriptIndex);
+				Log.message(scriptName + " removed from " + goContainer.gameObject.name);
+			}
+			else
+			{
+				scriptIndex = getScriptIndex(goContainer.disabledList, scriptName);
+				if(scriptIndex != -1)
+				{
+					goContainer.disabledList.remove(scriptIndex);
+					Log.message(scriptName + " removed from " + goContainer.gameObject.name);
+				}
+				else
+					Log.error("RemoveScript", scriptName + " is not attached to " + goContainer.gameObject.name);
+			}
+		}
+		else
+		{
+			if((typeof goIdentifier) != "string")
+				Log.error("RemoveScript", "No scripts attached to " + goIdentifier.name);
+			else
+				Log.error("RemoveScript", "No scripts attached to " + goIdentifier);
+		}
+	}
+	catch(error)
+	{
+		printStack("RemoveScript : " + error);
+	}
+}
 
 this.disableScript <- function(goIdentifier, scriptName)
 {
