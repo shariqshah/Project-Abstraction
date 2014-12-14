@@ -227,6 +227,11 @@ namespace Renderer
 			return false;
 	}
 
+	void setNodeFlags(Node node, NodeFlag flag, bool recursive)
+	{
+		h3dSetNodeFlags(node, (int)flag, recursive);
+	}
+
 	namespace Resources
 	{	
 		bool loadAddedResources()

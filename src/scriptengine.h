@@ -6,6 +6,7 @@
 #include <iostream>
 
 struct GameObject;
+struct CollisionData;
 
 typedef HSQUIRRELVM VM;
 typedef GameObject* GOPtr;
@@ -23,6 +24,7 @@ namespace ScriptEngine
 	void executeFunction(const std::string& name, GOPtr gameObject);
 	void executeFunction(const std::string& functionName, const float argument);
 	void executeFunction(const std::string& name, GOPtr gameObject, const std::string& script);
+	void executeFunction(const std::string& name, GOPtr gameObject, const CollisionData& collisionData);
 	void executeFunction(const std::string& name,
 						 const std::string& goName,
 						 const std::string& scriptName);

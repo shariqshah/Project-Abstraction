@@ -23,6 +23,14 @@ typedef std::vector<Node> NodeList;
 typedef glm::vec3 Vec3;
 typedef glm::vec2 Vec2;
 
+enum class NodeFlag : int
+{
+	INACTIVE     = H3DNodeFlags::Inactive,
+	NO_DRAW      = H3DNodeFlags::NoDraw,
+	NO_SHADOW    = H3DNodeFlags::NoCastShadow,
+	NO_RAY_QUERY = H3DNodeFlags::NoRayQuery,
+};
+
 enum class ResourceType : int
 {
 	MODEL    = H3DResTypes::SceneGraph,
@@ -80,6 +88,7 @@ namespace Renderer
 	void toggleDebugView();
 	void toggleWireframe();
 	void resetTransformFlag(Node node);
+	void setNodeFlags(Node node, NodeFlag flag, bool recursive = true);
 	
 	bool removeNode(Node node);
 	bool setParent(Node child, Node parent);

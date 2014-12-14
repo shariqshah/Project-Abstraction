@@ -21,6 +21,15 @@ class Test extends BaseBehaviourScript </ type = "Test" />
 		// 	this.reloadScriptByName(player, "PlayerBehaviour")
 		// }
 	}
+
+	function onCollision(collisionData)
+	{
+		//Log.message(gameObject.name + " collided with " + collisionData.collidingObj.name)
+		local obj = collisionData.collidingObj;
+
+		if(obj.tag == "child")
+			SceneManager.removeByNode(obj.node)
+	}
 }
 
 function init(gameObject)

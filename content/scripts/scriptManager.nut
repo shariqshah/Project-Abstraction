@@ -185,6 +185,30 @@ this.getScript <- function(goIdentifier, scriptName)
 	}
 }
 
+this.processCollision <- function(gameObject, collisionData)
+{
+	try
+	{
+		assert(gameObject != null);
+		
+		local goContainer = findGameObjectContainer(gameObject);
+
+		if(goContainer)
+		{
+			foreach(script in goContainer.behaviourList)
+			    script.onCollision(collisionData);
+		}
+		// else
+		// {
+		// 	Log.warning("ProcessCollision : No scripts attached to " + gameObject.name);
+		// }
+	}
+	catch(error)
+	{
+		printStack("ProcessCollision : " + error);
+	}
+}
+
 this.removeGameObject <- function(gameObject)
 {
 	try

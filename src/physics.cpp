@@ -2,6 +2,7 @@
 #include "camera.h"
 #include "transform.h"
 #include "scriptengine.h"
+#include "gameobject.h"
 
 namespace Physics
 {
@@ -49,6 +50,41 @@ namespace Physics
 	void update(float deltaTime)
 	{
 		sWorld->stepSimulation(deltaTime);
+
+		// Process collisions
+		int numManifolds = sWorld->getDispatcher()->getNumManifolds();
+		for (int i=0;i<numManifolds;i++)
+		{
+			btPersistentManifold* contactManifold =  sWorld->getDispatcher()->getManifoldByIndexInternal(i);
+			const btCollisionObject* obA = contactManifold->getBody0();
+			const btCollisionObject* obB = contactManifold->getBody1();
+
+			int numContacts = contactManifold->getNumContacts();
+			for (int j = 0; j < numContacts; j++)
+			{
+				btManifoldPoint& pt = contactManifold->getContactPoint(j);
+				if (pt.getDistance()<0.f)
+				{
+					const btVector3& ptA       = pt.getPositionWorldOnA();
+					const btVector3& ptB       = pt.getPositionWorldOnB();
+					const btVector3& normalOnB = pt.m_normalWorldOnB;
+
+					GameObject* gameObjectA = (GameObject*)obA->getUserPointer();
+					GameObject* gameObjectB = (GameObject*)obB->getUserPointer();
+					
+					CollisionData collisionData;
+					collisionData.collidingObj = gameObjectB;
+					collisionData.normal       = Utils::toGlm(normalOnB);
+					collisionData.worldPosA    = Utils::toGlm(ptA);
+					collisionData.worldPosB    = Utils::toGlm(ptB);
+ 
+					GO::processCollision(gameObjectA, collisionData);
+
+					collisionData.collidingObj = gameObjectA;
+					GO::processCollision(gameObjectB, collisionData);
+				}
+			}
+		}
 	}
 
 	void draw(CTransform* viewerTransform, CCamera* viewerCamera)
@@ -217,7 +253,7 @@ namespace Physics
 			return new Cylinder(halfExtent, axis);
 		}
 
-		CollisionMesh* createCollisionMesh(CModel& model, bool isTriMesh)
+		CollisionMesh* createCollisionMesh(CModel* model, bool isTriMesh)
 		{
 			return new CollisionMesh(model, isTriMesh);
 		}
@@ -242,21 +278,28 @@ namespace Physics
 								.Ctor<Vec3, Vec3>());
 		Sqrat::RootTable().Bind("CollisionMesh",
 								Sqrat::DerivedClass<CollisionMesh, CollisionShape>()
-								.Ctor<CModel, bool>());
+								.Ctor<CModel*, bool>());
 
-		Sqrat::RootTable().Bind("CollisionShapes", Sqrat::Table (ScriptEngine::getVM())
-								.Func("createSphere", &CollisionShapes::createSphere)
-								.Func("createBox", &CollisionShapes::createBox)
-								.Func("createCapsule", &CollisionShapes::createCapsule)
-								.Func("createPlane", &CollisionShapes::createPlane)
+		Sqrat::RootTable().Bind("CollisionData", Sqrat::Class<CollisionData>()
+								.Var("collidingObj", &CollisionData::collidingObj)
+								.Var("worldPosA",    &CollisionData::worldPosA)
+								.Var("worldPosB",    &CollisionData::worldPosB)
+								.Var("normal",       &CollisionData::normal));
+
+		Sqrat::RootTable().Bind("CollisionShapes", Sqrat::Table(ScriptEngine::getVM())
+								.Func("createSphere",   &CollisionShapes::createSphere)
+								.Func("createBox",      &CollisionShapes::createBox)
+								.Func("createCapsule",  &CollisionShapes::createCapsule)
+								.Func("createPlane",    &CollisionShapes::createPlane)
 								.Func("createCylinder", &CollisionShapes::createCylinder)
-								.Func("createMesh", &CollisionShapes::createCollisionMesh));
+								.Func("createMesh",     &CollisionShapes::createCollisionMesh));
 		
 	}
 
 	namespace RigidBody
 	{
-		CRigidBody create(CollisionShape* shape,
+		CRigidBody create(GameObject*     gameObject,
+						  CollisionShape* shape,
 						  btMotionState*  motionState,
 						  float           mass,
 						  float           restitution)
@@ -272,6 +315,7 @@ namespace Physics
 															  inertia);
 			btRigidBody* body = new btRigidBody(consInfo);
 			body->setRestitution(restitution);
+			body->setUserPointer(gameObject);
 			sWorld->addRigidBody(body);
 			
 			CRigidBody rbHandle = -1;

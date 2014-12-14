@@ -29,8 +29,8 @@ namespace System
 		Physics::initialize(Vec3(0.f, -9.8f, 0.f));
 		CompManager::initialize();
 		suzanneModel = Renderer::Model::create("models/test/test.scene.xml");
-		statCollMesh = new CollisionMesh(*suzanneModel, true);
-		hullCollMesh = new CollisionMesh(*suzanneModel, false);
+		statCollMesh = new CollisionMesh(suzanneModel, true);
+		hullCollMesh = new CollisionMesh(suzanneModel, false);
 		tmpShape = new Sphere(1.f);
 
 		ScriptEngine::initialize();
@@ -272,8 +272,7 @@ namespace System
 		SceneManager::cleanup();
 		CompManager::cleanup();
 		Physics::cleanup();
-		Renderer::Model::remove(*suzanneModel);
-		delete suzanneModel;
+		Renderer::Model::cleanup();
 		ScriptEngine::cleanup();
 	}
 }

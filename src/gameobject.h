@@ -6,6 +6,8 @@
 #include "renderer.h"
 #include "componentTypes.h"
 
+struct CollisionData;
+
 const static int EMPTY_INDEX = -1;
 
 struct GameObject
@@ -30,6 +32,7 @@ namespace GO
 	void reloadScriptType(const std::string& typeName);
 	void removeScript(GameObject* gameObject, const std::string& name);
 	void removeScript(const std::string& goName, const std::string& name);
+	void processCollision(GameObject* gameObject, const CollisionData& collisionData);
 }
 
 #endif

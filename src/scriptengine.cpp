@@ -3,6 +3,7 @@
 #include <vector>
 #include "log.h"
 #include "gameobject.h"
+#include "physics.h"
 
 namespace ScriptEngine
 {
@@ -167,5 +168,15 @@ namespace ScriptEngine
 			Log::error("executefunction", "Could not find function called : " + name);
 		else
 			function.Execute(goName, scriptName);
+	}
+
+	void executeFunction(const std::string& name, GOPtr gameObject, const CollisionData& collisionData)
+	{
+		Sqrat::Function function = Sqrat::RootTable().GetFunction(name.c_str());
+
+		if(function.IsNull())
+			Log::error("executefunction", "Could not find function called : " + name);
+		else
+			function.Execute(gameObject, collisionData);
 	}
 }

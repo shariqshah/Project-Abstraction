@@ -16,9 +16,18 @@ class  btMotionState;
 class  CollisionShape;
 struct CCamera;
 struct CTransform;
+struct GameObject;
 
 typedef btDiscreteDynamicsWorld PhysicsWorld;
 typedef int32_t                 CRigidBody;
+
+struct CollisionData
+{
+	GameObject* collidingObj;
+	Vec3        worldPosA;
+	Vec3        worldPosB;
+	Vec3        normal;
+};
 
 namespace Physics
 {
@@ -58,7 +67,8 @@ namespace Physics
 
 	namespace RigidBody
 	{
-		CRigidBody create(CollisionShape* shape,
+		CRigidBody create(GameObject*     gameObject,
+						  CollisionShape* shape,
 						  btMotionState*  motionState,
 						  float           mass,
 						  float           restitution);
@@ -222,11 +232,11 @@ public:
 
 class CollisionMesh : public CollisionShape
 {
-	CModel mModel;
-	bool   mTriMesh;
+	CModel* mModel;
+	bool    mTriMesh;
 public:
 
-	CollisionMesh(CModel& model, bool isTriMesh)
+	CollisionMesh(CModel* model, bool isTriMesh)
 	{
 		mModel   = model;
 		mTriMesh = isTriMesh;
@@ -235,10 +245,10 @@ public:
 
 	void initialize()
 	{
-		if(mModel.node != 0)
+		if(mModel)
 		{
-			float* vertices = Renderer::Model::getVertices(&mModel);
-			int vertexCount = Renderer::Model::getVertexCount(&mModel);
+			float* vertices = Renderer::Model::getVertices(mModel);
+			int vertexCount = Renderer::Model::getVertexCount(mModel);
 			
 			btTriangleMesh *triMesh = new btTriangleMesh();
 

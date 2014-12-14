@@ -80,7 +80,8 @@ namespace CompManager
 							float restitution)
 	{
 		btMotionState* motionState = new MotionState(gameObject);
-		CRigidBody newRigidBody  = Physics::RigidBody::create(shape,
+		CRigidBody newRigidBody  = Physics::RigidBody::create(gameObject,
+															  shape,
 															  motionState,
 															  mass,
 															  restitution);
@@ -300,7 +301,7 @@ namespace CompManager
 				case Component::MODEL:
 					index = gameObject->compIndices[(int)type];
 					gameObject->compIndices[(int)type] = EMPTY_INDEX;
-					Renderer::Model::remove(sModelList[index]);
+					Renderer::Model::remove(&sModelList[index]);
 					sModelList[index].valid = false;
 					sModelEmptyList.push_back(index);
 					break;

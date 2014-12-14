@@ -5,6 +5,26 @@ namespace Renderer
 {
 	namespace Model
 	{
+		namespace
+		{
+			std::vector<CModel*> untrackedModels;
+		}
+
+		void cleanup()
+		{
+			for(CModel* model : untrackedModels)
+			{
+				if(model != NULL)
+				{
+					remove(model);
+					delete model;
+					model = NULL;
+				}
+			}
+
+			untrackedModels.clear();
+		}
+		
 		float* getVertices(CModel* model)
 		{
 			Resource geo = h3dGetNodeParamI(model->node, H3DModel::GeoResI);
@@ -29,17 +49,17 @@ namespace Renderer
 			return vertexCount;
 		}
 
-		void remove(const CModel& model)
+		void remove(CModel* model)
 		{
-			if(model.resourceID != 0 &&
-			   Renderer::Resources::isLoaded(model.resourceID))
+			if(model->resourceID != 0 &&
+			   Renderer::Resources::isLoaded(model->resourceID))
 			{
-				if(!Renderer::Resources::remove(model.resourceID))
+				if(!Renderer::Resources::remove(model->resourceID))
 					Log::warning("Resource not removed for Model!");
 
-				if(model.node != 0)
+				if(model->node != 0)
 				{
-					if(!Renderer::removeNode(model.node))
+					if(!Renderer::removeNode(model->node))
 						Log::warning("Node not removed for Model");
 				}
 			}
@@ -51,21 +71,24 @@ namespace Renderer
 			// added to gameobjects. It can only be used to provide collision
 			// mesh.
 			
-			CModel* newModel = new CModel;
+			untrackedModels.push_back(new CModel);
+			CModel* newModel = untrackedModels.back();
 			
 			newModel->filename = filename;
 			newModel->resourceID = Renderer::Resources::get(ResourceType::MODEL,
-													   newModel->filename);
+															newModel->filename);
 
 			if(newModel->resourceID == 0)
 				Log::warning("Model resource could not be created. Check renderer logs.");
 			else
 			{
 				newModel->node = Renderer::createNode(newModel->resourceID,
-												  Renderer::ROOT_NODE);
+													  Renderer::ROOT_NODE);
 
 				if(newModel->node == 0)
 					Log::warning("Model resource could not be parented to Root. Check renderer logs.");
+				else
+					Renderer::setNodeFlags(newModel->node, NodeFlag::INACTIVE);
 			}
 
 			newModel->valid = false;

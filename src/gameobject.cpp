@@ -62,4 +62,9 @@ namespace GO
 	{
 		ScriptEngine::executeFunction("reloadScriptType", typeName);
 	}
+
+	void processCollision(GameObject* gameObject, const CollisionData& collisionData)
+	{
+		ScriptEngine::executeFunction("processCollision", gameObject, collisionData);
+	}
 }

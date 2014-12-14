@@ -32,16 +32,21 @@ class PlayerBehaviour extends BaseBehaviourScript </ type = "PlayerBehaviour" />
 
 		if(Input.isKeyReleased(Key.B))
 		{
-			local test = SceneManager.findByName("TestOBJ");
+			//local test = SceneManager.findByName("TestOBJ");
 			// local light = CompManager.addLight(test, "TestOBJLight");
 			// Light.setColor(light, Vec3(0, 1, 0));
 			// GO.attachScript(test, "Debug");
 			// GO.reloadAllScriptsByName("TestOBJ");
 			//GO.reloadAllScripts(test);
-			//GO.reloadScriptType("Test")
+			::reloadScriptType("Test")
 			
-			local script = ::getScript(test, "Test");
-			script.speed = 50.0;
+			// local script = ::getScript(test, "Test");
+			// script.speed = 50.0;
+			// local model = Model.create("models/falcon/falcon.scene.xml")
+			// CompManager.addRigidBody(test,
+			// 						 CollisionShapes.createCollisionMesh(model, false),
+			// 						 1.0f,
+			// 						 0.5f)
 		}
 
 		if(Input.isKeyReleased(Key.R))

@@ -19,8 +19,9 @@ namespace Renderer
 		float*  getVertices(CModel* model);
 		CModel* create(const std::string& filename);
 		int     getVertexCount(CModel* model);
-		void    remove(const CModel& model);
+		void    remove(CModel* model);
 		void    generateBindings();
+		void    cleanup();
 	}
 }
 	
