@@ -1,0 +1,60 @@
+* ChangeLog
+** <2014-12-14 Sun 20:41>
+
+- Added support for responding to collisions detected by bullet by calling 'onCollision' method
+  of every script attached to the gameobject and passing the relevant collision data to the
+  method, which includes the gameobject colliding with and the world-space location.
+
+- Models that are not attached to any gameobject as nodes are now added to a list on creation
+  and are removed from the game on cleanup. The caller does not need to do the cleanup anymore
+  which means the can be called from scripts as well.
+
+- Add support for setting renderer's flag on any node.
+
+- Models that are added to scene only as collision meshes or that are not attached to any 
+  gameobject as component do not show up in the scene anymore as their flag is set to 
+  'INACTIVE'
+
+* Tasks
+** High-level
+*** TODO Squirrel mode for emacs?
+*** TODO GUI
+Add GUI by using IMGUI tuts.
+*** TODO Render to texture
+Last step before moving on to CPU!
+*** TODO CPU
+*** TODO World/Terrain generation?
+*** TODO ???
+*** TODO Profit!
+** Day to Day
+
+*** <2014-12-14 Sun 20:45>
+
+**** DONE  Collision Response by using contact manifold
+	 - State "DONE"       from "TODO"       [2014-12-14 Sun 21:02]
+**** TODO  Create bindings for seting default viewer of a scene/game.
+**** TODO  Save script container index for a particular gameobject inside the gameobject struct for faster lookup of gameobject in script manager.
+**** TODO  Rigidbody collision filtering by using layer and ability to switch them.
+**** TODO  Remove all static state variables from anonymous namespaces.
+**** TODO  Scaling collision meshes?
+
+	 Could be done by applying transformation to model serving as collision mesh or maybe bullet has something built-in?
+**** TODO Fix setKinematic and handling of kinematic bodies' handling
+* Notes
+** <2014-12-14 Sun 21:21>
+This is the first entry into my "OrgFile.org". The plan is to have a seperate OrgFile for every project that i work on, although i might change that in that in the future.
+The file is divided into three major parts,
+- Changelog
+  Contains day to day developments
+- Tasks
+  Contains list of things to do, divided into high-level and day to day tasks.
+  - High-Level
+	List of high level things to do that span the full length of the project.
+  - Day to Day
+	List of things arranged by timestamp. Contains TODO lists of things that come up and day-to-day work but are not major enough to be included in High-Level list.
+- Notes
+  Contains a list on notes arranged by timestamps. Each note may contain things related to the current project but it is not necessay. The notes section serves more as a 
+  journal or a blog.
+
+I hope i keep this habit up! After several(failed) attempts in the past to maintain a journal i hope i can finally do better this time!
+  
