@@ -27,14 +27,14 @@ Last step before moving on to CPU!
 *** TODO ???
 *** TODO Profit!
 ** Day to Day
-
 *** <2014-12-14 Sun 20:45>
 
 **** DONE  Collision Response by using contact manifold
 	 - State "DONE"       from "TODO"       [2014-12-14 Sun 21:02]
 **** TODO  Create bindings for seting default viewer of a scene/game.
 **** TODO  Save script container index for a particular gameobject inside the gameobject struct for faster lookup of gameobject in script manager.
-**** TODO  Rigidbody collision filtering by using layer and ability to switch them.
+**** DONE Rigidbody collision filtering by using layer and ability to switch them.
+	 - State "DONE"       from "TODO"       [2014-12-21 Sun 01:49]
 **** TODO  Remove all static state variables from anonymous namespaces.
 **** TODO  Scaling collision meshes?
 
@@ -58,3 +58,12 @@ The file is divided into three major parts,
 
 I hope i keep this habit up! After several(failed) attempts in the past to maintain a journal i hope i can finally do better this time!
   
+** <2014-12-21 Sun>
+Removed all static state variables from unnamed namespaces by simply removing the 'static' from them.
+I expected to see alot of errors but was pleasantly surprised when the buid completed successfully.
+Also removed all the various "executeFunction" variants from scriptengine. I figured a little bit of template magic won't
+hurt any one. And they worked as expected. Now, instead of having eight or nine different variants of the same "executeFunction"
+function i have only one that serves my current needs and any future ones if needed and it looks much cleaner and takes far 
+less lines. All those repetitive code took around ninety lines and the current one takes only ten!
+
+Much less progress today since i only worked for about ten minutes but anything is better than nothing!
