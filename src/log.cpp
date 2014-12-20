@@ -5,7 +5,7 @@ namespace Log
 {
 	namespace
 	{
-		static bool isEnabled = true;
+		bool isEnabled = true;
 	}
 	
     void message(const std::string& message)

@@ -1,5 +1,5 @@
-#ifndef _game_H_
-#define _game_H_
+#ifndef _game_H
+#define _game_H
 
 #include <iostream>
 
@@ -10,7 +10,7 @@ typedef GameObject* GOPtr;
 class Game
 {
     std::string mContentFolderDir;
-	GOPtr mCurrentViewer;
+	GOPtr       mCurrentViewer;
 public:
     Game(std::string path);
 	~Game();

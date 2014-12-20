@@ -100,7 +100,7 @@ public:
 	
 	virtual void initialize() {}
 	
-	~CollisionShape()
+	virtual ~CollisionShape()
 	{
 		if(mShape)
 			delete mShape;

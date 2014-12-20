@@ -4,8 +4,8 @@ namespace Settings
 {
 	namespace
 	{
-		static int cWindowWidth;
-		static int cWindowHeight;
+		int cWindowWidth;
+		int cWindowHeight;
 	}
 	
 	bool initSettings()

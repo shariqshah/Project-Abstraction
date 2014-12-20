@@ -8,21 +8,21 @@ namespace Physics
 {
 	namespace
 	{
-		static PhysicsWorld* sWorld;
-		static btVector3     sGravity;
+		PhysicsWorld* sWorld;
+		btVector3     sGravity;
 
-		static btBroadphaseInterface*               sBroadphase;
-		static btDefaultCollisionConfiguration*     sCollisionConfiguration;
-		static btCollisionDispatcher*               sDispatcher;
-		static btSequentialImpulseConstraintSolver* sSolver;
+		btBroadphaseInterface*               sBroadphase;
+		btDefaultCollisionConfiguration*     sCollisionConfiguration;
+		btCollisionDispatcher*               sDispatcher;
+		btSequentialImpulseConstraintSolver* sSolver;
 
-		static std::vector<CRigidBody>          sFreeList;
-		static std::vector<btRigidBody*>      sRigidBodies;
-		static std::vector<CollisionShape*>   sShapes;
+		std::vector<CRigidBody>          sFreeList;
+		std::vector<btRigidBody*>        sRigidBodies;
+		std::vector<CollisionShape*>     sShapes;
 
-		static DebugDrawer* sDebugDrawer;
-		static bool         sEnableDebugDraw;
-		static DBG_Mode     sCurrentDebugMode;
+		DebugDrawer* sDebugDrawer;
+		bool         sEnableDebugDraw;
+		DBG_Mode     sCurrentDebugMode;
 	}
 
 	void initialize(glm::vec3 gravity)

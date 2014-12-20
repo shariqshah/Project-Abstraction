@@ -5,10 +5,9 @@ namespace Renderer
 {
 	namespace
 	{
-		static std::vector<Node> cameras;
-		
-		static Resource    sDefaultPipeline;
-		static Resource    sPipelines[3];
+		std::vector<Node> cameras;
+		Resource    sDefaultPipeline;
+		Resource    sPipelines[3];
 	}
 	
 	namespace Camera

@@ -9,10 +9,10 @@ namespace ScriptEngine
 {
 	namespace
 	{
-		static VM vmInstance;
-		static Sqrat::SqratVM *vm;
-		static std::vector<Sqrat::Script> scriptList;
-		static std::vector<int> scriptFreeIndices;
+		VM vmInstance;
+		Sqrat::SqratVM *vm;
+		std::vector<Sqrat::Script> scriptList;
+		std::vector<int> scriptFreeIndices;
 	}
 
 	void printfunc(HSQUIRRELVM v,const SQChar *s,...)
@@ -104,79 +104,6 @@ namespace ScriptEngine
 		{
 			Log::error("Compiling " + name, error);
 			return -1;
-		}
-		
-	}
-
-	void executeFunction(const std::string& name, const float argument)
-	{
-		Sqrat::Function function = Sqrat::RootTable().GetFunction(name.c_str());
-
-		if(function.IsNull())
-			Log::error("executefunction", "Could not find function called : " + name);
-		else
-			function.Execute(argument);
-	}
-
-	void executeFunction(const std::string& name, const std::string& argument)
-	{
-		Sqrat::Function function = Sqrat::RootTable().GetFunction(name.c_str());
-
-		if(function.IsNull())
-			Log::error("executefunction", "Could not find function called : " + name);
-		else
-			function.Execute(argument);
-	}
-
-	void executeFunction(const std::string& name)
-	{
-		Sqrat::Function function = Sqrat::RootTable().GetFunction(name.c_str());
-
-		if(function.IsNull())
-			Log::error("executefunction", "Could not find function called : " + name);
-		else
-			function.Execute();
-	}
-
-	void executeFunction(const std::string& name, GOPtr gameObject, const std::string& script)
-	{
-		Sqrat::Function function = Sqrat::RootTable().GetFunction(name.c_str());
-
-		if(function.IsNull())
-			Log::error("executefunction", "Could not find function called : " + name);
-		else
-			function.Execute(gameObject, script);
-	}
-
-	void executeFunction(const std::string& name, GOPtr gameObject)
-	{
-		Sqrat::Function function = Sqrat::RootTable().GetFunction(name.c_str());
-
-		if(function.IsNull())
-			Log::error("executefunction", "Could not find function called : " + name);
-		else
-			function.Execute(gameObject);
-	}
-
-	void executeFunction(const std::string& name,
-						 const std::string& goName,
-						 const std::string& scriptName)
-	{
-		Sqrat::Function function = Sqrat::RootTable().GetFunction(name.c_str());
-
-		if(function.IsNull())
-			Log::error("executefunction", "Could not find function called : " + name);
-		else
-			function.Execute(goName, scriptName);
-	}
-
-	void executeFunction(const std::string& name, GOPtr gameObject, const CollisionData& collisionData)
-	{
-		Sqrat::Function function = Sqrat::RootTable().GetFunction(name.c_str());
-
-		if(function.IsNull())
-			Log::error("executefunction", "Could not find function called : " + name);
-		else
-			function.Execute(gameObject, collisionData);
+		}	
 	}
 }

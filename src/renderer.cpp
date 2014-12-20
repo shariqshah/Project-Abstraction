@@ -4,16 +4,16 @@ namespace Renderer
 {
 	namespace
 	{
-		static std::string cContentFolderDir;
-		static std::vector<std::string> sTextList;
-		static Vec2 sFontPos;
-		static Resource sFontMat;
-		static Resource sPanelMat;
-		static float sFontSize;
-		static Resource sLightMat;
-		static DebugLevel sDebugLevel;
-		static bool sRenderWireframe;
-		static bool sRenderDebugView;
+		std::string              cContentFolderDir;
+		std::vector<std::string> sTextList;
+		Vec2       sFontPos;
+		Resource   sFontMat;
+		Resource   sPanelMat;
+		float      sFontSize;
+		Resource   sLightMat;
+		DebugLevel sDebugLevel;
+		bool       sRenderWireframe;
+		bool       sRenderDebugView;
 	}
 
 	void setNodeTransform(Node node, glm::mat4 transformMat)

@@ -10,12 +10,10 @@ Game*         game;
 
 //========================================================> Function Prototypes
 bool        init(char *pFullPath);
-
 void        close();
 void        handleKeyboard(SDL_Event event, float deltaTime, bool *quit);
 void        handleWindowEvent(SDL_WindowEvent event);
-
-std::string extractAppPath( char *pFullPath );
+std::string extractAppPath(char *pFullPath);
 
 int main(int argc, char** args)
 {

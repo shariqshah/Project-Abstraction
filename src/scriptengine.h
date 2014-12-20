@@ -3,7 +3,8 @@
 
 #include <sqrat.h>
 #include <sqrat/sqratVM.h>
-#include <iostream>
+
+#include "log.h"
 
 struct GameObject;
 struct CollisionData;
@@ -19,15 +20,17 @@ namespace ScriptEngine
 	void cleanup();
 	void runScript(const std::string& scriptName);
 	int  createScript(const std::string& name);
-	void executeFunction(const std::string& name);
-	void executeFunction(const std::string& name, const std::string& argument);
-	void executeFunction(const std::string& name, GOPtr gameObject);
-	void executeFunction(const std::string& functionName, const float argument);
-	void executeFunction(const std::string& name, GOPtr gameObject, const std::string& script);
-	void executeFunction(const std::string& name, GOPtr gameObject, const CollisionData& collisionData);
-	void executeFunction(const std::string& name,
-						 const std::string& goName,
-						 const std::string& scriptName);
+
+	template<typename... Params>
+	void executeFunction(const std::string& name, Params... params)
+	{
+		Sqrat::Function function = Sqrat::RootTable().GetFunction(name.c_str());
+
+		if(function.IsNull())
+			Log::error("executefunction", "Could not find function called : " + name);
+		else
+			function.Execute(params...);
+	}
 }
 
 #endif

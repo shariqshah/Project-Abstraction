@@ -9,8 +9,8 @@ namespace SceneManager
 {
 	namespace
 	{
-		static GOMap sSceneObjects;
-		static std::vector<Node> sRemovables;
+		GOMap sSceneObjects;
+		std::vector<Node> sRemovables;
 
 		void removeGameObject(GOPtr gameObject)
 		{

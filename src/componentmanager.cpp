@@ -13,20 +13,20 @@ namespace CompManager
 {
 	namespace
 	{
-		static std::vector<CTransform> sTransformList;
-		static std::vector<int>        sTransformEmptyList;
+		std::vector<CTransform> sTransformList;
+		std::vector<int>        sTransformEmptyList;
 
-		static std::vector<CCamera>    sCameraList;
-		static std::vector<int>        sCameraEmptyList;
+		std::vector<CCamera>    sCameraList;
+		std::vector<int>        sCameraEmptyList;
 
-		static std::vector<CModel>     sModelList;
-		static std::vector<int>        sModelEmptyList;
+		std::vector<CModel>     sModelList;
+		std::vector<int>        sModelEmptyList;
 
-		static std::vector<CLight>     sLightList;
-		static std::vector<int>        sLightEmptyList;
+		std::vector<CLight>     sLightList;
+		std::vector<int>        sLightEmptyList;
 
-		static std::vector<CRigidBody> sRigidBodyList;
-		static std::vector<int>        sRigidBodyEmptyList;
+		std::vector<CRigidBody> sRigidBodyList;
+		std::vector<int>        sRigidBodyEmptyList;
 	}
 
     void initialize()

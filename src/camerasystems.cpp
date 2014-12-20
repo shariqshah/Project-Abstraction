@@ -12,14 +12,14 @@ namespace System
 	{
 		namespace
 		{
-			const static  float cMaxUpDownRot   = 80.f;
+			const float cMaxUpDownRot   = 80.f;
 			
-			static float sTotalUpDownRot = 0.f;
-			static float sMovSpeed       = 20.f;
-			static float sRotSpeed       = 1.2f;
-			static float sSprintFactor   = 3.f;
+			float sTotalUpDownRot = 0.f;
+			float sMovSpeed       = 20.f;
+			float sRotSpeed       = 1.2f;
+			float sSprintFactor   = 3.f;
 			
-			static GameObject* activeObject = NULL;
+			GameObject* activeObject = NULL;
 		}
 
 		void setActiveObject(GameObject* gameObject)

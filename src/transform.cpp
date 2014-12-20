@@ -5,7 +5,7 @@ namespace Transform
 {
 	namespace
 	{
-		static const float epsilon = 0.005f;
+		const float epsilon = 0.005f;
 	}
 
 	void updateTransformMatrix(CTransform* transform)

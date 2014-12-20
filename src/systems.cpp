@@ -16,11 +16,11 @@ namespace System
 {
 	namespace
 	{
-		static bool    sPhysicsEnabled      = true;
-		static Sphere* tmpShape             = NULL;
-		static CModel* suzanneModel         = NULL;
-		static CollisionShape* statCollMesh = NULL;
-		static CollisionShape* hullCollMesh = NULL;
+		bool    sPhysicsEnabled      = true;
+		Sphere* tmpShape             = NULL;
+		CModel* suzanneModel         = NULL;
+		CollisionShape* statCollMesh = NULL;
+		CollisionShape* hullCollMesh = NULL;
 	}
 	
 	void initialize()

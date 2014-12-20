@@ -11,10 +11,10 @@ namespace Input
 		const int cNumKeyboardKeys = 283;
 		const int cNumMouseButtons = 5;
 		const int cMaxDelta = 50;
-        static Uint8 sKeyState[cNumKeyboardKeys];
-        static Uint8 sMouseButtonState[cNumMouseButtons];
-		static Sint32 sMouseX, sMouseY;
-		static Sint32 sMouseRelX, sMouseRelY;
+        Uint8  sKeyState[cNumKeyboardKeys];
+        Uint8  sMouseButtonState[cNumMouseButtons];
+		Sint32 sMouseX, sMouseY;
+		Sint32 sMouseRelX, sMouseRelY;
 	}
 	
 	void updateKeys(SDL_KeyboardEvent event)

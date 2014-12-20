@@ -1,5 +1,6 @@
 #include "gameobject.h"
 #include "scriptengine.h"
+#include "physics.h"
 
 namespace GO
 {
