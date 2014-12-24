@@ -11,7 +11,7 @@ struct CCamera
 	float    farZ        = 1000.f;
 	float    fov         = 75.f;
 	float    aspectRatio = 4.f/3.f;
-	Pipeline pipeline    = Pipeline::HDR;
+	Pipeline pipeline    = Pipeline::FORWARD;
 	bool     valid       = true;
 };
 
@@ -33,9 +33,9 @@ namespace Renderer
 		void setNearZ(CCamera* camera, float nearZ);
 		void setFarZ(CCamera* camera, float farZ);
 		void generateBindings();
+		void setOutputTexture(CCamera* camera, Resource texture);
 		
-		CCamera create(const std::string& name, Node parent);
-		
+		CCamera create(const std::string& name, Node parent, Resource pipeline);
 	}
 }
 

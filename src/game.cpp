@@ -10,6 +10,7 @@
 #include "gameobject.h"
 #include "componentmanager.h"
 #include "camerasystems.h"
+#include "cpu.h"
 
 Game::Game(std::string path)
 {	
@@ -28,18 +29,19 @@ Game::Game(std::string path)
 	auto goLight = CompManager::addLight(lightGO, "GOLight");
 	auto lTransform = CompManager::getTransform(lightGO);
 
-	Transform::setPosition(lTransform, Vec3(-176, 319, 18));
-	Transform::setLookAt(lTransform, Vec3(0));
+
+	Transform::setPosition(lTransform, Vec3(-50, 200, 0));
+	Transform::rotate(lTransform, Transform::UNIT_X, -90, Transform::Space::WORLD);
 	Renderer::Light::setColor(goLight, Vec3(0.8f, 0.8f, 0.5f));
 	Renderer::Light::setRadius(goLight, 500);
 
 	GOPtr player = SceneManager::create("Player");
 	player->tag = "FreeCamera";
 	auto playerTrans = CompManager::getTransform(player);
-	auto playerLight = CompManager::addLight(player, "playerLight");
-	CompManager::addCamera(player, "playerCamera");
-	Renderer::Light::setColor(playerLight, Vec3(1, 0, 0));
-	Transform::setPosition(playerTrans, Vec3(-110, 85, 92));
+	// auto playerLight = CompManager::addLight(player, "playerLight");
+	// Renderer::Light::setColor(playerLight, Vec3(1, 0, 0));
+	CompManager::addCamera(player, "playerCamera", Pipeline::FORWARD);
+	Transform::setPosition(playerTrans, Vec3(-18, 40, 28));
 	System::CameraSystem::setActiveObject(player);
 	GO::attachScript(player, "PlayerBehaviour");
 	mCurrentViewer = player;
@@ -62,15 +64,15 @@ Game::Game(std::string path)
 		CompManager::addModel(suzanne, "models/test/test.scene.xml");
 		CompManager::addRigidBody(suzanne, sphere);
 
-		auto suzLight = CompManager::addLight(suzanne,
-											  "light" + std::to_string(i));
+		// auto suzLight = CompManager::addLight(suzanne,
+		// 									  "light" + std::to_string(i));
 		
-		float r = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
-		float g = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
-		float b = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+		// float r = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+		// float g = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+		// float b = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
 
-		Renderer::Light::setColor(suzLight, Vec3(r, g, b));
-		Renderer::Light::setShadowCaster(suzLight, false);
+		// Renderer::Light::setColor(suzLight, Vec3(r, g, b));
+		// Renderer::Light::setShadowCaster(suzLight, false);
 	}
 
 	GOPtr plane = SceneManager::create("Floor");
@@ -94,6 +96,7 @@ void Game::draw()
 {
 	auto activeCamera = CompManager::getCamera(mCurrentViewer);
 	auto activeTrans  = CompManager::getTransform(mCurrentViewer);
+	Cpu::draw();
 	Renderer::renderFrame(activeCamera->node);
 	Physics::draw(activeTrans, activeCamera);
 }

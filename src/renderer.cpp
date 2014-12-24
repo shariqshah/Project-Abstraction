@@ -295,6 +295,20 @@ namespace Renderer
 			return true;
 			
 		}
+
+		Resource createTexture(const std::string& name,
+							   int                width,
+							   int                height,
+							   TextureFormat      format,
+							   ResourceFlags      flags)
+		{
+			Resource texture = h3dCreateTexture(name.c_str(), width, height, (int)format, (int)flags);
+
+			if(texture == 0)
+				Log::error("Renderer", "Could not create texture, check renderer logs");
+
+			return texture;
+		}
 	}
 
 }

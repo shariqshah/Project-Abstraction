@@ -6,35 +6,35 @@ namespace Renderer
 	namespace
 	{
 		std::vector<Node> cameras;
-		Resource    sDefaultPipeline;
-		Resource    sPipelines[3];
+        Resource          pipelineList[4];
 	}
 	
 	namespace Camera
 	{
 		void initialize()
 		{
-			sPipelines[0] = Resources::add(ResourceType::PIPELINE,
+            pipelineList[0] = Resources::add(ResourceType::PIPELINE,
 										   "pipelines/forward.pipeline.xml",
 										   0);
-			sPipelines[1] = Resources::add(ResourceType::PIPELINE,
+            pipelineList[1] = Resources::add(ResourceType::PIPELINE,
 										   "pipelines/deferred.pipeline.xml",
 										   0);
-			sPipelines[2] = Resources::add(ResourceType::PIPELINE,
+            pipelineList[2] = Resources::add(ResourceType::PIPELINE,
 										   "pipelines/hdr.pipeline.xml",
+										   0);
+            pipelineList[3] = Resources::add(ResourceType::PIPELINE,
+										   "pipelines/rtt.pipeline.xml",
 										   0);
 
 			Resources::loadAddedResources();
-
-			sDefaultPipeline = sPipelines[(int)Pipeline::HDR];
 		}
 
-		CCamera create(const std::string& name, Node parent)
+		CCamera create(const std::string& name, Node parent, Resource pipeline)
 		{
 			CCamera newCamera;
 			Node node = h3dAddCameraNode(parent,
 										 name.c_str(),
-										 sDefaultPipeline);
+										 pipelineList[(int)pipeline]);
 			if(node != 0)
 			{
 				cameras.push_back(node);
@@ -71,15 +71,15 @@ namespace Renderer
 
 		void resizePipelineBuffers(int width, int height)
 		{
-			h3dResizePipelineBuffers(sPipelines[(int)Pipeline::FORWARD],
+            h3dResizePipelineBuffers(pipelineList[(int)Pipeline::FORWARD],
 									 width,
 									 height);
 			
-			h3dResizePipelineBuffers(sPipelines[(int)Pipeline::DEFERRED],
+            h3dResizePipelineBuffers(pipelineList[(int)Pipeline::DEFERRED],
 									 width,
 									 height);
 			
-			h3dResizePipelineBuffers(sPipelines[(int)Pipeline::HDR],
+            h3dResizePipelineBuffers(pipelineList[(int)Pipeline::HDR],
 									 width,
 									 height);
 		}
@@ -131,19 +131,22 @@ namespace Renderer
 
 		void setPipeline(CCamera* camera, Pipeline pipeline)
 		{
-			Resource newPipeline = sDefaultPipeline;
+			Resource newPipeline = 0;
 			camera->pipeline = pipeline;
 			
 			switch(pipeline)
 			{
 			case Pipeline::FORWARD:
-				newPipeline = sPipelines[(int)Pipeline::FORWARD];
+                newPipeline = pipelineList[(int)Pipeline::FORWARD];
 				break;
 			case Pipeline::DEFERRED:
-				newPipeline = sPipelines[(int)Pipeline::DEFERRED];
+                newPipeline = pipelineList[(int)Pipeline::DEFERRED];
 				break;
 			case Pipeline::HDR:
-				newPipeline = sPipelines[(int)Pipeline::HDR];
+                newPipeline = pipelineList[(int)Pipeline::HDR];
+				break;
+			case Pipeline::RTT:
+                newPipeline = pipelineList[(int)Pipeline::RTT];
 				break;
 			}
 
@@ -158,6 +161,11 @@ namespace Renderer
 		void setOrthographic(CCamera* camera, bool enable)
 		{
 			h3dSetNodeParamI(camera->node, H3DCamera::OrthoI, enable ? 1 : 0);
+		}
+
+		void setOutputTexture(CCamera* camera, Resource texture)
+		{
+			h3dSetNodeParamI(camera->node, H3DCamera::OutTexResI, texture);
 		}
 
 		void generateBindings()

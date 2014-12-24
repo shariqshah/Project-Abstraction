@@ -10,13 +10,12 @@ class PlayerBehaviour extends BaseBehaviourScript </ type = "PlayerBehaviour" />
 
 	function update(deltaTime)
 	{
-		local pTransform = CompManager.getTransform(gameObject);
-		// local translation  = Vec3(0.0, 0.0, 0.0);
-		// local speed = 5.0;
-
-		// if(Input.isKeyPressed(Key.I))
-		// 	translation.x += deltaTime * speed
-		//Log.message("Player Alive!")
+		if(Input.isKeyReleased(Key.I))
+		{
+			local go = SceneManager.findByName("LightGO")
+			local lTransform = CompManager.getTransform(go)
+			Transform.setForward(lTransform, Vec3(0))
+		}
 
 		if(Input.isKeyReleased(Key.V))
 		{

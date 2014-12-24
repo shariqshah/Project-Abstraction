@@ -183,13 +183,13 @@ namespace CompManager
 		}
 	}
 
-	CCamera* addCamera(GameObject* gameObject, const std::string& name)
+	CCamera* addCamera(GameObject* gameObject, const std::string& name, int pipeline)
 	{
 		if(gameObject)
 		{
 			if(!GO::hasComponent(gameObject, Component::CAMERA))
 			{
-				CCamera newCamera = Renderer::Camera::create(name, gameObject->node);
+				CCamera newCamera = Renderer::Camera::create(name, gameObject->node, pipeline);
 
 				if(newCamera.valid)
 				{

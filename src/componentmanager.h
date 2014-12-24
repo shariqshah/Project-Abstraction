@@ -19,13 +19,15 @@ namespace CompManager
 	void cleanup();
 
 	CTransform* addTransform(GameObject* gameObject);
-	CCamera*    addCamera(GameObject* gameObject, const std::string& name);
 	CModel*     addModel(GameObject* gameObject, const std::string& filename);
 	CLight*     addLight(GameObject* gameObject, const std::string& name);
 	CRigidBody  addRigidBody(GameObject* gameObject,
 							 CollisionShape* shape,
-							 const float mass        = 1.f,
-							 const float restitution = 0.5f);
+							 const float     mass        = 1.f,
+							 const float     restitution = 0.5f);
+	CCamera*    addCamera(GameObject*        gameObject,
+						  const std::string& name,
+						  int                pipeline);
 	
 	CTransform* getTransform(GameObject* gameObject);
 	CCamera*    getCamera(GameObject* gameObject);

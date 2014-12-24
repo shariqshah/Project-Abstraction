@@ -39,6 +39,17 @@ enum class ResourceType : int
 	GEOMETRY = H3DResTypes::Geometry
 };
 
+enum class ResourceFlags : int
+{
+	NO_QUERY            = H3DResFlags::NoQuery,
+	NO_TEX_COMPRESSION  = H3DResFlags::NoTexCompression,
+	NO_TEX_MIPMAP       = H3DResFlags::NoTexMipmaps,
+	TEX_CUBEMAP_        = H3DResFlags::TexCubemap,
+	TEX_DYNAMIC_        = H3DResFlags::TexDynamic,
+	TEX_RENDERABLE      = H3DResFlags::TexRenderable,
+	TEX_SRGB            = H3DResFlags::TexSRGB
+};
+
 enum class NodeType : int
 {
 	GROUP  = H3DNodeTypes::Group,
@@ -52,7 +63,8 @@ enum Pipeline : uint8_t
 {
 	FORWARD  = 0,
 	DEFERRED = 1,
-	HDR      = 2
+	HDR      = 2,
+	RTT      = 3
 };
 
 enum class DebugLevel : uint8_t
@@ -62,17 +74,28 @@ enum class DebugLevel : uint8_t
 	HIGH   = 2
 };
 
+enum class TextureFormat : int
+{
+	UNKNOWN   = H3DFormats::Unknown,
+	BGRA8     = H3DFormats::TEX_BGRA8,
+	DXT1      = H3DFormats::TEX_DXT1,
+	DXT3      = H3DFormats::TEX_DXT3,
+	DXT5      = H3DFormats::TEX_DXT5,
+	RGBA16F   = H3DFormats::TEX_RGBA16F,
+	RGBA32F   = H3DFormats::TEX_RGBA32F
+};
+
 namespace Renderer
 {
 	static const Node ROOT_NODE = H3DRootNode;
 	
     void initialize(const std::string& path);
 	void renderFrame(Node activeCamera);
-	void setNodeTransform(Node node,
+	void setNodeTransform(Node       node,
 						  const Vec3 position,
 						  const Vec3 rotation,
 						  const Vec3 scale);
-	void getNodeTransform(Node node,
+	void getNodeTransform(Node  node,
 						  Vec3* position,
 						  Vec3* rotation,
 						  Vec3* scale);
@@ -108,6 +131,11 @@ namespace Renderer
 	{
 		Resource add(ResourceType type, const std::string& name, int flag = 0);
 		Resource get(ResourceType type, const std::string& name);
+		Resource createTexture(const std::string& name,
+							   int                width,
+							   int                height,
+							   TextureFormat      format,
+							   ResourceFlags      flags);
 
 		bool isLoaded(Resource resource);
 		bool remove(Resource resource);

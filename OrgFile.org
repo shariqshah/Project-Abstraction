@@ -40,6 +40,8 @@ Last step before moving on to CPU!
 
 	 Could be done by applying transformation to model serving as collision mesh or maybe bullet has something built-in?
 **** TODO Fix setKinematic and handling of kinematic bodies' handling
+*** <2014-12-22 Mon 17:28>
+**** TODO Add assertions everywhere!!
 * Notes
 ** <2014-12-14 Sun 21:21>
 This is the first entry into my "OrgFile.org". The plan is to have a seperate OrgFile for every project that i work on, although i might change that in that in the future.
