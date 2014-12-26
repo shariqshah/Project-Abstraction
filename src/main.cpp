@@ -11,7 +11,7 @@ Game*         game;
 //========================================================> Function Prototypes
 bool        init(char *pFullPath);
 void        close();
-void        handleKeyboard(SDL_Event event, float deltaTime, bool *quit);
+void        handleEvents(SDL_Event* event, bool *quit);
 void        handleWindowEvent(SDL_WindowEvent event);
 std::string extractAppPath(char *pFullPath);
 
@@ -29,7 +29,8 @@ int main(int argc, char** args)
         //Event handler
         SDL_Event e;
         float current, previous, deltaTime;
-
+		current = previous = deltaTime = 0.f;
+		
         while(!quit)
         {
             previous = current;
@@ -37,35 +38,11 @@ int main(int argc, char** args)
             deltaTime = (current - previous) / 1000.f;
 
             //Handle events on a queue
-            while(SDL_PollEvent(&e) != 0)
-            {
-                //User request quit
-                if(e.type == SDL_QUIT)
-                    quit = true;
-
-                if(e.type == SDL_KEYDOWN)
-                {
-                    handleKeyboard(e, deltaTime, &quit);
-					Input::updateKeys(e.key);
-                }
-
-				if(e.type == SDL_KEYUP)
-					Input::updateKeys(e.key);
-
-				if(e.type == SDL_MOUSEBUTTONDOWN || e.type == SDL_MOUSEBUTTONUP)
-					Input::updateMouseButtons(e.button);
-
-				if(e.type == SDL_MOUSEMOTION)
-					Input::updateMousePostion(e.motion);
-
-				if(e.type == SDL_WINDOWEVENT)
-					handleWindowEvent(e.window);
-            }
-			
+            handleEvents(&e, &quit);
 
             //Render to screen
 			float timeBeforeUpdate = SDL_GetTicks();
-			game->update(deltaTime);
+			game->update(deltaTime, &quit);
 			float timeAfterUpdate = SDL_GetTicks();
 			float updateTime = timeAfterUpdate - timeBeforeUpdate;
 			
@@ -171,15 +148,29 @@ void close()
     SDL_Quit();
 }
 
-void handleKeyboard(SDL_Event event, float deltaTime, bool *quit)
+void handleEvents(SDL_Event* event, bool *quit)
 {
-    switch(event.key.keysym.sym)
+    while(SDL_PollEvent(event) != 0)
     {
-    case SDLK_ESCAPE:
-        *quit = true;
-        break;
-    }
+		//User request quit
+		if(event->type == SDL_QUIT)
+			*quit = true;
 
+		if(event->type == SDL_KEYDOWN)
+			Input::updateKeys(event->key);
+
+		if(event->type == SDL_KEYUP)
+			Input::updateKeys(event->key);
+
+		if(event->type == SDL_MOUSEBUTTONDOWN || event->type == SDL_MOUSEBUTTONUP)
+			Input::updateMouseButtons(event->button);
+
+		if(event->type == SDL_MOUSEMOTION)
+			Input::updateMousePostion(event->motion);
+
+		if(event->type == SDL_WINDOWEVENT)
+			handleWindowEvent(event->window);
+	}
 }
 
 std::string extractAppPath( char *pFullPath )

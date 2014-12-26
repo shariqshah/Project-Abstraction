@@ -15,7 +15,7 @@ public:
     Game(std::string path);
 	~Game();
 
-    void update(float deltaTime);
+    void update(float deltaTime, bool* quit);
     void draw();
 	void resize(int width, int height);
 };

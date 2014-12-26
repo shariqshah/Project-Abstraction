@@ -7,7 +7,7 @@ namespace System
 {
 	void initialize();
 	void update(float deltaTime, GameObject* gameObject);
-	void update(float deltaTime);
+	void update(float deltaTime, bool* quit);
 	void cleanup();
 }
 

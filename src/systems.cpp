@@ -148,7 +148,7 @@ namespace System
 		                                  // transform then sync Physics.
 	}
 
-	void update(float deltaTime)
+	void update(float deltaTime, bool* quit)
 	{
 		if(Input::isReleased(Input::Key::F1))
 			Renderer::setDebugLevel(DebugLevel::NONE);
@@ -170,6 +170,8 @@ namespace System
 			Log::setEnabled(true);
 		if(Input::isReleased(Input::Key::F10))
 			Log::setEnabled(false);
+		if(Input::isReleased(Input::Key::ESC))
+			*quit = true;
 		
 		System::CameraSystem::updateFreeCamera(deltaTime);
 		Cpu::update(deltaTime);

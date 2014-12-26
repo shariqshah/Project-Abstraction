@@ -87,9 +87,9 @@ Game::~Game()
 	System::cleanup();
 }
 
-void Game::update(float deltaTime)
+void Game::update(float deltaTime, bool* quit)
 {
-	System::update(deltaTime);
+	System::update(deltaTime, quit);
 }
 
 void Game::draw()

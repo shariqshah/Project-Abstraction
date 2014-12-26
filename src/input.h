@@ -81,6 +81,7 @@ namespace Input
 		RCTRL    = SDLK_RCTRL,
 		SPACE    = SDLK_SPACE,
 		ENTER    = SDLK_RETURN,
+		ESC      = SDLK_ESCAPE,
 		NP_PLUS  = SDLK_KP_PLUS,
 		NP_MINUS = SDLK_KP_MINUS
 	};
