@@ -16,6 +16,16 @@ add_executable(${PROJECT_NAME} ${SRC_LIST})
 include_directories(${PROJECT_SOURCE_DIR}/include)
 include_directories(${PROJECT_SOURCE_DIR}/include/bullet)
 
+find_package(PkgConfig)
+
+# Glew
+find_package(GLEW REQUIRED)
+include_directories(${GLEW_INCLUDE_DIR})
+if (GLEW_FOUND)
+  target_link_libraries(${PROJECT_NAME} ${GLEW_LIBRARY})
+  message(STATUS "Glew found!")
+endif()
+
 # OpenGL
 find_package(OpenGL REQUIRED)
 include_directories(${OPENGL_INCLUDE_DIR})

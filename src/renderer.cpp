@@ -1,4 +1,5 @@
 #include "renderer.h"
+#include <GL/gl.h>
 
 namespace Renderer
 {
@@ -130,24 +131,25 @@ namespace Renderer
 		h3dSetOption(H3DOptions::WireframeMode, sRenderWireframe ? 1.0f : 0.0f);
 	}
 
-	void renderFrame(Node activeCamera)
+	void renderFrame()
 	{
-		if(sDebugLevel != DebugLevel::NONE)
-		{
-			if(sDebugLevel == DebugLevel::MEDIUM)
-				h3dutShowFrameStats( sFontMat, sPanelMat, 1);
-			else if(sDebugLevel == DebugLevel::HIGH)
-				h3dutShowFrameStats( sFontMat, sPanelMat, 2);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		// if(sDebugLevel != DebugLevel::NONE)
+		// {
+		// 	if(sDebugLevel == DebugLevel::MEDIUM)
+		// 		h3dutShowFrameStats( sFontMat, sPanelMat, 1);
+		// 	else if(sDebugLevel == DebugLevel::HIGH)
+		// 		h3dutShowFrameStats( sFontMat, sPanelMat, 2);
 			
-			drawText();
-		}
-		else
-			sTextList.clear();
+		// 	drawText();
+		// }
+		// else
+		// 	sTextList.clear();
 		
-		h3dRender(activeCamera);
-		h3dFinalizeFrame();
-		h3dClearOverlays();
-		h3dutDumpMessages();
+		// h3dRender(activeCamera);
+		// h3dFinalizeFrame();
+		// h3dClearOverlays();
+		// h3dutDumpMessages();
 	}
 	
     Node createGroupNode(const std::string& name, Node parent)

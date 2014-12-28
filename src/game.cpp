@@ -1,3 +1,6 @@
+#include <GL/glew.h>
+#include <GL/gl.h>
+
 #include "game.h"
 #include "systems.h"
 #include "renderer.h"
@@ -11,80 +14,121 @@
 #include "componentmanager.h"
 #include "camerasystems.h"
 #include "cpu.h"
+#include "utilities.h"
+#include "shader.h"
 
 Game::Game(std::string path)
-{	
-	Renderer::initialize(path);
-	Renderer::Camera::initialize();
-	System::initialize();
+{
+	    //Vertices
+    std::vector<Vec3>vertices;
+    vertices.push_back(Vec3(-0.5, -0.5, 0.0));
+    vertices.push_back(Vec3( 0.5, -0.5, 0.0));
+    vertices.push_back(Vec3(   0,  0.5, 0.0));
+    // vertices.push_back(Vec3( 1.0,  1.0, 0.0));
+    // vertices.push_back(Vec3(-1.0,  1.0, 0.0));
+    // vertices.push_back(Vec3(-1.0, -1.0, 0.0));
+
+    //UV's
+    std::vector<glm::vec2>uvs;
+    uvs.push_back(glm::vec2(0.0, 0.0));
+    uvs.push_back(glm::vec2(1.0, 0.0));
+    uvs.push_back(glm::vec2(1.0, 1.0));
+    uvs.push_back(glm::vec2(1.0, 1.0));
+    uvs.push_back(glm::vec2(0.0, 1.0));
+    uvs.push_back(glm::vec2(0.0, 0.0));
+
+	glGenVertexArrays(1, &mVAO);
+	glBindVertexArray(mVAO);
+
+	GLuint vertexVBO;
+	glGenBuffers(1, &vertexVBO);
+	glBindBuffer(GL_ARRAY_BUFFER, vertexVBO);
+	glBufferData(GL_ARRAY_BUFFER,
+				 vertices.size() * sizeof(Vec3),
+				 vertices.data(),
+				 GL_STATIC_DRAW);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+
+	GLuint uvVBO;
+	glGenBuffers(1, &uvVBO);
+	glBindBuffer(GL_ARRAY_BUFFER, uvVBO);
+	glBufferData(GL_ARRAY_BUFFER,
+				 uvs.size() * sizeof(glm::vec2),
+				 uvs.data(),
+				 GL_STATIC_DRAW);
+	glEnableVertexAttribArray(2);
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_TRUE, 0, 0);
+
+	glBindVertexArray(0);
+
+	mShader = Shader::create("../content/shaders/simple.vert",
+							 "../content/shaders/simple.frag");
 	
-	GOPtr falcon = SceneManager::create("Falcon");
-	falcon->tag = "Falcon";
-	auto falMod = CompManager::addModel(falcon, "models/falcon/falcon.scene.xml");
-	//auto falconTransform = CompManager::getTransform(falcon);
-	CompManager::addRigidBody(falcon, new CollisionMesh(falMod, false), 10);
+	// Log::message(Utils::loadFileIntoString("../content/scripts/BaseBehaviour.nut"));
+	// Renderer::initialize(path);
+	// Renderer::Camera::initialize();
+	// System::initialize();
+	
+	// GOPtr falcon = SceneManager::create("Falcon");
+	// falcon->tag = "Falcon";
+	// auto falMod = CompManager::addModel(falcon, "models/falcon/falcon.scene.xml");
+	// //auto falconTransform = CompManager::getTransform(falcon);
+	// CompManager::addRigidBody(falcon, new CollisionMesh(falMod, false), 10);
 
-	GOPtr lightGO = SceneManager::create("LightGO");
-	CompManager::addModel(lightGO, "models/sphere/sphere.scene.xml");
-	auto goLight = CompManager::addLight(lightGO, "GOLight");
-	auto lTransform = CompManager::getTransform(lightGO);
+	// GOPtr lightGO = SceneManager::create("LightGO");
+	// CompManager::addModel(lightGO, "models/sphere/sphere.scene.xml");
+	// auto goLight = CompManager::addLight(lightGO, "GOLight");
+	// auto lTransform = CompManager::getTransform(lightGO);
 
 
-	Transform::setPosition(lTransform, Vec3(-50, 200, 0));
-	Transform::rotate(lTransform, Transform::UNIT_X, -90, Transform::Space::WORLD);
-	Renderer::Light::setColor(goLight, Vec3(0.8f, 0.8f, 0.5f));
-	Renderer::Light::setRadius(goLight, 500);
+	// Transform::setPosition(lTransform, Vec3(-50, 200, 0));
+	// Transform::rotate(lTransform, Transform::UNIT_X, -90, Transform::Space::WORLD);
+	// Renderer::Light::setColor(goLight, Vec3(0.8f, 0.8f, 0.5f));
+	// Renderer::Light::setRadius(goLight, 500);
 
-	GOPtr player = SceneManager::create("Player");
-	player->tag = "FreeCamera";
-	auto playerTrans = CompManager::getTransform(player);
-	// auto playerLight = CompManager::addLight(player, "playerLight");
-	// Renderer::Light::setColor(playerLight, Vec3(1, 0, 0));
-	CompManager::addCamera(player, "playerCamera", Pipeline::FORWARD);
-	Transform::setPosition(playerTrans, Vec3(-18, 40, 28));
-	System::CameraSystem::setActiveObject(player);
-	GO::attachScript(player, "PlayerBehaviour");
-	mCurrentViewer = player;
+	// GOPtr player = SceneManager::create("Player");
+	// player->tag = "FreeCamera";
+	// auto playerTrans = CompManager::getTransform(player);
+	// // auto playerLight = CompManager::addLight(player, "playerLight");
+	// // Renderer::Light::setColor(playerLight, Vec3(1, 0, 0));
+	// CompManager::addCamera(player, "playerCamera", Pipeline::FORWARD);
+	// Transform::setPosition(playerTrans, Vec3(-18, 40, 28));
+	// System::CameraSystem::setActiveObject(player);
+	// GO::attachScript(player, "PlayerBehaviour");
+	// mCurrentViewer = player;
 
-	Sphere* sphere = new Sphere(1);
-	for(int i = 0; i < 10; i++)
-	{
-		GOPtr suzanne = SceneManager::create("Suzanne" + std::to_string(i));
-		suzanne->tag = "suzanne";
-		auto suzTransform = CompManager::getTransform(suzanne);
+	// Sphere* sphere = new Sphere(1);
+	// for(int i = 0; i < 10; i++)
+	// {
+	// 	GOPtr suzanne = SceneManager::create("Suzanne" + std::to_string(i));
+	// 	suzanne->tag = "suzanne";
+	// 	auto suzTransform = CompManager::getTransform(suzanne);
 
-		float radius = 20.f;
-		float width  = glm::sin((float)i) * radius;
-		float height = glm::cos((float)i) * radius;
-		if(i < 50)
-			Transform::setPosition(suzTransform, Vec3(width, 5, height));
-		else
-			Transform::setPosition(suzTransform, Vec3(0, height + 7, width));
+	// 	float radius = 20.f;
+	// 	float width  = glm::sin((float)i) * radius;
+	// 	float height = glm::cos((float)i) * radius;
+	// 	if(i < 50)
+	// 		Transform::setPosition(suzTransform, Vec3(width, 5, height));
+	// 	else
+	// 		Transform::setPosition(suzTransform, Vec3(0, height + 7, width));
 		
-		CompManager::addModel(suzanne, "models/test/test.scene.xml");
-		CompManager::addRigidBody(suzanne, sphere);
+	// 	CompManager::addModel(suzanne, "models/test/test.scene.xml");
+	// 	CompManager::addRigidBody(suzanne, sphere);
 
-		// auto suzLight = CompManager::addLight(suzanne,
-		// 									  "light" + std::to_string(i));
-		
-		// float r = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
-		// float g = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
-		// float b = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+	// }
 
-		// Renderer::Light::setColor(suzLight, Vec3(r, g, b));
-		// Renderer::Light::setShadowCaster(suzLight, false);
-	}
+	// GOPtr plane = SceneManager::create("Floor");
+	// CompManager::addRigidBody(plane, new Plane(Vec3(0, 1, 0), 0.04f), 0.f);
 
-	GOPtr plane = SceneManager::create("Floor");
-	CompManager::addRigidBody(plane, new Plane(Vec3(0, 1, 0), 0.04f), 0.f);
-
-	Renderer::Camera::resizePipelineBuffers(Settings::getWindowWidth(),
-											Settings::getWindowHeight());
+	// Renderer::Camera::resizePipelineBuffers(Settings::getWindowWidth(),
+	// 										Settings::getWindowHeight());
 }
 
 Game::~Game()
 {
 	System::cleanup();
+	Shader::cleanup();
 }
 
 void Game::update(float deltaTime, bool* quit)
@@ -94,18 +138,29 @@ void Game::update(float deltaTime, bool* quit)
 
 void Game::draw()
 {
-	auto activeCamera = CompManager::getCamera(mCurrentViewer);
-	auto activeTrans  = CompManager::getTransform(mCurrentViewer);
-	Cpu::draw();
-	Renderer::renderFrame(activeCamera->node);
-	Physics::draw(activeTrans, activeCamera);
+	// auto activeCamera = CompManager::getCamera(mCurrentViewer);
+	// auto activeTrans  = CompManager::getTransform(mCurrentViewer);
+	// Cpu::draw();
+	Renderer::renderFrame();
+
+	if(mShader != -1)
+	{
+		Shader::bindShader(mShader);
+		glBindVertexArray(mVAO);
+		glDrawArrays(GL_TRIANGLES, 0, 3);
+	    glBindVertexArray(0);
+		Shader::unbindActiveShader();
+	}
+	
+	// Physics::draw(activeTrans, activeCamera);
 }
 
 void Game::resize(int width, int height)
 {
-	auto activeCamera = CompManager::getCamera(mCurrentViewer);
-	Renderer::Camera::resizePipelineBuffers(width, height);
-	Renderer::Camera::setViewportSize(activeCamera,
-									  width,
-									  height);
+	// auto activeCamera = CompManager::getCamera(mCurrentViewer);
+	// Renderer::Camera::resizePipelineBuffers(width, height);
+	// Renderer::Camera::setViewportSize(activeCamera,
+	// 								  width,
+	// 								  height);
+	glViewport(0, 0, width, height);
 }

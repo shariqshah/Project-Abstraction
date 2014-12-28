@@ -29,6 +29,11 @@ namespace Log
 	void setEnabled(bool enabled)
 	{
 		isEnabled = enabled;
+		
+		if(isEnabled)
+			message("Logging enabled");
+		else
+			message("Logging disabled");
 	}
 
 	void generateBindings()

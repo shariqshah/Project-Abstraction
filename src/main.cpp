@@ -1,3 +1,7 @@
+#define GLEW_STATIC
+#include <GL/glew.h>
+#include <GL/gl.h>
+
 #include "game.h"
 #include "settings.h"
 #include "input.h"
@@ -10,6 +14,7 @@ Game*         game;
 
 //========================================================> Function Prototypes
 bool        init(char *pFullPath);
+bool        initGL();
 void        close();
 void        handleEvents(SDL_Event* event, bool *quit);
 void        handleWindowEvent(SDL_WindowEvent event);
@@ -113,9 +118,21 @@ bool init(char *pFullPath)
 				}
 				else
 				{
-					if(!h3dInit())
+					//Initialize GLEW
+					glewExperimental = GL_TRUE;
+					GLenum glewError = glewInit();
+					if( glewError != GLEW_OK )
+							printf("Error initializing GLEW! %s\n", glewGetErrorString(glewError));
+
+					// if(GLEW_ARB_uniform_buffer_object)
+					// 	Log::message("GLEW_ARB_uniform_buffer_object = YES\n");
+					// else
+					// 	Log::message("GLEW_ARB_uniform_buffer_object = NO\n");
+
+					//Initialize OpenGL
+					if(!initGL())
 					{
-						h3dutDumpMessages();
+						Log::error("Init GL", "Unalble to initialize OpenGL");
 						success = false;
 					}
 					else
@@ -132,13 +149,23 @@ bool init(char *pFullPath)
 	return success;
 }
 
+bool initGL()
+{
+    bool success = true;
+
+    glClearColor(0.55, 0.6, 0.8, 1.0);
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
+    glDepthFunc(GL_LEQUAL);
+
+    return success;
+}
+
 void close()
 {
 	//game->cleanup();
 	delete game;
-	
-	// Release horde3d
-	h3dRelease();
 	
 	//Destroy window
     SDL_DestroyWindow(window);

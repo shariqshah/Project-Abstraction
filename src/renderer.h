@@ -90,7 +90,7 @@ namespace Renderer
 	static const Node ROOT_NODE = H3DRootNode;
 	
     void initialize(const std::string& path);
-	void renderFrame(Node activeCamera);
+	void renderFrame();
 	void setNodeTransform(Node       node,
 						  const Vec3 position,
 						  const Vec3 rotation,

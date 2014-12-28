@@ -1,4 +1,10 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <fstream>
+#include <sstream>
+
 #include "utilities.h"
+#include "log.h"
 #include "../include/bullet/btBulletDynamicsCommon.h"
 
 namespace Utils
@@ -96,4 +102,60 @@ namespace Utils
 
         return vectorString;
     }
+
+	std::string loadFileIntoString(const char* name)
+	{
+		std::ifstream input(name);
+		std::stringstream sstr;
+		sstr << input.rdbuf();
+
+		input.close();
+		
+		return sstr.str();
+	}
+	
+	char* loadFileIntoCString(const char* name, bool addNull)
+	{
+		FILE* file = fopen(name, "r");
+		char* fileContents = NULL;
+
+		if(file)
+		{
+			int rc = fseek(file, 0L, SEEK_END);
+			if(rc == 0)
+			{
+				long offsetTillEnd = ftell(file);
+				size_t size = (size_t)offsetTillEnd;
+				rewind(file);
+
+				if(addNull)
+					fileContents = (char *)calloc(sizeof(char), size + 1);
+				else
+					fileContents = (char *)calloc(sizeof(char), size);
+
+				if(fileContents)
+				{
+					if(fread(fileContents, size, sizeof(char), file) < 0)
+						Log::error("Utils loadFileintostring", "Read failed");
+
+					if(addNull)
+						fileContents[size] = '\0';
+				}
+				else
+					Log::error("Utils loadFileintostring", "Alloc failed");
+			}
+			else
+			{
+				Log::error("Utils loadFileintostring", "Fseek failed");
+			}
+
+			fclose(file);
+		}
+		else
+		{
+			Log::error("Utils loadFileintostring", "Couldn't open file");
+		}
+		
+		return fileContents;
+	}
 }

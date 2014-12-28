@@ -9,8 +9,10 @@ typedef GameObject* GOPtr;
 
 class Game
 {
-    std::string mContentFolderDir;
-	GOPtr       mCurrentViewer;
+    std::string  mContentFolderDir;
+	GOPtr        mCurrentViewer;
+	unsigned int mVAO;
+	int          mShader;
 public:
     Game(std::string path);
 	~Game();

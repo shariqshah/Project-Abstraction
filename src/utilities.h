@@ -29,6 +29,11 @@ namespace Utils
 
     Vec3 toGlm(const btVector3 bulletVec3);
     Quat toGlm(const btQuaternion bulletQuat);
+
+	std::string loadFileIntoString(const char* name);
+	char*       loadFileIntoCString(const char* name,
+									bool addNull = true);
+	
 }
 
 #endif // UTILITIES_H

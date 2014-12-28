@@ -150,22 +150,22 @@ namespace System
 
 	void update(float deltaTime, bool* quit)
 	{
-		if(Input::isReleased(Input::Key::F1))
-			Renderer::setDebugLevel(DebugLevel::NONE);
-		if(Input::isReleased(Input::Key::F2))
-			Renderer::setDebugLevel(DebugLevel::MEDIUM);
-		if(Input::isReleased(Input::Key::F3))
-			Renderer::setDebugLevel(DebugLevel::HIGH);
-		if(Input::isReleased(Input::Key::F4))
-			Renderer::toggleWireframe();
-		if(Input::isReleased(Input::Key::F5))
-			Renderer::toggleDebugView();
-		if(Input::isReleased(Input::Key::F6))
-			Physics::enableDebugDraw(true);
-		if(Input::isReleased(Input::Key::F7))
-			Physics::enableDebugDraw(false);
-		if(Input::isReleased(Input::Key::F8))
-			Physics::nextDebugMode();
+		// if(Input::isReleased(Input::Key::F1))
+		// 	Renderer::setDebugLevel(DebugLevel::NONE);
+		// if(Input::isReleased(Input::Key::F2))
+		// 	Renderer::setDebugLevel(DebugLevel::MEDIUM);
+		// if(Input::isReleased(Input::Key::F3))
+		// 	Renderer::setDebugLevel(DebugLevel::HIGH);
+		// if(Input::isReleased(Input::Key::F4))
+		// 	Renderer::toggleWireframe();
+		// if(Input::isReleased(Input::Key::F5))
+		// 	Renderer::toggleDebugView();
+		// if(Input::isReleased(Input::Key::F6))
+		// 	Physics::enableDebugDraw(true);
+		// if(Input::isReleased(Input::Key::F7))
+		// 	Physics::enableDebugDraw(false);
+		// if(Input::isReleased(Input::Key::F8))
+		// 	Physics::nextDebugMode();
 		if(Input::isReleased(Input::Key::F9))
 			Log::setEnabled(true);
 		if(Input::isReleased(Input::Key::F10))
@@ -173,40 +173,40 @@ namespace System
 		if(Input::isReleased(Input::Key::ESC))
 			*quit = true;
 		
-		System::CameraSystem::updateFreeCamera(deltaTime);
-		Cpu::update(deltaTime);
-		ScriptEngine::executeFunction("updateObjects", deltaTime);
+		// System::CameraSystem::updateFreeCamera(deltaTime);
+		// Cpu::update(deltaTime);
+		// ScriptEngine::executeFunction("updateObjects", deltaTime);
 		
-		GOMap* sceneObjects = SceneManager::getSceneObjects();
-		for(GOMap::iterator it = sceneObjects->begin();
-			it != sceneObjects->end();
-			it++)
-		{
-			update(deltaTime, it->second);
-		}
+		// GOMap* sceneObjects = SceneManager::getSceneObjects();
+		// for(GOMap::iterator it = sceneObjects->begin();
+		// 	it != sceneObjects->end();
+		// 	it++)
+		// {
+		// 	update(deltaTime, it->second);
+		// }
 
-		if(Input::isReleased(Input::Key::C))
-			sPhysicsEnabled ? sPhysicsEnabled = false : sPhysicsEnabled = true;
+		// if(Input::isReleased(Input::Key::C))
+		// 	sPhysicsEnabled ? sPhysicsEnabled = false : sPhysicsEnabled = true;
 
-		if(sPhysicsEnabled)
-			Physics::update(deltaTime);
+		// if(sPhysicsEnabled)
+		// 	Physics::update(deltaTime);
 		
-		SceneManager::update();
+		// SceneManager::update();
 
-		if(Input::isReleased(Input::Key::K9))
-		{
-			// auto test = SceneManager::find("TestOBJ");
-			// GO::reloadScript(test, "Test");
-			GO::reloadScript("TestOBJ", "Test");
-		}
+		// if(Input::isReleased(Input::Key::K9))
+		// {
+		// 	// auto test = SceneManager::find("TestOBJ");
+		// 	// GO::reloadScript(test, "Test");
+		// 	GO::reloadScript("TestOBJ", "Test");
+		// }
 	}
 
 	void cleanup()
 	{
-		SceneManager::cleanup();
-		CompManager::cleanup();
-		Physics::cleanup();
-		Renderer::Model::cleanup();
-		ScriptEngine::cleanup();
+		// SceneManager::cleanup();
+		// CompManager::cleanup();
+		// Physics::cleanup();
+		// Renderer::Model::cleanup();
+		// ScriptEngine::cleanup();
 	}
 }
