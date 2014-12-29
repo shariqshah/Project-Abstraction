@@ -1,20 +1,25 @@
-#include "renderer.h"
 #include <GL/gl.h>
+
+#include "renderer.h"
+#include "texture.h"
+#include "shader.h"
 
 namespace Renderer
 {
 	namespace
 	{
-		std::string              cContentFolderDir;
+        char*       contentDir;
 		std::vector<std::string> sTextList;
-		Vec2       sFontPos;
-		Resource   sFontMat;
-		Resource   sPanelMat;
-		float      sFontSize;
-		Resource   sLightMat;
-		DebugLevel sDebugLevel;
-		bool       sRenderWireframe;
-		bool       sRenderDebugView;
+		Vec2        sFontPos;
+		Resource    sFontMat;
+		Resource    sPanelMat;
+		float       sFontSize;
+		Resource    sLightMat;
+		DebugLevel  sDebugLevel;
+		bool        sRenderWireframe;
+		bool        sRenderDebugView;
+		const char* texPathName   = "/textures/";
+		const char* contentDirName = "/../content";
 	}
 
 	void setNodeTransform(Node node, glm::mat4 transformMat)
@@ -49,36 +54,60 @@ namespace Renderer
 							&scale->x   , &scale->y   , &scale->z);
 	}
 
-	void initialize(const std::string& path)
+	void initialize(const char* path)
 	{
-		cContentFolderDir = path + "../content";
+		contentDir = (char*)malloc(sizeof(char) * (strlen(path) + strlen(contentDirName)) + 1);
+		assert(contentDir != NULL);
 		
-		// Set options
-		h3dSetOption(H3DOptions::LoadTextures  ,  1);
-		h3dSetOption(H3DOptions::TexCompression,  0);
-		h3dSetOption(H3DOptions::FastAnimation ,  0);
-		h3dSetOption(H3DOptions::MaxAnisotropy ,  4);
-		h3dSetOption(H3DOptions::ShadowMapSize ,  1024);
-		
-		sFontMat = Resources::add(ResourceType::MATERIAL,
-								  "overlays/font.material.xml",
-								  0);
-		sPanelMat = Resources::add(ResourceType::MATERIAL,
-								   "overlays/panel.material.xml",
-								   0);
-		sLightMat = Resources::add(ResourceType::MATERIAL,
-								   "materials/light.material.xml",
-								   0);
-		
-		Resources::loadAddedResources();
+        strcpy(contentDir, path);
+		strcat(contentDir, contentDirName);
 
-		sFontPos = glm::vec2(0.03, 0.25);
-		sFontSize = 0.026f;
-		sRenderWireframe = sRenderDebugView = false;
-		setDebugLevel(DebugLevel::MEDIUM);
+		glClearColor(0.55, 0.6, 0.8, 1.0);
+		glEnable(GL_DEPTH_TEST);
+		glEnable(GL_CULL_FACE);
+		glCullFace(GL_BACK);
+		glDepthFunc(GL_LEQUAL);
 
-		h3dSetOption(H3DOptions::DebugViewMode, sRenderDebugView ? 1.0f : 0.0f);
-		h3dSetOption(H3DOptions::WireframeMode, sRenderWireframe ? 1.0f : 0.0f);
+        char* texturePath = (char *)malloc(sizeof(char) *
+										   (strlen(contentDir) + strlen(texPathName)) + 1);
+        strcpy(texturePath, contentDir);
+		strcat(texturePath, texPathName);
+		Texture::initialize(texturePath);
+		free(texturePath);
+		
+		// // SET options
+		// h3dSetOption(H3DOptions::LoadTextures  ,  1);
+		// h3dSetOption(H3DOptions::TexCompression,  0);
+		// h3dSetOption(H3DOptions::FastAnimation ,  0);
+		// h3dSetOption(H3DOptions::MaxAnisotropy ,  4);
+		// h3dSetOption(H3DOptions::ShadowMapSize ,  1024);
+		
+		// sFontMat = Resources::add(ResourceType::MATERIAL,
+		// 						  "overlays/font.material.xml",
+		// 						  0);
+		// sPanelMat = Resources::add(ResourceType::MATERIAL,
+		// 						   "overlays/panel.material.xml",
+		// 						   0);
+		// sLightMat = Resources::add(ResourceType::MATERIAL,
+		// 						   "materials/light.material.xml",
+		// 						   0);
+		
+		// Resources::loadAddedResources();
+
+		// sFontPos = glm::vec2(0.03, 0.25);
+		// sFontSize = 0.026f;
+		// sRenderWireframe = sRenderDebugView = false;
+		// setDebugLevel(DebugLevel::MEDIUM);
+
+		// h3dSetOption(H3DOptions::DebugViewMode, sRenderDebugView ? 1.0f : 0.0f);
+		// h3dSetOption(H3DOptions::WireframeMode, sRenderWireframe ? 1.0f : 0.0f);
+	}
+
+	void cleanup()
+	{
+		free(contentDir);
+		Texture::cleanup();
+		Shader::cleanup();
 	}
 	
 	void drawText()
@@ -238,7 +267,7 @@ namespace Renderer
 	{	
 		bool loadAddedResources()
 		{
-			return h3dutLoadResourcesFromDisk(cContentFolderDir.c_str());
+            // return h3dutLoadResourcesFromDisk(contentDir.c_str());
 		}
 
 		bool remove(Resource resource)

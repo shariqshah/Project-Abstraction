@@ -2,6 +2,15 @@
 #include <GL/glew.h>
 #include <GL/gl.h>
 
+#include <stdio.h>  /* defines FILENAME_MAX */
+#ifdef WINDOWS
+    #include <direct.h>
+    #define GetCurrentDir _getcwd
+#else
+    #include <unistd.h>
+    #define GetCurrentDir getcwd
+ #endif
+
 #include "game.h"
 #include "settings.h"
 #include "input.h"
@@ -13,19 +22,18 @@ SDL_GLContext context;
 Game*         game;
 
 //========================================================> Function Prototypes
-bool        init(char *pFullPath);
-bool        initGL();
+bool        init();
 void        close();
 void        handleEvents(SDL_Event* event, bool *quit);
 void        handleWindowEvent(SDL_WindowEvent event);
-std::string extractAppPath(char *pFullPath);
+char*       getWorkingDirectory();
 
 int main(int argc, char** args)
 {
 	bool quit = false;
 
     //Initialize SDL and OpenGL
-    if(!init(args[0]))
+    if(!init())
     {
 		std::cerr<<"Could not initialize \n";
     }
@@ -75,7 +83,7 @@ int main(int argc, char** args)
     return 0;
 }
 
-bool init(char *pFullPath)
+bool init()
 {
 	bool success = true;
 	
@@ -124,22 +132,10 @@ bool init(char *pFullPath)
 					if( glewError != GLEW_OK )
 							printf("Error initializing GLEW! %s\n", glewGetErrorString(glewError));
 
-					// if(GLEW_ARB_uniform_buffer_object)
-					// 	Log::message("GLEW_ARB_uniform_buffer_object = YES\n");
-					// else
-					// 	Log::message("GLEW_ARB_uniform_buffer_object = NO\n");
-
-					//Initialize OpenGL
-					if(!initGL())
-					{
-						Log::error("Init GL", "Unalble to initialize OpenGL");
-						success = false;
-					}
-					else
-					{
-						game = new Game(extractAppPath(pFullPath));
-						Input::initializeInput();
-					}
+					char* directory = getWorkingDirectory();
+					game = new Game(directory);
+					free(directory);
+					Input::initializeInput();
 				}
 			
 			}	
@@ -147,19 +143,6 @@ bool init(char *pFullPath)
 	}
 
 	return success;
-}
-
-bool initGL()
-{
-    bool success = true;
-
-    glClearColor(0.55, 0.6, 0.8, 1.0);
-    glEnable(GL_DEPTH_TEST);
-    glEnable(GL_CULL_FACE);
-    glCullFace(GL_BACK);
-    glDepthFunc(GL_LEQUAL);
-
-    return success;
 }
 
 void close()
@@ -179,7 +162,6 @@ void handleEvents(SDL_Event* event, bool *quit)
 {
     while(SDL_PollEvent(event) != 0)
     {
-		//User request quit
 		if(event->type == SDL_QUIT)
 			*quit = true;
 
@@ -200,22 +182,18 @@ void handleEvents(SDL_Event* event, bool *quit)
 	}
 }
 
-std::string extractAppPath( char *pFullPath )
+char* getWorkingDirectory()
 {
-#ifdef __APPLE__
-	std::string s( pFullPath );
-	for( int i = 0; i < 4; ++i )
-		s = s.substr( 0, s.rfind( "/" ) );
-	return s + "/../";
-#else
-	const std::string s( pFullPath );
-	if( s.find( "/" ) != std::string::npos )
-		return s.substr( 0, s.rfind( "/" ) ) + "/";
-	else if( s.find( "\\" ) != std::string::npos )
-		return s.substr( 0, s.rfind( "\\" ) ) + "\\";
-	else
-		return "";
-#endif
+	long size;
+	char *buf;
+	char *ptr;
+
+	size = pathconf(".", _PC_PATH_MAX);
+
+	if ((buf = (char *)malloc((size_t)size)) != NULL)
+		ptr = getcwd(buf, (size_t)size);
+
+	return buf;
 }
 
 void handleWindowEvent(SDL_WindowEvent winEvent)

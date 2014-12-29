@@ -89,7 +89,8 @@ namespace Renderer
 {
 	static const Node ROOT_NODE = H3DRootNode;
 	
-    void initialize(const std::string& path);
+    void initialize(const char* path);
+	void cleanup();
 	void renderFrame();
 	void setNodeTransform(Node       node,
 						  const Vec3 position,

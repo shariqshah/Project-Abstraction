@@ -16,17 +16,21 @@
 #include "cpu.h"
 #include "utilities.h"
 #include "shader.h"
+#include "texture.h"
 
-Game::Game(std::string path)
+Game::Game(const char* path)
 {
+	Renderer::initialize(path);
+	
 	    //Vertices
     std::vector<Vec3>vertices;
     vertices.push_back(Vec3(-0.5, -0.5, 0.0));
     vertices.push_back(Vec3( 0.5, -0.5, 0.0));
     vertices.push_back(Vec3(   0,  0.5, 0.0));
-    // vertices.push_back(Vec3( 1.0,  1.0, 0.0));
-    // vertices.push_back(Vec3(-1.0,  1.0, 0.0));
-    // vertices.push_back(Vec3(-1.0, -1.0, 0.0));
+	
+    vertices.push_back(Vec3(-1.0,  1.0, 0.0));
+    vertices.push_back(Vec3(-1.0, -1.0, 0.0));
+    vertices.push_back(Vec3( 1.0, -1.0, 0.0));
 
     //UV's
     std::vector<glm::vec2>uvs;
@@ -64,8 +68,8 @@ Game::Game(std::string path)
 
 	mShader = Shader::create("../content/shaders/simple.vert",
 							 "../content/shaders/simple.frag");
-	
-	// Log::message(Utils::loadFileIntoString("../content/scripts/BaseBehaviour.nut"));
+
+	mTexture = Texture::create("test.png");
 	// Renderer::initialize(path);
 	// Renderer::Camera::initialize();
 	// System::initialize();
@@ -128,7 +132,7 @@ Game::Game(std::string path)
 Game::~Game()
 {
 	System::cleanup();
-	Shader::cleanup();
+	Renderer::cleanup();
 }
 
 void Game::update(float deltaTime, bool* quit)
@@ -146,9 +150,12 @@ void Game::draw()
 	if(mShader != -1)
 	{
 		Shader::bindShader(mShader);
+		Texture::bindTexture(mTexture);
 		glBindVertexArray(mVAO);
 		glDrawArrays(GL_TRIANGLES, 0, 3);
+		glDrawArrays(GL_TRIANGLES, 3, 3);
 	    glBindVertexArray(0);
+		Texture::unBindActiveTexture();
 		Shader::unbindActiveShader();
 	}
 	

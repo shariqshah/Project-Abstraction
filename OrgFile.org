@@ -14,9 +14,14 @@
 - Models that are added to scene only as collision meshes or that are not attached to any 
   gameobject as component do not show up in the scene anymore as their flag is set to 
   'INACTIVE'
-
+** <2014-12-30 Tue>
+   
+- Added support for loading/unloading/using textures by using SDL_Image
+- Created and fixed new and previous memory leaks with valgrind.
 * Tasks
 ** High-level
+*** TODO Renderer
+Replace Horde3d with custom renderer implemented in Opengl. The renderer only needs to be as complex as i need it to be.
 *** TODO Squirrel mode for emacs?
 *** TODO GUI
 Add GUI by using IMGUI tuts.
@@ -24,6 +29,7 @@ Add GUI by using IMGUI tuts.
 Last step before moving on to CPU!
 *** TODO CPU
 *** TODO World/Terrain generation?
+*** TODO Replace all 'c++' stuff with custom or 'c' stuff. C-ify All The Things!
 *** TODO ???
 *** TODO Profit!
 ** Day to Day
@@ -42,6 +48,15 @@ Last step before moving on to CPU!
 **** TODO Fix setKinematic and handling of kinematic bodies' handling
 *** <2014-12-22 Mon 17:28>
 **** TODO Add assertions everywhere!!
+*** <2014-12-30 Tue>
+**** DONE Add support for loading and using textures.
+	 - State "DONE"       from "TODO"       [2014-12-30 Tue 02:23]
+**** DONE Add support for loading and using shaders.
+	 - State "DONE"       from "TODO"       [2014-12-30 Tue 02:23]
+**** TODO Add support for setting shader uniforms.
+**** TODO Add utility functions for string manipulations.
+**** TODO Add custom std::vector replacement.
+**** TODO Add custom std::unordered_map replacement.
 * Notes
 ** <2014-12-14 Sun 21:21>
 This is the first entry into my "OrgFile.org". The plan is to have a seperate OrgFile for every project that i work on, although i might change that in that in the future.
@@ -69,3 +84,15 @@ function i have only one that serves my current needs and any future ones if nee
 less lines. All those repetitive code took around ninety lines and the current one takes only ten!
 
 Much less progress today since i only worked for about ten minutes but anything is better than nothing!
+** <2014-12-30 Tue>
+I have started with the proces of replacing Horde3d as the renderer and replacing it with my own
+custom renderer. The new renderer will be as simple/complex as i want it to be so i won't have anymore
+problems figuring out how to add/remove/modify anything should the need arise. This will not only remove
+a dependency from the codebase but also simplify things to a large degree.
+
+I've also started to transition to codebase to a more simpler c-style. I have always been interested in
+learing more about and C and getting close to the metal and since Project Abstraction is largely about
+me learning about how things work, i thought why not! I do realize this will slow things down further
+but i'm in no particular hurry anyway.
+
+P.S. My writing and composition is horrible. I hope this note-taking can make it better!

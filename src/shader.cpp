@@ -12,7 +12,7 @@ namespace Shader
 {
 	namespace
 	{
-		std::vector<ShaderObject> shaderObjects;
+		std::vector<ShaderObject> shaderList;
 		std::vector<unsigned int> emptyIndices;
 	}
 	
@@ -87,6 +87,7 @@ namespace Shader
 		glBindAttribLocation(program, 0, "vPosition");
 		glBindAttribLocation(program, 1, "vNormal");
 		glBindAttribLocation(program, 2, "vUV");
+		glBindAttribLocation(program, 3, "vColor");
 
 		glLinkProgram(program);
 
@@ -120,12 +121,12 @@ namespace Shader
 		{
 			index = emptyIndices.back();
 			emptyIndices.pop_back();
-			shaderObjects[index] = newObject;
+			shaderList[index] = newObject;
 		}
 		else
 		{
-			shaderObjects.push_back(newObject);
-			index = shaderObjects.size() - 1;
+			shaderList.push_back(newObject);
+			index = shaderList.size() - 1;
 		}
 
 		Log::message(std::string(vertexShader) + ", " + std::string(fragmentShader) +
@@ -135,7 +136,7 @@ namespace Shader
 
 	void bindShader(int shaderIndex)
 	{
-		auto shaderObject = shaderObjects[shaderIndex];
+		auto shaderObject = shaderList[shaderIndex];
 		glUseProgram(shaderObject.program);
 	}
 
@@ -144,9 +145,9 @@ namespace Shader
 		glUseProgram(0);
 	}
 
-	void destroyShader(int shaderIndex)
+	void destroyShader(unsigned int shaderIndex)
 	{
-		auto shaderObject = shaderObjects[shaderIndex];
+		auto shaderObject = shaderList[shaderIndex];
 		glDeleteProgram(shaderObject.program);
 		glDeleteShader(shaderObject.vertexShader);
 		glDeleteShader(shaderObject.fragmentShader);
@@ -155,10 +156,10 @@ namespace Shader
 	
 	void cleanup()
 	{
-		for(int i = 0; i < shaderObjects.size(); i++)
+		for(unsigned int i = 0; i < shaderList.size(); i++)
 			destroyShader(i);
 
-		shaderObjects.clear();
+		shaderList.clear();
 		emptyIndices.clear();
 	}
 }

@@ -15,7 +15,7 @@ namespace Shader
 	int  create(const char* vertexShader, const char* fragmentShader);
 	void bindShader(int shaderIndex);
 	void unbindActiveShader();
-	void destroyShader(int shaderIndex);
+	void destroyShader(unsigned int shaderIndex);
 	void cleanup();
 }
 
