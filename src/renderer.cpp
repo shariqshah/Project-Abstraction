@@ -3,6 +3,7 @@
 #include "renderer.h"
 #include "texture.h"
 #include "shader.h"
+#include "material.h"
 
 namespace Renderer
 {
@@ -18,7 +19,8 @@ namespace Renderer
 		DebugLevel  sDebugLevel;
 		bool        sRenderWireframe;
 		bool        sRenderDebugView;
-		const char* texPathName   = "/textures/";
+		const char* texDir         = "/textures/";
+		const char* shaderDir      = "/shaders/";
 		const char* contentDirName = "/../content";
 	}
 
@@ -54,6 +56,11 @@ namespace Renderer
 							&scale->x   , &scale->y   , &scale->z);
 	}
 
+	void setClearColor(const Vec3 clearColor)
+	{
+		glClearColor(clearColor.r, clearColor.g, clearColor.b, 1.0);
+	}
+
 	void initialize(const char* path)
 	{
 		contentDir = (char*)malloc(sizeof(char) * (strlen(path) + strlen(contentDirName)) + 1);
@@ -69,11 +76,21 @@ namespace Renderer
 		glDepthFunc(GL_LEQUAL);
 
         char* texturePath = (char *)malloc(sizeof(char) *
-										   (strlen(contentDir) + strlen(texPathName)) + 1);
+										   (strlen(contentDir) + strlen(texDir)) + 1);
         strcpy(texturePath, contentDir);
-		strcat(texturePath, texPathName);
+		strcat(texturePath, texDir);
+		
+		char* shaderPath = (char *)malloc(sizeof(char) *
+										   (strlen(contentDir) + strlen(shaderDir)) + 1);
+        strcpy(shaderPath, contentDir);
+		strcat(shaderPath, shaderDir);
+
 		Texture::initialize(texturePath);
+		Shader::initialize(shaderPath);
+		Material::initialize();
+		
 		free(texturePath);
+		free(shaderPath);
 		
 		// // SET options
 		// h3dSetOption(H3DOptions::LoadTextures  ,  1);
@@ -268,6 +285,7 @@ namespace Renderer
 		bool loadAddedResources()
 		{
             // return h3dutLoadResourcesFromDisk(contentDir.c_str());
+			return true;
 		}
 
 		bool remove(Resource resource)

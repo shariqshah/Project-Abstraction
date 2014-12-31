@@ -92,6 +92,7 @@ namespace Renderer
     void initialize(const char* path);
 	void cleanup();
 	void renderFrame();
+	void setClearColor(Vec3 clearColor);
 	void setNodeTransform(Node       node,
 						  const Vec3 position,
 						  const Vec3 rotation,

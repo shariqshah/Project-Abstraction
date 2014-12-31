@@ -1,17 +1,9 @@
 #ifndef _transform_H
 #define _transform_H
 
-#define GLM_FORCE_RADIANS
-#include "../include/glm/gtx/transform.hpp"
-#include "../include/glm/gtx/quaternion.hpp"
-
+#include "mathdefs.h"
 #include "componentTypes.h"
 #include "renderer.h"
-
-typedef glm::vec3 Vec3;
-typedef glm::vec2 Vec2;
-typedef glm::mat4 Mat4;
-typedef glm::quat Quat;
 
 struct CTransform
 {

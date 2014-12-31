@@ -10,19 +10,42 @@
 
 namespace Shader
 {
+	struct ShaderObject
+	{
+		// TODO: Add name field to shader
+		unsigned int fragmentShader;		unsigned int vertexShader;
+		unsigned int program; 
+	};
+	
 	namespace
 	{
 		std::vector<ShaderObject> shaderList;
 		std::vector<unsigned int> emptyIndices;
+		char*                     shaderPath;
+	}
+
+	void initialize(const char* path)
+	{
+		shaderPath   = (char *)malloc(sizeof(char) * strlen(path) + 1);
+		strcpy(shaderPath, path);
 	}
 	
 	int create(const char* vertexShader, const char* fragmentShader)
 	{
+		char* vsPath = (char *)malloc(sizeof(char) *
+									  (strlen(shaderPath) + strlen(vertexShader)) + 1);
+		strcpy(vsPath, shaderPath);
+		strcat(vsPath, vertexShader);
+		char* fsPath = (char *)malloc(sizeof(char) *
+									  (strlen(shaderPath) + strlen(fragmentShader)) + 1);
+		strcpy(fsPath, shaderPath);
+		strcat(fsPath, fragmentShader);
+		
 		GLuint vertShader = glCreateShader(GL_VERTEX_SHADER);
 		GLuint fragShader = glCreateShader(GL_FRAGMENT_SHADER);
 
-		char* vertSource = Utils::loadFileIntoCString(vertexShader);
-		char* fragSource = Utils::loadFileIntoCString(fragmentShader);
+		char* vertSource = Utils::loadFileIntoCString(vsPath);
+		char* fragSource = Utils::loadFileIntoCString(fsPath);
 
 		assert(vertSource != NULL);
 		assert(fragSource != NULL);
@@ -131,12 +154,15 @@ namespace Shader
 
 		Log::message(std::string(vertexShader) + ", " + std::string(fragmentShader) +
 					 " compiled into shader program");
+		free(vsPath);
+		free(fsPath);
+		
 		return index;
 	}
 
-	void bindShader(int shaderIndex)
+	void bindShader(const unsigned int shaderIndex)
 	{
-		auto shaderObject = shaderList[shaderIndex];
+		ShaderObject shaderObject = shaderList[shaderIndex];
 		glUseProgram(shaderObject.program);
 	}
 
@@ -145,9 +171,62 @@ namespace Shader
 		glUseProgram(0);
 	}
 
-	void destroyShader(unsigned int shaderIndex)
+	GLint getUniformLocation(const unsigned int shaderIndex, const char* name)
 	{
-		auto shaderObject = shaderList[shaderIndex];
+		ShaderObject shaderObject = shaderList[shaderIndex];
+		GLint handle = glGetUniformLocation(shaderObject.program, name);
+
+		if(handle == -1)
+			Log::error("GetUniformLocation", "Invalid uniform " + std::string(name));
+
+		return handle;
+	}
+
+	void setUniformInt(const unsigned int shaderIndex, const char* name, const int value)
+	{
+		GLint location = -1;
+		if((location = getUniformLocation(shaderIndex, name)))
+			glUniform1i(location, value);
+	}
+	
+	void setUniformFloat(const unsigned int shaderIndex, const char* name, const float value)
+    {
+		GLint location = -1;
+		if((location = getUniformLocation(shaderIndex, name)))
+			glUniform1f(location, value);
+	}
+	
+	void setUniformVec2(const unsigned int shaderIndex,  const char* name, const Vec2 value)
+	{
+		GLint location = -1;
+		if((location = getUniformLocation(shaderIndex, name)))
+			glUniform2fv(location, 1, glm::value_ptr(value));
+	}
+	
+	void setUniformVec3(const unsigned int shaderIndex,  const char* name, const Vec3 value)
+	{
+		GLint location = -1;
+		if((location = getUniformLocation(shaderIndex, name)))
+			glUniform3fv(location, 1, glm::value_ptr(value));
+	}
+	
+	void setUniformVec4(const unsigned int shaderIndex,  const char* name, const Vec4 value)
+	{
+		GLint location = -1;
+		if((location = getUniformLocation(shaderIndex, name)))
+			glUniform4fv(location, 1, glm::value_ptr(value));
+	}
+	
+	void setUniformMat4(const unsigned int shaderIndex,  const char* name, const Mat4 value)	
+	{
+		GLint location = -1;
+		if((location = getUniformLocation(shaderIndex, name)))
+			glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(value));
+	}
+
+	void destroyShader(const unsigned int shaderIndex)
+	{
+		ShaderObject shaderObject = shaderList[shaderIndex];
 		glDeleteProgram(shaderObject.program);
 		glDeleteShader(shaderObject.vertexShader);
 		glDeleteShader(shaderObject.fragmentShader);
@@ -156,6 +235,7 @@ namespace Shader
 	
 	void cleanup()
 	{
+		free(shaderPath);
 		for(unsigned int i = 0; i < shaderList.size(); i++)
 			destroyShader(i);
 

@@ -3,6 +3,8 @@
 
 #include "componentTypes.h"
 #include "renderer.h"
+#include "mathdefs.h"
+#include "material.h"
 
 struct CModel
 {
@@ -10,6 +12,14 @@ struct CModel
 	Node        node       = 0;
 	std::string filename   = "NOT_INITIALIZED";
 	bool        valid      = true;
+	
+	std::vector<Vec3>         vertices;
+	std::vector<Vec3>         vertexColors;
+	std::vector<Vec3>         normals;
+	std::vector<Vec2>         uvs;
+	std::vector<unsigned int> indices;
+	Mat_Type                  material;
+	unsigned int              vboStartIndex;
 };
 
 namespace Renderer

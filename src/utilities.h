@@ -3,15 +3,7 @@
 
 #include <iostream>
 
-#define GLM_FORCE_RADIANS
-#include "../include/glm/glm.hpp"
-#include "../include/glm/gtc/quaternion.hpp"
-
-typedef glm::vec2 Vec2;
-typedef glm::vec3 Vec3;
-typedef glm::vec4 Vec4;
-typedef glm::mat4 Mat4;
-typedef glm::quat Quat;
+#include "mathdefs.h"
 
 class btVector3;
 class btQuaternion;
@@ -36,4 +28,4 @@ namespace Utils
 	
 }
 
-#endif // UTILITIES_H
+#endif

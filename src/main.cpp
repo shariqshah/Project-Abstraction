@@ -137,7 +137,7 @@ bool init()
 					free(directory);
 					Input::initializeInput();
 				}
-			
+
 			}	
 		}
 	}
