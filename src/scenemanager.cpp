@@ -1,6 +1,5 @@
 #include "scenemanager.h"
 #include "gameobject.h"
-#include "renderer.h"
 #include "componentmanager.h"
 #include "transform.h"
 #include "scriptengine.h"
@@ -9,9 +8,11 @@ namespace SceneManager
 {
 	namespace
 	{
-		GOMap sSceneObjects;
-		std::vector<Node> sRemovables;
-
+		std::vector<Node>         validNodes;
+		std::vector<Node>         removableNodes;
+		std::vector<GameObject>   sceneObjects;
+		std::vector<unsigned int> emptyIndices;
+		
 		void removeGameObject(GOPtr gameObject)
 		{
 			//remove components
@@ -25,78 +26,49 @@ namespace SceneManager
 
 			//remove scripts
 			ScriptEngine::executeFunction("removeGameObject", gameObject);
-			delete gameObject;
+
+			// remove the node from valid list and mark it's location in list as empty
+			int index = -1;
+			for(size_t i = 0; i < validNodes.size(); i++)
+			{
+				if(validNodes[i] == gameObject->node)
+				{
+					index = (int)i;
+					emptyIndices.push_back(index);
+					break;
+				}
+			}
+
+			if(index != -1)
+				validNodes.erase(validNodes.begin() + index);
+			else
+				Log::error("SceneManager::removeGameObject", "Could not remove node");
 		}
 
 		bool markForDeletion(Node nodeToMark)
 		{
-			// bool done = false;
-			// while(!done)
-			// {
-			// 	auto position = std::find(sRemovables.begin(), sRemovables.end(), nodeToMark);
-				
-			// 	if(position == sRemovables.end())
-			// 		done = true;
-			// 	else
-			// 		sRemovables.erase(position);
-			// }
-
-			// sRemovables.push_back(nodeToMark);
-			
-			// Check if node is already marked, if it is then return false otherwise
-			// mark it as removable by adding to list and return true
-
-			for(Node node : sRemovables)
+			// Check for doubles
+			for(Node node : removableNodes)
 			{
 				if(node == nodeToMark)
 					return false;
 			}
 
-			sRemovables.push_back(nodeToMark);
+			removableNodes.push_back(nodeToMark);
 			return true;
 		}
 	}
 	
-	bool add(GOPtr newGameObject)
-	{
-		Node node = newGameObject->node;
-		const std::string name = newGameObject->name;
-		
-		std::pair<GOMap::iterator, bool> returnValue;
-		returnValue = sSceneObjects.insert(std::make_pair(node, newGameObject));
-
-		if(returnValue.second)
-		{
-			Log::message(name + " added to scene");
-			return true;
-		}
-		else
-		{
-			Log::error("SceneManager", name + " could not be added to scene");
-			return false;
-		}
-	}
-
 	bool remove(Node node)
 	{
-		auto position = sSceneObjects.find(node);
+		GOPtr gameObject = find(node);
 
-		if(position != sSceneObjects.end())
+		if(gameObject)
 		{
-			//Recursively remove all children first, if any.
-			GOArray children;
-			if(getChildren(position->second, &children))
-			{
-				std::for_each(children.begin(), children.end(), [] (GOPtr child)
-  			    {
-				    remove(child->node);
-				});
-			}
-
 			if(markForDeletion(node))
-				Log::message(position->second->name + " marked for removal");
+				Log::message(gameObject->name + " marked for removal");
 			else
-				Log::message(position->second->name + " already marked for removal");
+				Log::message(gameObject->name + " already marked for removal");
 			
 			return true;
 		}
@@ -108,186 +80,114 @@ namespace SceneManager
 	
 	bool remove(const std::string& name)
 	{
-		for(GOMap::iterator it = sSceneObjects.begin();
-			it != sSceneObjects.end();
-			++it)
-		{
-			if(name == it->second->name)
-			{
-				//Recursively remove all children first, if any.
-				GOArray children;
-				if(getChildren(it->second, &children))
-				{
-					std::for_each(children.begin(), children.end(), [] (GOPtr child)
-					{
-					    remove(child->node);
-					});
-				}
-				
-				if(markForDeletion(it->first))
-					Log::message(name + " marked for removal");
-				else
-					Log::message(name + " already marked for removal");
-				
-				return true;
-			}
-		}
+		GOPtr gameObject = find(name);
 
-		Log::error("SceneManager", name + " not found in scene so cannot be removed.");
+		if(gameObject)
+		{
+			if(markForDeletion(gameObject->node))
+				Log::message(name + " marked for removal");
+			else
+				Log::message(name + " already marked for removal");
+			
+			return true;
+		}		
+
+		Log::error("SceneManager::remove",
+				   name + " not found in scene so cannot be removed.");
 		return false;
 	}
 	
 	GOPtr find(const std::string& name)
 	{
-		for(GOMap::iterator it = sSceneObjects.begin();
-			it != sSceneObjects.end();
-			++it)
+		GOPtr gameObject = NULL;
+		for(Node node : validNodes)
 		{
-			if(name == it->second->name)
-				return it->second;
+			gameObject = &sceneObjects[node];
+			if(name == gameObject->name)
+				break;
 		}
 
-		Log::warning(name + " not found in scene");
-		return nullptr;
+		if(!gameObject)
+			Log::warning(name + " not found in scene");
+		
+		return gameObject;
 	}
 
-	GOPtr find(Node node)
+	GOPtr find(Node nodeToFind)
 	{
-	    auto it = sSceneObjects.find(node);
+		GOPtr gameObject = NULL;
+		for(Node node : validNodes)
+		{
+			if(node == nodeToFind)
+			{
+				gameObject = &sceneObjects[node];
+				break;
+			}
+		}
 
-		if(it != sSceneObjects.end())
-			return it->second;
-
-		Log::warning("GO " + std::to_string(node) + " not found in scene");
-		return nullptr;
+		if(!gameObject)
+			Log::warning("GO " + std::to_string(nodeToFind) + " not found in scene");
+		
+		return gameObject;
 	}
 
 	void update()
 	{
 		//Remove Marked GOs
-		for(Node node : sRemovables)
+		for(Node node : removableNodes)
 		{
 			GOPtr gameObject = find(node);
 			removeGameObject(gameObject);
-			int removed = sSceneObjects.erase(node);
-			if(removed == 0)
-				Log::warning("GO marked for removal could not be removed!");
 		}
 
-		sRemovables.clear();
+		removableNodes.clear();
 	}
 
 	void cleanup()
 	{
-		std::cout<<"Size before : "<<sSceneObjects.size()<<std::endl;
+		std::cout<<"Size before : "<<sceneObjects.size()<<std::endl;
 
-		update();
+		for(Node node : validNodes)
+			markForDeletion(node);
 		
-		for(GOMap::iterator it = sSceneObjects.begin();
-			it != sSceneObjects.end();
-			++it)
-		{
-			removeGameObject(it->second);
-		}
+		update();
 
-		sSceneObjects.clear();
-		std::cout<<"Size after : "<<sSceneObjects.size()<<std::endl;
+		sceneObjects.clear();
+		std::cout<<"Size after : "<<sceneObjects.size()<<std::endl;
 
-		if(!sRemovables.empty())
-			sRemovables.clear();
+		removableNodes.clear();
 	}
 
 	GOPtr create(const std::string& name)
 	{
-		GOPtr newObj = new GameObject;
+		int index = -1;
+
+		if(!emptyIndices.empty())
+		{
+			index = emptyIndices.back();
+			emptyIndices.pop_back();
+			validNodes.push_back(index);
+			sceneObjects[index] = GameObject();
+		}
+		else
+		{
+			sceneObjects.push_back(GameObject());
+			index = sceneObjects.size() - 1;
+			validNodes.push_back(index);
+		}
+		
+		GOPtr newObj = &sceneObjects[index];
 		newObj->name = name;
-		newObj->node = Renderer::createGroupNode(name);
+		newObj->node = index; 	// FIXME : Do we really need this now?
 		CompManager::addTransform(newObj);
-		add(newObj);
+		Log::message(name + " added to scene");
 		
 		return newObj;
 	}
 
-	GOMap* getSceneObjects()
+	std::vector<Node>* getSceneObjects()
 	{
-		return &sSceneObjects;
-	}
-
-	GOPtr getParent(GameObject* gameObject)
-	{
-		if(gameObject)
-		{
-			Node parent = Renderer::getParent(gameObject->node);
-			
-			if(parent != 0)
-				return find(parent);
-		}
-		
-		return nullptr;
-	}
-
-	GOPtr getChild(GameObject* gameObject, const std::string& name)
-	{
-		GOArray children;
-
-		if(getChildren(gameObject, &children, name))
-			return children[0];
-		
-		return nullptr;
-	}
-
-	bool getChildren(GameObject* gameObject,
-					 GOArray* children,
-					 const std::string& name)
-	{
-		NodeList childNodes;
-
-		if(Renderer::getNodeChildren(gameObject->node, name, &childNodes))
-		{
-			for(Node child : childNodes)
-				children->push_back(find(child));
-
-			return true;
-		}
-		
-		return false;
-	}
-
-	void syncTransform(GameObject* gameObject)
-	{
-		Vec3 position, rotation, scale;
-		Renderer::getNodeTransform(gameObject->node,
-								   &position,
-								   &rotation,
-								   &scale);
-
-		
-		auto transform = CompManager::getTransform(gameObject);
-		Transform::setPosition(transform, position, false);
-		Transform::setRotation(transform, Quat(rotation), false);
-		Transform::setScale(transform, scale, false);
-	}
-
-	bool setParent(GameObject* child, GameObject* parent)
-	{
-		if(Renderer::setParent(child->node, parent->node))
-		{
-			syncTransform(child);
-			return true;
-		}
-
-		return false;
-	}
-
-	bool setParentAsRoot(GameObject* gameObject)
-	{
-		if(Renderer::setParent(gameObject->node, Renderer::ROOT_NODE))
-		{
-			syncTransform(gameObject);
-			return true;
-		}
-
-		return false;
+		return &validNodes;
 	}
 
 	bool removeByName(const std::string& name)
@@ -313,14 +213,10 @@ namespace SceneManager
 	void generateBindings()
 	{
 		Sqrat::RootTable().Bind("SceneManager", Sqrat::Table(ScriptEngine::getVM())
-								.Func("add",             &add)
 								.Func("removeByNode",    &removeByNode)
 								.Func("removeByName",    &removeByName)
-								.Func("setParent",       &setParent)
-								.Func("setParentAsRoot", &setParentAsRoot)
 								.Func("findByNode",      &findByNode)
 								.Func("findByName",      &findByName)
-								.Func("getChild",        &getChild)
 								.Func("create",          &create));
 	}
 }

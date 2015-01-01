@@ -161,6 +161,8 @@ namespace Physics
 		case DBG_Mode::MAX:
 			tempMode = DBG_Mode::NONE;
 			break;
+		default:
+			Log::error("Physics::NextDebugmode", "Unimplemented or Invalid Mode");
 		};
 
 		setDebugMode(tempMode);

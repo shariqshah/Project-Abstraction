@@ -1,5 +1,14 @@
+#include <GL/glew.h>
+#include <GL/gl.h>
+
 #include "model.h"
+#include "camera.h"
 #include "scriptengine.h"
+#include "shader.h"
+#include "gameobject.h"
+#include "scenemanager.h"
+#include "componentmanager.h"
+#include "transform.h"
 
 namespace Renderer
 {
@@ -8,6 +17,52 @@ namespace Renderer
 		namespace
 		{
 			std::vector<CModel*> untrackedModels;
+			std::vector<CModel>  modelList;
+
+			const int    MAX_VERTICES        = 1000000;
+			const int    MAX_VERT_VBO_SIZE   = sizeof(Vec3) * MAX_VERTICES;
+			const int    MAX_COLOR_VBO_SIZE  = sizeof(Vec3) * MAX_VERTICES;
+			const int    MAX_UV_VBO_SIZE     = sizeof(Vec2) * MAX_VERTICES;
+			const int    MAX_NORMAL_VBO_SIZE = sizeof(Vec3) * MAX_VERTICES;
+			const int    MAX_INDEX_VBO_SIZE  = MAX_VERTICES / 3;
+			GLuint       vao;
+			unsigned int vertexVBOTop = 0;
+			unsigned int colorVBOTop  = 0;
+			unsigned int uvVBOTop     = 0;
+			unsigned int normalVBOTop = 0;
+			unsigned int indexVBOTop  = 0;
+		}
+
+		void renderAllModels(CCamera* camera)
+		{
+			glBindVertexArray(vao);
+
+			for(Mat_Type material : Material::MATERIAL_LIST)
+			{
+				// TODO: Add error checking for returned material params
+				std::vector<int>* registeredMeshes = Material::getRegisteredModels(material);
+				int shaderIndex = Material::getShaderIndex(material);
+
+				Shader::bindShader(shaderIndex);
+				
+				for(int modelIndex : *registeredMeshes)
+				{
+					CModel      model      = modelList[modelIndex];
+					GameObject* gameObject = SceneManager::find(model.node);
+					CTransform* transform  = CompManager::getTransform(gameObject);
+
+					Mat4 mvp = camera->projectionMat * camera->viewMat * transform->transMat;
+					Shader::setUniformMat4(shaderIndex, "mvp", mvp);
+					
+					glDrawArrays(GL_TRIANGLES,
+								 model.vboStartIndex,
+								 model.vertices.size());
+				}
+
+				Shader::unbindActiveShader();
+			}
+		    
+			glBindVertexArray(0);
 		}
 
 		void cleanup()
@@ -108,6 +163,54 @@ namespace Renderer
 								.Func("getVertexcount", &getVertexCount)
 								.Func("remove", &remove));
 		}
+
+		void initialize()
+		{
+			glBindVertexArray(vao);
+
+			GLuint vertexVBO;
+			glGenBuffers(1, &vertexVBO);
+			glBindBuffer(GL_ARRAY_BUFFER, vertexVBO);
+			glBufferData(GL_ARRAY_BUFFER,
+						 MAX_VERT_VBO_SIZE,
+						 NULL,
+						 GL_STATIC_DRAW);
+			glEnableVertexAttribArray(0);
+			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+
+			GLuint normalVBO;
+			glGenBuffers(1, &normalVBO);
+			glBindBuffer(GL_ARRAY_BUFFER, normalVBO);
+			glBufferData(GL_ARRAY_BUFFER,
+						 MAX_NORMAL_VBO_SIZE,
+						 NULL,
+						 GL_STATIC_DRAW);
+			glEnableVertexAttribArray(0);
+			glVertexAttribPointer(1, 3, GL_FLOAT, GL_TRUE, 0, 0);
+
+			GLuint uvVBO;
+			glGenBuffers(1, &uvVBO);
+			glBindBuffer(GL_ARRAY_BUFFER, uvVBO);
+			glBufferData(GL_ARRAY_BUFFER,
+						 MAX_UV_VBO_SIZE,
+						 NULL,
+						 GL_STATIC_DRAW);
+			glEnableVertexAttribArray(2);
+			glVertexAttribPointer(2, 2, GL_FLOAT, GL_TRUE, 0, 0);
+
+			GLuint colorVBO;
+			glGenBuffers(1, &colorVBO);
+			glBindBuffer(GL_ARRAY_BUFFER, colorVBO);
+			glBufferData(GL_ARRAY_BUFFER,
+						 MAX_COLOR_VBO_SIZE,
+						 NULL,
+						 GL_STATIC_DRAW);
+			glEnableVertexAttribArray(0);
+			glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 0, 0);
+		
+			glBindVertexArray(0);
+		}
+
 	}
 }
 

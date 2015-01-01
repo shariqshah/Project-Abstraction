@@ -6,6 +6,8 @@
 #include "mathdefs.h"
 #include "material.h"
 
+struct CCamera;
+
 struct CModel
 {
 	Resource    resourceID = 0;
@@ -26,6 +28,8 @@ namespace Renderer
 {
 	namespace Model
 	{
+		void    initialize();
+		void    renderAllModels(CCamera* camera);
 		float*  getVertices(CModel* model);
 		CModel* create(const std::string& filename);
 		int     getVertexCount(CModel* model);

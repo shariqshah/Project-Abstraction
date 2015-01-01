@@ -16,8 +16,8 @@
 #include <vector>
 #include <algorithm>
 
-typedef H3DNode Node;
-typedef H3DRes  Resource;
+typedef uint32_t Node;
+typedef H3DRes   Resource;
 typedef std::vector<Node> NodeList;
 
 typedef glm::vec3 Vec3;
@@ -92,7 +92,7 @@ namespace Renderer
     void initialize(const char* path);
 	void cleanup();
 	void renderFrame();
-	void setClearColor(Vec3 clearColor);
+	void setClearColor(const Vec3 clearColor);
 	void setNodeTransform(Node       node,
 						  const Vec3 position,
 						  const Vec3 rotation,

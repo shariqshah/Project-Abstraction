@@ -3,6 +3,7 @@
 
 #include "componentTypes.h"
 #include "renderer.h"
+#include "mathdefs.h"
 
 struct CCamera
 {
@@ -13,6 +14,8 @@ struct CCamera
 	float    aspectRatio = 4.f/3.f;
 	Pipeline pipeline    = Pipeline::FORWARD;
 	bool     valid       = true;
+	Mat4     viewMat;
+	Mat4     projectionMat;
 };
 
 namespace Renderer

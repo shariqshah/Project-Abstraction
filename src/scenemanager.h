@@ -2,39 +2,27 @@
 #define _scenemanager_H
 
 #include <algorithm>
-#include <unordered_map>
-
-#include "../include/horde3d/Horde3D.h"
+#include <vector>
 
 struct GameObject;
 
-typedef H3DNode                         Node;
-typedef GameObject*                     GOPtr;
-typedef std::unordered_map<Node, GOPtr> GOMap;
-typedef std::vector<GOPtr>              GOArray;
+typedef uint32_t    Node;
+typedef GameObject* GOPtr;
 
 namespace SceneManager
 {
-	bool   add(GOPtr newGameObject);
-	bool   remove(const std::string& name);
-	bool   remove(Node node);
-	bool   setParent(GameObject* child, GameObject* parent);
-	bool   setParentAsRoot(GameObject* gameObject);
-	bool   getChildren(GameObject* gameObject,
-					   GOArray* children,
-					   const std::string& name = "");
+	bool remove(const std::string& name);
+	bool remove(Node node);
 	
-	GOPtr  find(const std::string& name);
-	GOPtr  find(Node node);
-	GOPtr  create(const std::string& name);
-	GOPtr  getParent(GameObject* gameObject);
-	GOPtr  getChild(GameObject* gameObject, const std::string& name);
-	
-	void   update();
-	void   cleanup();
-	void   generateBindings();
+	GOPtr find(const std::string& name);
+	GOPtr find(Node node);
+	GOPtr create(const std::string& name);
 
-	GOMap* getSceneObjects();
+	void update();
+	void cleanup();
+	void generateBindings();
+
+	std::vector<Node>* getSceneObjects();
 }
 
 #endif

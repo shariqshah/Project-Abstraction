@@ -2,9 +2,11 @@
 #define _gameobject_H_
 
 #include <vector>
+#include <iostream>
 
-#include "renderer.h"
 #include "componentTypes.h"
+
+typedef uint32_t Node;
 
 struct CollisionData;
 
