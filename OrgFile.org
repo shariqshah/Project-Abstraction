@@ -18,6 +18,11 @@
    
 - Added support for loading/unloading/using textures by using SDL_Image
 - Created and fixed new and previous memory leaks with valgrind.
+** <2015-01-02 Fri>
+
+- Added further functionality to model related procedures. The render loop is almost complete.
+- Re-wrote most of the scenemanager related procedures by removing all horde3d things. 
+  It uses flat arrays(currently c++ vector) for storing gameobjects.
 * Tasks
 ** High-level
 *** TODO Renderer
@@ -57,6 +62,10 @@ Last step before moving on to CPU!
 **** TODO Add utility functions for string manipulations.
 **** TODO Add custom std::vector replacement.
 **** TODO Add custom std::unordered_map replacement.
+*** <2015-01-02 Fri>
+**** DONE Re-write scenemanger.
+	 - State "DONE"       from "TODO"       [2015-01-02 Fri 00:51]
+**** TODO Reserve space in all vectors at initialization and addition of new elements.
 * Notes
 ** <2014-12-14 Sun 21:21>
 This is the first entry into my "OrgFile.org". The plan is to have a seperate OrgFile for every project that i work on, although i might change that in that in the future.
@@ -96,3 +105,13 @@ me learning about how things work, i thought why not! I do realize this will slo
 but i'm in no particular hurry anyway.
 
 P.S. My writing and composition is horrible. I hope this note-taking can make it better!
+** <2015-01-02 Fri>
+So i finally re-wrote the scenemanger. It was on the list of many things that i've been putting off to 
+write later. The scenemanager now uses flat arrays instead of unordered hashmap like it used to. It
+remains to be seen whether this will give me better performance or not. There is one thing however that
+i still haven't been able to figure out, which arises from my current implementations of using flat 
+arrays for storage. Since the size of the arrays is not fixed, everytime the array increases in size,
+pointers to current objects inside the array are invalidated because the resize causes reallocation.
+
+At the moment this isn't such a big issue but in the future this might cause some problems and headache
+i suspect!
