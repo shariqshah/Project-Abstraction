@@ -4,6 +4,8 @@
 #include "texture.h"
 #include "shader.h"
 #include "material.h"
+#include "model.h"
+#include "camera.h"
 
 namespace Renderer
 {
@@ -125,6 +127,8 @@ namespace Renderer
 		free(contentDir);
 		Texture::cleanup();
 		Shader::cleanup();
+		Model::cleanup();
+		Material::cleanup();
 	}
 	
 	void drawText()
@@ -177,25 +181,11 @@ namespace Renderer
 		h3dSetOption(H3DOptions::WireframeMode, sRenderWireframe ? 1.0f : 0.0f);
 	}
 
-	void renderFrame()
+	void renderFrame(CCamera* camera)
 	{
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		// if(sDebugLevel != DebugLevel::NONE)
-		// {
-		// 	if(sDebugLevel == DebugLevel::MEDIUM)
-		// 		h3dutShowFrameStats( sFontMat, sPanelMat, 1);
-		// 	else if(sDebugLevel == DebugLevel::HIGH)
-		// 		h3dutShowFrameStats( sFontMat, sPanelMat, 2);
-			
-		// 	drawText();
-		// }
-		// else
-		// 	sTextList.clear();
-		
-		// h3dRender(activeCamera);
-		// h3dFinalizeFrame();
-		// h3dClearOverlays();
-		// h3dutDumpMessages();
+
+		Model::renderAllModels(camera);
 	}
 	
     Node createGroupNode(const std::string& name, Node parent)

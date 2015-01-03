@@ -293,17 +293,13 @@ namespace CompManager
 				case Component::CAMERA:
 					index = gameObject->compIndices[(int)type];
 					gameObject->compIndices[(int)type] = EMPTY_INDEX;
-					Renderer::Camera::removeCamera(sCameraList[index]);
-					sCameraList[index].valid = false;
-					sCameraEmptyList.push_back(index);
+					Renderer::Camera::remove(index);
 					break;
 
 				case Component::MODEL:
 					index = gameObject->compIndices[(int)type];
 					gameObject->compIndices[(int)type] = EMPTY_INDEX;
-					Renderer::Model::remove(&sModelList[index]);
-					sModelList[index].valid = false;
-					sModelEmptyList.push_back(index);
+					Renderer::Model::remove(index);
 					break;
 
 				case Component::LIGHT:

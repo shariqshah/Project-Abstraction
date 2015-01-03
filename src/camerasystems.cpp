@@ -5,6 +5,8 @@
 #include "gameobject.h"
 #include "renderer.h"
 #include "utilities.h"
+#include "scenemanager.h"
+#include "camera.h"
 
 namespace System
 {
@@ -19,7 +21,7 @@ namespace System
 			float sRotSpeed       = 1.2f;
 			float sSprintFactor   = 3.f;
 			
-			GameObject* activeObject = NULL;
+			Node activeObject;
 		}
 
 		void setActiveObject(GameObject* gameObject)
@@ -28,15 +30,17 @@ namespace System
 			   GO::hasComponent(gameObject, Component::CAMERA)    &&
 			   gameObject->tag == "FreeCamera")
 			{
-				activeObject = gameObject;
-				Log::message("Free camera system initailized with "
-							 + activeObject->name);
+				activeObject = gameObject->node;
+				Log::message("Free camera system initailized with " + gameObject->name);
 			}
 		}
 
 		void updateFreeCamera(float deltaTime)
 		{
-			auto transform = CompManager::getTransform(activeObject);
+			GameObject* activeObjectPtr = SceneManager::find(activeObject);
+			auto transform = CompManager::getTransform(activeObjectPtr);
+			auto camera    = Renderer::Camera::getCamera(activeObjectPtr->compIndices[(int)Component::CAMERA]);
+			
 			// if(!Input::isCursorLocked())
 			// 	Input::setCursorLock(true);
 					
@@ -46,7 +50,7 @@ namespace System
 			float upDownRot = 0.f; 
 			float leftRightRot = 0.f;
 
-			upDownRot = Input::getMouseRelY() * sRotSpeed * deltaTime;
+			upDownRot    = Input::getMouseRelY() * sRotSpeed * deltaTime;
 			leftRightRot = Input::getMouseRelX() * sRotSpeed * deltaTime;
 				
 			if(Input::isPressed(Input::Key::W))
@@ -91,12 +95,15 @@ namespace System
 			}
 
 			float epsilon = 0.0001;
+			bool  updateCamera = false;
+			
 			if(upDownRot > epsilon || upDownRot < -epsilon)
 			{
 				Transform::rotate(transform,
 								  Vec3(-1, 0, 0),
 								  upDownRot,
 								  Transform::Space::LOCAL);
+				updateCamera = true;
 			} 
 			
 			if(leftRightRot > epsilon || leftRightRot < -epsilon)
@@ -105,13 +112,19 @@ namespace System
 								  Vec3(0, 1, 0),
 								  -leftRightRot,
 								  Transform::Space::WORLD);
+				updateCamera = true;
 			}
 			
 
 			if(translation.x != 0 || translation.y != 0 || translation.z != 0)
+			{
 				Transform::translate(transform, translation, Transform::Space::LOCAL);
-			
-			Renderer::addText(Utils::toString(transform->position));
+				Log::message("Player : " + Utils::toString(transform->position));
+				updateCamera = true;
+			}
+
+			if(updateCamera)
+				Renderer::Camera::updateView(camera, transform);
 		}
 	}
 }

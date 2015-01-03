@@ -5,6 +5,9 @@
 #include "renderer.h"
 #include "mathdefs.h"
 
+struct GameObject;
+struct CTransform;
+
 struct CCamera
 {
 	Node     node        = 0;
@@ -15,7 +18,8 @@ struct CCamera
 	Pipeline pipeline    = Pipeline::FORWARD;
 	bool     valid       = true;
 	Mat4     viewMat;
-	Mat4     projectionMat;
+	Mat4     projMat;
+	Mat4     viewProjMat;
 };
 
 namespace Renderer
@@ -37,8 +41,13 @@ namespace Renderer
 		void setFarZ(CCamera* camera, float farZ);
 		void generateBindings();
 		void setOutputTexture(CCamera* camera, Resource texture);
+		void updateProjection(CCamera* camera);
+		void updateView(CCamera* camera, CTransform* transform);
+		void remove(int cameraIndex);
 		
-		CCamera create(const std::string& name, Node parent, Resource pipeline);
+		CCamera* getCamera(int cameraIndex);
+		CCamera* create(GameObject* gameObject, CCamera* camera);
+		CCamera  create(const std::string& name, Node parent, Resource pipeline);
 	}
 }
 

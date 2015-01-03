@@ -1,16 +1,15 @@
 #ifndef _game_H
 #define _game_H
 
+#include <iostream>
+
 struct GameObject;
 
-typedef GameObject* GOPtr;
+typedef uint32_t Node;
 
 class Game
 {
-	GOPtr        mCurrentViewer;
-	unsigned int mVAO;
-	unsigned int mShader;
-	unsigned int mTexture;
+	Node player;
 public:
     Game(const char* path);
 	~Game();

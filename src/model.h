@@ -7,6 +7,7 @@
 #include "material.h"
 
 struct CCamera;
+struct GameObject;
 
 struct CModel
 {
@@ -21,7 +22,8 @@ struct CModel
 	std::vector<Vec2>         uvs;
 	std::vector<unsigned int> indices;
 	Mat_Type                  material;
-	unsigned int              vboStartIndex;
+	unsigned int              vao;
+	bool                      drawIndexed = false;
 };
 
 namespace Renderer
@@ -32,8 +34,10 @@ namespace Renderer
 		void    renderAllModels(CCamera* camera);
 		float*  getVertices(CModel* model);
 		CModel* create(const std::string& filename);
+		CModel* addModel(GameObject* gameObject, CModel* model);
 		int     getVertexCount(CModel* model);
 		void    remove(CModel* model);
+		void    remove(unsigned int modelIndex);
 		void    generateBindings();
 		void    cleanup();
 	}

@@ -66,6 +66,8 @@ Last step before moving on to CPU!
 **** DONE Re-write scenemanger.
 	 - State "DONE"       from "TODO"       [2015-01-02 Fri 00:51]
 **** TODO Reserve space in all vectors at initialization and addition of new elements.
+*** <2015-01-02 Fri>
+**** TODO Move component creation/retrieval/removal code to GameObject
 * Notes
 ** <2014-12-14 Sun 21:21>
 This is the first entry into my "OrgFile.org". The plan is to have a seperate OrgFile for every project that i work on, although i might change that in that in the future.

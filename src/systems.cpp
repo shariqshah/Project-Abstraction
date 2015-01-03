@@ -173,7 +173,7 @@ namespace System
 		if(Input::isReleased(Input::Key::ESC))
 			*quit = true;
 		
-		// System::CameraSystem::updateFreeCamera(deltaTime);
+		System::CameraSystem::updateFreeCamera(deltaTime);
 		// Cpu::update(deltaTime);
 		// ScriptEngine::executeFunction("updateObjects", deltaTime);
 		
@@ -191,7 +191,7 @@ namespace System
 		// if(sPhysicsEnabled)
 		// 	Physics::update(deltaTime);
 		
-		// SceneManager::update();
+		SceneManager::update();
 
 		// if(Input::isReleased(Input::Key::K9))
 		// {
@@ -203,8 +203,8 @@ namespace System
 
 	void cleanup()
 	{
-		// SceneManager::cleanup();
-		// CompManager::cleanup();
+		SceneManager::cleanup();
+		CompManager::cleanup();
 		// Physics::cleanup();
 		// Renderer::Model::cleanup();
 		// ScriptEngine::cleanup();

@@ -146,14 +146,15 @@ namespace Utils
 			}
 			else
 			{
-				Log::error("Utils loadFileintostring", "Fseek failed");
+				Log::error("Utils::loadFileintostring", "Fseek failed");
 			}
 
 			fclose(file);
 		}
 		else
 		{
-			Log::error("Utils loadFileintostring", "Couldn't open file");
+			Log::error("Utils::loadFileintostring",
+					   "Couldn't open file " + std::string(name));
 		}
 		
 		return fileContents;

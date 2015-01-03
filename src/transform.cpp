@@ -15,7 +15,7 @@ namespace Transform
 		Mat4 rotationMat    = glm::toMat4(glm::normalize(transform->rotation));
 
 		transform->transMat = translationMat * rotationMat * scaleMat;
-		Renderer::setNodeTransform(transform->node, transform->transMat);
+		// Renderer::setNodeTransform(transform->node, transform->transMat);
 	}
 
 	void updateLookAt(CTransform* transform)
@@ -129,7 +129,7 @@ namespace Transform
 
 	void resetTransformFlag(CTransform* transform)
 	{
-		Renderer::resetTransformFlag(transform->node);
+		// Renderer::resetTransformFlag(transform->node);
 	}
 
 	void generateBindings()

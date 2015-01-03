@@ -11,9 +11,9 @@ namespace Material
 {
 	struct MatUnshaded
 	{
-		std::vector<int> registeredNodes;
-		Vec3             diffuseColor;
-		int              shaderIndex;
+		std::vector<int>  registeredNodes;
+		Vec3              diffuseColor;
+		int               shaderIndex;
 	};
 	
 	namespace
@@ -27,8 +27,45 @@ namespace Material
 		matUnshaded.shaderIndex = Shader::create("unshaded.vert", "unshaded.frag");
 	}
 
-	void registerModel(/* Node or Model, Mat_Type, Mat_Uniforms*/); //TODO: Figure this out!!!!!
-	// void setMaterialUniform(Mat_Type type, /* value to set use overloaded function of same name or gl-style i,f,v3,v4,mat prefixes*/);
+	bool registerModel(int modelIndex, Mat_Type material)
+	{
+		// Check if model is already registererd, if not register it
+		bool exists = false;
+		switch(material)
+		{
+		case MAT_UNSHADED:
+
+			for(int existingNode : matUnshaded.registeredNodes)
+			{
+				if(existingNode == modelIndex)
+				{
+					exists = true;
+					break;
+				}
+			}
+			
+			if(!exists)
+				matUnshaded.registeredNodes.push_back(modelIndex);
+			
+			break;
+		case MAT_UNSHADED_TEXTURED:
+			Log::error("Model::registerModel", "Material type unimplemented");
+			break;
+		case MAT_PHONG:
+			Log::error("Model::registerModel", "Material type unimplemented");
+			break;
+		case MAT_PHONG_TEXTURED:
+			Log::error("Model::registerModel", "Material type unimplemented");
+			break;
+		default:
+			Log::error("Model::registerModel", "Invalid Material type");
+			break;
+		}
+
+		// if node is already registered, return false otherwise true
+		return exists ? false : true;
+	}
+	
 
 	int getShaderIndex(Mat_Type material)
 	{
@@ -56,6 +93,42 @@ namespace Material
 		return shaderIndex;
 	}
 
+	bool unRegisterModel(int modelIndex, Mat_Type material)
+	{
+		int index = -1;
+		switch(material)
+		{
+		case MAT_UNSHADED:
+			for(unsigned int i = 0; i < matUnshaded.registeredNodes.size(); i++)
+			{
+				if(matUnshaded.registeredNodes[i] == modelIndex)
+				{
+					index = i;
+					break;
+				}
+			}
+
+			if(index != -1)
+				matUnshaded.registeredNodes.erase(matUnshaded.registeredNodes.begin() + index);
+			
+			break;
+		case MAT_UNSHADED_TEXTURED:
+			Log::error("Model::unRegisterModel", "Material type unimplemented");
+			break;
+		case MAT_PHONG:
+			Log::error("Model::unRegisterModel", "Material type unimplemented");
+			break;
+		case MAT_PHONG_TEXTURED:
+			Log::error("Model::unRegisterModel", "Material type unimplemented");
+			break;
+		default:
+			Log::error("Model::unRegisterModel", "Invalid Material type");
+			break;
+		};
+
+		return index != -1 ? true : false;
+	}
+	
 	std::vector<int>* getRegisteredModels(Mat_Type material)
     {
 		std::vector<int>* registeredModels = NULL;
@@ -80,5 +153,10 @@ namespace Material
 		};
 
 		return registeredModels;
+	}
+
+	void cleanup()
+	{
+		matUnshaded.registeredNodes.clear();
 	}
 }

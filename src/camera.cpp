@@ -1,12 +1,22 @@
 #include "camera.h"
 #include "scriptengine.h"
+#include "transform.h"
+#include "componentmanager.h"
+#include "gameobject.h"
 
 namespace Renderer
 {
 	namespace
 	{
-		std::vector<Node> cameras;
-        Resource          pipelineList[4];
+		std::vector<Node>    cameras;
+		std::vector<CCamera> cameraList;
+		std::vector<int>     emptyIndices;
+        Resource             pipelineList[4];
+
+		void updateViewProjection(CCamera* camera)
+		{
+			camera->viewProjMat = camera->projMat * camera->viewMat;
+		}
 	}
 	
 	namespace Camera
@@ -192,9 +202,72 @@ namespace Renderer
 								.Func("setAspectratio", &setAspectRatio)
 								.Func("setFov", &setFov)
 								.Func("setNearZ", &setNearZ)
-								.Func("updateView", &updateView)
+								// .Func("updateView", &updateView)
 								.Func("removeCamera", &removeCamera)
 								.Func("setFarZ", &setFarZ));
+		}
+
+		CCamera* getCamera(int cameraIndex)
+		{
+			return &cameraList[cameraIndex];
+		}
+
+		void updateProjection(CCamera* camera)
+		{
+			assert(camera);
+			
+			camera->projMat = glm::perspective(glm::radians(camera->fov),
+											   camera->aspectRatio,
+											   camera->nearZ,
+											   camera->farZ);
+			updateViewProjection(camera);
+		}
+
+		void updateView(CCamera* camera, CTransform* transform)
+		{
+			assert(camera);
+			assert(transform);
+			
+			camera->viewMat = glm::lookAt(transform->position,
+										  transform->lookAt,
+										  transform->up);
+
+			updateViewProjection(camera);
+		}
+		
+		CCamera* create(GameObject* gameObject, CCamera* camera)
+		{
+			assert(gameObject);
+			assert(camera);
+
+			camera->node = gameObject->node;
+			CTransform* transform = CompManager::getTransform(gameObject);
+			
+			updateView(camera, transform);
+			updateProjection(camera);
+
+			int index = -1;
+
+			if(emptyIndices.empty())
+			{
+				cameraList.push_back(*camera);
+				index = cameraList.size() - 1;
+			}
+			else
+			{
+				index = emptyIndices.back();
+				emptyIndices.pop_back();
+				cameraList[index] = *camera;
+			}
+
+			gameObject->compIndices[(int)Component::CAMERA] = index;
+			Log::message("Camera added to " + gameObject->name);
+			return &cameraList[index];
+		}
+
+		void remove(int cameraIndex)
+		{
+			emptyIndices.push_back(cameraIndex);
 		}
 	}
 }

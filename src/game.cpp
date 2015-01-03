@@ -21,112 +21,114 @@
 Game::Game(const char* path)
 {
 	Renderer::initialize(path);
+
+	float length = 1.f;
+	float height = 1.f;
+	float width  = 1.f;
+
+	length /= 2.f;
+	height /= 2.f;
+	width  /= 2.f;
 	
 	    //Vertices
     std::vector<Vec3>vertices;
-    vertices.push_back(Vec3(-0.5, -0.5, 0.0));
-    vertices.push_back(Vec3( 0.5, -0.5, 0.0));
-    vertices.push_back(Vec3(   0,  0.5, 0.0));
+    vertices.push_back(Vec3(-length,  height, width));
+    vertices.push_back(Vec3(-length, -height, width));
+    vertices.push_back(Vec3( length, -height, width));
+    vertices.push_back(Vec3( length,  height, width));
 	
-    vertices.push_back(Vec3(-1.0,  1.0, 0.0));
-    vertices.push_back(Vec3(-1.0, -1.0, 0.0));
-    vertices.push_back(Vec3( 1.0, -1.0, 0.0));
+    vertices.push_back(Vec3(-length,  height, -width));
+    vertices.push_back(Vec3(-length, -height, -width));
+    vertices.push_back(Vec3( length, -height, -width));
+    vertices.push_back(Vec3( length,  height, -width));	
 
     //UV's
-    std::vector<glm::vec2>uvs;
-    uvs.push_back(glm::vec2(0.0, 0.0));
-    uvs.push_back(glm::vec2(1.0, 0.0));
-    uvs.push_back(glm::vec2(1.0, 1.0));
-    uvs.push_back(glm::vec2(1.0, 1.0));
-    uvs.push_back(glm::vec2(0.0, 1.0));
-    uvs.push_back(glm::vec2(0.0, 0.0));
+    std::vector<Vec2>uvs;
+    uvs.push_back(Vec2(0.0, 0.0));
+    uvs.push_back(Vec2(1.0, 0.0));
+    uvs.push_back(Vec2(1.0, 1.0));
+    uvs.push_back(Vec2(1.0, 1.0));
+    uvs.push_back(Vec2(0.0, 1.0));
+    uvs.push_back(Vec2(0.0, 0.0));
 
-	glGenVertexArrays(1, &mVAO);
-	glBindVertexArray(mVAO);
+	std::vector<unsigned int> indices;
 
-	GLuint vertexVBO;
-	glGenBuffers(1, &vertexVBO);
-	glBindBuffer(GL_ARRAY_BUFFER, vertexVBO);
-	glBufferData(GL_ARRAY_BUFFER,
-				 vertices.size() * sizeof(Vec3),
-				 vertices.data(),
-				 GL_STATIC_DRAW);
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+	//front
+	indices.push_back(0); indices.push_back(1); indices.push_back(2);
+	indices.push_back(2); indices.push_back(3); indices.push_back(0);
 
-	GLuint uvVBO;
-	glGenBuffers(1, &uvVBO);
-	glBindBuffer(GL_ARRAY_BUFFER, uvVBO);
-	glBufferData(GL_ARRAY_BUFFER,
-				 uvs.size() * sizeof(glm::vec2),
-				 uvs.data(),
-				 GL_STATIC_DRAW);
-	glEnableVertexAttribArray(2);
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_TRUE, 0, 0);
+	//back
+	indices.push_back(6); indices.push_back(5); indices.push_back(4);
+	indices.push_back(4); indices.push_back(7); indices.push_back(6);
 
-	glBindVertexArray(0);
+	//left
+	indices.push_back(4); indices.push_back(5); indices.push_back(1);
+	indices.push_back(1); indices.push_back(0); indices.push_back(4);
 
-	mShader = Shader::create("../content/shaders/simple.vert",
-							 "../content/shaders/simple.frag");
+	//right
+	indices.push_back(3); indices.push_back(2); indices.push_back(6);
+	indices.push_back(6); indices.push_back(7); indices.push_back(3);
 
-	mTexture = Texture::create("test.png");
-	// Renderer::initialize(path);
-	// Renderer::Camera::initialize();
-	// System::initialize();
+	//top
+	indices.push_back(4); indices.push_back(0); indices.push_back(3);
+	indices.push_back(3); indices.push_back(7); indices.push_back(4);
+
+	//bottom
+	indices.push_back(1); indices.push_back(5); indices.push_back(6);
+	indices.push_back(6); indices.push_back(2); indices.push_back(1);
+
+	std::vector<Vec3> triVerts;
+	triVerts.push_back(Vec3(-0.5, -0.5, 0));
+	triVerts.push_back(Vec3( 0.5, -0.5, 0));
+	triVerts.push_back(Vec3( 0,    0.5, 0));
+
+	std::vector<unsigned int> triIndices;
+	triIndices.push_back(0);
+	triIndices.push_back(1);
+	triIndices.push_back(2);
+
+	CModel triModel;
+	triModel.filename = "TriMesh";
+	triModel.vertices = triVerts;
+	triModel.uvs      = uvs;
+	// triModel.indices  = triIndices;
+	triModel.material = MAT_UNSHADED;
 	
-	// GOPtr falcon = SceneManager::create("Falcon");
-	// falcon->tag = "Falcon";
-	// auto falMod = CompManager::addModel(falcon, "models/falcon/falcon.scene.xml");
-	// //auto falconTransform = CompManager::getTransform(falcon);
-	// CompManager::addRigidBody(falcon, new CollisionMesh(falMod, false), 10);
+	CModel model;
+	model.filename = "CubeMesh";
+	model.vertices = vertices;
+	model.uvs      = uvs;
+	model.indices  = indices;
+	model.material = MAT_UNSHADED;
+	
+	GameObject* triangle = SceneManager::create("Triangle");
+	Renderer::Model::addModel(triangle, &triModel);
+	CTransform* modelTransform = CompManager::getTransform(triangle);
+	Transform::setPosition(modelTransform, Vec3(0, 0, -5), true);
 
-	// GOPtr lightGO = SceneManager::create("LightGO");
-	// CompManager::addModel(lightGO, "models/sphere/sphere.scene.xml");
-	// auto goLight = CompManager::addLight(lightGO, "GOLight");
-	// auto lTransform = CompManager::getTransform(lightGO);
+	GameObject* cube2 = SceneManager::create("Cube");
+	Renderer::Model::addModel(cube2, &model);
+	CTransform* cube2Tran = CompManager::getTransform(cube2);
+	Transform::setPosition(cube2Tran, Vec3(5, 0, -5), true);
+	
+	for(int i = 0; i < 10; i++)
+	{
+		GameObject* cube2 = SceneManager::create("Cube" + std::to_string(i));
+		Renderer::Model::addModel(cube2, &model);
+		CTransform* cube2Tran = CompManager::getTransform(cube2);
+		Transform::setPosition(cube2Tran, Vec3(i, i, -i), true);
+		//Transform::setScale(cube2Tran, Vec3(2, 2, 2));
+	}
+	
+	GameObject* playerPtr = SceneManager::create("Player");
+	player = playerPtr->node;
+	playerPtr->tag = "FreeCamera";
+	CTransform* transform = CompManager::getTransform(playerPtr);
+	Transform::translate(transform, Vec3(0, 0, 5));
 
-
-	// Transform::setPosition(lTransform, Vec3(-50, 200, 0));
-	// Transform::rotate(lTransform, Transform::UNIT_X, -90, Transform::Space::WORLD);
-	// Renderer::Light::setColor(goLight, Vec3(0.8f, 0.8f, 0.5f));
-	// Renderer::Light::setRadius(goLight, 500);
-
-	// GOPtr player = SceneManager::create("Player");
-	// player->tag = "FreeCamera";
-	// auto playerTrans = CompManager::getTransform(player);
-	// // auto playerLight = CompManager::addLight(player, "playerLight");
-	// // Renderer::Light::setColor(playerLight, Vec3(1, 0, 0));
-	// CompManager::addCamera(player, "playerCamera", Pipeline::FORWARD);
-	// Transform::setPosition(playerTrans, Vec3(-18, 40, 28));
-	// System::CameraSystem::setActiveObject(player);
-	// GO::attachScript(player, "PlayerBehaviour");
-	// mCurrentViewer = player;
-
-	// Sphere* sphere = new Sphere(1);
-	// for(int i = 0; i < 10; i++)
-	// {
-	// 	GOPtr suzanne = SceneManager::create("Suzanne" + std::to_string(i));
-	// 	suzanne->tag = "suzanne";
-	// 	auto suzTransform = CompManager::getTransform(suzanne);
-
-	// 	float radius = 20.f;
-	// 	float width  = glm::sin((float)i) * radius;
-	// 	float height = glm::cos((float)i) * radius;
-	// 	if(i < 50)
-	// 		Transform::setPosition(suzTransform, Vec3(width, 5, height));
-	// 	else
-	// 		Transform::setPosition(suzTransform, Vec3(0, height + 7, width));
-		
-	// 	CompManager::addModel(suzanne, "models/test/test.scene.xml");
-	// 	CompManager::addRigidBody(suzanne, sphere);
-
-	// }
-
-	// GOPtr plane = SceneManager::create("Floor");
-	// CompManager::addRigidBody(plane, new Plane(Vec3(0, 1, 0), 0.04f), 0.f);
-
-	// Renderer::Camera::resizePipelineBuffers(Settings::getWindowWidth(),
-	// 										Settings::getWindowHeight());
+	CCamera newCamera;
+	Renderer::Camera::create(playerPtr, &newCamera);
+	System::CameraSystem::setActiveObject(playerPtr);
 }
 
 Game::~Game()
@@ -137,27 +139,18 @@ Game::~Game()
 
 void Game::update(float deltaTime, bool* quit)
 {
+	auto cube = SceneManager::find("Cube2");
+	auto tran = CompManager::getTransform(cube);
+	Transform::rotate(tran, Vec3(0, 1, 0), 30 * deltaTime);
+	
 	System::update(deltaTime, quit);
 }
 
 void Game::draw()
 {
-	// auto activeCamera = CompManager::getCamera(mCurrentViewer);
-	// auto activeTrans  = CompManager::getTransform(mCurrentViewer);
-	// Cpu::draw();
-	Renderer::renderFrame();
-
-	if(mShader != -1)
-	{
-		Shader::bindShader(mShader);
-		Texture::bindTexture(mTexture);
-		glBindVertexArray(mVAO);
-		glDrawArrays(GL_TRIANGLES, 0, 3);
-		glDrawArrays(GL_TRIANGLES, 3, 3);
-	    glBindVertexArray(0);
-		Texture::unBindActiveTexture();
-		Shader::unbindActiveShader();
-	}
+	GameObject* playerPtr = SceneManager::find(player);
+	CCamera* camera = Renderer::Camera::getCamera(playerPtr->compIndices[(int)Component::CAMERA]);
+	Renderer::renderFrame(camera);
 	
 	// Physics::draw(activeTrans, activeCamera);
 }

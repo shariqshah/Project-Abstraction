@@ -25,7 +25,7 @@ namespace SceneManager
 			}
 
 			//remove scripts
-			ScriptEngine::executeFunction("removeGameObject", gameObject);
+			// ScriptEngine::executeFunction("removeGameObject", gameObject);
 
 			// remove the node from valid list and mark it's location in list as empty
 			int index = -1;
@@ -100,14 +100,19 @@ namespace SceneManager
 	GOPtr find(const std::string& name)
 	{
 		GOPtr gameObject = NULL;
+		bool  found      = false;
+		
 		for(Node node : validNodes)
 		{
 			gameObject = &sceneObjects[node];
 			if(name == gameObject->name)
+			{
+				found = true;
 				break;
+			}
 		}
 
-		if(!gameObject)
+		if(!found)
 			Log::warning(name + " not found in scene");
 		
 		return gameObject;
@@ -116,6 +121,7 @@ namespace SceneManager
 	GOPtr find(Node nodeToFind)
 	{
 		GOPtr gameObject = NULL;
+		
 		for(Node node : validNodes)
 		{
 			if(node == nodeToFind)
@@ -133,14 +139,17 @@ namespace SceneManager
 
 	void update()
 	{
-		//Remove Marked GOs
-		for(Node node : removableNodes)
+		//Remove Marked GOs, if any
+		if(removableNodes.size() > 0)
 		{
-			GOPtr gameObject = find(node);
-			removeGameObject(gameObject);
+			for(Node node : removableNodes)
+		    {
+				GOPtr gameObject = find(node);
+				removeGameObject(gameObject);
+			}
+			
+			removableNodes.clear();
 		}
-
-		removableNodes.clear();
 	}
 
 	void cleanup()
@@ -160,7 +169,7 @@ namespace SceneManager
 
 	GOPtr create(const std::string& name)
 	{
-		int index = -1;
+		unsigned int index = 0;
 
 		if(!emptyIndices.empty())
 		{
@@ -178,7 +187,7 @@ namespace SceneManager
 		
 		GOPtr newObj = &sceneObjects[index];
 		newObj->name = name;
-		newObj->node = index; 	// FIXME : Do we really need this now?
+		newObj->node = index;
 		CompManager::addTransform(newObj);
 		Log::message(name + " added to scene");
 		

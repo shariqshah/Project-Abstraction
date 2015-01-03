@@ -177,50 +177,50 @@ namespace Shader
 		GLint handle = glGetUniformLocation(shaderObject.program, name);
 
 		if(handle == -1)
-			Log::error("GetUniformLocation", "Invalid uniform " + std::string(name));
+			Log::error("Shader::getUniformLocation", "Invalid uniform " + std::string(name));
 
 		return handle;
 	}
 
 	void setUniformInt(const unsigned int shaderIndex, const char* name, const int value)
 	{
-		GLint location = -1;
-		if((location = getUniformLocation(shaderIndex, name)))
+		GLint location = getUniformLocation(shaderIndex, name);
+		if(location >= 0)
 			glUniform1i(location, value);
 	}
 	
 	void setUniformFloat(const unsigned int shaderIndex, const char* name, const float value)
     {
-		GLint location = -1;
-		if((location = getUniformLocation(shaderIndex, name)))
+		GLint location = getUniformLocation(shaderIndex, name);
+		if(location >= 0)
 			glUniform1f(location, value);
 	}
 	
 	void setUniformVec2(const unsigned int shaderIndex,  const char* name, const Vec2 value)
 	{
-		GLint location = -1;
-		if((location = getUniformLocation(shaderIndex, name)))
+		GLint location = getUniformLocation(shaderIndex, name);
+		if(location >= 0)
 			glUniform2fv(location, 1, glm::value_ptr(value));
 	}
 	
 	void setUniformVec3(const unsigned int shaderIndex,  const char* name, const Vec3 value)
 	{
-		GLint location = -1;
-		if((location = getUniformLocation(shaderIndex, name)))
+		GLint location = getUniformLocation(shaderIndex, name);
+		if(location >= 0)
 			glUniform3fv(location, 1, glm::value_ptr(value));
 	}
 	
 	void setUniformVec4(const unsigned int shaderIndex,  const char* name, const Vec4 value)
 	{
-		GLint location = -1;
-		if((location = getUniformLocation(shaderIndex, name)))
+		GLint location = getUniformLocation(shaderIndex, name);
+		if(location >= 0)
 			glUniform4fv(location, 1, glm::value_ptr(value));
 	}
 	
 	void setUniformMat4(const unsigned int shaderIndex,  const char* name, const Mat4 value)	
 	{
-		GLint location = -1;
-		if((location = getUniformLocation(shaderIndex, name)))
+		GLint location = getUniformLocation(shaderIndex, name);
+		if(location >= 0)
 			glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(value));
 	}
 

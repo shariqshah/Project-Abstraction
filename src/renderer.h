@@ -23,6 +23,8 @@ typedef std::vector<Node> NodeList;
 typedef glm::vec3 Vec3;
 typedef glm::vec2 Vec2;
 
+struct CCamera;
+
 enum class NodeFlag : int
 {
 	INACTIVE     = H3DNodeFlags::Inactive,
@@ -91,7 +93,7 @@ namespace Renderer
 	
     void initialize(const char* path);
 	void cleanup();
-	void renderFrame();
+	void renderFrame(CCamera* camera);
 	void setClearColor(const Vec3 clearColor);
 	void setNodeTransform(Node       node,
 						  const Vec3 position,
