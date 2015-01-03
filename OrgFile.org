@@ -1,6 +1,5 @@
 * ChangeLog
 ** <2014-12-14 Sun 20:41>
-
 - Added support for responding to collisions detected by bullet by calling 'onCollision' method
   of every script attached to the gameobject and passing the relevant collision data to the
   method, which includes the gameobject colliding with and the world-space location.
@@ -15,14 +14,16 @@
   gameobject as component do not show up in the scene anymore as their flag is set to 
   'INACTIVE'
 ** <2014-12-30 Tue>
-   
 - Added support for loading/unloading/using textures by using SDL_Image
 - Created and fixed new and previous memory leaks with valgrind.
 ** <2015-01-02 Fri>
-
 - Added further functionality to model related procedures. The render loop is almost complete.
 - Re-wrote most of the scenemanager related procedures by removing all horde3d things. 
   It uses flat arrays(currently c++ vector) for storing gameobjects.
+** <2015-01-04 Sun>
+- Implemented rendering of meshes.
+- Implemented camera for viewing scene.
+- Slightly modified previous code for freecamera to work with current version.
 * Tasks
 ** High-level
 *** TODO Renderer
@@ -58,7 +59,8 @@ Last step before moving on to CPU!
 	 - State "DONE"       from "TODO"       [2014-12-30 Tue 02:23]
 **** DONE Add support for loading and using shaders.
 	 - State "DONE"       from "TODO"       [2014-12-30 Tue 02:23]
-**** TODO Add support for setting shader uniforms.
+**** DONE Add support for setting shader uniforms.
+	 - State "DONE"       from "TODO"       [2015-01-04 Sun 02:33]
 **** TODO Add utility functions for string manipulations.
 **** TODO Add custom std::vector replacement.
 **** TODO Add custom std::unordered_map replacement.
@@ -68,6 +70,8 @@ Last step before moving on to CPU!
 **** TODO Reserve space in all vectors at initialization and addition of new elements.
 *** <2015-01-02 Fri>
 **** TODO Move component creation/retrieval/removal code to GameObject
+*** <2015-01-04 Sun>
+**** TODO Enable setting per-model uniforms for it's material.
 * Notes
 ** <2014-12-14 Sun 21:21>
 This is the first entry into my "OrgFile.org". The plan is to have a seperate OrgFile for every project that i work on, although i might change that in that in the future.
