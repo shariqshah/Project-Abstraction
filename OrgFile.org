@@ -24,6 +24,9 @@
 - Implemented rendering of meshes.
 - Implemented camera for viewing scene.
 - Slightly modified previous code for freecamera to work with current version.
+** <2015-01-04 Sun>
+- Refactored code from Component Manager to GameObject namespace.
+- Component creation/retrieval and removal will be done through GO namespace and Component Manager will be discarded
 * Tasks
 ** High-level
 *** TODO Renderer
