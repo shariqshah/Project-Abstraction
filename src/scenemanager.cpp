@@ -20,7 +20,7 @@ namespace SceneManager
 			{
 				if(gameObject->compIndices[i] != -1)
 				{
-					CompManager::removeComponent(gameObject, (Component)i);
+					GO::removeComponent(gameObject, (Component)i);
 				}
 			}
 
@@ -188,7 +188,7 @@ namespace SceneManager
 		GOPtr newObj = &sceneObjects[index];
 		newObj->name = name;
 		newObj->node = index;
-		CompManager::addTransform(newObj);
+		GO::addTransform(newObj);
 		Log::message(name + " added to scene");
 		
 		return newObj;

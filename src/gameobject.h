@@ -9,6 +9,9 @@
 typedef uint32_t Node;
 
 struct CollisionData;
+struct CTransform;
+struct CModel;
+struct CCamera;
 
 const static int EMPTY_INDEX = -1;
 
@@ -35,6 +38,15 @@ namespace GO
 	void removeScript(GameObject* gameObject, const std::string& name);
 	void removeScript(const std::string& goName, const std::string& name);
 	void processCollision(GameObject* gameObject, const CollisionData& collisionData);
+	void removeComponent(GameObject* gameObject, Component type);
+
+	CTransform* addTransform(GameObject* gameObject);
+	CCamera*    addCamera(GameObject* gameObject);
+	CModel*     addModel(GameObject* gameObject, CModel* model);
+	
+	CTransform* getTransform(GameObject* gameObject);
+	CCamera*    getCamera(GameObject* gameObject);
+	CModel*     getModel(GameObject* gameObject);
 }
 
 #endif

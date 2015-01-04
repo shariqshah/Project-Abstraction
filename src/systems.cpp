@@ -70,13 +70,6 @@ namespace System
 		if(GO::hasComponent(gameObject, Component::CAMERA))
 		{
 			auto camera = CompManager::getCamera(gameObject);
-			
-			if(Input::isReleased(Input::Key::K5))
-				Renderer::Camera::setPipeline(camera, Pipeline::FORWARD);
-			if(Input::isReleased(Input::Key::K6))
-				Renderer::Camera::setPipeline(camera, Pipeline::DEFERRED);
-			if(Input::isReleased(Input::Key::K7))
-				Renderer::Camera::setPipeline(camera, Pipeline::HDR);
 
 			if(Input::isReleased(Input::Key::ENTER))
 			{
@@ -204,7 +197,8 @@ namespace System
 	void cleanup()
 	{
 		SceneManager::cleanup();
-		CompManager::cleanup();
+		Transform::cleanup();
+		//CompManager::cleanup();
 		// Physics::cleanup();
 		// Renderer::Model::cleanup();
 		// ScriptEngine::cleanup();

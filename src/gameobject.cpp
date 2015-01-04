@@ -1,6 +1,9 @@
 #include "gameobject.h"
 #include "scriptengine.h"
 #include "physics.h"
+#include "transform.h"
+#include "model.h"
+#include "camera.h"
 
 namespace GO
 {
@@ -67,5 +70,159 @@ namespace GO
 	void processCollision(GameObject* gameObject, const CollisionData& collisionData)
 	{
 		ScriptEngine::executeFunction("processCollision", gameObject, collisionData);
+	}
+
+	CTransform* addTransform(GameObject* gameObject)
+	{
+		assert(gameObject);
+
+		CTransform* newTransform = NULL;
+		
+		if(!hasComponent(gameObject, Component::TRANSFORM))
+		{
+			int index = Transform::create(gameObject->node);
+			
+			gameObject->compIndices[(int)Component::TRANSFORM] = index;
+			Log::message("Transform added to " + gameObject->name);
+			newTransform = Transform::getTransformAtIndex(index);
+		}
+		else
+		{
+			Log::warning("Transform couldnot be added to " + gameObject->name +
+						 " because it already has one");
+		}
+
+		return newTransform;
+	}
+
+	CCamera* addCamera(GameObject* gameObject)
+	{
+		assert(gameObject);
+
+		CCamera* newCamera = NULL;
+
+		if(!hasComponent(gameObject, Component::CAMERA))
+		{
+			int index = Renderer::Camera::create(gameObject);
+
+			gameObject->compIndices[(int)Component::CAMERA] = index;
+			Log::message("Camera added to " + gameObject->name);
+			newCamera = Renderer::Camera::getCameraAtIndex(index);
+		}
+		else
+		{
+			Log::warning("Camera couldnot be added to " + gameObject->name +
+						 " because it already has one");
+		}
+
+		return newCamera;
+	}
+
+	CModel* addModel(GameObject* gameObject, CModel* model)
+	{
+		assert(gameObject);
+
+		CModel* newModel = NULL;
+
+		if(!hasComponent(gameObject, Component::MODEL))
+		{
+			int index = Renderer::Model::create(model);
+
+			gameObject->compIndices[(int)Component::MODEL] = index;
+			Log::message("Model added to " + gameObject->name);
+			newModel = Renderer::Model::getModelAtIndex(index);
+			newModel->node = gameObject->node;
+		}
+		else
+		{
+			Log::warning("Model couldnot be added to " + gameObject->name +
+						 " because it already has one");
+		}
+
+		return newModel;		
+	}
+
+	CModel* getModel(GameObject* gameObject)
+	{
+		assert(gameObject);
+		CModel* model = NULL;
+		
+		if(hasComponent(gameObject, Component::MODEL))
+			model = Renderer::Model::getModelAtIndex(gameObject->compIndices[(Component::MODEL)]);
+		else
+			Log::error("GO::getModel", gameObject->name + " does not have model component");
+
+		return model;
+	}
+
+	CCamera* getCamera(GameObject* gameObject)
+	{
+		assert(gameObject);
+		CCamera* camera = NULL;
+		
+		if(hasComponent(gameObject, Component::CAMERA))
+			camera = Renderer::Camera::getCameraAtIndex(gameObject->compIndices[(Component::CAMERA)]);
+		else
+			Log::error("GO::getCamera", gameObject->name + " does not have camera component");
+
+		return camera;
+	}
+
+
+	CTransform* getTransform(GameObject* gameObject)
+	{
+		assert(gameObject);
+		CTransform* transform = NULL;
+		
+		if(hasComponent(gameObject, Component::TRANSFORM))
+			transform = Transform::getTransformAtIndex(gameObject->compIndices[(Component::TRANSFORM)]);
+		else
+			Log::error("GO::getTransform", gameObject->name + " does not have transform component");
+
+		return transform;
+	}
+
+	void removeComponent(GameObject* gameObject, Component type)
+	{
+	    assert(gameObject);
+
+		if(hasComponent(gameObject, type))
+		{
+			int index = gameObject->compIndices[(int)type];
+			gameObject->compIndices[(int)type] = EMPTY_INDEX;
+			
+			switch(type)
+			{
+			case Component::TRANSFORM:
+				Transform::remove(index);
+				break;
+					
+			case Component::CAMERA:
+				Renderer::Camera::remove(index);
+				break;
+
+			case Component::MODEL:
+				Renderer::Model::remove(index);
+				break;
+
+			case Component::LIGHT:
+				// Renderer::removeNode(sLightList[index].node);
+				// sLightList[index].valid = false;
+				// sLightEmptyList.push_back(index);
+				break;
+					
+			case Component::RIGIDBODY:
+				// Physics::RigidBody::remove(sRigidBodyList[index]);
+				// sRigidBodyList[index] = -1;
+				// sRigidBodyEmptyList.push_back(index);
+				break;
+			case Component::NUM_COMPONENTS:
+				Log::error("GO::removeComponent", "Cannot remove invalid component type");
+				break;
+			case Component::EMPTY:
+				Log::error("GO::removeComponent", "Cannot remove invalid component type");
+				break;
+			}
+		}
 	}
 }

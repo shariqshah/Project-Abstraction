@@ -38,8 +38,8 @@ namespace System
 		void updateFreeCamera(float deltaTime)
 		{
 			GameObject* activeObjectPtr = SceneManager::find(activeObject);
-			auto transform = CompManager::getTransform(activeObjectPtr);
-			auto camera    = Renderer::Camera::getCamera(activeObjectPtr->compIndices[(int)Component::CAMERA]);
+			auto transform = GO::getTransform(activeObjectPtr);
+			auto camera    = Renderer::Camera::getCameraAtIndex(activeObjectPtr->compIndices[(int)Component::CAMERA]);
 			
 			// if(!Input::isCursorLocked())
 			// 	Input::setCursorLock(true);
@@ -68,14 +68,14 @@ namespace System
 			if(Input::isPressed(Input::Key::LSHIFT))
 				translation *= sSprintFactor;
 
-			if(Input::isPressed(Input::Key::LEFT))
+			if(Input::isPressed(Input::Key::J))
 				leftRightRot -= sRotSpeed * deltaTime;
-			if(Input::isPressed(Input::Key::RIGHT))
+			if(Input::isPressed(Input::Key::L))
 				leftRightRot += sRotSpeed * deltaTime;
 
-			if(Input::isPressed(Input::Key::UP))
+			if(Input::isPressed(Input::Key::I))
 				upDownRot -= sRotSpeed * deltaTime;
-			if(Input::isPressed(Input::Key::DOWN))
+			if(Input::isPressed(Input::Key::K))
 				upDownRot += sRotSpeed * deltaTime;
 				
 

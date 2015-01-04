@@ -11,11 +11,8 @@ struct GameObject;
 
 struct CModel
 {
-	Resource    resourceID = 0;
-	Node        node       = 0;
-	std::string filename   = "NOT_INITIALIZED";
-	bool        valid      = true;
-	
+	Node                      node     = 0;
+	std::string               filename = "UNDEFINED";
 	std::vector<Vec3>         vertices;
 	std::vector<Vec3>         vertexColors;
 	std::vector<Vec3>         normals;
@@ -32,10 +29,9 @@ namespace Renderer
 	{
 		void    initialize();
 		void    renderAllModels(CCamera* camera);
-		float*  getVertices(CModel* model);
+		CModel* getModelAtIndex(unsigned int modelIndex);
 		CModel* create(const std::string& filename);
-		CModel* addModel(GameObject* gameObject, CModel* model);
-		int     getVertexCount(CModel* model);
+		int     create(CModel* model);
 		void    remove(CModel* model);
 		void    remove(unsigned int modelIndex);
 		void    generateBindings();

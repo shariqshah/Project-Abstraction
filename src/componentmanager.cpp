@@ -139,97 +139,12 @@ namespace CompManager
 	
 	CModel* addModel(GameObject* gameObject, const std::string& filename)
 	{
-		CModel newModel;
 
-		newModel.filename   = filename;
-		newModel.resourceID = Renderer::Resources::get(ResourceType::MODEL,
-													   newModel.filename);
-
-		if(newModel.resourceID == 0)
-		{
-			Log::error("CompManager", "Model could not be added to gameobject. Check renderer logs.");
-			return NULL;
-		}
-		else
-		{
-			newModel.node = Renderer::createNode(newModel.resourceID,
-												 gameObject->node);
-			if(newModel.node == 0)
-			{
-				Log::error("CompManager", "Model node could not be parented to GameObject. Check renderer logs.");
-				return NULL;
-			}
-			else
-			{
-				int index = 0;
-			
-				if(sModelEmptyList.empty())
-				{
-					sModelList.push_back(newModel);
-					index = sModelList.size() - 1;
-				}
-				else
-				{
-					index = sModelEmptyList.back();
-					sModelList[index] = newModel;
-					sModelEmptyList.pop_back();
-				}
-
-				gameObject->compIndices[(int)Component::MODEL] = index;
-				Log::message("Model added to " + gameObject->name);
-				return &sModelList[index];
-			}
-				
-		}
 	}
 
 	CCamera* addCamera(GameObject* gameObject, const std::string& name, int pipeline)
 	{
-		if(gameObject)
-		{
-			if(!GO::hasComponent(gameObject, Component::CAMERA))
-			{
-				CCamera newCamera = Renderer::Camera::create(name, gameObject->node, pipeline);
 
-				if(newCamera.valid)
-				{
-					int index = 0;
-			
-					if(sCameraEmptyList.empty())
-					{
-						sCameraList.push_back(newCamera);
-						index = sCameraList.size() - 1;
-					}
-					else
-					{
-						index = sCameraEmptyList.back();
-						sCameraList[index] = newCamera;
-						sCameraEmptyList.pop_back();
-					}
-
-					gameObject->compIndices[(int)Component::CAMERA] = index;
-					Log::message("Camera added to " + gameObject->name);
-					return &sCameraList[index];
-				}
-				else
-				{
-					Log::error("CompManager", "Camera could not be added to "
-							   + gameObject->name + " because of some renderer error. Check logs.");
-					return NULL;
-				}
-			}
-			else
-			{
-				Log::warning("Camera couldnot be added to " + gameObject->name +
-							 " because it already has one");
-				return NULL;
-			}
-		}
-		else
-		{
-			Log::error("CompManager", "Camera could not be added to gameobject because it is NULL");
-			return NULL;
-		}
 	}
 
 	CTransform* addTransform(GameObject* gameObject)

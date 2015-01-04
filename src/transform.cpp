@@ -1,11 +1,70 @@
+#include <vector>
+
 #include "transform.h"
 #include "scriptengine.h"
+#include "gameobject.h"
 
 namespace Transform
 {
 	namespace
 	{
 		const float epsilon = 0.005f;
+		std::vector<CTransform>   transformList;
+		std::vector<unsigned int> emptyIndices;
+	}
+
+	int create(Node node)
+	{
+		CTransform newTransform;
+		newTransform.node = node;
+		Transform::updateTransformMatrix(&newTransform);
+		
+		int index = 0;
+			
+		if(emptyIndices.empty())
+		{
+			transformList.push_back(newTransform);
+			index = transformList.size() - 1;
+		}
+		else
+		{
+			index = emptyIndices.back();
+			transformList[index] = newTransform;
+			emptyIndices.pop_back();
+		}
+
+		return index;
+	}
+
+	void cleanup()
+	{
+		transformList.clear();
+		emptyIndices.clear();
+	}
+
+	CTransform* getTransformAtIndex(unsigned int transformIndex)
+	{
+		return &transformList[transformIndex];
+	}
+
+	bool remove(unsigned int transformIndex)
+	{
+		bool alreadyRemoved = true;
+		for(unsigned int i = 0; i < emptyIndices.size(); i++)
+		{
+			if(emptyIndices[i] == transformIndex)
+			{
+				alreadyRemoved = true;
+				break;
+			}
+		}
+
+		if(!alreadyRemoved)
+			emptyIndices.push_back(transformIndex);
+		else
+			Log::warning("Transform at index " + std::to_string(transformIndex) + " already removed!");
+
+		return alreadyRemoved ? false : true;
 	}
 
 	void updateTransformMatrix(CTransform* transform)

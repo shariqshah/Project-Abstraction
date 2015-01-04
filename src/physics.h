@@ -247,8 +247,14 @@ public:
 	{
 		if(mModel)
 		{
-			float* vertices = Renderer::Model::getVertices(mModel);
-			int vertexCount = Renderer::Model::getVertexCount(mModel);
+			// float* vertices = Renderer::Model::getVertices(mModel);
+			// int vertexCount = Renderer::Model::getVertexCount(mModel);
+			float* vertices = NULL;
+			int vertexCount = NULL;
+
+			// TODO: Fix by adding check if mesh has indices and modifying the loop below accordingly
+			assert(vertices);
+			assert(vertexCount > 0);
 			
 			btTriangleMesh *triMesh = new btTriangleMesh();
 
@@ -261,10 +267,9 @@ public:
 				triMesh->addTriangle(v1, v2, v3);
 			}
 
-			if(this->mTriMesh)
+			if(mTriMesh)
 			{
 				mShape = new btBvhTriangleMeshShape(triMesh, false);
-				// mShape = new btGImpactConvexDecompositionShape(triMesh, btVector3(1, 1, 1), btScalar(0.1f), true);
 			}
 			else
 			{

@@ -1,9 +1,13 @@
 #ifndef _transform_H
 #define _transform_H
 
+// #include <iostream>
+
 #include "mathdefs.h"
 #include "componentTypes.h"
 #include "renderer.h"
+
+typedef uint32_t Node;
 
 struct CTransform
 {
@@ -57,6 +61,10 @@ namespace Transform
 	void resetTransformFlag(CTransform* transform);
 	void updateTransformMatrix(CTransform* transform);
 	void generateBindings();
+	void cleanup();
+	bool remove(unsigned int transformIndex);
+	int  create(Node node);
+	CTransform* getTransformAtIndex(unsigned int transformIndex);
 }
 
 #endif

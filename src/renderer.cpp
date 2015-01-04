@@ -93,33 +93,6 @@ namespace Renderer
 		
 		free(texturePath);
 		free(shaderPath);
-		
-		// // SET options
-		// h3dSetOption(H3DOptions::LoadTextures  ,  1);
-		// h3dSetOption(H3DOptions::TexCompression,  0);
-		// h3dSetOption(H3DOptions::FastAnimation ,  0);
-		// h3dSetOption(H3DOptions::MaxAnisotropy ,  4);
-		// h3dSetOption(H3DOptions::ShadowMapSize ,  1024);
-		
-		// sFontMat = Resources::add(ResourceType::MATERIAL,
-		// 						  "overlays/font.material.xml",
-		// 						  0);
-		// sPanelMat = Resources::add(ResourceType::MATERIAL,
-		// 						   "overlays/panel.material.xml",
-		// 						   0);
-		// sLightMat = Resources::add(ResourceType::MATERIAL,
-		// 						   "materials/light.material.xml",
-		// 						   0);
-		
-		// Resources::loadAddedResources();
-
-		// sFontPos = glm::vec2(0.03, 0.25);
-		// sFontSize = 0.026f;
-		// sRenderWireframe = sRenderDebugView = false;
-		// setDebugLevel(DebugLevel::MEDIUM);
-
-		// h3dSetOption(H3DOptions::DebugViewMode, sRenderDebugView ? 1.0f : 0.0f);
-		// h3dSetOption(H3DOptions::WireframeMode, sRenderWireframe ? 1.0f : 0.0f);
 	}
 
 	void cleanup()
@@ -129,6 +102,8 @@ namespace Renderer
 		Shader::cleanup();
 		Model::cleanup();
 		Material::cleanup();
+		Model::cleanup();
+		Camera::cleanup();
 	}
 	
 	void drawText()
