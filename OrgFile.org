@@ -27,6 +27,9 @@
 ** <2015-01-04 Sun>
 - Refactored code from Component Manager to GameObject namespace.
 - Component creation/retrieval and removal will be done through GO namespace and Component Manager will be discarded
+** <2015-01-05 Mon>
+- Implemented per model material setting by adding a new stuct called materialuniforms to every model.
+- Unshaded material can now use per mode material information. For Unshaded material it is currently only diffuse.
 * Tasks
 ** High-level
 *** TODO Renderer
@@ -74,7 +77,11 @@ Last step before moving on to CPU!
 *** <2015-01-02 Fri>
 **** TODO Move component creation/retrieval/removal code to GameObject
 *** <2015-01-04 Sun>
-**** TODO Enable setting per-model uniforms for it's material.
+**** DONE Enable setting per-model uniforms for it's material.
+	 - State "DONE"       from "TODO"       [2015-01-05 Mon 23:40]
+*** <2015-01-05 Mon>
+**** TODO Implement loading model from file(write simple blender exporter perhaps?)
+**** TODO Implement reference counted assets(textures, models)
 * Notes
 ** <2014-12-14 Sun 21:21>
 This is the first entry into my "OrgFile.org". The plan is to have a seperate OrgFile for every project that i work on, although i might change that in that in the future.
@@ -124,3 +131,11 @@ pointers to current objects inside the array are invalidated because the resize 
 
 At the moment this isn't such a big issue but in the future this might cause some problems and headache
 i suspect!
+** <2015-01-05 Mon>
+After a lot of dilly dally i finally managed to come up with a very simple solution to setting per model
+material properties which include diffuse, texture etc. I implemented it by having a single struct inside
+each model that has various properties. At render time these properties are set depending on the material
+of the model. For example, if a model has "unshaded" material, only it's "diffuseColor" property will be set.
+No need for inheritance etc like i was doing in ProjectNGE.
+
+KISS is working well so far! Let's hope this continues.

@@ -6,13 +6,13 @@
 #include "shader.h"
 #include "model.h"
 #include "mathdefs.h"
+#include "texture.h"
 
 namespace Material
 {
 	struct MatUnshaded
 	{
 		std::vector<int>  registeredNodes;
-		Vec3              diffuseColor;
 		int               shaderIndex;
 	};
 	
@@ -153,6 +153,54 @@ namespace Material
 		};
 
 		return registeredModels;
+	}
+
+	void setMaterialUniforms(const Mat_Uniforms* materialUniforms, Mat_Type material)
+	{
+		assert(materialUniforms);
+
+		unsigned int shaderIndex = getShaderIndex(material);
+		switch(material)
+		{
+		case MAT_UNSHADED:
+			Shader::setUniformVec3(shaderIndex, "diffuseColor", materialUniforms->diffuseColor);
+			break;
+		case MAT_UNSHADED_TEXTURED:
+			Log::error("Model::setMaterialUniforms", "Material type unimplemented");
+			break;
+		case MAT_PHONG:
+			Log::error("Model::setMaterialUniforms", "Material type unimplemented");
+			break;
+		case MAT_PHONG_TEXTURED:
+			Log::error("Model::setMaterialUniforms", "Material type unimplemented");
+			break;
+		default:
+			Log::error("Model::setMaterialUniforms", "Invalid Material type");
+			break;
+		}
+	}
+
+	void removeMaterialUniforms(const Mat_Uniforms* materialUniforms, Mat_Type material)
+	{
+		assert(materialUniforms);
+
+		switch(material)
+		{
+		case MAT_UNSHADED:
+			break;
+		case MAT_UNSHADED_TEXTURED:
+			Texture::remove(materialUniforms->texture);
+			break;
+		case MAT_PHONG:
+			Log::error("Model::removeMaterialUniforms", "Material type unimplemented");
+			break;
+		case MAT_PHONG_TEXTURED:
+			Texture::remove(materialUniforms->texture);
+			break;
+		default:
+			Log::error("Model::removeMaterialUniforms", "Invalid Material type");
+			break;
+		}
 	}
 
 	void cleanup()

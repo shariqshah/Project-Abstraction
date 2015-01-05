@@ -96,7 +96,7 @@ namespace Texture
 		return index;
 	}
 	
-	void destroy(unsigned int textureIndex)
+	void remove(unsigned int textureIndex)
 	{
 		TextureObj textureObj = textureList[textureIndex];
 		glDeleteTextures(1, &textureObj.id);
@@ -133,7 +133,7 @@ namespace Texture
 		free(texturePath);
 		
 		for(unsigned int i = 0; i < textureList.size(); i ++)
-			destroy(i);
+			remove(i);
 
 		textureList.clear();
 		emptyIndices.clear();

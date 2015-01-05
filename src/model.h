@@ -20,6 +20,7 @@ struct CModel
 	std::vector<unsigned int> indices;
 	Mat_Type                  material;
 	unsigned int              vao;
+	Mat_Uniforms              materialUniforms;
 	bool                      drawIndexed = false;
 };
 

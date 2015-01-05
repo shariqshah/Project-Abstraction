@@ -140,7 +140,9 @@ void Game::update(float deltaTime, bool* quit)
 {
 	auto cube = SceneManager::find("Cube2");
 	auto tran = GO::getTransform(cube);
+	auto mod  = GO::getModel(cube);
 	Transform::rotate(tran, Vec3(0, 1, 0), 30 * deltaTime);
+	mod->materialUniforms.diffuseColor.r += glm::sin(deltaTime);
 	
 	System::update(deltaTime, quit);
 }

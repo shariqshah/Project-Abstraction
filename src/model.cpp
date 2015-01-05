@@ -109,7 +109,8 @@ namespace Renderer
 
 					Mat4 mvp = camera->viewProjMat * transform->transMat;
 					Shader::setUniformMat4(shaderIndex, "mvp", mvp);
-
+					Material::setMaterialUniforms(&model.materialUniforms, model.material);
+					
 					glBindVertexArray(model.vao);
 
 					if(model.drawIndexed)
@@ -126,7 +127,7 @@ namespace Renderer
 
 		int create(CModel* model)
 		{
-			assert(model      != NULL);
+			assert(model);
 
 			// Create VAO for the model that will be used in rendering
 			createVAO(model);
@@ -194,6 +195,7 @@ namespace Renderer
 			CModel model = modelList[modelIndex];
 			glDeleteVertexArrays(1, &model.vao);
 
+			Material::removeMaterialUniforms(&model.materialUniforms, model.material);
 			model.vertices.clear();
 			model.normals.clear();
 			model.uvs.clear();
