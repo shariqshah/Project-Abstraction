@@ -82,6 +82,9 @@ Last step before moving on to CPU!
 *** <2015-01-05 Mon>
 **** TODO Implement loading model from file(write simple blender exporter perhaps?)
 **** TODO Implement reference counted assets(textures, models)
+*** <2015-01-06 Tue>
+**** TODO Frustrum culling and bounding boxes
+**** TODO Raycasting/Picking
 * Notes
 ** <2014-12-14 Sun 21:21>
 This is the first entry into my "OrgFile.org". The plan is to have a seperate OrgFile for every project that i work on, although i might change that in that in the future.

@@ -20,7 +20,7 @@ struct Mat_Uniforms
 {
 	Vec3  diffuseColor      = Vec3(1.f);
 	float diffuse           = 1.f;
-	float specular          = 1.0f;
+	float specular          = 1.f;
 	float specularIntensity = 50.f;
 	int   texture           = -1;
 };

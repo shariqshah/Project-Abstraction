@@ -36,6 +36,7 @@ namespace Renderer
 		void updateView(CCamera* camera, CTransform* transform);
 		bool remove(int cameraIndex);
 		void cleanup();
+		void updateAllCamerasAspectRatio(float aspectRatio);
 		
 		int      create(GameObject* gameObject);
 		CCamera* getCameraAtIndex(int cameraIndex);

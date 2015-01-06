@@ -87,12 +87,22 @@ enum class TextureFormat : int
 	RGBA32F   = H3DFormats::TEX_RGBA32F
 };
 
+struct TextRect
+{
+	std::string  text;
+	unsigned int xPos;
+	unsigned int yPos;
+	Vec3         color;
+};
+
 namespace Renderer
 {
 	static const Node ROOT_NODE = H3DRootNode;
 	
     void initialize(const char* path);
 	void cleanup();
+	void addTextRect(TextRect text);
+	void checkGlError(const char* context);
 	void renderFrame(CCamera* camera);
 	void setClearColor(const Vec3 clearColor);
 	void setNodeTransform(Node       node,

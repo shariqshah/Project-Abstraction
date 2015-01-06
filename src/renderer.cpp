@@ -1,3 +1,4 @@
+#include <GL/glew.h>
 #include <GL/gl.h>
 
 #include "renderer.h"
@@ -6,24 +7,224 @@
 #include "material.h"
 #include "model.h"
 #include "camera.h"
+#include "settings.h"
 
 namespace Renderer
 {
 	namespace
 	{
-        char*       contentDir;
+        char*      contentDir;
+		Vec2       sFontPos;
+		DebugLevel sDebugLevel;
+		bool       sRenderWireframe;
+		bool       sRenderDebugView;
 		std::vector<std::string> sTextList;
-		Vec2        sFontPos;
-		Resource    sFontMat;
-		Resource    sPanelMat;
-		float       sFontSize;
-		Resource    sLightMat;
-		DebugLevel  sDebugLevel;
-		bool        sRenderWireframe;
-		bool        sRenderDebugView;
 		const char* texDir         = "/textures/";
 		const char* shaderDir      = "/shaders/";
 		const char* contentDirName = "/../content";
+
+		GLuint textVAO      = 0;
+		GLuint textVertVBO  = 0;
+		GLuint textUVBO     = 0;
+		GLuint textIndexVBO = 0;
+
+		unsigned int textVertTop  = 0;
+		unsigned int textUVTop    = 0;
+		unsigned int textIndexTop = 0;
+		
+		uint32_t MAX_TEXT_VBO     = 4 * 500 * sizeof(Vec2);
+		uint32_t MAX_TEXT_IND_VBO = 6 * 500 * sizeof(GLuint);
+
+		std::vector<Vec2>     quadVerts;
+		std::vector<Vec2>     quadUVs;
+		std::vector<uint32_t> quadIndices;
+
+		std::vector<TextRect> textList;
+		int textShader = -1;
+
+		Vec3 textColor = Vec3(0.7f);
+	}
+
+	void initText()
+	{
+		// quadVerts.push_back(Vec3(-0.5f,  0.5f, 0));
+		// quadVerts.push_back(Vec3(-0.5f, -0.5f, 0));
+		// quadVerts.push_back(Vec3( 0.5f, -0.5f, 0));
+		// quadVerts.push_back(Vec3( 0.5f,  0.5f, 0));
+
+		// quadUVs.push_back(Vec2(0, 0));
+		// quadUVs.push_back(Vec2(0, 1));
+		// quadUVs.push_back(Vec2(1, 1));
+		// quadUVs.push_back(Vec2(1, 0));
+
+		// quadIndices.push_back(0);
+		// quadIndices.push_back(1);
+		// quadIndices.push_back(2);	
+		// quadIndices.push_back(2);
+		// quadIndices.push_back(3);
+		// quadIndices.push_back(0);
+		
+		// Load shader for text rendering
+	    textShader = Shader::create("quad.vert", "quad.frag");
+		
+		glGenVertexArrays(1, &textVAO);
+		glBindVertexArray(textVAO);
+
+		// Vertices
+		glGenBuffers(1, &textVertVBO);
+		glBindBuffer(GL_ARRAY_BUFFER, textVertVBO);
+		glBufferData(GL_ARRAY_BUFFER,
+					 MAX_TEXT_VBO,
+					 NULL,
+					 GL_STREAM_DRAW);
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, 0);
+		checkGlError("Renderer::initText::Vertices");
+		
+		// UVs
+		glGenBuffers(1, &textUVBO);
+		glBindBuffer(GL_ARRAY_BUFFER, textUVBO);
+		glBufferData(GL_ARRAY_BUFFER,
+					 MAX_TEXT_VBO,
+					 NULL,
+					 GL_STREAM_DRAW);
+		glEnableVertexAttribArray(2);
+		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, 0);
+		checkGlError("Renderer::initText::UVs");
+
+		// Indices
+		glGenBuffers(1, &textIndexVBO);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, textIndexVBO);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER,
+					 MAX_TEXT_IND_VBO,
+					 NULL,
+					 GL_STREAM_DRAW);
+		checkGlError("Renderer::initText::Indices");
+		
+		glBindVertexArray(0);
+		checkGlError("Renderer::initText::VAO");
+
+		quadVerts.push_back(Vec2(-0.5f,  0.5f));
+		quadVerts.push_back(Vec2(-0.5f, -0.5f));
+		quadVerts.push_back(Vec2( 0.5f, -0.5f));
+		quadVerts.push_back(Vec2( 0.5f,  0.5f));
+
+		quadUVs.push_back(Vec2(0, 0));
+		quadUVs.push_back(Vec2(0, 1));
+		quadUVs.push_back(Vec2(1, 1));
+		quadUVs.push_back(Vec2(1, 0));
+
+		quadIndices.push_back(0);
+		quadIndices.push_back(1);
+		quadIndices.push_back(2);	
+		quadIndices.push_back(2);
+		quadIndices.push_back(3);
+		quadIndices.push_back(0);
+	}
+
+	void cleanupText()
+	{
+		glDeleteVertexArrays(1, &textVAO);
+		Shader::remove(textShader);
+	}
+
+	void addTextRect(TextRect text)
+	{
+		textList.push_back(text);
+
+		std::vector<Vec2>     totalVertices;
+		std::vector<Vec2>     totalUVs;
+		std::vector<uint32_t> totalIndices;
+		
+		for(uint32_t i = 0; i < textList.size(); i++)
+		{
+			for(Vec2 vertex : quadVerts)
+				totalVertices.push_back(vertex);
+
+			for(Vec2 uv : quadUVs)
+				totalUVs.push_back(uv);
+
+			for(uint32_t index : quadIndices)
+				totalIndices.push_back((i * 6) + index);
+		}
+
+		textVertTop  = totalVertices.size();
+		textUVTop    = totalUVs.size();
+		textIndexTop = totalIndices.size();
+		
+		glBindBuffer(GL_ARRAY_BUFFER, textVertVBO);
+		glBufferSubData(GL_ARRAY_BUFFER, 0, MAX_TEXT_VBO, totalVertices.data());
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		checkGlError("Renderer::addRect::Vertices");
+		
+		glBindBuffer(GL_ARRAY_BUFFER, textUVBO);
+		glBufferSubData(GL_ARRAY_BUFFER, 0, MAX_TEXT_VBO, totalUVs.data());
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		checkGlError("Renderer::addRect::UVs");
+		
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, textIndexVBO);
+		glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, MAX_TEXT_IND_VBO, totalIndices.data());
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+		checkGlError("Renderer::addRect::Indices");
+	}
+
+	void renderText()
+	{
+		Mat4 translation = glm::translate(Mat4(1.0f), Vec3(0, 0, 0));
+		Mat4 scale       = glm::scale(Mat4(1.0f), Vec3(1, 1, 1));
+
+		Mat4 model = translation * scale;
+		Mat4 projection = glm::ortho(0.f, 10.f, 0.f, 10.f);
+		
+		Shader::bindShader(textShader);
+		
+		Mat4 mvp = projection * model;
+		Shader::setUniformMat4(textShader, "mvp", mvp);
+		Shader::setUniformVec3(textShader, "textColor", textColor);
+		
+		glBindVertexArray(textVAO);
+		glDrawElements(GL_TRIANGLES, textIndexTop, GL_UNSIGNED_INT, (void*) 0);
+		glBindVertexArray(0);
+
+		Shader::unbindActiveShader();
+	}
+
+	void checkGlError(const char* context)
+	{
+		GLenum error = glGetError();
+
+		std::string errorString = "No Error";
+
+		switch(error)
+		{
+		case GL_INVALID_OPERATION:
+			errorString = "Invalid Operation";
+			break;
+		case GL_NO_ERROR:
+			errorString = "No Error";
+			break;
+		case GL_INVALID_ENUM:
+			errorString = "Invalid ENUM";
+			break;
+		case GL_INVALID_VALUE:
+			errorString = "Invalid Value";
+			break;
+		case GL_INVALID_FRAMEBUFFER_OPERATION:
+			errorString = "Invalid FrameBuffer Operation";
+			break;
+		case GL_OUT_OF_MEMORY:
+			errorString = "Out of Memory";
+			break;
+		case GL_STACK_UNDERFLOW:
+			errorString = "Stack Underflow";
+			break;
+		case GL_STACK_OVERFLOW:
+			errorString = "Stack Overflow";
+			break;
+		}
+
+		if(error != GL_NO_ERROR)
+			Log::error(context, errorString);
 	}
 
 	void setNodeTransform(Node node, glm::mat4 transformMat)
@@ -76,6 +277,7 @@ namespace Renderer
 		glEnable(GL_CULL_FACE);
 		glCullFace(GL_BACK);
 		glDepthFunc(GL_LEQUAL);
+		// glPolygonMode(GL_FRONT, GL_LINE);
 
         char* texturePath = (char *)malloc(sizeof(char) *
 										   (strlen(contentDir) + strlen(texDir)) + 1);
@@ -90,6 +292,8 @@ namespace Renderer
 		Texture::initialize(texturePath);
 		Shader::initialize(shaderPath);
 		Material::initialize();
+
+		initText();
 		
 		free(texturePath);
 		free(shaderPath);
@@ -98,6 +302,7 @@ namespace Renderer
 	void cleanup()
 	{
 		free(contentDir);
+		cleanupText();
 		Texture::cleanup();
 		Shader::cleanup();
 		Model::cleanup();
@@ -105,24 +310,6 @@ namespace Renderer
 		Model::cleanup();
 		Camera::cleanup();
 	}
-	
-	void drawText()
-	{
-		int count = 0;
-		for(const std::string& text : sTextList)
-		{
-			h3dutShowText(text.c_str(),
-						  sFontPos.x,
-						  sFontPos.y + (sFontSize * count),
-						  sFontSize,
-						  1, 1, 1,
-						  sFontMat);
-			count++;
-		}
-
-		sTextList.clear();	
-	}
-
 
 	void setDebugLevel(DebugLevel level)
 	{
@@ -161,6 +348,7 @@ namespace Renderer
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		Model::renderAllModels(camera);
+		renderText();
 	}
 	
     Node createGroupNode(const std::string& name, Node parent)

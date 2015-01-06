@@ -45,7 +45,7 @@ namespace Renderer
 								 model->normals.size() * sizeof(Vec3),
 								 &model->normals,
 								 GL_STATIC_DRAW);
-					glEnableVertexAttribArray(0);
+					glEnableVertexAttribArray(1);
 					glVertexAttribPointer(1, 3, GL_FLOAT, GL_TRUE, 0, 0);
 				}
 
@@ -71,7 +71,7 @@ namespace Renderer
 								 model->vertexColors.size() * sizeof(Vec3),
 								 &model->vertexColors,
 								 GL_STATIC_DRAW);
-					glEnableVertexAttribArray(0);
+					glEnableVertexAttribArray(3);
 					glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 0, 0);
 				}
 

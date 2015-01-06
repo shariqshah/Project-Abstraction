@@ -8,7 +8,7 @@ namespace Shader
 	int  create(const char* vertexShader, const char* fragmentShader);
 	void initialize(const char* path);
 	void bindShader(const unsigned int shaderIndex);
-	void destroyShader(const unsigned int shaderIndex);
+	void remove(const unsigned int shaderIndex);
 	void unbindActiveShader();
 	void setUniformInt(const unsigned int shaderIndex, const char* name, const int value);
 	void setUniformFloat(const unsigned int shaderIndex, const char* name, const float value);

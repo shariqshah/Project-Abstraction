@@ -103,8 +103,9 @@ bool init()
 									  SDL_WINDOWPOS_CENTERED,      //Window position y
 									  Settings::getWindowWidth(),  //Window width
 									  Settings::getWindowHeight(), //Window height
-									  SDL_WINDOW_SHOWN |           //Window flags, show window when created
-									  SDL_WINDOW_OPENGL);          //OpenGL flag
+									  SDL_WINDOW_SHOWN  |          //Window flags, show window when created
+									  SDL_WINDOW_OPENGL |          //OpenGL flag
+									  SDL_WINDOW_RESIZABLE );
 			
 			if(window == NULL)
 			{
@@ -202,6 +203,8 @@ void handleWindowEvent(SDL_WindowEvent winEvent)
 	{
 	    case SDL_WINDOWEVENT_SIZE_CHANGED:
 			game->resize(winEvent.data1, winEvent.data2);
+			Settings::setWindowWidth(winEvent.data1);
+			Settings::setWindowHeight(winEvent.data2);
 			break;
 		
 	};

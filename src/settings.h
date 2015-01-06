@@ -4,8 +4,10 @@
 namespace Settings
 {
 	bool initSettings();
-	int getWindowWidth();
-	int getWindowHeight();
+	int  getWindowWidth();
+	int  getWindowHeight();
+	void setWindowWidth(int width);
+	void setWindowHeight(int height);
 }
 
 #endif

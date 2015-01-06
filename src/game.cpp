@@ -100,6 +100,7 @@ Game::Game(const char* path)
 	model.uvs      = uvs;
 	model.indices  = indices;
 	model.material = MAT_UNSHADED;
+	model.materialUniforms.diffuseColor = Vec3(1, 0, 0);
 	
 	GameObject* triangle = SceneManager::create("Triangle");
 	GO::addModel(triangle, &triModel);
@@ -114,6 +115,7 @@ Game::Game(const char* path)
 	for(int i = 0; i < 10; i++)
 	{
 		GameObject* cube2 = SceneManager::create("Cube" + std::to_string(i));
+		model.materialUniforms.diffuseColor = Vec3(1/(i + 1), 0, 0);
 		GO::addModel(cube2, &model);
 		CTransform* cube2Tran = GO::getTransform(cube2);
 		Transform::setPosition(cube2Tran, Vec3(i, i, -i), true);
@@ -128,6 +130,10 @@ Game::Game(const char* path)
 
 	GO::addCamera(playerPtr);
 	System::CameraSystem::setActiveObject(playerPtr);
+
+	TextRect text;
+	text.text = "Hello";
+	Renderer::addTextRect(text);
 }
 
 Game::~Game()
@@ -140,9 +146,7 @@ void Game::update(float deltaTime, bool* quit)
 {
 	auto cube = SceneManager::find("Cube2");
 	auto tran = GO::getTransform(cube);
-	auto mod  = GO::getModel(cube);
 	Transform::rotate(tran, Vec3(0, 1, 0), 30 * deltaTime);
-	mod->materialUniforms.diffuseColor.r += glm::sin(deltaTime);
 	
 	System::update(deltaTime, quit);
 }
@@ -159,4 +163,5 @@ void Game::draw()
 void Game::resize(int width, int height)
 {
 	glViewport(0, 0, width, height);
+	Renderer::Camera::updateAllCamerasAspectRatio((float)(width/height));
 }

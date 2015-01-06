@@ -73,6 +73,12 @@ namespace Renderer
 			return &cameraList[cameraIndex];
 		}
 
+		void updateAllCamerasAspectRatio(float aspectRatio)
+		{
+			for(CCamera camera : cameraList)
+				setAspectRatio(&camera, aspectRatio);
+		}
+
 		void updateProjection(CCamera* camera)
 		{
 			assert(camera);

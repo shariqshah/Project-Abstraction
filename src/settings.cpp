@@ -11,7 +11,7 @@ namespace Settings
 	bool initSettings()
 	{
 		// TODO: Load settings from a file instead
-		cWindowWidth = 800;
+		cWindowWidth  = 800;
 		cWindowHeight = 600;
 
 		return true;
@@ -25,6 +25,16 @@ namespace Settings
 	int getWindowHeight()
 	{
 		return cWindowHeight;
+	}
+
+	void setWindowWidth(int width)
+	{
+		cWindowWidth = width;
+	}
+
+	void setWindowHeight(int height)
+	{
+		cWindowHeight = height;
 	}
 	
 }

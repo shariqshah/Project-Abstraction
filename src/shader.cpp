@@ -224,7 +224,7 @@ namespace Shader
 			glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(value));
 	}
 
-	void destroyShader(const unsigned int shaderIndex)
+	void remove(const unsigned int shaderIndex)
 	{
 		ShaderObject shaderObject = shaderList[shaderIndex];
 		glDeleteProgram(shaderObject.program);
@@ -237,7 +237,7 @@ namespace Shader
 	{
 		free(shaderPath);
 		for(unsigned int i = 0; i < shaderList.size(); i++)
-			destroyShader(i);
+			remove(i);
 
 		shaderList.clear();
 		emptyIndices.clear();
