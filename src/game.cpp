@@ -131,9 +131,14 @@ Game::Game(const char* path)
 	GO::addCamera(playerPtr);
 	System::CameraSystem::setActiveObject(playerPtr);
 
-	TextRect text;
-	text.text = "Hello";
-	Renderer::addTextRect(text);
+	for(int i = 0; i < 20; i++)
+	{
+		TextRect text;
+		text.position = Vec2((rand() % 11) + 1, (rand() % 11) + 1);
+		text.text = "Hello";
+		text.scale = Vec2(rand() % 5, rand() % 3);
+		Renderer::addTextRect(text);
+	}
 }
 
 Game::~Game()
@@ -154,7 +159,7 @@ void Game::update(float deltaTime, bool* quit)
 void Game::draw()
 {
 	GameObject* playerPtr = SceneManager::find(player);
-	CCamera* camera = Renderer::Camera::getCameraAtIndex(playerPtr->compIndices[(int)Component::CAMERA]);
+	CCamera*    camera    = GO::getCamera(playerPtr);
 	Renderer::renderFrame(camera);
 	
 	// Physics::draw(activeTrans, activeCamera);

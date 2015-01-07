@@ -32,8 +32,8 @@ namespace Renderer
 		unsigned int textUVTop    = 0;
 		unsigned int textIndexTop = 0;
 		
-		uint32_t MAX_TEXT_VBO     = 4 * 500 * sizeof(Vec2);
-		uint32_t MAX_TEXT_IND_VBO = 6 * 500 * sizeof(GLuint);
+		uint32_t MAX_TEXT_VBO     = 4 * 1000 * sizeof(Vec2);
+		uint32_t MAX_TEXT_IND_VBO = 6 * 1000 * sizeof(GLuint);
 
 		std::vector<Vec2>     quadVerts;
 		std::vector<Vec2>     quadUVs;
@@ -42,28 +42,50 @@ namespace Renderer
 		std::vector<TextRect> textList;
 		int textShader = -1;
 
-		Vec3 textColor = Vec3(0.7f);
+		Vec3 textColor = Vec3(0.8f);
+	    Mat4 textProjMat;
+
+		void updateTextVBOs()
+		{
+			std::vector<Vec2>     totalVertices;
+			std::vector<Vec2>     totalUVs;
+			std::vector<uint32_t> totalIndices;
+		
+			for(uint32_t i = 0; i < textList.size(); i++)
+			{			
+				for(Vec2 vertex : quadVerts)
+					totalVertices.push_back(vertex);
+
+				for(Vec2 uv : quadUVs)
+					totalUVs.push_back(uv);
+
+				for(uint32_t index : quadIndices)
+					totalIndices.push_back((i * 6) + index);
+			}
+
+			textVertTop  = totalVertices.size();
+			textUVTop    = totalUVs.size();
+			textIndexTop = totalIndices.size();
+		
+			glBindBuffer(GL_ARRAY_BUFFER, textVertVBO);
+			glBufferSubData(GL_ARRAY_BUFFER, 0, MAX_TEXT_VBO, totalVertices.data());
+			glBindBuffer(GL_ARRAY_BUFFER, 0);
+			checkGLError("Renderer::addRect::Vertices");
+		
+			glBindBuffer(GL_ARRAY_BUFFER, textUVBO);
+			glBufferSubData(GL_ARRAY_BUFFER, 0, MAX_TEXT_VBO, totalUVs.data());
+			glBindBuffer(GL_ARRAY_BUFFER, 0);
+			checkGLError("Renderer::addRect::UVs");
+		
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, textIndexVBO);
+			glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, MAX_TEXT_IND_VBO, totalIndices.data());
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+			checkGLError("Renderer::addRect::Indices");
+		}
 	}
 
 	void initText()
-	{
-		// quadVerts.push_back(Vec3(-0.5f,  0.5f, 0));
-		// quadVerts.push_back(Vec3(-0.5f, -0.5f, 0));
-		// quadVerts.push_back(Vec3( 0.5f, -0.5f, 0));
-		// quadVerts.push_back(Vec3( 0.5f,  0.5f, 0));
-
-		// quadUVs.push_back(Vec2(0, 0));
-		// quadUVs.push_back(Vec2(0, 1));
-		// quadUVs.push_back(Vec2(1, 1));
-		// quadUVs.push_back(Vec2(1, 0));
-
-		// quadIndices.push_back(0);
-		// quadIndices.push_back(1);
-		// quadIndices.push_back(2);	
-		// quadIndices.push_back(2);
-		// quadIndices.push_back(3);
-		// quadIndices.push_back(0);
-		
+	{		
 		// Load shader for text rendering
 	    textShader = Shader::create("quad.vert", "quad.frag");
 		
@@ -79,7 +101,7 @@ namespace Renderer
 					 GL_STREAM_DRAW);
 		glEnableVertexAttribArray(0);
 		glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, 0);
-		checkGlError("Renderer::initText::Vertices");
+		checkGLError("Renderer::initText::Vertices");
 		
 		// UVs
 		glGenBuffers(1, &textUVBO);
@@ -90,7 +112,7 @@ namespace Renderer
 					 GL_STREAM_DRAW);
 		glEnableVertexAttribArray(2);
 		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, 0);
-		checkGlError("Renderer::initText::UVs");
+		checkGLError("Renderer::initText::UVs");
 
 		// Indices
 		glGenBuffers(1, &textIndexVBO);
@@ -99,10 +121,10 @@ namespace Renderer
 					 MAX_TEXT_IND_VBO,
 					 NULL,
 					 GL_STREAM_DRAW);
-		checkGlError("Renderer::initText::Indices");
+		checkGLError("Renderer::initText::Indices");
 		
 		glBindVertexArray(0);
-		checkGlError("Renderer::initText::VAO");
+		checkGLError("Renderer::initText::VAO");
 
 		quadVerts.push_back(Vec2(-0.5f,  0.5f));
 		quadVerts.push_back(Vec2(-0.5f, -0.5f));
@@ -120,6 +142,8 @@ namespace Renderer
 		quadIndices.push_back(2);
 		quadIndices.push_back(3);
 		quadIndices.push_back(0);
+
+		textProjMat = glm::ortho(0.f, 10.f, 0.f, 10.f);
 	}
 
 	void cleanupText()
@@ -130,66 +154,38 @@ namespace Renderer
 
 	void addTextRect(TextRect text)
 	{
+		Vec2 position = text.position;
+		Vec2 scale    = text.scale;
+			
+		Mat4 translation = glm::translate(Mat4(1.f),Vec3(position.x, position.y, 0.f));
+		Mat4 scaleMat    = glm::scale(Mat4(1.f), Vec3(scale.x, scale.y, 1.f));
+			
+		text.transMat = translation * scaleMat;
 		textList.push_back(text);
 
-		std::vector<Vec2>     totalVertices;
-		std::vector<Vec2>     totalUVs;
-		std::vector<uint32_t> totalIndices;
-		
-		for(uint32_t i = 0; i < textList.size(); i++)
-		{
-			for(Vec2 vertex : quadVerts)
-				totalVertices.push_back(vertex);
-
-			for(Vec2 uv : quadUVs)
-				totalUVs.push_back(uv);
-
-			for(uint32_t index : quadIndices)
-				totalIndices.push_back((i * 6) + index);
-		}
-
-		textVertTop  = totalVertices.size();
-		textUVTop    = totalUVs.size();
-		textIndexTop = totalIndices.size();
-		
-		glBindBuffer(GL_ARRAY_BUFFER, textVertVBO);
-		glBufferSubData(GL_ARRAY_BUFFER, 0, MAX_TEXT_VBO, totalVertices.data());
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-		checkGlError("Renderer::addRect::Vertices");
-		
-		glBindBuffer(GL_ARRAY_BUFFER, textUVBO);
-		glBufferSubData(GL_ARRAY_BUFFER, 0, MAX_TEXT_VBO, totalUVs.data());
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-		checkGlError("Renderer::addRect::UVs");
-		
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, textIndexVBO);
-		glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, MAX_TEXT_IND_VBO, totalIndices.data());
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-		checkGlError("Renderer::addRect::Indices");
+		updateTextVBOs();
 	}
 
 	void renderText()
 	{
-		Mat4 translation = glm::translate(Mat4(1.0f), Vec3(0, 0, 0));
-		Mat4 scale       = glm::scale(Mat4(1.0f), Vec3(1, 1, 1));
-
-		Mat4 model = translation * scale;
-		Mat4 projection = glm::ortho(0.f, 10.f, 0.f, 10.f);
-		
+		// TODO: Bitmap font rendering
 		Shader::bindShader(textShader);
-		
-		Mat4 mvp = projection * model;
-		Shader::setUniformMat4(textShader, "mvp", mvp);
 		Shader::setUniformVec3(textShader, "textColor", textColor);
-		
 		glBindVertexArray(textVAO);
-		glDrawElements(GL_TRIANGLES, textIndexTop, GL_UNSIGNED_INT, (void*) 0);
+		
+		for(uint32_t i = 0; i < textList.size(); i++)
+		{
+			Mat4 mvp = textProjMat * textList[i].transMat;
+			Shader::setUniformMat4(textShader, "mvp", mvp);
+			glDrawElementsBaseVertex(GL_TRIANGLES, 6, GL_UNSIGNED_INT, (void*) 0, (i * 4));
+			checkGLError("Renderer::renderText");
+		}
+		
 		glBindVertexArray(0);
-
 		Shader::unbindActiveShader();
 	}
 
-	void checkGlError(const char* context)
+	void checkGLError(const char* context)
 	{
 		GLenum error = glGetError();
 

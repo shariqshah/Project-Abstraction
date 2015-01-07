@@ -1,16 +1,12 @@
 #ifndef RENDERER_H
 #define RENDERER_H
 
-#define GLM_FORCE_RADIANS
-#include "../include/glm/glm.hpp"
-#include "../include/glm/gtc/quaternion.hpp"
-#include "../include/glm/gtc/type_ptr.hpp"
-
 #include "../include/horde3d/Horde3D.h"
 #include "../include/horde3d/Horde3DUtils.h"
 
 #include "log.h"
 #include "settings.h"
+#include "mathdefs.h"
 
 #include <iostream>
 #include <vector>
@@ -19,9 +15,6 @@
 typedef uint32_t Node;
 typedef H3DRes   Resource;
 typedef std::vector<Node> NodeList;
-
-typedef glm::vec3 Vec3;
-typedef glm::vec2 Vec2;
 
 struct CCamera;
 
@@ -89,10 +82,11 @@ enum class TextureFormat : int
 
 struct TextRect
 {
-	std::string  text;
-	unsigned int xPos;
-	unsigned int yPos;
-	Vec3         color;
+	std::string text     = "UNINITIALIZED";
+	Vec2        scale    = Vec2(1, 1);
+	Vec2        position = Vec2(0, 0);	
+	Vec4        color;
+	Mat4        transMat;
 };
 
 namespace Renderer
@@ -102,7 +96,7 @@ namespace Renderer
     void initialize(const char* path);
 	void cleanup();
 	void addTextRect(TextRect text);
-	void checkGlError(const char* context);
+	void checkGLError(const char* context);
 	void renderFrame(CCamera* camera);
 	void setClearColor(const Vec3 clearColor);
 	void setNodeTransform(Node       node,

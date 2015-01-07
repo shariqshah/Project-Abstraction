@@ -50,8 +50,8 @@ namespace System
 			float upDownRot = 0.f; 
 			float leftRightRot = 0.f;
 
-			upDownRot    = Input::getMouseRelY() * sRotSpeed * deltaTime;
-			leftRightRot = Input::getMouseRelX() * sRotSpeed * deltaTime;
+			// upDownRot    = Input::getMouseRelY() * sRotSpeed * deltaTime;
+			// leftRightRot = Input::getMouseRelX() * sRotSpeed * deltaTime;
 				
 			if(Input::isPressed(Input::Key::W))
 				translation.z -= increment;
