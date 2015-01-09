@@ -30,6 +30,9 @@
 ** <2015-01-05 Mon>
 - Implemented per model material setting by adding a new stuct called materialuniforms to every model.
 - Unshaded material can now use per mode material information. For Unshaded material it is currently only diffuse.
+** <2015-01-08 Thu>
+- Fixed bugs with vertexcolors, uvs and normals not being sent to gpu when creating VBOs for model.
+- Fixed bugs with texture createion and texture mapping.
 * Tasks
 ** High-level
 *** TODO Renderer

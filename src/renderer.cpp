@@ -21,6 +21,7 @@ namespace Renderer
 		std::vector<std::string> sTextList;
 		const char* texDir         = "/textures/";
 		const char* shaderDir      = "/shaders/";
+		const char* modelDir       = "/models/";
 		const char* contentDirName = "/../content";
 
 		GLuint textVAO      = 0;
@@ -32,8 +33,9 @@ namespace Renderer
 		unsigned int textUVTop    = 0;
 		unsigned int textIndexTop = 0;
 		
-		uint32_t MAX_TEXT_VBO     = 4 * 1000 * sizeof(Vec2);
-		uint32_t MAX_TEXT_IND_VBO = 6 * 1000 * sizeof(GLuint);
+		uint32_t MAX_TEXT_VERT_VBO = 4 * 1000 * sizeof(Vec2);
+		uint32_t MAX_TEXT_UV_VBO   = 6 * 1000 * sizeof(Vec2);
+		uint32_t MAX_TEXT_IND_VBO  = 6 * 1000 * sizeof(GLuint);
 
 		std::vector<Vec2>     quadVerts;
 		std::vector<Vec2>     quadUVs;
@@ -44,6 +46,8 @@ namespace Renderer
 
 		Vec3 textColor = Vec3(0.8f);
 	    Mat4 textProjMat;
+
+		int texture = -1;
 
 		void updateTextVBOs()
 		{
@@ -68,24 +72,25 @@ namespace Renderer
 			textIndexTop = totalIndices.size();
 		
 			glBindBuffer(GL_ARRAY_BUFFER, textVertVBO);
-			glBufferSubData(GL_ARRAY_BUFFER, 0, MAX_TEXT_VBO, totalVertices.data());
-			glBindBuffer(GL_ARRAY_BUFFER, 0);
+			glBufferSubData(GL_ARRAY_BUFFER, 0, MAX_TEXT_VERT_VBO, totalVertices.data());
 			checkGLError("Renderer::addRect::Vertices");
+			glBindBuffer(GL_ARRAY_BUFFER, 0);			
 		
 			glBindBuffer(GL_ARRAY_BUFFER, textUVBO);
-			glBufferSubData(GL_ARRAY_BUFFER, 0, MAX_TEXT_VBO, totalUVs.data());
-			glBindBuffer(GL_ARRAY_BUFFER, 0);
+			glBufferSubData(GL_ARRAY_BUFFER, 0, MAX_TEXT_UV_VBO, totalUVs.data());
 			checkGLError("Renderer::addRect::UVs");
+			glBindBuffer(GL_ARRAY_BUFFER, 0);
 		
 			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, textIndexVBO);
 			glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, MAX_TEXT_IND_VBO, totalIndices.data());
-			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 			checkGLError("Renderer::addRect::Indices");
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 		}
 	}
 
 	void initText()
-	{		
+	{
+		texture = Texture::create("test2.png");
 		// Load shader for text rendering
 	    textShader = Shader::create("quad.vert", "quad.frag");
 		
@@ -96,7 +101,7 @@ namespace Renderer
 		glGenBuffers(1, &textVertVBO);
 		glBindBuffer(GL_ARRAY_BUFFER, textVertVBO);
 		glBufferData(GL_ARRAY_BUFFER,
-					 MAX_TEXT_VBO,
+					 MAX_TEXT_VERT_VBO,
 					 NULL,
 					 GL_STREAM_DRAW);
 		glEnableVertexAttribArray(0);
@@ -107,7 +112,7 @@ namespace Renderer
 		glGenBuffers(1, &textUVBO);
 		glBindBuffer(GL_ARRAY_BUFFER, textUVBO);
 		glBufferData(GL_ARRAY_BUFFER,
-					 MAX_TEXT_VBO,
+					 MAX_TEXT_UV_VBO,
 					 NULL,
 					 GL_STREAM_DRAW);
 		glEnableVertexAttribArray(2);
@@ -131,10 +136,12 @@ namespace Renderer
 		quadVerts.push_back(Vec2( 0.5f, -0.5f));
 		quadVerts.push_back(Vec2( 0.5f,  0.5f));
 
-		quadUVs.push_back(Vec2(0, 0));
 		quadUVs.push_back(Vec2(0, 1));
-		quadUVs.push_back(Vec2(1, 1));
+		quadUVs.push_back(Vec2(0, 0));
 		quadUVs.push_back(Vec2(1, 0));
+		quadUVs.push_back(Vec2(1, 0));
+		quadUVs.push_back(Vec2(1, 1));
+		quadUVs.push_back(Vec2(0, 1));
 
 		quadIndices.push_back(0);
 		quadIndices.push_back(1);
@@ -148,6 +155,7 @@ namespace Renderer
 
 	void cleanupText()
 	{
+		Texture::remove(texture);
 		glDeleteVertexArrays(1, &textVAO);
 		Shader::remove(textShader);
 	}
@@ -170,17 +178,34 @@ namespace Renderer
 	{
 		// TODO: Bitmap font rendering
 		Shader::bindShader(textShader);
-		Shader::setUniformVec3(textShader, "textColor", textColor);
+		// Shader::setUniformVec3(textShader, "textColor", textColor);
 		glBindVertexArray(textVAO);
+		// glEnable(GL_TEXTURE_2D);
+		Texture::bindTexture((unsigned int)texture);
 		
 		for(uint32_t i = 0; i < textList.size(); i++)
 		{
 			Mat4 mvp = textProjMat * textList[i].transMat;
 			Shader::setUniformMat4(textShader, "mvp", mvp);
 			glDrawElementsBaseVertex(GL_TRIANGLES, 6, GL_UNSIGNED_INT, (void*) 0, (i * 4));
-			checkGLError("Renderer::renderText");
 		}
-		
+
+		// glBegin (GL_QUADS);
+		// glTexCoord2f (0.0, 1.0);
+		// glVertex2f (-0.5, 0.5);
+
+		// glTexCoord2f (0.0, 0.0);
+		// glVertex2f (-0.5, -0.5);
+
+		// glTexCoord2f (1.0, 0.0);
+		// glVertex2f (0.5, -0.5);
+
+		// glTexCoord2f (1.0, 1.0);
+		// glVertex2f (0.5, 0.5);
+		// glEnd ();
+
+		Texture::unBindActiveTexture();
+		// glDisable(GL_TEXTURE_2D);
 		glBindVertexArray(0);
 		Shader::unbindActiveShader();
 	}
@@ -285,25 +310,31 @@ namespace Renderer
         strcpy(shaderPath, contentDir);
 		strcat(shaderPath, shaderDir);
 
+		char* modelPath = (char *)malloc(sizeof(char) *
+										   (strlen(contentDir) + strlen(modelDir)) + 1);
+        strcpy(modelPath, contentDir);
+		strcat(modelPath, modelDir);
+
 		Texture::initialize(texturePath);
 		Shader::initialize(shaderPath);
 		Material::initialize();
+		Model::initialize(modelPath);
 
 		initText();
 		
 		free(texturePath);
 		free(shaderPath);
+		free(modelPath);
 	}
 
 	void cleanup()
 	{
 		free(contentDir);
 		cleanupText();
+		Model::cleanup();
 		Texture::cleanup();
 		Shader::cleanup();
-		Model::cleanup();
 		Material::cleanup();
-		Model::cleanup();
 		Camera::cleanup();
 	}
 

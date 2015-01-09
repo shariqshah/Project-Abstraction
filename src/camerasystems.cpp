@@ -31,7 +31,7 @@ namespace System
 			   gameObject->tag == "FreeCamera")
 			{
 				activeObject = gameObject->node;
-				Log::message("Free camera system initailized with " + gameObject->name);
+				Log::message("Free camera system initialized with " + gameObject->name);
 			}
 		}
 

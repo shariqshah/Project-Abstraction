@@ -28,7 +28,7 @@ namespace Renderer
 {
 	namespace Model
 	{
-		void    initialize();
+		void    initialize(const char* path);
 		void    renderAllModels(CCamera* camera);
 		CModel* getModelAtIndex(unsigned int modelIndex);
 		CModel* create(const std::string& filename);
@@ -37,6 +37,7 @@ namespace Renderer
 		void    remove(unsigned int modelIndex);
 		void    generateBindings();
 		void    cleanup();
+		bool    loadFromFile(const char* filename, CModel* model);
 	}
 }
 	

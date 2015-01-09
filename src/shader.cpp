@@ -7,6 +7,7 @@
 #include "shader.h"
 #include "utilities.h"
 #include "log.h"
+#include "renderer.h"
 
 namespace Shader
 {
@@ -111,7 +112,8 @@ namespace Shader
 		glBindAttribLocation(program, 1, "vNormal");
 		glBindAttribLocation(program, 2, "vUV");
 		glBindAttribLocation(program, 3, "vColor");
-
+		Renderer::checkGLError("Shader::create");
+		
 		glLinkProgram(program);
 
 		GLint isLinked = 0;

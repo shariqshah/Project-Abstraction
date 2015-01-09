@@ -8,6 +8,7 @@
 #include "gameobject.h"
 #include "scenemanager.h"
 #include "transform.h"
+#include "texture.h"
 
 namespace Renderer
 {
@@ -17,7 +18,9 @@ namespace Renderer
 		{
 			std::vector<CModel>        modelList;
 			std::vector<unsigned int>  emptyIndices;
-
+			int texture;
+			char* modelPath;
+			
 			void createVAO(CModel* model)
 			{
 				// TODO : Add support for different model formats and interleaving VBO
@@ -33,6 +36,7 @@ namespace Renderer
 							 model->vertices.size() * sizeof(Vec3),
 							 model->vertices.data(),
 							 GL_STATIC_DRAW);
+				checkGLError("Model::createVBO::vertex");
 				glEnableVertexAttribArray(0);
 				glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
@@ -43,8 +47,9 @@ namespace Renderer
 					glBindBuffer(GL_ARRAY_BUFFER, normalVBO);
 					glBufferData(GL_ARRAY_BUFFER,
 								 model->normals.size() * sizeof(Vec3),
-								 &model->normals,
+								 model->normals.data(),
 								 GL_STATIC_DRAW);
+					checkGLError("Model::createVBO::normal");
 					glEnableVertexAttribArray(1);
 					glVertexAttribPointer(1, 3, GL_FLOAT, GL_TRUE, 0, 0);
 				}
@@ -56,10 +61,11 @@ namespace Renderer
 					glBindBuffer(GL_ARRAY_BUFFER, uvVBO);
 					glBufferData(GL_ARRAY_BUFFER,
 								 model->uvs.size() * sizeof(Vec2),
-								 &model->uvs,
+								 model->uvs.data(),
 								 GL_STATIC_DRAW);
+					checkGLError("Model::createVBO::uv");
 					glEnableVertexAttribArray(2);
-					glVertexAttribPointer(2, 2, GL_FLOAT, GL_TRUE, 0, 0);
+					glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, 0);
 				}
 
 				if(model->vertexColors.size() > 0)
@@ -69,8 +75,9 @@ namespace Renderer
 					glBindBuffer(GL_ARRAY_BUFFER, colorVBO);
 					glBufferData(GL_ARRAY_BUFFER,
 								 model->vertexColors.size() * sizeof(Vec3),
-								 &model->vertexColors,
+								 model->vertexColors.data(),
 								 GL_STATIC_DRAW);
+					checkGLError("Model::createVBO::color");
 					glEnableVertexAttribArray(3);
 					glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 0, 0);
 				}
@@ -100,6 +107,9 @@ namespace Renderer
 				int shaderIndex = Material::getShaderIndex(material);
 
 				Shader::bindShader(shaderIndex);
+				Texture::bindTexture(texture);
+				glEnable(GL_BLEND);
+				glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 				
 				for(int modelIndex : *registeredMeshes)
 				{
@@ -120,7 +130,8 @@ namespace Renderer
 
 					glBindVertexArray(0);
 				}
-
+				glDisable(GL_BLEND);
+				Texture::unBindActiveTexture();
 				Shader::unbindActiveShader();
 			}
 		}
@@ -161,11 +172,14 @@ namespace Renderer
 
 		void cleanup()
 		{
+			free(modelPath);
 			for(unsigned int i = 0; i < modelList.size(); i++)
 				remove(i);
 
 			modelList.clear();
 			emptyIndices.clear();
+
+			Texture::remove(texture);
 		}
 
 		CModel* create(const std::string& filename)
@@ -206,11 +220,79 @@ namespace Renderer
 			emptyIndices.push_back(modelIndex);
 		}
 		
-		void initialize()
+		void initialize(const char* path)
 		{
+			modelPath   = (char *)malloc(sizeof(char) * strlen(path) + 1);
+			strcpy(modelPath, path);
 			
+			texture = Texture::create("test2.png");
 		}
 
+		bool loadFromFile(const char* filename, CModel* model)
+		{
+			assert(model);
+			assert(filename);
+			bool success = true;
+
+			char* fullPath = (char *)malloc(sizeof(char) *
+											(strlen(modelPath) + strlen(filename)) + 1);
+			strcpy(fullPath, modelPath);
+			strcat(fullPath, filename);
+			
+			FILE* file = fopen(fullPath, "rb");
+			free(fullPath);
+
+			assert(file);
+
+			const uint32_t HEADER_SIZE = sizeof(uint32_t) * 4;
+			const uint32_t INDEX_SIZE  = sizeof(uint32_t);
+			const uint32_t VEC3_SIZE  = sizeof(Vec3);
+			const uint32_t VEC2_SIZE  = sizeof(Vec2);
+			
+			uint32_t header[4];
+			size_t bytesRead = 0;
+			if((bytesRead = fread(header, INDEX_SIZE, 4, file)) <= 0)
+				Log::error("Model::loadFromFile", "Read failed");
+			else
+			{
+				uint32_t indicesCount  = header[0];
+				uint32_t verticesCount = header[1];
+				uint32_t normalsCount  = header[2];
+				uint32_t uvsCount      = header[3];
+
+				Log::message("IndicesCount : " + std::to_string(indicesCount));
+
+				// size_t indicesPos  = HEADER_SIZE;
+				// size_t verticesPos = indicesPos  + (indicesCount  * INDEX_SIZE);
+				// size_t normalsPos  = verticesPos + (verticesCount * VEC3_SIZE);
+				// size_t uvsPos      = normalsPos  + (normalsCount  * VEC3_SIZE);
+
+				// Indices
+				model->indices.reserve(indicesCount);
+				model->indices.insert(model->indices.begin(), indicesCount, 0);				
+                bytesRead = fread(&model->indices[0], INDEX_SIZE, indicesCount, file);
+
+				// Vertices
+				model->vertices.reserve(verticesCount);
+				model->vertices.insert(model->vertices.begin(), verticesCount, Vec3(0.f));				
+                bytesRead = fread(&model->vertices[0], VEC3_SIZE, verticesCount, file);
+
+				// Normals
+				model->normals.reserve(normalsCount);
+				model->normals.insert(model->normals.begin(), normalsCount, Vec3(0.f));				
+                bytesRead = fread(&model->normals[0], VEC3_SIZE, normalsCount, file);
+
+				// UVs
+				model->uvs.reserve(uvsCount);
+				model->uvs.insert(model->uvs.begin(), uvsCount, Vec2(0.f));				
+                bytesRead = fread(&model->uvs[0], VEC2_SIZE, uvsCount, file);
+			}
+
+			fclose(file);
+			model->filename = filename;
+
+			return success;
+		}
 	}
 }
 
