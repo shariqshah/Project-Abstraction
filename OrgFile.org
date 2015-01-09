@@ -33,6 +33,10 @@
 ** <2015-01-08 Thu>
 - Fixed bugs with vertexcolors, uvs and normals not being sent to gpu when creating VBOs for model.
 - Fixed bugs with texture createion and texture mapping.
+** <2015-01-09 Fri>
+- Created custom format for exporting meshes from blender to Project Abstraction
+- Created addon for blender to export currently selected mesh to (.pamesh)
+- Created importer that will import (.pamesh) files.
 * Tasks
 ** High-level
 *** TODO Renderer
@@ -88,6 +92,10 @@ Last step before moving on to CPU!
 *** <2015-01-06 Tue>
 **** TODO Frustrum culling and bounding boxes
 **** TODO Raycasting/Picking
+*** <2015-01-09 Fri>
+**** TODO Fix blender exporter
+**** TODO Add material support to blender exporter
+**** TODO Bitmapped fonts
 * Notes
 ** <2014-12-14 Sun 21:21>
 This is the first entry into my "OrgFile.org". The plan is to have a seperate OrgFile for every project that i work on, although i might change that in that in the future.
@@ -145,3 +153,20 @@ of the model. For example, if a model has "unshaded" material, only it's "diffus
 No need for inheritance etc like i was doing in ProjectNGE.
 
 KISS is working well so far! Let's hope this continues.
+** <2015-01-09 Fri>
+So i finally came to a stage where i realized in order to move forward i need to have
+the ability to import meshes into the game. I could have used an existing format for that,
+.obj comes to mind first as it is something i have used before and is rather simple to parse.
+
+But since this project is all about learning, i decided to come up with my own simple format 
+that does exactly what i want and is easy and fast to load as well. The format is 
+called (.pamesh) or Project Abstraction Mesh. Currently it supports exporting
+
+- Vertices
+- Normals
+- Indices
+- UVs
+
+of a selected mesh to binary. I plan on adding material support as well. If this goes well i
+might even add component support later on if i need it. Since Project Abstraction is going to
+be procedurally generated, i don't have need of a level editor just yet.
