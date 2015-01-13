@@ -1,13 +1,13 @@
 import bpy
 import bmesh
 import struct
+from math import radians
 from bpy_extras.io_utils import ExportHelper
 
 class ExportPamesh(bpy.types.Operator, ExportHelper):
     bl_idname       = "export_pa_mesh.pamesh";
     bl_label        = "Pamesh Exporter";
     bl_options      = {'PRESET'};
-    
     filename_ext    = ".pamesh";
     
     def execute(self, context):
@@ -18,6 +18,11 @@ class ExportPamesh(bpy.types.Operator, ExportHelper):
             raise NameError("Cannot export : Object %s is not a mesh" % activeObject)
 
         print("Exporting : " + activeObject.name)
+
+        # Rotate -90 deg on x axis to compensate for blender's different orientation
+        activeObject.rotation_euler[0] = radians(-90)
+        bpy.ops.object.transform_apply(location = True, scale = True, rotation = True)
+        
         mesh = activeObject.to_mesh(scene, True, 'PREVIEW')
         bm = bmesh.new()
         bm.from_mesh(mesh)
@@ -30,7 +35,7 @@ class ExportPamesh(bpy.types.Operator, ExportHelper):
 
         if len(mesh.uv_layers) > 0:
             uv_layer = bm.loops.layers.uv.values()[0]
-
+            index = 0;
             for face in bm.faces:
                 for loop in face.loops:
                     uv = loop[uv_layer].uv
@@ -39,13 +44,18 @@ class ExportPamesh(bpy.types.Operator, ExportHelper):
                     vertices.append(vert.co.to_tuple())
                     normals.append(vert.normal.to_tuple())
                     uvs.append(uv.to_tuple())
-                    indices.append(vert.index)
+                    indices.append(index)
+                    index += 1
         else:
             raise NameError("No uv layers detected. Did you forget to unwrap?")
 
         bm.free()
         del bm
 
+        # Reset object's previous rotation
+        activeObject.rotation_euler[0] = radians(90)
+        bpy.ops.object.transform_apply(location = True, scale = True, rotation = True)
+        
         file = open(self.filepath, 'bw')
 
         # Header

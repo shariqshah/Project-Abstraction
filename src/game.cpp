@@ -25,7 +25,7 @@ Game::Game(const char* path)
 	CModel loadTest;
 	loadTest.material = MAT_UNSHADED;
 	loadTest.materialUniforms.diffuseColor = Vec3(1, 0, 0);
-	Renderer::Model::loadFromFile("untitled.pamesh", &loadTest);
+	Renderer::Model::loadFromFile("suzanne.pamesh", &loadTest);
 
 	float length = 1.f;
 	float height = 1.f;

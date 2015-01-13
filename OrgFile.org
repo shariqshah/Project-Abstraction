@@ -37,6 +37,8 @@
 - Created custom format for exporting meshes from blender to Project Abstraction
 - Created addon for blender to export currently selected mesh to (.pamesh)
 - Created importer that will import (.pamesh) files.
+** <2015-01-13 Tue>
+- Fixed blender exporter
 * Tasks
 ** High-level
 *** TODO Renderer
@@ -93,9 +95,11 @@ Last step before moving on to CPU!
 **** TODO Frustrum culling and bounding boxes
 **** TODO Raycasting/Picking
 *** <2015-01-09 Fri>
-**** TODO Fix blender exporter
+**** DONE Fix blender exporter
+	 - State "DONE"       from "TODO"       [2015-01-13 Tue 13:59]
 **** TODO Add material support to blender exporter
 **** TODO Bitmapped fonts
+**** TODO Remove duplicate verties and use proper indices in blender exporter
 * Notes
 ** <2014-12-14 Sun 21:21>
 This is the first entry into my "OrgFile.org". The plan is to have a seperate OrgFile for every project that i work on, although i might change that in that in the future.
