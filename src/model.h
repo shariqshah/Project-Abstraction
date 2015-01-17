@@ -2,12 +2,12 @@
 #define _model_H_
 
 #include "componentTypes.h"
-#include "renderer.h"
 #include "mathdefs.h"
 #include "material.h"
 
 struct CCamera;
 struct GameObject;
+struct RenderParams;
 
 struct CModel
 {
@@ -29,7 +29,7 @@ namespace Renderer
 	namespace Model
 	{
 		void    initialize(const char* path);
-		void    renderAllModels(CCamera* camera);
+		void    renderAllModels(CCamera* camera, RenderParams* renderParams);
 		CModel* getModelAtIndex(unsigned int modelIndex);
 		CModel* create(const std::string& filename);
 		int     create(CModel* model);
@@ -38,6 +38,7 @@ namespace Renderer
 		void    generateBindings();
 		void    cleanup();
 		bool    loadFromFile(const char* filename, CModel* model);
+		void    setMaterialType(CModel* model, Mat_Type material);
 	}
 }
 	

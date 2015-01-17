@@ -39,6 +39,14 @@
 - Created importer that will import (.pamesh) files.
 ** <2015-01-13 Tue>
 - Fixed blender exporter
+** <2015-01-17 Sat>
+- Implemented unshadedtextured material.
+- Implmented reuse of textures. If a texture is already loaded it won't be loaded again, existing index
+  will be returned instead.
+- Added reference counting to textures.
+- Implemnted phong material.
+- Added simple shading and lighting and implemented spot, directional and point lights.
+- Added ambientlight and fog.
 * Tasks
 ** High-level
 *** TODO Renderer
@@ -101,6 +109,10 @@ Last step before moving on to CPU!
 **** TODO Add material support to blender exporter
 **** TODO Bitmapped fonts
 **** TODO Remove duplicate verties and use proper indices in blender exporter
+*** <2015-01-17 Sat>
+**** TODO Add instancing or find a way to reuse existing models rather than creating seperate vao for each 
+**** TODO Decide whether to use index numbers or struct pointers for components.
+**** TODO Decide whether to use cpp strings or cstrings.
 * Notes
 ** <2014-12-14 Sun 21:21>
 This is the first entry into my "OrgFile.org". The plan is to have a seperate OrgFile for every project that i work on, although i might change that in that in the future.

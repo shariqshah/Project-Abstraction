@@ -21,15 +21,15 @@ struct Mat_Uniforms
 	Vec4  diffuseColor      = Vec4(1.f);
 	float diffuse           = 1.f;
 	float specular          = 1.f;
-	float specularIntensity = 50.f;
+	float specularStrength  = 50.f;
 	int   texture           = -1;
 };
 
 namespace Material
 {
 	const static std::vector<Mat_Type> MATERIAL_LIST = { MAT_UNSHADED,
-														 MAT_UNSHADED_TEXTURED};
-														 // MAT_PHONG,
+														 MAT_UNSHADED_TEXTURED,
+														 MAT_PHONG};
 														 // MAT_PHONG_TEXTURED };
 	
 	void              initialize();

@@ -34,45 +34,45 @@ namespace CompManager
 		
 	}
 
-	CTransform* getTransform(GameObject* gameObject)
-	{
-		if(gameObject)
-			return &sTransformList[gameObject->compIndices[(int)Component::TRANSFORM]];
-		else
-			return NULL;
-	}
+	// CTransform* getTransform(GameObject* gameObject)
+	// {
+	// 	if(gameObject)
+	// 		return &sTransformList[gameObject->compIndices[(int)Component::TRANSFORM]];
+	// 	else
+	// 		return NULL;
+	// }
 
-	CCamera* getCamera(GameObject* gameObject)
-	{
-		if(gameObject)
-			return &sCameraList[gameObject->compIndices[(int)Component::CAMERA]];
-		else
-			return NULL;
-	}
+	// CCamera* getCamera(GameObject* gameObject)
+	// {
+	// 	if(gameObject)
+	// 		return &sCameraList[gameObject->compIndices[(int)Component::CAMERA]];
+	// 	else
+	// 		return NULL;
+	// }
 
-	CModel* getModel(GameObject* gameObject)
-	{
-		if(gameObject)
-			return &sModelList[gameObject->compIndices[(int)Component::MODEL]];
-		else
-			return NULL;
-	}
+	// CModel* getModel(GameObject* gameObject)
+	// {
+	// 	if(gameObject)
+	// 		return &sModelList[gameObject->compIndices[(int)Component::MODEL]];
+	// 	else
+	// 		return NULL;
+	// }
 
-	CLight* getLight(GameObject* gameObject)
-	{
-		if(gameObject)
-			return &sLightList[gameObject->compIndices[(int)Component::LIGHT]];
-		else
-			return NULL;
-	}
+	// CLight* getLight(GameObject* gameObject)
+	// {
+	// 	if(gameObject)
+	// 		return &sLightList[gameObject->compIndices[(int)Component::LIGHT]];
+	// 	else
+	// 		return NULL;
+	// }
 
-	CRigidBody getRigidBody(GameObject* gameObject)
-	{
-		if(gameObject)
-			return sRigidBodyList[gameObject->compIndices[(int)Component::RIGIDBODY]];
-		else
-			return 0;
-	}
+	// CRigidBody getRigidBody(GameObject* gameObject)
+	// {
+	// 	if(gameObject)
+	// 		return sRigidBodyList[gameObject->compIndices[(int)Component::RIGIDBODY]];
+	// 	else
+	// 		return 0;
+	// }
 
 	CRigidBody addRigidBody(GameObject* gameObject,
 							CollisionShape* shape,
@@ -105,143 +105,144 @@ namespace CompManager
 		return sRigidBodyList[index];
 	}
 
-	CLight* addLight(GameObject* gameObject, const std::string& name)
-	{
-		CLight newLight = Renderer::Light::create(gameObject->node, name);
+	// CLight* addLight(GameObject* gameObject, const std::string& name)
+	// {
+	// 	CLight newLight = Renderer::Light::create(gameObject->node, name);
 
-		if(newLight.node == 0)
-		{
-			Log::error("CompManager", "Light could not be added to "
-					   + gameObject->name +	". Check renderer logs.");
-			return NULL;
-		}
-		else
-		{
-			int index = 0;
+	// 	if(newLight.node == 0)
+	// 	{
+	// 		Log::error("CompManager", "Light could not be added to "
+	// 				   + gameObject->name +	". Check renderer logs.");
+	// 		return NULL;
+	// 	}
+	// 	else
+	// 	{
+	// 		int index = 0;
 			
-			if(sLightEmptyList.empty())
-			{
-				sLightList.push_back(newLight);
-				index = sLightList.size() - 1;
-			}
-			else
-			{
-				index = sLightEmptyList.back();
-				sLightList[index] = newLight;
-				sLightEmptyList.pop_back();
-			}
+	// 		if(sLightEmptyList.empty())
+	// 		{
+	// 			sLightList.push_back(newLight);
+	// 			index = sLightList.size() - 1;
+	// 		}
+	// 		else
+	// 		{
+	// 			index = sLightEmptyList.back();
+	// 			sLightList[index] = newLight;
+	// 			sLightEmptyList.pop_back();
+	// 		}
 
-			gameObject->compIndices[(int)Component::LIGHT] = index;
-			Log::message("Light added to " + gameObject->name);
-			return &sLightList[index];
-		}
-	}
+	// 		gameObject->compIndices[(int)Component::LIGHT] = index;
+	// 		Log::message("Light added to " + gameObject->name);
+	// 		return &sLightList[index];
+	// 	}
+	// }
 	
-	CModel* addModel(GameObject* gameObject, const std::string& filename)
-	{
+	// CModel* addModel(GameObject* gameObject, const std::string& filename)
+	// {
 
-	}
+	// }
 
-	CCamera* addCamera(GameObject* gameObject, const std::string& name, int pipeline)
-	{
+	// CCamera* addCamera(GameObject* gameObject, const std::string& name, int pipeline)
+	// {
 
-	}
+	// }
 
-	CTransform* addTransform(GameObject* gameObject)
-	{
-		if(gameObject)
-		{
-			if(!GO::hasComponent(gameObject, Component::TRANSFORM))
-			{
-			    CTransform newTransform;
-				newTransform.node = gameObject->node;
-				Transform::updateTransformMatrix(&newTransform);
-				int index = 0;
+	// CTransform* addTransform(GameObject* gameObject)
+	// {
+	// 	if(gameObject)
+	// 	{
+	// 		if(!GO::hasComponent(gameObject, Component::TRANSFORM))
+	// 		{
+	// 		    CTransform newTransform;
+	// 			newTransform.node = gameObject->node;
+	// 			Transform::updateTransformMatrix(&newTransform);
+	// 			int index = 0;
 			
-				if(sTransformEmptyList.empty())
-				{
-					sTransformList.push_back(newTransform);
-					index = sTransformList.size() - 1;
-				}
-				else
-				{
-					index = sTransformEmptyList.back();
-					sTransformList[index] = newTransform;
-					sTransformEmptyList.pop_back();
-				}
+	// 			if(sTransformEmptyList.empty())
+	// 			{
+	// 				sTransformList.push_back(newTransform);
+	// 				index = sTransformList.size() - 1;
+	// 			}
+	// 			else
+	// 			{
+	// 				index = sTransformEmptyList.back();
+	// 				sTransformList[index] = newTransform;
+	// 				sTransformEmptyList.pop_back();
+	// 			}
 
-				gameObject->compIndices[(int)Component::TRANSFORM] = index;
-				Log::message("Transform added to " + gameObject->name);
-				return &sTransformList[index];
-			}
-			else
-			{
-				Log::warning("Transform couldnot be added to " + gameObject->name +
-							 " because it already has one");
-				return NULL;
-			}
-		}
-		else
-		{
-			Log::error("CompManager", "Transform could not be added to gameobject because it is NULL");
-			return NULL;
-		} 
+	// 			gameObject->compIndices[(int)Component::TRANSFORM] = index;
+	// 			Log::message("Transform added to " + gameObject->name);
+	// 			return &sTransformList[index];
+	// 		}
+	// 		else
+	// 		{
+	// 			Log::warning("Transform couldnot be added to " + gameObject->name +
+	// 						 " because it already has one");
+	// 			return NULL;
+	// 		}
+	// 	}
+	// 	else
+	// 	{
+	// 		Log::error("CompManager", "Transform could not be added to gameobject because it is NULL");
+	// 		return NULL;
+	// 	}
 		
-	}
+		
+	// }
 
-	void removeComponent(GameObject* gameObject, Component type)
-	{
-		if(gameObject)
-		{
-			if(GO::hasComponent(gameObject, type))
-			{
-				int index = -1;
-				switch(type)
-				{
-				case Component::TRANSFORM:
-					index = gameObject->compIndices[(int)type];
-					gameObject->compIndices[(int)type] = EMPTY_INDEX;
-					sTransformList[index].valid = false;
-					sTransformEmptyList.push_back(index);
-					break;
+	// void removeComponent(GameObject* gameObject, Component type)
+	// {
+	// 	if(gameObject)
+	// 	{
+	// 		if(GO::hasComponent(gameObject, type))
+	// 		{
+	// 			int index = -1;
+	// 			switch(type)
+	// 			{
+	// 			case Component::TRANSFORM:
+	// 				index = gameObject->compIndices[(int)type];
+	// 				gameObject->compIndices[(int)type] = EMPTY_INDEX;
+	// 				sTransformList[index].valid = false;
+	// 				sTransformEmptyList.push_back(index);
+	// 				break;
 					
-				case Component::CAMERA:
-					index = gameObject->compIndices[(int)type];
-					gameObject->compIndices[(int)type] = EMPTY_INDEX;
-					Renderer::Camera::remove(index);
-					break;
+	// 			case Component::CAMERA:
+	// 				index = gameObject->compIndices[(int)type];
+	// 				gameObject->compIndices[(int)type] = EMPTY_INDEX;
+	// 				Renderer::Camera::remove(index);
+	// 				break;
 
-				case Component::MODEL:
-					index = gameObject->compIndices[(int)type];
-					gameObject->compIndices[(int)type] = EMPTY_INDEX;
-					Renderer::Model::remove(index);
-					break;
+	// 			case Component::MODEL:
+	// 				index = gameObject->compIndices[(int)type];
+	// 				gameObject->compIndices[(int)type] = EMPTY_INDEX;
+	// 				Renderer::Model::remove(index);
+	// 				break;
 
-				case Component::LIGHT:
-					index = gameObject->compIndices[(int)type];
-					gameObject->compIndices[(int)type] = EMPTY_INDEX;
-					Renderer::removeNode(sLightList[index].node);
-					sLightList[index].valid = false;
-					sLightEmptyList.push_back(index);
-					break;
+	// 			case Component::LIGHT:
+	// 				index = gameObject->compIndices[(int)type];
+	// 				gameObject->compIndices[(int)type] = EMPTY_INDEX;
+	// 				Renderer::removeNode(sLightList[index].node);
+	// 				sLightList[index].valid = false;
+	// 				sLightEmptyList.push_back(index);
+	// 				break;
 					
-				case Component::RIGIDBODY:
-					index = gameObject->compIndices[(int)type];
-					gameObject->compIndices[(int)type] = EMPTY_INDEX;
-					Physics::RigidBody::remove(sRigidBodyList[index]);
-					sRigidBodyList[index] = -1;
-					sRigidBodyEmptyList.push_back(index);
-					break;
-				case Component::NUM_COMPONENTS:
-					Log::error("CompManager", "Cannot remove invalid component type");
-					break;
-				case Component::EMPTY:
-					Log::error("CompManager", "Cannot remove invalid component type");
-					break;
-				}
-			}
-		}
-	}
+	// 			case Component::RIGIDBODY:
+	// 				index = gameObject->compIndices[(int)type];
+	// 				gameObject->compIndices[(int)type] = EMPTY_INDEX;
+	// 				Physics::RigidBody::remove(sRigidBodyList[index]);
+	// 				sRigidBodyList[index] = -1;
+	// 				sRigidBodyEmptyList.push_back(index);
+	// 				break;
+	// 			case Component::NUM_COMPONENTS:
+	// 				Log::error("CompManager", "Cannot remove invalid component type");
+	// 				break;
+	// 			case Component::EMPTY:
+	// 				Log::error("CompManager", "Cannot remove invalid component type");
+	// 				break;
+	// 			}
+	// 		}
+	// 	}
+	// }
 
 	void generateBindings()
 	{
@@ -252,17 +253,17 @@ namespace CompManager
 								 .Const("RIGIDBODY", Component::RIGIDBODY)
 								 .Const("LIGHT",     Component::LIGHT));
 
-		Sqrat::RootTable().Bind("CompManager", Sqrat::Table(ScriptEngine::getVM())
-								.Func("addTransform", &addTransform)
-								.Func("addModel", &addModel)
-								.Func("addLight", &addLight)
-								.Func("addRigidBody", &addRigidBody)
-								.Func("getTransform", &getTransform)
-								.Func("getCamera", &getCamera)
-								.Func("getLight", &getLight)
-								.Func("getRigidBody", &getRigidBody)
-								.Func("getModel", &getModel)
-								.Func("removeComponent", &removeComponent));
+		// Sqrat::RootTable().Bind("CompManager", Sqrat::Table(ScriptEngine::getVM())
+		// 						.Func("addTransform", &addTransform)
+		// 						.Func("addModel", &addModel)
+		// 						.Func("addLight", &addLight)
+		// 						.Func("addRigidBody", &addRigidBody)
+		// 						.Func("getTransform", &getTransform)
+		// 						.Func("getCamera", &getCamera)
+		// 						.Func("getLight", &getLight)
+		// 						.Func("getRigidBody", &getRigidBody)
+		// 						.Func("getModel", &getModel)
+		// 						.Func("removeComponent", &removeComponent));
 	}
 
 	void cleanup()

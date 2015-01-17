@@ -21,6 +21,7 @@ namespace Texture
 		SDL_Surface*  surface;
 		unsigned int  id;
 		char*         name;
+		uint32_t      refCount = 0;
 	};
 	namespace
 	{	
@@ -148,7 +149,8 @@ namespace Texture
 			TextureObj *newTexture = &textureList[index];
 			newTexture->id = id;
 			newTexture->surface = newSurface;
-		
+			newTexture->refCount++;
+			
 			if(newTexture->name != NULL)
 				free(newTexture->name);
 		
@@ -157,6 +159,10 @@ namespace Texture
 
 			Log::message("Texture : " + std::string(filename) + " created.");
 		}
+		else
+		{
+			textureList[index].refCount++;
+		}
 
 		return index;
 	}
@@ -164,22 +170,27 @@ namespace Texture
 	void remove(unsigned int textureIndex)
 	{
 		TextureObj *textureObj = &textureList[textureIndex];
-		glDeleteTextures(1, &textureObj->id);
-		textureObj->id = 0;
-		if(textureObj->surface != NULL)
+		if(textureObj->refCount == 1)
 		{
-			// free(textureObj->surface->pixels);
-			SDL_FreeSurface(textureObj->surface);
-			textureObj->surface = NULL;
+			glDeleteTextures(1, &textureObj->id);
+			textureObj->id = 0;
+			if(textureObj->surface != NULL)
+			{
+				// free(textureObj->surface->pixels);
+				SDL_FreeSurface(textureObj->surface);
+				textureObj->surface = NULL;
+			}
+
+			if(textureObj->name != NULL)
+			{
+				free(textureObj->name);
+				textureObj->name = NULL;
+			}
+
+			emptyIndices.push_back(textureIndex);
 		}
 
-		if(textureObj->name != NULL)
-		{
-			free(textureObj->name);
-			textureObj->name = NULL;
-		}
-
-		emptyIndices.push_back(textureIndex);
+		textureObj->refCount--;
 	}
 
 	void bindTexture(unsigned int textureIndex)

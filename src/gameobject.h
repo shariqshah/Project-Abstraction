@@ -12,6 +12,7 @@ struct CollisionData;
 struct CTransform;
 struct CModel;
 struct CCamera;
+struct CLight;
 
 const static int EMPTY_INDEX = -1;
 
@@ -43,10 +44,12 @@ namespace GO
 	CTransform* addTransform(GameObject* gameObject);
 	CCamera*    addCamera(GameObject* gameObject);
 	CModel*     addModel(GameObject* gameObject, CModel* model);
+	CLight*     addLight(GameObject* gameObject);
 	
 	CTransform* getTransform(GameObject* gameObject);
 	CCamera*    getCamera(GameObject* gameObject);
 	CModel*     getModel(GameObject* gameObject);
+	CLight*     getLight(GameObject* gameObject);
 }
 
 #endif

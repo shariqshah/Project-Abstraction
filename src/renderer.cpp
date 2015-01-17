@@ -23,6 +23,7 @@ namespace Renderer
 		const char* shaderDir      = "/shaders/";
 		const char* modelDir       = "/models/";
 		const char* contentDirName = "/../content";
+		RenderParams renderParams;
 
 		GLuint textVAO      = 0;
 		GLuint textVertVBO  = 0;
@@ -374,8 +375,8 @@ namespace Renderer
 	{
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		Model::renderAllModels(camera);
-		renderText();
+		Model::renderAllModels(camera, &renderParams);
+		// renderText();
 	}
 	
     Node createGroupNode(const std::string& name, Node parent)

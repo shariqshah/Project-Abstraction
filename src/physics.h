@@ -10,6 +10,7 @@
 #include "physicsdebugdrawer.h"
 #include "utilities.h"
 #include "model.h"
+#include "log.h"
 
 class  btDiscreteDynamicsWorld;
 class  btMotionState;

@@ -4,6 +4,7 @@
 #include "transform.h"
 #include "model.h"
 #include "camera.h"
+#include "light.h"
 
 namespace GO
 {
@@ -95,6 +96,29 @@ namespace GO
 		return newTransform;
 	}
 
+	CLight* addLight(GameObject* gameObject)
+	{
+		assert(gameObject);
+
+		CLight* newLight = NULL;
+		
+		if(!hasComponent(gameObject, Component::LIGHT))
+		{
+			int index = Renderer::Light::create(gameObject->node);
+			
+			gameObject->compIndices[(int)Component::LIGHT] = index;
+			Log::message("Light added to " + gameObject->name);
+			newLight = Renderer::Light::getLightAtIndex(index);
+		}
+		else
+		{
+			Log::warning("Light couldnot be added to " + gameObject->name + " because it already has one");
+		}
+
+		return newLight;
+	}
+
+
 	CCamera* addCamera(GameObject* gameObject)
 	{
 		assert(gameObject);
@@ -182,6 +206,20 @@ namespace GO
 		return transform;
 	}
 
+	CLight* getLight(GameObject* gameObject)
+	{
+		assert(gameObject);
+		CLight* light = NULL;
+		
+		if(hasComponent(gameObject, Component::LIGHT))
+			light =Renderer::Light::getLightAtIndex(gameObject->compIndices[(Component::LIGHT)]);
+		else
+			Log::error("GO::getLight", gameObject->name + " does not have light component");
+
+		return light;
+	}
+
+
 	void removeComponent(GameObject* gameObject, Component type)
 	{
 	    assert(gameObject);
@@ -206,9 +244,7 @@ namespace GO
 				break;
 
 			case Component::LIGHT:
-				// Renderer::removeNode(sLightList[index].node);
-				// sLightList[index].valid = false;
-				// sLightEmptyList.push_back(index);
+				Renderer::Light::remove(index);
 				break;
 					
 			case Component::RIGIDBODY:

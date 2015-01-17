@@ -89,6 +89,29 @@ struct TextRect
 	Mat4        transMat;
 };
 
+enum FogMode
+{
+	FG_NONE = 0,
+	FG_LINEAR,
+	FG_EXP,
+	FG_EXP_SQRD
+};
+
+struct Fog
+{
+	FogMode fogMode = FG_EXP;
+	float   density = 0.01f;
+	float   start   = 50.f;
+	float   max     = 150.f;
+	Vec4    color   = Vec4(60.f/255.f, 60.f/255.f, 75.f/255.f, 1.0f);
+};
+
+struct RenderParams
+{
+	Fog  fog;
+	Vec4 ambientLight = Vec4(0.2f, 0.2f, 0.2f, 1.0f);
+};
+
 namespace Renderer
 {
 	static const Node ROOT_NODE = H3DRootNode;

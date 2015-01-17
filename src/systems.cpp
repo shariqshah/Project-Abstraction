@@ -1,6 +1,6 @@
 #include "systems.h"
 #include "scenemanager.h"
-#include "componentmanager.h"
+// #include "componentmanager.h"
 #include "scriptengine.h"
 #include "input.h"
 #include "camerasystems.h"
@@ -28,9 +28,8 @@ namespace System
 	{
 		sPhysicsEnabled = true;
 		Physics::initialize(Vec3(0.f, -9.8f, 0.f));
-		CompManager::initialize();
+		// CompManager::initialize();
 		Cpu::initialize();
-		suzanneModel = Renderer::Model::create("models/test/test.scene.xml");
 		statCollMesh = new CollisionMesh(suzanneModel, true);
 		hullCollMesh = new CollisionMesh(suzanneModel, false);
 		tmpShape = new Sphere(1.f);
@@ -44,7 +43,7 @@ namespace System
 		Renderer::Light::generateBindings();
 		Renderer::Camera::generateBindings();
 		GO::generateBindings();
-		CompManager::generateBindings();
+		// CompManager::generateBindings();
 		Physics::generateBindings();
 		Physics::RigidBody::generateBindings();
 		SceneManager::generateBindings();
@@ -65,53 +64,53 @@ namespace System
 
 	void debug(float deltaTime, GameObject *gameObject)
 	{
-		auto transform = CompManager::getTransform(gameObject);
+		// // auto transform = CompManager::getTransform(gameObject);
 
-		if(GO::hasComponent(gameObject, Component::CAMERA))
-		{
-			auto camera = CompManager::getCamera(gameObject);
+		// if(GO::hasComponent(gameObject, Component::CAMERA))
+		// {
+		// 	// auto camera = CompManager::getCamera(gameObject);
 
-			if(Input::isReleased(Input::Key::ENTER))
-			{
-				GOPtr newLight = SceneManager::create("newLight");
-				newLight->tag = "child";
-				// auto light = newLight->addComponent<Light>(newLight->getNode(),
-				// 										   "newLight");
-				CompManager::addModel(newLight, "models/test/test.scene.xml");
-				// light->setColor(generateRandom());
-				// light->setShadowCaster(false);
-				auto lightTransform = CompManager::getTransform(newLight);
+		// 	if(Input::isReleased(Input::Key::ENTER))
+		// 	{
+		// 		GOPtr newLight = SceneManager::create("newLight");
+		// 		newLight->tag = "child";
+		// 		// auto light = newLight->addComponent<Light>(newLight->getNode(),
+		// 		// 										   "newLight");
+		// 		// CompManager::addModel(newLight, "models/test/test.scene.xml");
+		// 		// light->setColor(generateRandom());
+		// 		// light->setShadowCaster(false);
+		// 		// auto lightTransform = CompManager::getTransform(newLight);
 				
-				// auto falcon = SceneManager::find("Falcon");
-				// bool success = SceneManager::setParent(newLight.get(), falcon.get());
-				Transform::setPosition(lightTransform, transform->position);
-				Transform::setForward(lightTransform, transform->forward);
-				//lightTransform->translate(Vec3(0, 20, 0));
-				// success ? Log::message("success") : Log::message("fail");
+		// 		// auto falcon = SceneManager::find("Falcon");
+		// 		// bool success = SceneManager::setParent(newLight.get(), falcon.get());
+		// 		Transform::setPosition(lightTransform, transform->position);
+		// 		Transform::setForward(lightTransform, transform->forward);
+		// 		//lightTransform->translate(Vec3(0, 20, 0));
+		// 		// success ? Log::message("success") : Log::message("fail");
 
-				CRigidBody rigidBody = -1;
-				if(Input::isPressed(Input::Key::LCTRL))
-				{
-					rigidBody = CompManager::addRigidBody(newLight,
-														  statCollMesh,
-														  0.f);
-				}
-				else if(Input::isPressed(Input::Key::LSHIFT))
-				{
-					rigidBody = CompManager::addRigidBody(newLight,
-														  hullCollMesh);
-				}
-				else
-				{
-					rigidBody = CompManager::addRigidBody(newLight,
-														  tmpShape);
-				}
+		// 		CRigidBody rigidBody = -1;
+		// 		if(Input::isPressed(Input::Key::LCTRL))
+		// 		{
+		// 			// rigidBody = CompManager::addRigidBody(newLight,
+		// 												  statCollMesh,
+		// 												  0.f);
+		// 		}
+		// 		else if(Input::isPressed(Input::Key::LSHIFT))
+		// 		{
+		// 			// rigidBody = CompManager::addRigidBody(newLight,
+		// 												  hullCollMesh);
+		// 		}
+		// 		else
+		// 		{
+		// 			// rigidBody = CompManager::addRigidBody(newLight,
+		// 												  tmpShape);
+		// 		}
 
-				Physics::RigidBody::applyForce(rigidBody,
-											   transform->forward * 2000.f);
+		// 		Physics::RigidBody::applyForce(rigidBody,
+		// 									   transform->forward * 2000.f);
 					
-			}
-		}
+		// 	}
+		// }
 	}
 
 	void syncPhysicsTransform(GameObject* gameObject)
@@ -119,18 +118,18 @@ namespace System
 		// check if the gameobject's transform has been modified by
 		// someone other than bullet. if so, then update rigidbody's
 		// transform and force it to activate.
-		if(GO::hasComponent(gameObject, Component::RIGIDBODY))
-		{
-			auto transform  = CompManager::getTransform(gameObject);
-			auto rBody      = CompManager::getRigidBody(gameObject);
+		// if(GO::hasComponent(gameObject, Component::RIGIDBODY))
+		// {
+		// 	// auto transform  = CompManager::getTransform(gameObject);
+		// 	auto rBody      = CompManager::getRigidBody(gameObject);
 
-			if(Renderer::isTransformed(gameObject->node))
-			{
-				Mat4 transformMat = transform->transMat;
-				Physics::RigidBody::setTransform(rBody, transformMat);
-				Physics::RigidBody::setActivation(rBody, true);
-			}
-		}
+		// 	if(Renderer::isTransformed(gameObject->node))
+		// 	{
+		// 		Mat4 transformMat = transform->transMat;
+		// 		Physics::RigidBody::setTransform(rBody, transformMat);
+		// 		Physics::RigidBody::setActivation(rBody, true);
+		// 	}
+		// }
 	}
 	
 	void update(float deltaTime, GameObject* gameObject)

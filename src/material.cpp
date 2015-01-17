@@ -7,6 +7,7 @@
 #include "model.h"
 #include "mathdefs.h"
 #include "texture.h"
+#include "log.h"
 
 namespace Material
 {
@@ -20,6 +21,7 @@ namespace Material
 	{
 		Material unshaded;
 		Material unshadedTextured;
+		Material phong;
 		const Vec4  DEFAULT_COLOR(1.0f, 1.0f, 1.0f, 1.0f);
 	}
 
@@ -27,6 +29,7 @@ namespace Material
 	{
 		unshaded.shaderIndex = Shader::create("unshaded.vert", "unshaded.frag");
 		unshadedTextured.shaderIndex = Shader::create("unshaded_textured.vert", "unshaded_textured.frag");
+		phong.shaderIndex = Shader::create("phong.vert", "phong.frag");
 	}
 
 	bool registerModel(int modelIndex, Mat_Type material)
@@ -64,7 +67,17 @@ namespace Material
 				unshadedTextured.registeredNodes.push_back(modelIndex);
 			break;
 		case MAT_PHONG:
-			Log::error("Material::registerModel", "Material type unimplemented");
+			for(int existingNode : phong.registeredNodes)
+			{
+				if(existingNode == modelIndex)
+				{
+					exists = true;
+					break;
+				}
+			}
+			
+			if(!exists)
+				phong.registeredNodes.push_back(modelIndex);
 			break;
 		case MAT_PHONG_TEXTURED:
 			Log::error("Material::registerModel", "Material type unimplemented");
@@ -92,7 +105,7 @@ namespace Material
 			shaderIndex = unshadedTextured.shaderIndex;
 			break;
 		case MAT_PHONG:
-			Log::error("Material::getShaderIndex", "Material type unimplemented");
+			shaderIndex = phong.shaderIndex;
 			break;
 		case MAT_PHONG_TEXTURED:
 			Log::error("Material::getShaderIndex", "Material type unimplemented");
@@ -138,7 +151,17 @@ namespace Material
 				unshadedTextured.registeredNodes.erase(unshadedTextured.registeredNodes.begin() + index);
 			break;
 		case MAT_PHONG:
-			Log::error("Material::unRegisterModel", "Material type unimplemented");
+			for(unsigned int i = 0; i < phong.registeredNodes.size(); i++)
+			{
+				if(phong.registeredNodes[i] == modelIndex)
+				{
+					index = i;
+					break;
+				}
+			}
+
+			if(index != -1)
+				phong.registeredNodes.erase(phong.registeredNodes.begin() + index);
 			break;
 		case MAT_PHONG_TEXTURED:
 			Log::error("Material::unRegisterModel", "Material type unimplemented");
@@ -164,7 +187,7 @@ namespace Material
 			registeredModels = &unshadedTextured.registeredNodes;
 			break;
 		case MAT_PHONG:
-			Log::error("Material::getRegisteredModels", "Material type unimplemented");
+			registeredModels = &phong.registeredNodes;
 			break;
 		case MAT_PHONG_TEXTURED:
 			Log::error("Material::getRegisteredModels", "Material type unimplemented");
@@ -182,24 +205,21 @@ namespace Material
 		assert(materialUniforms);
 
 		unsigned int shaderIndex = getShaderIndex(material);
-		switch(material)
-		{
-		case MAT_UNSHADED:
-			Shader::setUniformVec4(shaderIndex, "diffuseColor", materialUniforms->diffuseColor);
-			break;
-		case MAT_UNSHADED_TEXTURED:
-			Shader::setUniformVec4(shaderIndex, "diffuseColor", materialUniforms->diffuseColor);
+
+		// Set diffuse color
+		Shader::setUniformVec4(shaderIndex, "diffuseColor", materialUniforms->diffuseColor);
+
+		// Bind texture if applicable
+		if(material == MAT_UNSHADED_TEXTURED || material == MAT_PHONG_TEXTURED)
 			Texture::bindTexture(materialUniforms->texture);
-			break;
-		case MAT_PHONG:
-			Log::error("Material::setMaterialUniforms", "Material type unimplemented");
-			break;
-		case MAT_PHONG_TEXTURED:
-			Log::error("Material::setMaterialUniforms", "Material type unimplemented");
-			break;
-		default:
-			Log::error("Material::setMaterialUniforms", "Invalid Material type");
-			break;
+
+		if(material == MAT_PHONG || material == MAT_PHONG_TEXTURED)
+		{
+			Shader::setUniformFloat(shaderIndex, "material.specular", materialUniforms->specular);
+			Shader::setUniformFloat(shaderIndex, "material.diffuse", materialUniforms->diffuse);
+			Shader::setUniformFloat(shaderIndex,
+									"material.specularStrength",
+									materialUniforms->specularStrength);
 		}
 	}
 
@@ -215,7 +235,6 @@ namespace Material
 			Texture::remove(materialUniforms->texture);
 			break;
 		case MAT_PHONG:
-			Log::error("Material::removeMaterialUniforms", "Material type unimplemented");
 			break;
 		case MAT_PHONG_TEXTURED:
 			Texture::remove(materialUniforms->texture);

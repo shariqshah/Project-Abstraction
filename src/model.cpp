@@ -8,7 +8,9 @@
 #include "gameobject.h"
 #include "scenemanager.h"
 #include "transform.h"
+#include "light.h"
 #include "texture.h"
+#include "renderer.h"
 
 namespace Renderer
 {
@@ -18,7 +20,6 @@ namespace Renderer
 		{
 			std::vector<CModel>        modelList;
 			std::vector<unsigned int>  emptyIndices;
-			int texture;
 			char* modelPath;
 			
 			void createVAO(CModel* model)
@@ -96,9 +97,86 @@ namespace Renderer
 		
 				glBindVertexArray(0);
 			}
+
+			int findModelIndex(const char* name)
+			{
+				int loaded = -1;
+				for(uint i = 0; i < modelList.size(); i++)
+				{
+					if(strcmp(name, modelList[i].filename.c_str()) == 0)
+					{
+						loaded = i;
+						break;
+					}
+				}
+
+				return loaded;
+			}
 		}
 
-		void renderAllModels(CCamera* camera)
+		void setLights(int shaderIndex)
+	    {
+			// TODO: Add light culling!
+			std::vector<uint32_t>* activeLights = Light::getActiveLights();
+
+			uint32_t count = 0;
+			for(uint32_t lightIndex : *activeLights)
+			{
+				CLight* light = Light::getLightAtIndex(lightIndex);
+				
+				std::string arrayIndex = "lightList[" + std::to_string(count) + "].";
+				Shader::setUniformFloat(shaderIndex,
+										std::string(arrayIndex + "exponent").c_str(),
+										light->exponent);
+				Shader::setUniformFloat(shaderIndex,
+										std::string(arrayIndex + "intensity").c_str(),
+										light->intensity);
+				Shader::setUniformFloat(shaderIndex,
+										std::string(arrayIndex + "outerAngle").c_str(),
+										light->outerAngle);
+				Shader::setUniformFloat(shaderIndex,
+										std::string(arrayIndex + "innerAngle").c_str(),
+										light->innerAngle);
+				Shader::setUniformFloat(shaderIndex,
+										std::string(arrayIndex + "attenuation.constant").c_str(),
+										light->attenuation.constant);
+				Shader::setUniformFloat(shaderIndex,
+										std::string(arrayIndex + "attenuation.linear").c_str(),
+										light->attenuation.linear);
+				Shader::setUniformFloat(shaderIndex,
+										std::string(arrayIndex + "attenuation.quadratic").c_str(),
+										light->attenuation.quadratic);
+				Shader::setUniformInt(shaderIndex,
+									  std::string(arrayIndex + "type").c_str(),
+									  light->type);
+				Shader::setUniformVec3(shaderIndex,
+									   std::string(arrayIndex + "color").c_str(),
+									   light->color);
+
+				GameObject* gameObject = SceneManager::find(light->node);
+				CTransform* transform  = GO::getTransform(gameObject);
+				Shader::setUniformVec3(shaderIndex,
+										std::string(arrayIndex + "direction").c_str(),
+										transform->forward);
+				Shader::setUniformVec3(shaderIndex,
+									   std::string(arrayIndex + "position").c_str(),
+									   transform->position);
+				count++;
+			}
+			Shader::setUniformInt(shaderIndex, "numLights", count);
+		}
+
+		void setRenderParams(int shaderIndex, RenderParams* renderParams)
+		{
+			Shader::setUniformFloat(shaderIndex, "fog.density",  renderParams->fog.density);
+			Shader::setUniformFloat(shaderIndex, "fog.start",    renderParams->fog.start);
+			Shader::setUniformFloat(shaderIndex, "fog.max",      renderParams->fog.max);
+			Shader::setUniformInt(shaderIndex,   "fog.fogMode",  renderParams->fog.fogMode);
+			Shader::setUniformVec4(shaderIndex,  "fog.color",    renderParams->fog.color);
+			Shader::setUniformVec4(shaderIndex,  "ambientLight", renderParams->ambientLight);
+		}
+		
+		void renderAllModels(CCamera* camera, RenderParams* renderParams)
 		{
 			for(Mat_Type material : Material::MATERIAL_LIST)
 			{
@@ -107,6 +185,17 @@ namespace Renderer
 				int shaderIndex = Material::getShaderIndex(material);
 
 				Shader::bindShader(shaderIndex);
+
+				if((material == MAT_PHONG || material == MAT_PHONG_TEXTURED)
+				   && registeredMeshes->size() > 1)
+				{
+					setLights(shaderIndex);
+					setRenderParams(shaderIndex, renderParams);
+					GameObject* viewer = SceneManager::find(camera->node);
+					CTransform* viewerTransform = GO::getTransform(viewer);
+					Shader::setUniformVec3(shaderIndex, "eyePos", viewerTransform->position);
+					// Shader::setUniformMat4(shaderIndex, "viewMat", camera->viewMat);
+				}
 				
 				for(int modelIndex : *registeredMeshes)
 				{
@@ -116,6 +205,9 @@ namespace Renderer
 
 					Mat4 mvp = camera->viewProjMat * transform->transMat;
 					Shader::setUniformMat4(shaderIndex, "mvp", mvp);
+					if(material == MAT_PHONG || material == MAT_PHONG_TEXTURED)
+						Shader::setUniformMat4(shaderIndex, "modelMat", transform->transMat);
+					
 					Material::setMaterialUniforms(&model.materialUniforms, model.material);
 					
 					glBindVertexArray(model.vao);
@@ -177,8 +269,6 @@ namespace Renderer
 
 			modelList.clear();
 			emptyIndices.clear();
-
-			Texture::remove(texture);
 		}
 
 		CModel* create(const std::string& filename)
@@ -205,16 +295,16 @@ namespace Renderer
 
 		void remove(unsigned int modelIndex)
 		{
-			CModel model = modelList[modelIndex];
-			glDeleteVertexArrays(1, &model.vao);
+			CModel* model = &modelList[modelIndex];
+			glDeleteVertexArrays(1, &model->vao);
 
-			Material::removeMaterialUniforms(&model.materialUniforms, model.material);
-			model.vertices.clear();
-			model.normals.clear();
-			model.uvs.clear();
-			model.vertexColors.clear();
+			Material::removeMaterialUniforms(&model->materialUniforms, model->material);
+			model->vertices.clear();
+			model->normals.clear();
+			model->uvs.clear();
+			model->vertexColors.clear();
 
-			if(!Material::unRegisterModel(modelIndex, model.material))
+			if(!Material::unRegisterModel(modelIndex, model->material))
 				Log::warning("Model at index " + std::to_string(modelIndex) + " not unregistered");
 			emptyIndices.push_back(modelIndex);
 		}
@@ -223,8 +313,6 @@ namespace Renderer
 		{
 			modelPath   = (char *)malloc(sizeof(char) * strlen(path) + 1);
 			strcpy(modelPath, path);
-			
-			texture = Texture::create("test2.png");
 		}
 
 		bool loadFromFile(const char* filename, CModel* model)
@@ -233,64 +321,76 @@ namespace Renderer
 			assert(filename);
 			bool success = true;
 
-			char* fullPath = (char *)malloc(sizeof(char) *
-											(strlen(modelPath) + strlen(filename)) + 1);
-			strcpy(fullPath, modelPath);
-			strcat(fullPath, filename);
-			
-			FILE* file = fopen(fullPath, "rb");
-			free(fullPath);
+			int index = findModelIndex(filename);
 
-			assert(file);
-
-			const uint32_t HEADER_SIZE = sizeof(uint32_t) * 4;
-			const uint32_t INDEX_SIZE  = sizeof(uint32_t);
-			const uint32_t VEC3_SIZE  = sizeof(Vec3);
-			const uint32_t VEC2_SIZE  = sizeof(Vec2);
+			if(index == -1)
+			{
+				char* fullPath = (char *)malloc(sizeof(char) *
+												(strlen(modelPath) + strlen(filename)) + 1);
+				strcpy(fullPath, modelPath);
+				strcat(fullPath, filename);
 			
-			uint32_t header[4];
-			size_t bytesRead = 0;
-			if((bytesRead = fread(header, INDEX_SIZE, 4, file)) <= 0)
-				Log::error("Model::loadFromFile", "Read failed");
+				FILE* file = fopen(fullPath, "rb");
+				free(fullPath);
+
+				assert(file);
+
+				const uint32_t INDEX_SIZE = sizeof(uint32_t);
+				const uint32_t VEC3_SIZE  = sizeof(Vec3);
+				const uint32_t VEC2_SIZE  = sizeof(Vec2);
+			
+				uint32_t header[4];
+				size_t bytesRead = 0;
+				if((bytesRead = fread(header, INDEX_SIZE, 4, file)) <= 0)
+					Log::error("Model::loadFromFile", "Read failed");
+				else
+				{
+					uint32_t indicesCount  = header[0];
+					uint32_t verticesCount = header[1];
+					uint32_t normalsCount  = header[2];
+					uint32_t uvsCount      = header[3];
+
+					// Log::message("IndicesCount : " + std::to_string(indicesCount));
+					
+					// Indices
+					model->indices.reserve(indicesCount);
+					model->indices.insert(model->indices.begin(), indicesCount, 0);				
+					bytesRead = fread(&model->indices[0], INDEX_SIZE, indicesCount, file);
+
+					// Vertices
+					model->vertices.reserve(verticesCount);
+					model->vertices.insert(model->vertices.begin(), verticesCount, Vec3(0.f));
+					bytesRead = fread(&model->vertices[0], VEC3_SIZE, verticesCount, file);
+
+					// Normals
+					model->normals.reserve(normalsCount);
+					model->normals.insert(model->normals.begin(), normalsCount, Vec3(0.f));				
+					bytesRead = fread(&model->normals[0], VEC3_SIZE, normalsCount, file);
+
+					// UVs
+					model->uvs.reserve(uvsCount);
+					model->uvs.insert(model->uvs.begin(), uvsCount, Vec2(0.f));				
+					bytesRead = fread(&model->uvs[0], VEC2_SIZE, uvsCount, file);					
+				}
+
+				fclose(file);
+				model->filename = filename;
+				model->drawIndexed = true;
+			}
 			else
 			{
-				uint32_t indicesCount  = header[0];
-				uint32_t verticesCount = header[1];
-				uint32_t normalsCount  = header[2];
-				uint32_t uvsCount      = header[3];
-
-				Log::message("IndicesCount : " + std::to_string(indicesCount));
-
-				// size_t indicesPos  = HEADER_SIZE;
-				// size_t verticesPos = indicesPos  + (indicesCount  * INDEX_SIZE);
-				// size_t normalsPos  = verticesPos + (verticesCount * VEC3_SIZE);
-				// size_t uvsPos      = normalsPos  + (normalsCount  * VEC3_SIZE);
-
-				// Indices
-				model->indices.reserve(indicesCount);
-				model->indices.insert(model->indices.begin(), indicesCount, 0);				
-                bytesRead = fread(&model->indices[0], INDEX_SIZE, indicesCount, file);
-
-				// Vertices
-				model->vertices.reserve(verticesCount);
-				model->vertices.insert(model->vertices.begin(), verticesCount, Vec3(0.f));				
-                bytesRead = fread(&model->vertices[0], VEC3_SIZE, verticesCount, file);
-
-				// Normals
-				model->normals.reserve(normalsCount);
-				model->normals.insert(model->normals.begin(), normalsCount, Vec3(0.f));				
-                bytesRead = fread(&model->normals[0], VEC3_SIZE, normalsCount, file);
-
-				// UVs
-				model->uvs.reserve(uvsCount);
-				model->uvs.insert(model->uvs.begin(), uvsCount, Vec2(0.f));				
-                bytesRead = fread(&model->uvs[0], VEC2_SIZE, uvsCount, file);
+				*model = modelList[index];
 			}
 
-			fclose(file);
-			model->filename = filename;
-
 			return success;
+		}
+
+		void setMaterialType(CModel* model, Mat_Type material)
+		{
+			int index = findModelIndex(model->filename.c_str());
+			Material::unRegisterModel(index, model->material);
+			model->material = material;
+			Material::registerModel(index, material);
 		}
 	}
 }
