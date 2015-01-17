@@ -204,7 +204,7 @@ namespace Renderer
 		// glVertex2f (0.5, 0.5);
 		// glEnd ();
 
-		Texture::unBindActiveTexture();
+		Texture::unbindActiveTexture();
 		// glDisable(GL_TEXTURE_2D);
 		glBindVertexArray(0);
 		Shader::unbindActiveShader();

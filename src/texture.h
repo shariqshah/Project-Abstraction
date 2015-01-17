@@ -7,7 +7,7 @@ namespace Texture
     void remove(unsigned int textureIndex);
 	void initialize(const char* path);
 	void bindTexture(unsigned int textureIndex);	
-	void unBindActiveTexture();
+	void unbindActiveTexture();
 	void cleanup();
 }
 

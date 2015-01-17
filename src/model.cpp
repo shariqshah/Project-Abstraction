@@ -107,9 +107,6 @@ namespace Renderer
 				int shaderIndex = Material::getShaderIndex(material);
 
 				Shader::bindShader(shaderIndex);
-				Texture::bindTexture(texture);
-				glEnable(GL_BLEND);
-				glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 				
 				for(int modelIndex : *registeredMeshes)
 				{
@@ -129,9 +126,11 @@ namespace Renderer
 						glDrawArrays(GL_TRIANGLES, 0, model.vertices.size());
 
 					glBindVertexArray(0);
+
+					if(model.material == MAT_UNSHADED_TEXTURED || model.material == MAT_PHONG_TEXTURED)
+						Texture::unbindActiveTexture();
 				}
-				glDisable(GL_BLEND);
-				Texture::unBindActiveTexture();
+				
 				Shader::unbindActiveShader();
 			}
 		}

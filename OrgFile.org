@@ -89,7 +89,8 @@ Last step before moving on to CPU!
 **** DONE Enable setting per-model uniforms for it's material.
 	 - State "DONE"       from "TODO"       [2015-01-05 Mon 23:40]
 *** <2015-01-05 Mon>
-**** TODO Implement loading model from file(write simple blender exporter perhaps?)
+**** DONE Implement loading model from file(write simple blender exporter perhaps?)
+	 - State "DONE"       from "TODO"       [2015-01-17 Sat 09:09]
 **** TODO Implement reference counted assets(textures, models)
 *** <2015-01-06 Tue>
 **** TODO Frustrum culling and bounding boxes

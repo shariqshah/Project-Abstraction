@@ -18,7 +18,7 @@ enum Mat_Type
 
 struct Mat_Uniforms
 {
-	Vec3  diffuseColor      = Vec3(1.f);
+	Vec4  diffuseColor      = Vec4(1.f);
 	float diffuse           = 1.f;
 	float specular          = 1.f;
 	float specularIntensity = 50.f;
@@ -27,8 +27,8 @@ struct Mat_Uniforms
 
 namespace Material
 {
-	const static std::vector<Mat_Type> MATERIAL_LIST = { MAT_UNSHADED};
-														 // MAT_UNSHADED_TEXTURED,
+	const static std::vector<Mat_Type> MATERIAL_LIST = { MAT_UNSHADED,
+														 MAT_UNSHADED_TEXTURED};
 														 // MAT_PHONG,
 														 // MAT_PHONG_TEXTURED };
 	

@@ -10,7 +10,7 @@
 
 namespace Material
 {
-	struct MatUnshaded
+	struct Material
 	{
 		std::vector<int>  registeredNodes;
 		int               shaderIndex;
@@ -18,13 +18,15 @@ namespace Material
 	
 	namespace
 	{
-		MatUnshaded matUnshaded;
+		Material unshaded;
+		Material unshadedTextured;
 		const Vec4  DEFAULT_COLOR(1.0f, 1.0f, 1.0f, 1.0f);
 	}
 
 	void initialize()
 	{
-		matUnshaded.shaderIndex = Shader::create("unshaded.vert", "unshaded.frag");
+		unshaded.shaderIndex = Shader::create("unshaded.vert", "unshaded.frag");
+		unshadedTextured.shaderIndex = Shader::create("unshaded_textured.vert", "unshaded_textured.frag");
 	}
 
 	bool registerModel(int modelIndex, Mat_Type material)
@@ -35,7 +37,7 @@ namespace Material
 		{
 		case MAT_UNSHADED:
 
-			for(int existingNode : matUnshaded.registeredNodes)
+			for(int existingNode : unshaded.registeredNodes)
 			{
 				if(existingNode == modelIndex)
 				{
@@ -45,20 +47,30 @@ namespace Material
 			}
 			
 			if(!exists)
-				matUnshaded.registeredNodes.push_back(modelIndex);
+				unshaded.registeredNodes.push_back(modelIndex);
 			
 			break;
 		case MAT_UNSHADED_TEXTURED:
-			Log::error("Model::registerModel", "Material type unimplemented");
+			for(int existingNode : unshadedTextured.registeredNodes)
+			{
+				if(existingNode == modelIndex)
+				{
+					exists = true;
+					break;
+				}
+			}
+			
+			if(!exists)
+				unshadedTextured.registeredNodes.push_back(modelIndex);
 			break;
 		case MAT_PHONG:
-			Log::error("Model::registerModel", "Material type unimplemented");
+			Log::error("Material::registerModel", "Material type unimplemented");
 			break;
 		case MAT_PHONG_TEXTURED:
-			Log::error("Model::registerModel", "Material type unimplemented");
+			Log::error("Material::registerModel", "Material type unimplemented");
 			break;
 		default:
-			Log::error("Model::registerModel", "Invalid Material type");
+			Log::error("Material::registerModel", "Invalid Material type");
 			break;
 		}
 
@@ -74,19 +86,19 @@ namespace Material
 		switch(material)
 		{
 		case MAT_UNSHADED:
-			shaderIndex = matUnshaded.shaderIndex;
+			shaderIndex = unshaded.shaderIndex;
 			break;
 		case MAT_UNSHADED_TEXTURED:
-			Log::error("Model::getShaderIndex", "Material type unimplemented");
+			shaderIndex = unshadedTextured.shaderIndex;
 			break;
 		case MAT_PHONG:
-			Log::error("Model::getShaderIndex", "Material type unimplemented");
+			Log::error("Material::getShaderIndex", "Material type unimplemented");
 			break;
 		case MAT_PHONG_TEXTURED:
-			Log::error("Model::getShaderIndex", "Material type unimplemented");
+			Log::error("Material::getShaderIndex", "Material type unimplemented");
 			break;
 		default:
-			Log::error("Model::getShaderIndex", "Invalid Material type");
+			Log::error("Material::getShaderIndex", "Invalid Material type");
 			break;
 		};
 
@@ -99,9 +111,9 @@ namespace Material
 		switch(material)
 		{
 		case MAT_UNSHADED:
-			for(unsigned int i = 0; i < matUnshaded.registeredNodes.size(); i++)
+			for(unsigned int i = 0; i < unshaded.registeredNodes.size(); i++)
 			{
-				if(matUnshaded.registeredNodes[i] == modelIndex)
+				if(unshaded.registeredNodes[i] == modelIndex)
 				{
 					index = i;
 					break;
@@ -109,20 +121,30 @@ namespace Material
 			}
 
 			if(index != -1)
-				matUnshaded.registeredNodes.erase(matUnshaded.registeredNodes.begin() + index);
+				unshaded.registeredNodes.erase(unshaded.registeredNodes.begin() + index);
 			
 			break;
 		case MAT_UNSHADED_TEXTURED:
-			Log::error("Model::unRegisterModel", "Material type unimplemented");
+			for(unsigned int i = 0; i < unshadedTextured.registeredNodes.size(); i++)
+			{
+				if(unshadedTextured.registeredNodes[i] == modelIndex)
+				{
+					index = i;
+					break;
+				}
+			}
+
+			if(index != -1)
+				unshadedTextured.registeredNodes.erase(unshadedTextured.registeredNodes.begin() + index);
 			break;
 		case MAT_PHONG:
-			Log::error("Model::unRegisterModel", "Material type unimplemented");
+			Log::error("Material::unRegisterModel", "Material type unimplemented");
 			break;
 		case MAT_PHONG_TEXTURED:
-			Log::error("Model::unRegisterModel", "Material type unimplemented");
+			Log::error("Material::unRegisterModel", "Material type unimplemented");
 			break;
 		default:
-			Log::error("Model::unRegisterModel", "Invalid Material type");
+			Log::error("Material::unRegisterModel", "Invalid Material type");
 			break;
 		};
 
@@ -136,19 +158,19 @@ namespace Material
 		switch(material)
 		{
 		case MAT_UNSHADED:
-			registeredModels = &matUnshaded.registeredNodes;
+			registeredModels = &unshaded.registeredNodes;
 			break;
 		case MAT_UNSHADED_TEXTURED:
-			Log::error("Model::getRegisteredModels", "Material type unimplemented");
+			registeredModels = &unshadedTextured.registeredNodes;
 			break;
 		case MAT_PHONG:
-			Log::error("Model::getRegisteredModels", "Material type unimplemented");
+			Log::error("Material::getRegisteredModels", "Material type unimplemented");
 			break;
 		case MAT_PHONG_TEXTURED:
-			Log::error("Model::getRegisteredModels", "Material type unimplemented");
+			Log::error("Material::getRegisteredModels", "Material type unimplemented");
 			break;
 		default:
-			Log::error("Model::getRegisteredModels", "Invalid Material type");
+			Log::error("Material::getRegisteredModels", "Invalid Material type");
 			break;
 		};
 
@@ -163,19 +185,20 @@ namespace Material
 		switch(material)
 		{
 		case MAT_UNSHADED:
-			Shader::setUniformVec3(shaderIndex, "diffuseColor", materialUniforms->diffuseColor);
+			Shader::setUniformVec4(shaderIndex, "diffuseColor", materialUniforms->diffuseColor);
 			break;
 		case MAT_UNSHADED_TEXTURED:
-			Log::error("Model::setMaterialUniforms", "Material type unimplemented");
+			Shader::setUniformVec4(shaderIndex, "diffuseColor", materialUniforms->diffuseColor);
+			Texture::bindTexture(materialUniforms->texture);
 			break;
 		case MAT_PHONG:
-			Log::error("Model::setMaterialUniforms", "Material type unimplemented");
+			Log::error("Material::setMaterialUniforms", "Material type unimplemented");
 			break;
 		case MAT_PHONG_TEXTURED:
-			Log::error("Model::setMaterialUniforms", "Material type unimplemented");
+			Log::error("Material::setMaterialUniforms", "Material type unimplemented");
 			break;
 		default:
-			Log::error("Model::setMaterialUniforms", "Invalid Material type");
+			Log::error("Material::setMaterialUniforms", "Invalid Material type");
 			break;
 		}
 	}
@@ -192,19 +215,20 @@ namespace Material
 			Texture::remove(materialUniforms->texture);
 			break;
 		case MAT_PHONG:
-			Log::error("Model::removeMaterialUniforms", "Material type unimplemented");
+			Log::error("Material::removeMaterialUniforms", "Material type unimplemented");
 			break;
 		case MAT_PHONG_TEXTURED:
 			Texture::remove(materialUniforms->texture);
 			break;
 		default:
-			Log::error("Model::removeMaterialUniforms", "Invalid Material type");
+			Log::error("Material::removeMaterialUniforms", "Invalid Material type");
 			break;
 		}
 	}
 
 	void cleanup()
 	{
-		matUnshaded.registeredNodes.clear();
+		unshaded.registeredNodes.clear();
+		unshadedTextured.registeredNodes.clear();
 	}
 }
