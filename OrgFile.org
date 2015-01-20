@@ -47,6 +47,8 @@
 - Implemnted phong material.
 - Added simple shading and lighting and implemented spot, directional and point lights.
 - Added ambientlight and fog.
+** <2015-01-20 Tue>
+- Added shader preprocessing that looks for "//include" in shader file and includes the space seperated files.
 * Tasks
 ** High-level
 *** TODO Renderer
@@ -113,6 +115,9 @@ Last step before moving on to CPU!
 **** TODO Add instancing or find a way to reuse existing models rather than creating seperate vao for each 
 **** TODO Decide whether to use index numbers or struct pointers for components.
 **** TODO Decide whether to use cpp strings or cstrings.
+*** <2015-01-18 Sun>
+**** DONE Add preprocessing and #includes to shader and put common code in a seperate file.
+	 - State "DONE"       from "TODO"       [2015-01-20 Tue 18:10]
 * Notes
 ** <2014-12-14 Sun 21:21>
 This is the first entry into my "OrgFile.org". The plan is to have a seperate OrgFile for every project that i work on, although i might change that in that in the future.

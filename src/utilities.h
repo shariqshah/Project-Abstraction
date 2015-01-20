@@ -23,8 +23,7 @@ namespace Utils
     Quat toGlm(const btQuaternion bulletQuat);
 
 	std::string loadFileIntoString(const char* name);
-	char*       loadFileIntoCString(const char* name,
-									bool addNull = true);
+	char*       loadFileIntoCString(const char* name, bool addNull = true);
 	
 }
 

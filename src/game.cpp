@@ -28,38 +28,20 @@ Game::Game(const char* path)
 	cubeModel.materialUniforms.texture = Texture::create("chessboard.png");
 	Renderer::Model::loadFromFile("suzanne.pamesh", &cubeModel);
 
-	std::vector<Vec3> colors;
-	for(int i = 0; i < 24; i++)
-		colors.push_back(Vec3(0, 1, 0));
-	
-	std::vector<Vec3> triVerts;
-	triVerts.push_back(Vec3(-0.5, -0.5, 0));
-	triVerts.push_back(Vec3( 0.5, -0.5, 0));
-	triVerts.push_back(Vec3( 0,    0.5, 0));
-
-	std::vector<Vec2> triUVs;
-	triUVs.push_back(Vec2(0, 0));
-	triUVs.push_back(Vec2(1, 0));
-	triUVs.push_back(Vec2(0.5, 1));
-
-	std::vector<unsigned int> triIndices;
-	triIndices.push_back(0);
-	triIndices.push_back(1);
-	triIndices.push_back(2);
 
 	CModel triModel;
-	triModel.filename = "TriMesh";
-	triModel.vertices = triVerts;
-	triModel.uvs      = triUVs;
-	triModel.indices  = triIndices;
-	triModel.material = MAT_UNSHADED_TEXTURED;
-	triModel.materialUniforms.texture = Texture::create("chessboard.png");
+	Renderer::Model::loadFromFile("sphere.pamesh", &triModel);
+	triModel.material = MAT_UNSHADED;
+	triModel.materialUniforms.diffuseColor = Vec4(0.7f, 0.7f, 0.7f, 1.0f);
+	// triModel.materialUniforms.texture = Texture::create("chessboard.png");
 	// triModel.materialUniforms.diffuseColor = Vec4(0.5, 0, 0.5, 1);
 	
 	GameObject* triangle = SceneManager::create("Triangle");
 	GO::addModel(triangle, &triModel);
+	CLight* light = GO::addLight(triangle);
+	light->type = LT_POINT;
 	CTransform* modelTransform = GO::getTransform(triangle);
-	Transform::setPosition(modelTransform, Vec3(-5, 0, -5), true);
+	Transform::setPosition(modelTransform, Vec3(-5, 10, -5), true);
 
 	GameObject* cube = SceneManager::create("Cube");
 	GO::addModel(cube, &cubeModel);
@@ -83,7 +65,7 @@ Game::Game(const char* path)
 	playerPtr->tag = "FreeCamera";
 	CTransform* transform = GO::getTransform(playerPtr);
 	Transform::translate(transform, Vec3(0, 0, 5));
-	GO::addLight(playerPtr);
+	// GO::addLight(playerPtr);
 	GO::addCamera(playerPtr);
 	System::CameraSystem::setActiveObject(playerPtr);
 

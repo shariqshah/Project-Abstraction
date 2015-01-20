@@ -25,6 +25,70 @@ namespace Shader
 		char*                     shaderPath;
 	}
 
+	void debugPrintShader(const char* shaderText)
+	{
+		size_t len = strlen(shaderText);
+		int lineCount = 1;
+		std::cout<<std::to_string(lineCount) + ". ";
+		for(uint i = 0; i < len; i++)
+		{
+			if(shaderText[i] != '\n')
+				std::cout<<shaderText[i];
+			else
+				std::cout<<std::endl<<std::to_string(++lineCount) + ". ";
+		}
+		std::cout<<"\n END_DEBUG_PRINT\n\n";
+	}
+
+	char* runPreProcessor(char* shaderText)
+	{
+		char* includeLoc = strstr(shaderText, "//include");
+
+		if(includeLoc)
+		{
+			// size_t len = strlen(includeLoc);
+			char* lineEnd = strchr(includeLoc, '\n');
+			int lineSize = lineEnd - includeLoc;
+			char* incLine = (char*)malloc(sizeof(char) * lineSize);
+			strncpy(incLine, includeLoc, lineSize);
+			// Log::message(std::string(incLine));
+
+			char* filename = strtok(incLine, " ");
+			while(filename)
+			{
+				filename = strtok(NULL, " ");
+				if(filename)
+				{
+					char* path = (char*)malloc(sizeof(char) *
+											   (strlen(shaderPath) + strlen(filename) + 1));
+					strcpy(path, shaderPath);
+					strcat(path, filename);
+					char* file = Utils::loadFileIntoCString(path);
+					char* shaderCopy = strdup(shaderText);
+					char* temp = (char*)realloc(shaderText, (strlen(shaderText) + strlen(file) + 2));
+					if(temp)
+					{
+						shaderText = temp;
+						strcpy(shaderText, file);
+						strcat(shaderText, shaderCopy);
+					}
+					else
+					{
+						Log::warning("Realloc failed in Shader::runPreProcessor");
+					}
+
+					free(path);
+					free(shaderCopy);
+					free(file);
+				}
+			}
+			// Log::message(std::string(shaderText));
+			free(incLine);
+		}
+
+		return shaderText;
+	}
+	
 	void initialize(const char* path)
 	{
 		shaderPath   = (char *)malloc(sizeof(char) * strlen(path) + 1);
@@ -50,6 +114,9 @@ namespace Shader
 
 		assert(vertSource != NULL);
 		assert(fragSource != NULL);
+
+		vertSource = runPreProcessor(vertSource);
+		fragSource = runPreProcessor(fragSource);
 		
 		GLint vSize = (GLint)strlen(vertSource);
 		GLint fSize = (GLint)strlen(fragSource);
@@ -65,9 +132,6 @@ namespace Shader
 
 	    glCompileShader(vertShader);
 	    glCompileShader(fragShader);
-
-		free(vertSource);
-		free(fragSource);
 		
 		GLint isVertCompiled = 0;
 		GLint isFragCompiled = 0;
@@ -81,7 +145,8 @@ namespace Shader
 			char* message = (char *)malloc(sizeof(char) * logSize);
 			glGetShaderInfoLog(vertShader, logSize, NULL, message);
 
-			Log::error("COMPILE " + std::string(vertexShader), std::string(message));
+			Log::error("COMPILING VS " + std::string(vertexShader), std::string(message));
+			debugPrintShader(vertSource);
 			free(message);
 		}
 
@@ -92,10 +157,14 @@ namespace Shader
 			char* message = (char *)malloc(sizeof(char) * logSize);
 			glGetShaderInfoLog(fragShader, logSize, NULL, message);
 
-			Log::error("COMPILE " + std::string(fragmentShader), std::string(message));
+			Log::error("COMPILING FS " + std::string(fragmentShader), std::string(message));
+			debugPrintShader(fragSource);
 			free(message);
 		}
 
+		free(vertSource);
+		free(fragSource);
+		
 		if(!isVertCompiled || !isFragCompiled)
 		{
 			glDeleteShader(vertShader);

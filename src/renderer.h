@@ -109,7 +109,7 @@ struct Fog
 struct RenderParams
 {
 	Fog  fog;
-	Vec4 ambientLight = Vec4(0.2f, 0.2f, 0.2f, 1.0f);
+	Vec4 ambientLight = Vec4(0.1f, 0.1f, 0.12f, 1.0f);
 };
 
 namespace Renderer

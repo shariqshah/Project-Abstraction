@@ -1,11 +1,5 @@
-#version 130
+//include commonFrag.glsl common.glsl version.glsl
 
-out vec4 fragColor;
-
-in vec2 uv;
-in vec3 color;
-
-uniform vec4 diffuseColor;
 uniform sampler2D sampler;
 
 void main()
