@@ -8,7 +8,7 @@ struct Attenuation
 
 struct Light
 {
-	vec3        color;
+	vec4        color;
 	vec3        direction;
 	vec3        position;
 	float       intensity;
@@ -38,8 +38,8 @@ uniform Light lightList[MAX_LIGHTS];
 
 vec4 calcDirLight(Light dLight)
 {
-	vec3 diffuse = vec3(0.0);
-	vec3 specular = vec3(0.0);
+	vec4 diffuse  = vec4(0.0);
+	vec4 specular = vec4(0.0);
 
 	vec3 normalizedNormal = normalize(normal);
 	float cosAngIncidence = dot(normalizedNormal, -dLight.direction);
@@ -58,13 +58,13 @@ vec4 calcDirLight(Light dLight)
 	}
 
 	// return dLight.intensity * shadowFactor * (diffuse + specular);
-	return vec4(dLight.intensity * (diffuse + specular), 1.0);
+	return (dLight.intensity * (diffuse + specular));
 }
 
 vec4 calcPointLight(Light light)
 {
-	vec3 diffuse  = vec3(0.0);
-	vec3 specular = vec3(0.0);
+	vec4 diffuse  = vec4(0.0);
+	vec4 specular = vec4(0.0);
 
 	vec3 lightDirection = vertex - light.position;
 	float distance = length(lightDirection);
@@ -92,7 +92,7 @@ vec4 calcPointLight(Light light)
 							(light.attenuation.linear * distance) +
 							(light.attenuation.quadratic * distance * distance);
 
-		return vec4(((diffuse + specular) / attenuation) * light.intensity, 1.0);
+		return (((diffuse + specular) / attenuation) * light.intensity);
 	}
 	else
 		return vec4(0.0);

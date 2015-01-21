@@ -149,7 +149,7 @@ namespace Renderer
 				Shader::setUniformInt(shaderIndex,
 									  std::string(arrayIndex + "type").c_str(),
 									  light->type);
-				Shader::setUniformVec3(shaderIndex,
+				Shader::setUniformVec4(shaderIndex,
 									   std::string(arrayIndex + "color").c_str(),
 									   light->color);
 

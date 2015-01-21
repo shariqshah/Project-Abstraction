@@ -22,27 +22,25 @@ Game::Game(const char* path)
 {
 	Renderer::initialize(path);
 
-	CModel cubeModel;
-	cubeModel.material = MAT_PHONG;
-	cubeModel.materialUniforms.diffuseColor = Vec4(0, 1, 0, 1);
-	cubeModel.materialUniforms.texture = Texture::create("chessboard.png");
-	Renderer::Model::loadFromFile("suzanne.pamesh", &cubeModel);
-
-
 	CModel triModel;
 	Renderer::Model::loadFromFile("sphere.pamesh", &triModel);
 	triModel.material = MAT_UNSHADED;
-	triModel.materialUniforms.diffuseColor = Vec4(0.7f, 0.7f, 0.7f, 1.0f);
-	// triModel.materialUniforms.texture = Texture::create("chessboard.png");
-	// triModel.materialUniforms.diffuseColor = Vec4(0.5, 0, 0.5, 1);
-	
+	triModel.materialUniforms.diffuseColor = Vec4(0.f, 1.f, 0.f, 1.0f);
+
 	GameObject* triangle = SceneManager::create("Triangle");
 	GO::addModel(triangle, &triModel);
 	CLight* light = GO::addLight(triangle);
-	light->type = LT_POINT;
+	light->type  = LT_POINT;
+	light->color = Vec4(0, 0, 1, 1);
 	CTransform* modelTransform = GO::getTransform(triangle);
 	Transform::setPosition(modelTransform, Vec3(-5, 10, -5), true);
 
+	CModel cubeModel;
+	cubeModel.material = MAT_PHONG;
+	cubeModel.materialUniforms.diffuseColor = Vec4(0, 1, 0, 1);
+	cubeModel.materialUniforms.texture = Texture::create("layingrock.png");
+	Renderer::Model::loadFromFile("suzanne.pamesh", &cubeModel);
+	
 	GameObject* cube = SceneManager::create("Cube");
 	GO::addModel(cube, &cubeModel);
 	CTransform* cubeTran = GO::getTransform(cube);
@@ -52,30 +50,46 @@ Game::Game(const char* path)
 	{
 		GameObject* cube2 = SceneManager::create("Cube" + std::to_string(i));
 		if((i % 2) == 0)
+		{
 			cubeModel.materialUniforms.diffuseColor = Vec4(1, 0, 0, 1);
+			cubeModel.material = MAT_PHONG;
+		}
 		else
+		{
 			cubeModel.materialUniforms.diffuseColor = Vec4(1);
+			// cubeModel.material = MAT_PHONG_TEXTURED;
+		}
 		GO::addModel(cube2, &cubeModel);
 		CTransform* cube2Tran = GO::getTransform(cube2);
-		Transform::setPosition(cube2Tran, Vec3(i, i, -i), true);
+		Transform::setPosition(cube2Tran, Vec3(i, i + 2, -i), true);
 	}
 	
 	GameObject* playerPtr = SceneManager::create("Player");
 	player = playerPtr->node;
 	playerPtr->tag = "FreeCamera";
 	CTransform* transform = GO::getTransform(playerPtr);
-	Transform::translate(transform, Vec3(0, 0, 5));
+	Transform::translate(transform, Vec3(0, 3, 5));
 	// GO::addLight(playerPtr);
 	GO::addCamera(playerPtr);
 	System::CameraSystem::setActiveObject(playerPtr);
 
 	GameObject* plane = SceneManager::create("Ground");
 	CModel planeModel;
-	planeModel.material = MAT_PHONG;
+	planeModel.material = MAT_PHONG_TEXTURED;
 	// planeModel.materialUniforms.diffuseColor = Vec4(0, 1, 0, 1);
-	planeModel.materialUniforms.texture = Texture::create("chessboard.png");
+	planeModel.materialUniforms.texture = Texture::create("layingrock.png");
 	Renderer::Model::loadFromFile("plane.pamesh", &planeModel);
 	GO::addModel(plane, &planeModel);
+
+	GameObject* tea = SceneManager::create("Teapot");
+	CModel teapot;
+	teapot.material = MAT_PHONG_TEXTURED;
+	teapot.materialUniforms.diffuseColor = Vec4(1, 0.6, 0.0, 1);
+	teapot.materialUniforms.texture = Texture::create("test2.png");
+	Renderer::Model::loadFromFile("teapot.pamesh", &teapot);
+	GO::addModel(tea, &teapot);
+	CTransform* tTran = GO::getTransform(tea);
+	Transform::setPosition(tTran, Vec3(0, 5, -5), true);
 
 	for(int i = 0; i < 1; i++)
 	{

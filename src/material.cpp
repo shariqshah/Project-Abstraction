@@ -20,8 +20,9 @@ namespace Material
 	namespace
 	{
 		Material unshaded;
-		Material unshadedTextured;
 		Material phong;
+		Material unshadedTextured;
+		Material phongTextured;
 		const Vec4  DEFAULT_COLOR(1.0f, 1.0f, 1.0f, 1.0f);
 	}
 
@@ -30,6 +31,7 @@ namespace Material
 		unshaded.shaderIndex = Shader::create("unshaded.vert", "unshaded.frag");
 		unshadedTextured.shaderIndex = Shader::create("unshaded_textured.vert", "unshaded_textured.frag");
 		phong.shaderIndex = Shader::create("phong.vert", "phong.frag");
+		phongTextured.shaderIndex = Shader::create("phong.vert", "phongTextured.frag");
 	}
 
 	bool registerModel(int modelIndex, Mat_Type material)
@@ -80,7 +82,17 @@ namespace Material
 				phong.registeredNodes.push_back(modelIndex);
 			break;
 		case MAT_PHONG_TEXTURED:
-			Log::error("Material::registerModel", "Material type unimplemented");
+			for(int existingNode : phongTextured.registeredNodes)
+			{
+				if(existingNode == modelIndex)
+				{
+					exists = true;
+					break;
+				}
+			}
+			
+			if(!exists)
+				phongTextured.registeredNodes.push_back(modelIndex);
 			break;
 		default:
 			Log::error("Material::registerModel", "Invalid Material type");
@@ -108,7 +120,7 @@ namespace Material
 			shaderIndex = phong.shaderIndex;
 			break;
 		case MAT_PHONG_TEXTURED:
-			Log::error("Material::getShaderIndex", "Material type unimplemented");
+			shaderIndex = phongTextured.shaderIndex;
 			break;
 		default:
 			Log::error("Material::getShaderIndex", "Invalid Material type");
@@ -164,7 +176,17 @@ namespace Material
 				phong.registeredNodes.erase(phong.registeredNodes.begin() + index);
 			break;
 		case MAT_PHONG_TEXTURED:
-			Log::error("Material::unRegisterModel", "Material type unimplemented");
+			for(unsigned int i = 0; i < phongTextured.registeredNodes.size(); i++)
+			{
+				if(phongTextured.registeredNodes[i] == modelIndex)
+				{
+					index = i;
+					break;
+				}
+			}
+
+			if(index != -1)
+				phongTextured.registeredNodes.erase(phongTextured.registeredNodes.begin() + index);
 			break;
 		default:
 			Log::error("Material::unRegisterModel", "Invalid Material type");
@@ -190,7 +212,7 @@ namespace Material
 			registeredModels = &phong.registeredNodes;
 			break;
 		case MAT_PHONG_TEXTURED:
-			Log::error("Material::getRegisteredModels", "Material type unimplemented");
+			registeredModels = &phongTextured.registeredNodes;
 			break;
 		default:
 			Log::error("Material::getRegisteredModels", "Invalid Material type");
@@ -249,5 +271,7 @@ namespace Material
 	{
 		unshaded.registeredNodes.clear();
 		unshadedTextured.registeredNodes.clear();
+		phong.registeredNodes.clear();
+		phongTextured.registeredNodes.clear();
 	}
 }

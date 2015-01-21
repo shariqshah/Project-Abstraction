@@ -27,7 +27,7 @@ struct CLight
 	float       innerAngle  = 20.f;
 	float       exponent    = 4.f;
 	float       intensity   = 1.0f;
-	Vec3        color       = Vec3(1.f);
+	Vec4        color       = Vec4(1.f);
 	Node        node        = 0;
 	bool        castShadow  = false;
 	bool        valid       = true;
