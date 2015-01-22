@@ -1,10 +1,12 @@
 local testobj = SceneManager.create("TestOBJ")
-CompManager.addModel(testobj, "models/falcon/falcon.scene.xml")
-local transform = CompManager.getTransform(testobj)
-Transform.setPosition(transform, Vec3(0, 10, 0), true)
+local model = CModel();
+Model.loadFromFile("teapot.pamesh", model)
+Log.message(model.filename)
+// model.material = Mat_Type.PHONG
+GO.addModel(testobj, model)
+local transform = GO.getTransform(testobj)
+Transform.setPosition(transform, Vec3(0, 10, 5), true)
 ::attachScript(testobj, "Test")
-local model = Model.create("models/falcon/falcon.scene.xml")
-CompManager.addRigidBody(testobj,
-						 CollisionShapes.createMesh(model, false),
-						 1.0,
-						 0.5)
+
+local reloader = SceneManager.create("Reloader")
+::attachScript(reloader, "Reloader")

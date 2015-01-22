@@ -8,6 +8,7 @@
 #include "mathdefs.h"
 #include "texture.h"
 #include "log.h"
+#include "scriptengine.h"
 
 namespace Material
 {
@@ -154,4 +155,20 @@ namespace Material
         phong.registeredModels.clear();
         phongTextured.registeredModels.clear();
 	}
+
+	void generateBindings()
+	{
+		Sqrat::ConstTable().Enum("Mat_Type", Sqrat::Enumeration ()
+								 .Const("UNSHADED",          Mat_Type::MAT_UNSHADED)
+								 .Const("UNSHADED_TEXTURED", Mat_Type::MAT_UNSHADED_TEXTURED)
+								 .Const("PHONG",             Mat_Type::MAT_PHONG)
+								 .Const("PHONG_TEXTURED",    Mat_Type::MAT_PHONG_TEXTURED));
+		
+		Sqrat::RootTable().Bind("Mat_Uniforms", Sqrat::Class<Mat_Uniforms>()
+								.Var("diffuseColor",     &Mat_Uniforms::diffuseColor)
+								.Var("diffuse",          &Mat_Uniforms::diffuse)
+								.Var("specular",         &Mat_Uniforms::specular)
+								.Var("specularStrength", &Mat_Uniforms::specularStrength)
+								.Var("texture",          &Mat_Uniforms::texture));
+	} 
 }

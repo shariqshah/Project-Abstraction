@@ -24,8 +24,25 @@ namespace GO
 								.Var("tag",    &GameObject::tag)
 								.Var("remove", &GameObject::remove));
 
+		Sqrat::ConstTable().Enum("Component", Sqrat::Enumeration()
+								 .Const("TRANSFORM", Component::TRANSFORM)
+								 .Const("CAMERA",    Component::CAMERA)
+								 .Const("MODEL",     Component::MODEL)
+								 .Const("RIGIDBODY", Component::RIGIDBODY)
+								 .Const("LIGHT",     Component::LIGHT));
+
 		Sqrat::RootTable().Bind("GO", Sqrat::Table (ScriptEngine::getVM())
-								.Func("hasComponent", &hasComponent));
+								.Func("hasComponent", &hasComponent)
+ 								.Func("addTransform", &addTransform)
+								.Func("addModel", &addModel)
+								.Func("addLight", &addLight)
+								// .Func("addRigidBody", &addRigidBody)
+								.Func("getTransform", &getTransform)
+								.Func("getCamera", &getCamera)
+								.Func("getLight", &getLight)
+								// .Func("getRigidBody", &getRigidBody)
+								.Func("getModel", &getModel)
+								.Func("removeComponent", &removeComponent));
 	}
 
 	void attachScript(GameObject* gameObject, const std::string& name)

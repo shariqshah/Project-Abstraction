@@ -270,26 +270,35 @@ namespace Renderer
 			emptyIndices.clear();
 		}
 
-		CModel* create(const std::string& filename)
-		{
-			// If model is created without a parent node then it cannot be
-			// added to gameobjects. It can only be used to provide collision
-			// mesh.
+		// CModel* create(const std::string& filename)
+		// {
+		// 	// If model is created without a parent node then it cannot be
+		// 	// added to gameobjects. It can only be used to provide collision
+		// 	// mesh.
 			
-		}
+		// }
 
 		void generateBindings()
 		{
 			Sqrat::RootTable().Bind("CModel", Sqrat::Class<CModel>()
-								.Var("node",     &CModel::node)
-								.Var("filename", &CModel::filename));
+								.Var("node",             &CModel::node)
+								.Var("filename",         &CModel::filename)
+								.Var("vertices",         &CModel::vertices)
+								.Var("vertexColors",     &CModel::vertexColors)
+								.Var("normals",          &CModel::normals)
+								.Var("uvs",              &CModel::uvs)
+								.Var("indices",          &CModel::indices)
+								.Var("material",         &CModel::material)
+								.Var("materialUniforms", &CModel::materialUniforms)
+								.Var("drawIndexed",      &CModel::drawIndexed));
 
 
-			// Sqrat::RootTable().Bind("Model", Sqrat::Table(ScriptEngine::getVM())
-			// 					.Func("getVertices", &getVertices)
-			// 					// .Func("create", &create)
-			// 					.Func("getVertexcount", &getVertexCount));
-			// 					// .Func("remove", &remove));
+			Sqrat::RootTable().Bind("Model", Sqrat::Table(ScriptEngine::getVM())
+								.Func("create",          &create)
+								.Func("remove",          &remove)
+								.Func("loadFromFile",    &loadFromFile)
+								.Func("setMaterialType", &setMaterialType)
+								.Func("getModelAtIndex", &getModelAtIndex));
 		}
 
 		void remove(unsigned int modelIndex)

@@ -95,6 +95,7 @@ namespace Transform
 
 	void setPosition(CTransform* transform, Vec3 position, bool updateTransMat)
 	{
+		assert(transform);
 		transform->position = position;
 
 		if(updateTransMat)
@@ -103,7 +104,8 @@ namespace Transform
 
 	void translate(CTransform* transform, Vec3 offset, Space transformSpace)
 	{
-		if(transformSpace == Space::LOCAL)
+		assert(transform);
+		if(transformSpace == Space::TS_LOCAL)
 			offset = transform->rotation * offset;
 		
 		transform->position += offset;
@@ -114,6 +116,7 @@ namespace Transform
 
 	void setForward(CTransform* transform, Vec3 direction)
 	{
+		assert(transform);
 		//TODO: Fix this function by comparing with jDoom
 		Vec3  newForward = glm::normalize(direction);
 		float angle      = glm::dot(transform->forward, newForward);
@@ -131,8 +134,9 @@ namespace Transform
 
 	void rotate(CTransform* transform, Vec3 axis, float angle, Space transformSpace)
 	{
+		assert(transform);
 		angle = glm::radians(angle);
-		if(transformSpace == Space::LOCAL)
+		if(transformSpace == Space::TS_LOCAL)
 			transform->rotation *= glm::normalize(glm::angleAxis(angle, axis));
 		else
 			transform->rotation  = glm::normalize(glm::angleAxis(angle, axis))*
@@ -147,6 +151,7 @@ namespace Transform
 
 	void setScale(CTransform* transform, Vec3 newScale, bool updateTransMat)
 	{
+		assert(transform);
 		transform->scale = newScale;
 
 		if(updateTransMat)
@@ -155,12 +160,14 @@ namespace Transform
 
 	void setLookAt(CTransform* transform, Vec3 lookAt)
 	{
+		assert(transform);
 		Vec3 direction = lookAt - transform->position;	
 		setForward(transform, glm::normalize(direction));
 	}
 
 	void setUpVector(CTransform* transform, Vec3 up)
 	{
+		assert(transform);
 		Vec3  newUp = glm::normalize(up);
 		float angle = glm::dot(transform->up, newUp);
 
@@ -176,6 +183,7 @@ namespace Transform
 
 	void setRotation(CTransform* transform, Quat newRotation, bool updateTransMat)
 	{
+		assert(transform);
 		transform->rotation = newRotation;
 
 		updateUpVector(transform);
@@ -218,8 +226,8 @@ namespace Transform
 								.Var("forawrd",  &CTransform::forward));
 
 		Sqrat::ConstTable().Enum("Space", Sqrat::Enumeration ()
-								 .Const("LOCAL", 0)
-								 .Const("WORLD", 1));
+								 .Const("LOCAL", Space::TS_LOCAL)
+								 .Const("WORLD", Space::TS_WORLD));
 
 		Sqrat::RootTable().Bind("Transform", Sqrat::Table(ScriptEngine::getVM())
 								.Func("translate", &translate)

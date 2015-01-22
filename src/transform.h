@@ -30,8 +30,8 @@ namespace Transform
 	
 	enum Space
     {
-        LOCAL = 0,
-        WORLD
+        TS_LOCAL = 0,
+        TS_WORLD
     };
 
 	void setPosition(CTransform* transform,
@@ -40,12 +40,12 @@ namespace Transform
 	
     void translate(CTransform* transform,
 				   Vec3        offset,
-				   Space       transformSpace = Space::WORLD);
+                   Space       transformSpace = Space::TS_WORLD);
 	
     void rotate(CTransform* transform,
 				Vec3        axis,
 				float       angle,
-				Space       transformSpace = Space::WORLD);
+                Space       transformSpace = Space::TS_WORLD);
 	
     void setScale(CTransform* transform,
 				  Vec3        newScale,

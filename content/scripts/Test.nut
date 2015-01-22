@@ -12,7 +12,7 @@ class Test extends BaseBehaviourScript </ type = "Test" />
 
 	function update(deltaTime)
 	{
-		local transform = CompManager.getTransform(gameObject);
+		local transform = GO.getTransform(gameObject);
 		Transform.rotate(transform, Vec3(0, 1, 0), speed * deltaTime, Space.WORLD);
 
 		// if(Input.isKeyReleased(Key.V))

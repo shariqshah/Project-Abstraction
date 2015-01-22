@@ -102,7 +102,7 @@ namespace System
 				Transform::rotate(transform,
 								  Vec3(-1, 0, 0),
 								  upDownRot,
-								  Transform::Space::LOCAL);
+								  Transform::Space::TS_LOCAL);
 				updateCamera = true;
 			} 
 			
@@ -111,14 +111,14 @@ namespace System
 				Transform::rotate(transform,
 								  Vec3(0, 1, 0),
 								  -leftRightRot,
-								  Transform::Space::WORLD);
+								  Transform::Space::TS_WORLD);
 				updateCamera = true;
 			}
 			
 
 			if(translation.x != 0 || translation.y != 0 || translation.z != 0)
 			{
-				Transform::translate(transform, translation, Transform::Space::LOCAL);
+				Transform::translate(transform, translation, Transform::Space::TS_LOCAL);
 				Log::message("Player : " + Utils::toString(transform->position));
 				updateCamera = true;
 			}

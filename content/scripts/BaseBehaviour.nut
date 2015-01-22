@@ -4,8 +4,7 @@ class BaseBehaviourScript </ type = "BaseBehaviourScript" />
 	
 	constructor(attachedObj)
 	{
-		assert(attachedObj != null);
-		
+		assert(attachedObj != null);		
 		gameObject = attachedObj;
 	}
 

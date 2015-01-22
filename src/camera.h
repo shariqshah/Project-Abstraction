@@ -15,7 +15,6 @@ struct CCamera
 	float    farZ        = 1000.f;
 	float    fov         = 75.f;
 	float    aspectRatio = 4.f/3.f;
-	Pipeline pipeline    = Pipeline::FORWARD;
 	bool     valid       = true;
 	Mat4     viewMat;
 	Mat4     projMat;
@@ -40,7 +39,6 @@ namespace Renderer
 		
 		int      create(GameObject* gameObject);
 		CCamera* getCameraAtIndex(int cameraIndex);
-		CCamera  create(const std::string& name, Node parent, Resource pipeline);
 	}
 }
 

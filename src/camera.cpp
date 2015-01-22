@@ -52,20 +52,21 @@ namespace Renderer
 		void generateBindings()
 		{
 			Sqrat::RootTable().Bind("CCamera", Sqrat::Class<CCamera>()
-								.Var("node",        &CCamera::node)
-								.Var("nearZ",       &CCamera::nearZ)
-								.Var("farZ",        &CCamera::farZ)
-								.Var("fov",         &CCamera::fov)
-								.Var("aspectRatio", &CCamera::aspectRatio)
-								.Var("pipeline",    &CCamera::pipeline));
+									.Var("node",        &CCamera::node)
+									.Var("nearZ",       &CCamera::nearZ)
+									.Var("farZ",        &CCamera::farZ)
+									.Var("fov",         &CCamera::fov)
+									.Var("aspectRatio", &CCamera::aspectRatio));
 
 			Sqrat::RootTable().Bind("Camera", Sqrat::Table(ScriptEngine::getVM())
-								.Func("setAspectratio", &setAspectRatio)
-								.Func("setFov", &setFov)
-								.Func("setNearZ", &setNearZ)
-								.Func("updateView", &updateView)
-								// .Func("removeCamera", &removeCamera)
-								.Func("setFarZ", &setFarZ));
+									.Func("setAspectratio",   &setAspectRatio)
+									.Func("setFov",           &setFov)
+									.Func("setNearZ",         &setNearZ)
+									.Func("updateView",       &updateView)
+									.Func("updateProjection", &updateProjection)
+									.Func("getCameraAtIndex", &getCameraAtIndex)
+									.Func("remove",           &remove)
+									.Func("create",           &create));
 		}
 
 		CCamera* getCameraAtIndex(int cameraIndex)

@@ -32,6 +32,7 @@ namespace Material
 														 MAT_PHONG,
 														 MAT_PHONG_TEXTURED };
 	void              initialize();
+	void              generateBindings();
 	void              cleanup();
 	std::vector<int>* getRegisteredModels(Mat_Type material);
     int               getShaderIndex(Mat_Type material);

@@ -162,19 +162,30 @@ namespace Renderer
 
 		void generateBindings()
 		{
+			Sqrat::ConstTable().Enum("LightType", Sqrat::Enumeration ()
+									 .Const("LT_SPOT",  LightType::LT_SPOT)
+									 .Const("LT_DIR",   LightType::LT_DIR)
+									 .Const("LT_POINT", LightType::LT_POINT));
+			
+			Sqrat::RootTable().Bind("Attenuation", Sqrat::Class<Attenuation>()
+									.Var("linear",    &Attenuation::linear)
+									.Var("constant",  &Attenuation::constant)
+									.Var("quadratic", &Attenuation::quadratic));
+			
 			Sqrat::RootTable().Bind("CLight", Sqrat::Class<CLight>()
-								.Var("intensity",     &CLight::intensity)
-								.Var("color",         &CLight::color)
-								.Var("castShadow",    &CLight::castShadow));
+								.Var("intensity",   &CLight::intensity)
+								.Var("color",       &CLight::color)
+								.Var("outerAngle",  &CLight::outerAngle)
+								.Var("innderAngle", &CLight::innerAngle)
+								.Var("exponent",    &CLight::exponent)
+								.Var("node",        &CLight::node)
+								.Var("castShadow",  &CLight::castShadow)
+								.Var("valid",       &CLight::valid)
+								.Var("type",        &CLight::type)
+								.Var("attenuation", &CLight::attenuation));
 
-			// Sqrat::RootTable().Bind("Light", Sqrat::Table(ScriptEngine::getVM())
-			// 					.Func("setRadius", &setRadius)
-			// 					.Func("setColor", &setColor)
-			// 					.Func("setIntensity", &setIntensity)
-			// 					.Func("setShadowBias", &setShadowMapBias)
-			// 					.Func("setShadowLambda", &setShadowSplitLambda)
-			// 					.Func("setShadowmapCount", &setShadowMapCount)
-			// 					.Func("setShadowCaster", &setShadowCaster));
+			Sqrat::RootTable().Bind("Light", Sqrat::Table(ScriptEngine::getVM())
+									.Func("create", &create));
 		}
 	}
 

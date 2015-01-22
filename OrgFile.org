@@ -52,6 +52,10 @@
 
 ** <2015-01-21 Wed>
 - Implemented phong textured material.
+** <2015-01-22 Thu>
+- Added fog and ambientLight to unshaded materials
+- Compacted material.cpp code
+- Fixed binding generation everywhere
 * Tasks
 ** High-level
 *** TODO Renderer
@@ -123,6 +127,8 @@ Last step before moving on to CPU!
 *** <2015-01-18 Sun>
 **** DONE Add preprocessing and #includes to shader and put common code in a seperate file.
 	 - State "DONE"       from "TODO"       [2015-01-20 Tue 18:10]
+*** <2015-01-22 Thu>
+**** TODO Update script manager to use gameobject node instead of pointers
 * Notes
 ** <2014-12-14 Sun 21:21>
 This is the first entry into my "OrgFile.org". The plan is to have a seperate OrgFile for every project that i work on, although i might change that in that in the future.

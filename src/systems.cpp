@@ -11,6 +11,7 @@
 #include "transform.h"
 #include "renderer.h"
 #include "camera.h"
+#include "material.h"
 #include "cpu.h"
 
 namespace System
@@ -26,31 +27,30 @@ namespace System
 	
 	void initialize()
 	{
-		sPhysicsEnabled = true;
-		Physics::initialize(Vec3(0.f, -9.8f, 0.f));
+		// sPhysicsEnabled = true;
+		// Physics::initialize(Vec3(0.f, -9.8f, 0.f));
 		// CompManager::initialize();
-		Cpu::initialize();
-		statCollMesh = new CollisionMesh(suzanneModel, true);
-		hullCollMesh = new CollisionMesh(suzanneModel, false);
-		tmpShape = new Sphere(1.f);
+		// Cpu::initialize();
+		// statCollMesh = new CollisionMesh(suzanneModel, true);
+		// hullCollMesh = new CollisionMesh(suzanneModel, false);
+		// tmpShape = new Sphere(1.f);
 
 		ScriptEngine::initialize();
 
 		Log::generateBindings();
 		Input::generateBindings();
 		Transform::generateBindings();
+		Material::generateBindings();
 		Renderer::Model::generateBindings();
 		Renderer::Light::generateBindings();
 		Renderer::Camera::generateBindings();
 		GO::generateBindings();
-		// CompManager::generateBindings();
 		Physics::generateBindings();
 		Physics::RigidBody::generateBindings();
 		SceneManager::generateBindings();
 
 		ScriptEngine::runScript("../content/scripts/scriptManager.nut");
 		ScriptEngine::runScript("../content/scripts/init.nut");
-
 	}
 	
 	Vec3 generateRandom()
@@ -167,7 +167,7 @@ namespace System
 		
 		System::CameraSystem::updateFreeCamera(deltaTime);
 		// Cpu::update(deltaTime);
-		// ScriptEngine::executeFunction("updateObjects", deltaTime);
+		ScriptEngine::executeFunction("updateObjects", deltaTime);
 		
 		// GOMap* sceneObjects = SceneManager::getSceneObjects();
 		// for(GOMap::iterator it = sceneObjects->begin();

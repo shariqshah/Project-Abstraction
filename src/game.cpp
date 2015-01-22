@@ -20,6 +20,7 @@
 Game::Game(const char* path)
 {
 	Renderer::initialize(path);
+	System::initialize();
 
 	CModel sphereModel;
 	Renderer::Model::loadFromFile("sphere.pamesh", &sphereModel);
