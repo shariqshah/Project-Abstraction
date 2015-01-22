@@ -36,11 +36,13 @@ namespace Renderer
 			if(index < lightList.size())
 			{
 				bool alreadyEmpty = true;
-				for(uint32_t activeLight : activeLights)
+				uint indexToErase = 0;
+				for(uint i = 0; i < activeLights.size(); i++)
 				{
-					if(activeLight == index)
+					if(activeLights[i] == index)
 					{
 						alreadyEmpty = false;
+						indexToErase = i;
 						break;
 					}
 				}
@@ -49,7 +51,7 @@ namespace Renderer
 				{
 					emptyIndices.push_back(index);
 					lightList[index].valid = false;
-					activeLights.erase(activeLights.begin() + index);
+					activeLights.erase(activeLights.begin() + indexToErase);
 				}
 				else
 				{

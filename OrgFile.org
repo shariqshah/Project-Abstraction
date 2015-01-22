@@ -49,6 +49,9 @@
 - Added ambientlight and fog.
 ** <2015-01-20 Tue>
 - Added shader preprocessing that looks for "//include" in shader file and includes the space seperated files.
+
+** <2015-01-21 Wed>
+- Implemented phong textured material.
 * Tasks
 ** High-level
 *** TODO Renderer
@@ -78,7 +81,8 @@ Last step before moving on to CPU!
 	 Could be done by applying transformation to model serving as collision mesh or maybe bullet has something built-in?
 **** TODO Fix setKinematic and handling of kinematic bodies' handling
 *** <2014-12-22 Mon 17:28>
-**** TODO Add assertions everywhere!!
+**** DONE Add assertions everywhere!!
+	 - State "DONE"       from "TODO"       [2015-01-21 Wed 17:30]
 *** <2014-12-30 Tue>
 **** DONE Add support for loading and using textures.
 	 - State "DONE"       from "TODO"       [2014-12-30 Tue 02:23]
@@ -94,7 +98,8 @@ Last step before moving on to CPU!
 	 - State "DONE"       from "TODO"       [2015-01-02 Fri 00:51]
 **** TODO Reserve space in all vectors at initialization and addition of new elements.
 *** <2015-01-02 Fri>
-**** TODO Move component creation/retrieval/removal code to GameObject
+**** DONE Move component creation/retrieval/removal code to GameObject
+	 - State "DONE"       from "TODO"       [2015-01-21 Wed 17:30]
 *** <2015-01-04 Sun>
 **** DONE Enable setting per-model uniforms for it's material.
 	 - State "DONE"       from "TODO"       [2015-01-05 Mon 23:40]

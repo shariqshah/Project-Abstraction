@@ -189,13 +189,12 @@ namespace Renderer
 				if((material == MAT_PHONG || material == MAT_PHONG_TEXTURED)
 				   && registeredMeshes->size() > 1)
 				{
-					setLights(shaderIndex);
-					setRenderParams(shaderIndex, renderParams);
+					setLights(shaderIndex);					
 					GameObject* viewer = SceneManager::find(camera->node);
 					CTransform* viewerTransform = GO::getTransform(viewer);
 					Shader::setUniformVec3(shaderIndex, "eyePos", viewerTransform->position);
-					// Shader::setUniformMat4(shaderIndex, "viewMat", camera->viewMat);
 				}
+				setRenderParams(shaderIndex, renderParams);
 				
 				for(int modelIndex : *registeredMeshes)
 				{

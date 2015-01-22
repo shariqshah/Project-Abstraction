@@ -13,7 +13,7 @@ namespace Material
 {
 	struct Material
 	{
-		std::vector<int>  registeredNodes;
+        std::vector<int>  registeredModels;
 		int               shaderIndex;
 	};
 	
@@ -28,76 +28,28 @@ namespace Material
 
 	void initialize()
 	{
-		unshaded.shaderIndex = Shader::create("unshaded.vert", "unshaded.frag");
+		unshaded.shaderIndex         = Shader::create("unshaded.vert", "unshaded.frag");
 		unshadedTextured.shaderIndex = Shader::create("unshaded_textured.vert", "unshaded_textured.frag");
-		phong.shaderIndex = Shader::create("phong.vert", "phong.frag");
-		phongTextured.shaderIndex = Shader::create("phong.vert", "phongTextured.frag");
+		phong.shaderIndex            = Shader::create("phong.vert", "phong.frag");
+		phongTextured.shaderIndex    = Shader::create("phong.vert", "phongTextured.frag");
 	}
-
+	
 	bool registerModel(int modelIndex, Mat_Type material)
 	{
 		// Check if model is already registererd, if not register it
 		bool exists = false;
-		switch(material)
+		std::vector<int>* registeredNodes = getRegisteredModels(material);
+		for(int existingNode : *registeredNodes)
 		{
-		case MAT_UNSHADED:
-
-			for(int existingNode : unshaded.registeredNodes)
+			if(existingNode == modelIndex)
 			{
-				if(existingNode == modelIndex)
-				{
-					exists = true;
-					break;
-				}
+				exists = true;
+				break;
 			}
-			
-			if(!exists)
-				unshaded.registeredNodes.push_back(modelIndex);
-			
-			break;
-		case MAT_UNSHADED_TEXTURED:
-			for(int existingNode : unshadedTextured.registeredNodes)
-			{
-				if(existingNode == modelIndex)
-				{
-					exists = true;
-					break;
-				}
-			}
-			
-			if(!exists)
-				unshadedTextured.registeredNodes.push_back(modelIndex);
-			break;
-		case MAT_PHONG:
-			for(int existingNode : phong.registeredNodes)
-			{
-				if(existingNode == modelIndex)
-				{
-					exists = true;
-					break;
-				}
-			}
-			
-			if(!exists)
-				phong.registeredNodes.push_back(modelIndex);
-			break;
-		case MAT_PHONG_TEXTURED:
-			for(int existingNode : phongTextured.registeredNodes)
-			{
-				if(existingNode == modelIndex)
-				{
-					exists = true;
-					break;
-				}
-			}
-			
-			if(!exists)
-				phongTextured.registeredNodes.push_back(modelIndex);
-			break;
-		default:
-			Log::error("Material::registerModel", "Invalid Material type");
-			break;
 		}
+
+		if(!exists)
+			registeredNodes->push_back(modelIndex);
 
 		// if node is already registered, return false otherwise true
 		return exists ? false : true;
@@ -110,21 +62,11 @@ namespace Material
 		
 		switch(material)
 		{
-		case MAT_UNSHADED:
-			shaderIndex = unshaded.shaderIndex;
-			break;
-		case MAT_UNSHADED_TEXTURED:
-			shaderIndex = unshadedTextured.shaderIndex;
-			break;
-		case MAT_PHONG:
-			shaderIndex = phong.shaderIndex;
-			break;
-		case MAT_PHONG_TEXTURED:
-			shaderIndex = phongTextured.shaderIndex;
-			break;
-		default:
-			Log::error("Material::getShaderIndex", "Invalid Material type");
-			break;
+		case MAT_UNSHADED:	        shaderIndex = unshaded.shaderIndex;	          break;
+		case MAT_UNSHADED_TEXTURED:	shaderIndex = unshadedTextured.shaderIndex;	  break;
+		case MAT_PHONG:			    shaderIndex = phong.shaderIndex;			  break;
+		case MAT_PHONG_TEXTURED:	shaderIndex = phongTextured.shaderIndex;	  break;
+		default: Log::error("Material::getShaderIndex", "Invalid Material type"); break;
 		};
 
 		return shaderIndex;
@@ -132,68 +74,24 @@ namespace Material
 
 	bool unRegisterModel(int modelIndex, Mat_Type material)
 	{
-		int index = -1;
-		switch(material)
+		int  index = -1;
+		bool found = false;
+		std::vector<int>* registeredNodes = getRegisteredModels(material);
+
+		for(int registeredNode : *registeredNodes)
 		{
-		case MAT_UNSHADED:
-			for(unsigned int i = 0; i < unshaded.registeredNodes.size(); i++)
+			index++;
+			if(registeredNode == modelIndex)
 			{
-				if(unshaded.registeredNodes[i] == modelIndex)
-				{
-					index = i;
-					break;
-				}
+				found = true;
+				break;
 			}
+		}
 
-			if(index != -1)
-				unshaded.registeredNodes.erase(unshaded.registeredNodes.begin() + index);
-			
-			break;
-		case MAT_UNSHADED_TEXTURED:
-			for(unsigned int i = 0; i < unshadedTextured.registeredNodes.size(); i++)
-			{
-				if(unshadedTextured.registeredNodes[i] == modelIndex)
-				{
-					index = i;
-					break;
-				}
-			}
+		if(found)
+			registeredNodes->erase(registeredNodes->begin() + index);
 
-			if(index != -1)
-				unshadedTextured.registeredNodes.erase(unshadedTextured.registeredNodes.begin() + index);
-			break;
-		case MAT_PHONG:
-			for(unsigned int i = 0; i < phong.registeredNodes.size(); i++)
-			{
-				if(phong.registeredNodes[i] == modelIndex)
-				{
-					index = i;
-					break;
-				}
-			}
-
-			if(index != -1)
-				phong.registeredNodes.erase(phong.registeredNodes.begin() + index);
-			break;
-		case MAT_PHONG_TEXTURED:
-			for(unsigned int i = 0; i < phongTextured.registeredNodes.size(); i++)
-			{
-				if(phongTextured.registeredNodes[i] == modelIndex)
-				{
-					index = i;
-					break;
-				}
-			}
-
-			if(index != -1)
-				phongTextured.registeredNodes.erase(phongTextured.registeredNodes.begin() + index);
-			break;
-		default:
-			Log::error("Material::unRegisterModel", "Invalid Material type");
-			break;
-		};
-
-		return index != -1 ? true : false;
+		return found;
 	}
 	
 	std::vector<int>* getRegisteredModels(Mat_Type material)
@@ -202,21 +100,11 @@ namespace Material
 		
 		switch(material)
 		{
-		case MAT_UNSHADED:
-			registeredModels = &unshaded.registeredNodes;
-			break;
-		case MAT_UNSHADED_TEXTURED:
-			registeredModels = &unshadedTextured.registeredNodes;
-			break;
-		case MAT_PHONG:
-			registeredModels = &phong.registeredNodes;
-			break;
-		case MAT_PHONG_TEXTURED:
-			registeredModels = &phongTextured.registeredNodes;
-			break;
-		default:
-			Log::error("Material::getRegisteredModels", "Invalid Material type");
-			break;
+        case MAT_UNSHADED:	        registeredModels = &unshaded.registeredModels;	      break;
+        case MAT_UNSHADED_TEXTURED:	registeredModels = &unshadedTextured.registeredModels; break;
+        case MAT_PHONG:			    registeredModels = &phong.registeredModels;  		  break;
+        case MAT_PHONG_TEXTURED:	registeredModels = &phongTextured.registeredModels;    break;
+		default: Log::error("Material::getRegisteredModels", "Invalid Material type");	  break;
 		};
 
 		return registeredModels;
@@ -251,27 +139,19 @@ namespace Material
 
 		switch(material)
 		{
-		case MAT_UNSHADED:
-			break;
-		case MAT_UNSHADED_TEXTURED:
-			Texture::remove(materialUniforms->texture);
-			break;
-		case MAT_PHONG:
-			break;
-		case MAT_PHONG_TEXTURED:
-			Texture::remove(materialUniforms->texture);
-			break;
-		default:
-			Log::error("Material::removeMaterialUniforms", "Invalid Material type");
-			break;
+		case MAT_UNSHADED: break;
+		case MAT_UNSHADED_TEXTURED:	Texture::remove(materialUniforms->texture);	break;
+		case MAT_PHONG:	break;
+		case MAT_PHONG_TEXTURED:	Texture::remove(materialUniforms->texture);	break;
+		default: Log::error("Material::removeMaterialUniforms", "Invalid Material type"); break;
 		}
 	}
 
 	void cleanup()
 	{
-		unshaded.registeredNodes.clear();
-		unshadedTextured.registeredNodes.clear();
-		phong.registeredNodes.clear();
-		phongTextured.registeredNodes.clear();
+        unshaded.registeredModels.clear();
+        unshadedTextured.registeredModels.clear();
+        phong.registeredModels.clear();
+        phongTextured.registeredModels.clear();
 	}
 }

@@ -11,7 +11,6 @@
 #include "transform.h"
 #include "scenemanager.h"
 #include "gameobject.h"
-#include "componentmanager.h"
 #include "camerasystems.h"
 #include "cpu.h"
 #include "utilities.h"
@@ -22,19 +21,34 @@ Game::Game(const char* path)
 {
 	Renderer::initialize(path);
 
-	CModel triModel;
-	Renderer::Model::loadFromFile("sphere.pamesh", &triModel);
-	triModel.material = MAT_UNSHADED;
-	triModel.materialUniforms.diffuseColor = Vec4(0.f, 1.f, 0.f, 1.0f);
+	CModel sphereModel;
+	Renderer::Model::loadFromFile("sphere.pamesh", &sphereModel);
+	sphereModel.material = MAT_UNSHADED;
 
-	GameObject* triangle = SceneManager::create("Triangle");
-	GO::addModel(triangle, &triModel);
-	CLight* light = GO::addLight(triangle);
-	light->type  = LT_POINT;
-	light->color = Vec4(0, 0, 1, 1);
-	CTransform* modelTransform = GO::getTransform(triangle);
-	Transform::setPosition(modelTransform, Vec3(-5, 10, -5), true);
+	
+	{
+		Vec4 color = Vec4(0, 1, 1, 1);
+		GameObject* sphere = SceneManager::create("sphere");
+		sphereModel.materialUniforms.diffuseColor = color;
+		GO::addModel(sphere, &sphereModel);
+		CLight* light = GO::addLight(sphere);
+		light->type  = LT_POINT;
+		light->color = color;
+		CTransform* modelTransform = GO::getTransform(sphere);
+		Transform::setPosition(modelTransform, Vec3(-5, 10, -5), true);
+	}
 
+	{
+		Vec4 color = Vec4(1, 0.6, 0, 1);
+		GameObject* sphere = SceneManager::create("sphere2");
+		sphereModel.materialUniforms.diffuseColor = color;
+		GO::addModel(sphere, &sphereModel);
+		CLight* light = GO::addLight(sphere);
+		light->type  = LT_POINT;
+		light->color = color;
+		CTransform* modelTransform = GO::getTransform(sphere);
+		Transform::setPosition(modelTransform, Vec3(15 , 10, -5), true);
+	}
 	CModel cubeModel;
 	cubeModel.material = MAT_PHONG;
 	cubeModel.materialUniforms.diffuseColor = Vec4(0, 1, 0, 1);
