@@ -1,11 +1,11 @@
 class BaseBehaviourScript </ type = "BaseBehaviourScript" />
 {
-	gameObject = null;
+	node = null;
 	
 	constructor(attachedObj)
 	{
 		assert(attachedObj != null);		
-		gameObject = attachedObj;
+		node = attachedObj.node;
 	}
 
 	function update(deltaTime)
@@ -16,5 +16,34 @@ class BaseBehaviourScript </ type = "BaseBehaviourScript" />
 	function onCollision(collisionData)
 	{
 		// To be overridden by extending class
+	}
+
+	function getGameObject()
+	{
+		return SceneManager.findByNode(node)
+	}
+	
+	function getTransform()
+	{
+		local gameObject = getGameObject()
+		return GO.getTransform(gameObject)
+	}
+
+	function getModel()
+	{
+		local gameObject = getGameObject()
+		return GO.getModel(gameObject)
+	}
+
+	function getCamera()
+	{
+		local gameObject = getGameObject()
+		return GO.getCamera(gameObject)
+	}
+
+	function getLight()
+	{
+		local gameObject = getGameObject()
+		return GO.getLight(gameObject)
 	}
 }

@@ -101,11 +101,11 @@ namespace Material
 		
 		switch(material)
 		{
-        case MAT_UNSHADED:	        registeredModels = &unshaded.registeredModels;	      break;
+        case MAT_UNSHADED:	        registeredModels = &unshaded.registeredModels;	       break;
         case MAT_UNSHADED_TEXTURED:	registeredModels = &unshadedTextured.registeredModels; break;
-        case MAT_PHONG:			    registeredModels = &phong.registeredModels;  		  break;
+        case MAT_PHONG:			    registeredModels = &phong.registeredModels;  		   break;
         case MAT_PHONG_TEXTURED:	registeredModels = &phongTextured.registeredModels;    break;
-		default: Log::error("Material::getRegisteredModels", "Invalid Material type");	  break;
+		default: Log::error("Material::getRegisteredModels", "Invalid Material type");	   break;
 		};
 
 		return registeredModels;

@@ -1,14 +1,12 @@
 class GOContainer
 {
-	gameObject = null;
+	node          = null;
 	behaviourList = null;
 	disabledList  = null;
 	
-	constructor(gameObjectToStore)
+	constructor(nodeToStore)
 	{
-		if(gameObjectToStore)
-			gameObject = gameObjectToStore;
-
+		node = nodeToStore;
 		behaviourList = [];
 		disabledList  = [];
 	}
@@ -17,6 +15,11 @@ class GOContainer
 	{
 		foreach(scriptObject in behaviourList)
 		    scriptObject.update(deltaTime);
+	}
+
+	function getGameObject()
+	{
+		return SceneManager.findByNode(node)
 	}
 }
 
@@ -32,30 +35,52 @@ this.findGameObjectContainer <- function(goIdentifier)
 {
 	assert(goIdentifier != null);	
 	local gameObjectContainer = null;
-	local compareNode = false;
-
-	if((typeof goIdentifier) != "string")
+	local compareNode   = false;
+	local compareString = false;
+	local comparePtr    = false;
+	
+	if((typeof goIdentifier) == "string")
+	{
+		compareString = true;
+	}
+	else if((typeof goIdentifier) == "integer")
+	{
 		compareNode = true;
+	}
+	else
+	{
+		comparePtr = true;
+	}
 	
 	foreach(object in this.objectList)
 	{
 		if(compareNode)
 		{
-			if(goIdentifier.node == object.gameObject.node)
+			if(goIdentifier == object.node)
 			{
 				gameObjectContainer = object;
 				break;
 			}
 		}
-		else
+
+		if(compareString)
 		{
-			if(goIdentifier == object.gameObject.name)
+			local gameObject = SceneManager.findByNode(object.node)
+			if(goIdentifier == gameObject.name)
 			{
 				gameObjectContainer = object;
 				break;
 			}
 		}
-		
+
+		if(comparePtr)
+		{
+			if(goIdentifier.node == object.node)
+			{
+				gameObjectContainer = object;
+				break;
+			}
+		}
 	}
 
 	return gameObjectContainer;
@@ -86,12 +111,12 @@ this.getScriptIndex <- function(scriptList, scriptName)
 
 this.addScript <- function(gameObject, scriptObj)
 {
-	local goContainer = findGameObjectContainer(gameObject);
+	local goContainer = findGameObjectContainer(gameObject.node);
 	local typeName = getScriptType(scriptObj);
 	
 	if(goContainer == null)
 	{
-		local newContainer = GOContainer(gameObject);
+		local newContainer = GOContainer(gameObject.node);
 		newContainer.behaviourList.append(scriptObj);
 		this.objectList.append(newContainer);
 	}
@@ -137,8 +162,7 @@ this.attachScript <- function(gameObject, scriptName)
 		if(initFunc)
 		{
 			local scriptObj = initFunc(gameObject);
-			
-			if(scriptObj)			
+			if(scriptObj)
 				addScript(gameObject, scriptObj);
 			else
 				Log.error("AttachScript", scriptName + " could not be initialized!");
@@ -189,8 +213,7 @@ this.processCollision <- function(gameObject, collisionData)
 {
 	try
 	{
-		assert(gameObject != null);
-		
+		assert(gameObject != null);		
 		local goContainer = findGameObjectContainer(gameObject);
 
 		if(goContainer)
@@ -220,7 +243,7 @@ this.removeGameObject <- function(gameObject)
 		
 		foreach(currentIndex, object in this.objectList)
 		{
-			if(gameObject.node == object.gameObject.node)
+			if(gameObject.node == object.node)
 			{
 				index = currentIndex;
 				foundObject = object;
@@ -368,14 +391,14 @@ this.reloadScript <- function(goIdentifier, scriptName)
 			local scriptIndex = getScriptIndex(goContainer.behaviourList, scriptName);
 			if(scriptIndex != -1)
 			{
-				Log.message("Reloading " + scriptName + " for " + goContainer.gameObject.name);
+				Log.message("Reloading " + scriptName + " for " + goContainer.getGameObject().name);
 				goContainer.behaviourList.remove(scriptIndex);
-				attachScript(goContainer.gameObject, scriptName);
+				attachScript(goContainer.getGameObject(), scriptName);
 			}
 			else
 			{
 				Log.error("ReloadScript", scriptName + " is not attached to "
-						  + goContainer.gameObject.name);
+						  + goContainer.getGameObject().name);
 			}
 		}
 		else

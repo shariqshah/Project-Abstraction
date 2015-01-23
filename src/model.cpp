@@ -207,7 +207,7 @@ namespace Renderer
 					if(material == MAT_PHONG || material == MAT_PHONG_TEXTURED)
 						Shader::setUniformMat4(shaderIndex, "modelMat", transform->transMat);
 					
-					Material::setMaterialUniforms(&model.materialUniforms, model.material);
+					Material::setMaterialUniforms(&model.materialUniforms, (Mat_Type)model.material);
 					
 					glBindVertexArray(model.vao);
 
@@ -246,7 +246,7 @@ namespace Renderer
 				emptyIndices.pop_back();
 			}
 
-			if(Material::registerModel(index, model->material))
+			if(Material::registerModel(index, (Mat_Type)model->material))
 				Log::message("Model " + model->filename + " registered");
 			else
 				Log::warning("Model " + model->filename + " already registered!");
@@ -281,24 +281,24 @@ namespace Renderer
 		void generateBindings()
 		{
 			Sqrat::RootTable().Bind("CModel", Sqrat::Class<CModel>()
-								.Var("node",             &CModel::node)
-								.Var("filename",         &CModel::filename)
-								.Var("vertices",         &CModel::vertices)
-								.Var("vertexColors",     &CModel::vertexColors)
-								.Var("normals",          &CModel::normals)
-								.Var("uvs",              &CModel::uvs)
-								.Var("indices",          &CModel::indices)
-								.Var("material",         &CModel::material)
-								.Var("materialUniforms", &CModel::materialUniforms)
-								.Var("drawIndexed",      &CModel::drawIndexed));
+									.Var("node",             &CModel::node)
+									.Var("filename",         &CModel::filename)
+									.Var("vertices",         &CModel::vertices)
+									.Var("vertexColors",     &CModel::vertexColors)
+									.Var("normals",          &CModel::normals)
+									.Var("uvs",              &CModel::uvs)
+									.Var("indices",          &CModel::indices)
+									.Var("material",         &CModel::material)
+									.Var("materialUniforms", &CModel::materialUniforms)
+									.Var("drawIndexed",      &CModel::drawIndexed));
 
 
 			Sqrat::RootTable().Bind("Model", Sqrat::Table(ScriptEngine::getVM())
-								.Func("create",          &create)
-								.Func("remove",          &remove)
-								.Func("loadFromFile",    &loadFromFile)
-								.Func("setMaterialType", &setMaterialType)
-								.Func("getModelAtIndex", &getModelAtIndex));
+									.Func("create",          &create)
+									.Func("remove",          &remove)
+									.Func("loadFromFile",    &loadFromFile)
+									.Func("setMaterialType", &setMaterialType)
+									.Func("getModelAtIndex", &getModelAtIndex));
 		}
 
 		void remove(unsigned int modelIndex)
@@ -306,13 +306,13 @@ namespace Renderer
 			CModel* model = &modelList[modelIndex];
 			glDeleteVertexArrays(1, &model->vao);
 
-			Material::removeMaterialUniforms(&model->materialUniforms, model->material);
+			Material::removeMaterialUniforms(&model->materialUniforms, (Mat_Type)model->material);
 			model->vertices.clear();
 			model->normals.clear();
 			model->uvs.clear();
 			model->vertexColors.clear();
 
-			if(!Material::unRegisterModel(modelIndex, model->material))
+			if(!Material::unRegisterModel(modelIndex, (Mat_Type)model->material))
 				Log::warning("Model at index " + std::to_string(modelIndex) + " not unregistered");
 			emptyIndices.push_back(modelIndex);
 		}
@@ -396,7 +396,7 @@ namespace Renderer
 		void setMaterialType(CModel* model, Mat_Type material)
 		{
 			int index = findModelIndex(model->filename.c_str());
-			Material::unRegisterModel(index, model->material);
+			Material::unRegisterModel(index, (Mat_Type)model->material);
 			model->material = material;
 			Material::registerModel(index, material);
 		}

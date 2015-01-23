@@ -14,12 +14,12 @@ class Reloader extends BaseBehaviourScript </ type = "Reloader" />
 	{
 		if(Input.isKeyReleased(Key.V))
 		{
-			local player = SceneManager.findByName("Player")
-			::reloadScript(player, "PlayerBehaviour")
+			local player = SceneManager.findByName("TestOBJ")
+			::reloadScript(player, "Test")
 		}
 
-		if(Input.isKeyPressed(Key.R))
-			::reloadScript(gameObject, "Reloader")
+		if(Input.isKeyReleased(Key.R))
+			::reloadScript(getGameObject(), "Reloader")
 	}
 }
 

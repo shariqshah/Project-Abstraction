@@ -56,6 +56,8 @@
 - Added fog and ambientLight to unshaded materials
 - Compacted material.cpp code
 - Fixed binding generation everywhere
+** <2015-01-23 Fri>
+- Brought back scripting to it's former glory. Scripting now works just as before
 * Tasks
 ** High-level
 *** TODO Renderer
@@ -128,7 +130,11 @@ Last step before moving on to CPU!
 **** DONE Add preprocessing and #includes to shader and put common code in a seperate file.
 	 - State "DONE"       from "TODO"       [2015-01-20 Tue 18:10]
 *** <2015-01-22 Thu>
-**** TODO Update script manager to use gameobject node instead of pointers
+**** DONE Update script manager to use gameobject node instead of pointers
+	 - State "DONE"       from "TODO"       [2015-01-23 Fri 22:33]
+*** <2015-01-23 Fri>
+**** TODO Add scene export to blender exporter so that each object is exported seperately and imported as a seperate gameobject ingamea
+**** TODO Fix material bug where phong textured material behave strangely when objects are added after it
 * Notes
 ** <2014-12-14 Sun 21:21>
 This is the first entry into my "OrgFile.org". The plan is to have a seperate OrgFile for every project that i work on, although i might change that in that in the future.
