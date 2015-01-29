@@ -58,6 +58,9 @@
 - Fixed binding generation everywhere
 ** <2015-01-23 Fri>
 - Brought back scripting to it's former glory. Scripting now works just as before
+** <2015-01-29 Thu>
+- Fixed bug where light's type could not be set from squirrel
+- Added bindings for texture creation/removal
 * Tasks
 ** High-level
 *** TODO Renderer
@@ -209,3 +212,7 @@ called (.pamesh) or Project Abstraction Mesh. Currently it supports exporting
 of a selected mesh to binary. I plan on adding material support as well. If this goes well i
 might even add component support later on if i need it. Since Project Abstraction is going to
 be procedurally generated, i don't have need of a level editor just yet.
+** <2015-01-29 Thu>
+For some reason when a struct has internal member as an enum sqrat can't seem to be able to set it.
+To fix it, i had to change the member's type from enum to int and then it works. I suppose things like that
+are to be expected when using someone else's code. Weird bug!

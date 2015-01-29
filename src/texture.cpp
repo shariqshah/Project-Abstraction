@@ -10,6 +10,7 @@
 #include "texture.h"
 #include "log.h"
 #include "renderer.h"
+#include "scriptengine.h"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "../include/stb_image.h"
@@ -216,5 +217,12 @@ namespace Texture
 		emptyIndices.clear();
 		
 		IMG_Quit();
+	}
+
+	void generateBindings()
+	{
+		Sqrat::RootTable().Bind("Texture", Sqrat::Table(ScriptEngine::getVM())
+								.Func("create", &create)
+								.Func("remove", &remove));
 	}
 }

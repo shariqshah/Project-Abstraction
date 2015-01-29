@@ -162,6 +162,11 @@ namespace Renderer
 									   std::string(arrayIndex + "position").c_str(),
 									   transform->position);
 				count++;
+				if(count > (Light::MAX_LIGHTS - 1))
+				{
+					count--;
+					break;
+				}
 			}
 			Shader::setUniformInt(shaderIndex, "numLights", count);
 		}

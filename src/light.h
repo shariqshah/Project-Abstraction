@@ -10,8 +10,8 @@ typedef uint32_t Node;
 enum LightType
 {
 	LT_SPOT  = 0,
-	LT_DIR   = 1,
-	LT_POINT = 2
+	LT_DIR,
+	LT_POINT
 };
 
 struct Attenuation
@@ -31,7 +31,7 @@ struct CLight
 	Node        node        = 0;
 	bool        castShadow  = false;
 	bool        valid       = true;
-	LightType   type        = LT_SPOT;
+	int         type        = LT_SPOT;
 	Attenuation attenuation;
 };
 
@@ -39,6 +39,8 @@ namespace Renderer
 {
 	namespace Light
 	{
+		const int MAX_LIGHTS = 32;
+		
 		int                    create(Node node);
 		void                   initialize();
 		void                   generateBindings();		

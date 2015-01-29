@@ -9,6 +9,7 @@ namespace Texture
 	void bindTexture(unsigned int textureIndex);	
 	void unbindActiveTexture();
 	void cleanup();
+	void generateBindings();
 }
 
 #endif

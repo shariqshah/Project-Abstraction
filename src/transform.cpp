@@ -211,6 +211,17 @@ namespace Transform
 								.Ctor<int, int, int>()
 								.Ctor<float, float, float>());
 
+		Sqrat::RootTable().Bind("Vec4", Sqrat::Class<glm::vec4>()
+								.Var("x", &glm::vec4::x)
+								.Var("y", &glm::vec4::y)
+								.Var("z", &glm::vec4::z)
+								.Var("w", &glm::vec4::w)
+								.Ctor()
+								.Ctor<float>()
+								.Ctor<int>()
+								.Ctor<int, int, int, int>()
+								.Ctor<float, float, float, float>());
+
 		Sqrat::RootTable().Bind("Quat", Sqrat::Class<glm::quat>()
 								.Var("x", &glm::quat::x)
 								.Var("y", &glm::quat::y)

@@ -12,6 +12,7 @@
 #include "renderer.h"
 #include "camera.h"
 #include "material.h"
+#include "texture.h"
 #include "cpu.h"
 
 namespace System
@@ -41,6 +42,7 @@ namespace System
 		Input::generateBindings();
 		Transform::generateBindings();
 		Material::generateBindings();
+		Texture::generateBindings();
 		Renderer::Model::generateBindings();
 		Renderer::Light::generateBindings();
 		Renderer::Camera::generateBindings();

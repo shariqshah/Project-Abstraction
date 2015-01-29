@@ -163,9 +163,9 @@ namespace Renderer
 		void generateBindings()
 		{
 			Sqrat::ConstTable().Enum("LightType", Sqrat::Enumeration ()
-									 .Const("LT_SPOT",  LightType::LT_SPOT)
-									 .Const("LT_DIR",   LightType::LT_DIR)
-									 .Const("LT_POINT", LightType::LT_POINT));
+									 .Const("SPOT",  LightType::LT_SPOT)
+									 .Const("DIR",   LightType::LT_DIR)
+									 .Const("POINT", LightType::LT_POINT));
 			
 			Sqrat::RootTable().Bind("Attenuation", Sqrat::Class<Attenuation>()
 									.Var("linear",    &Attenuation::linear)
@@ -181,7 +181,7 @@ namespace Renderer
 								.Var("node",        &CLight::node)
 								.Var("castShadow",  &CLight::castShadow)
 								.Var("valid",       &CLight::valid)
-								.Var("type",        &CLight::type)
+								.Var("lightType",        &CLight::type)
 								.Var("attenuation", &CLight::attenuation));
 
 			Sqrat::RootTable().Bind("Light", Sqrat::Table(ScriptEngine::getVM())
