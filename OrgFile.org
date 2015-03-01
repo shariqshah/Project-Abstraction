@@ -61,6 +61,8 @@
 ** <2015-01-29 Thu>
 - Fixed bug where light's type could not be set from squirrel
 - Added bindings for texture creation/removal
+- Added bindings for Vec4 type
+- Set max limit for light uniforms that can be set from clientside(CPU)
 * Tasks
 ** High-level
 *** TODO Renderer

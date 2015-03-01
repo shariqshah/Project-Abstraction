@@ -15,10 +15,10 @@ class Reloader extends BaseBehaviourScript </ type = "Reloader" />
 
 		color = Vec4(0, 1, 0, 1)
 		model = CModel()
-		Model.loadFromFile("sphere.pamesh", model)
+		Model.loadFromFile("suzanne.pamesh", model)
 		model.material = Mat_Type.UNSHADED;
 		model.materialUniforms.diffuseColor = color
-		model.materialUniforms.texture = Texture.create("chessboard.png")
+		model.materialUniforms.texture = Texture.create("test2.png")
 	}
 
 	function update(deltaTime)
@@ -36,14 +36,17 @@ class Reloader extends BaseBehaviourScript </ type = "Reloader" />
 		{
 			count++
 			local temp = SceneManager.create("Test" + count)
+			
+			if(Input.isKeyPressed(Key.LCTRL))
+				model.material = Mat_Type.PHONG
 			GO.addModel(temp, model)
 			local player = SceneManager.findByName("Player")
 			local pt = GO.getTransform(player)
 			local t = GO.getTransform(temp)
 			Transform.setPosition(t, pt.position, true)
-			local light = GO.addLight(temp)
-			light.lightType  = LightType.POINT
-			light.color = color
+			// local light = GO.addLight(temp)
+			// light.lightType  = LightType.POINT
+			// light.color = color
 		}
 	}
 }

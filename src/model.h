@@ -18,7 +18,7 @@ struct CModel
 	std::vector<Vec3>         normals;
 	std::vector<Vec2>         uvs;
 	std::vector<unsigned int> indices;
-	int                       material;
+	int                       material = 0;
 	unsigned int              vao;
 	Mat_Uniforms              materialUniforms;
 	bool                      drawIndexed = false;

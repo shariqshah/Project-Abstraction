@@ -80,12 +80,12 @@ enum class TextureFormat : int
 	RGBA32F   = H3DFormats::TEX_RGBA32F
 };
 
-struct TextRect
+struct Rect
 {
 	std::string text     = "UNINITIALIZED";
 	Vec2        scale    = Vec2(1, 1);
 	Vec2        position = Vec2(0, 0);	
-	Vec4        color;
+	Vec4        color    = Vec4(1.f);
 	Mat4        transMat;
 };
 
@@ -118,7 +118,7 @@ namespace Renderer
 	
     void initialize(const char* path);
 	void cleanup();
-	void addTextRect(TextRect text);
+    void addTextRect(Rect text);
 	void checkGLError(const char* context);
 	void renderFrame(CCamera* camera);
 	void setClearColor(const Vec3 clearColor);

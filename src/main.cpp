@@ -16,6 +16,8 @@
 #include "input.h"
 #include "renderer.h"
 
+// #define NDEBUG
+
 //========================================================> Globals
 SDL_Window*   window = NULL;
 SDL_GLContext context;

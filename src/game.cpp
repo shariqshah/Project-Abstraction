@@ -90,9 +90,9 @@ Game::Game(const char* path)
 
 	GameObject* plane = SceneManager::create("Ground");
 	CModel planeModel;
-	planeModel.material = MAT_PHONG_TEXTURED;
+    planeModel.material = MAT_PHONG;
 	// planeModel.materialUniforms.diffuseColor = Vec4(0, 1, 0, 1);
-	planeModel.materialUniforms.texture = Texture::create("layingrock.png");
+	planeModel.materialUniforms.texture = Texture::create("test2.png");
 	Renderer::Model::loadFromFile("plane.pamesh", &planeModel);
 	GO::addModel(plane, &planeModel);
 
@@ -100,15 +100,15 @@ Game::Game(const char* path)
 	CModel teapot;
 	teapot.material = MAT_PHONG_TEXTURED;
 	teapot.materialUniforms.diffuseColor = Vec4(1, 0.6, 0.0, 1);
-	teapot.materialUniforms.texture = Texture::create("test2.png");
+	teapot.materialUniforms.texture = Texture::create("chessboard.png");
 	Renderer::Model::loadFromFile("teapot.pamesh", &teapot);
-	GO::addModel(tea, &teapot);
+	CModel* testModel = GO::addModel(tea, &teapot);
 	CTransform* tTran = GO::getTransform(tea);
-	Transform::setPosition(tTran, Vec3(0, 5, -5), true);
+	Transform::setPosition(tTran, Vec3(0, 10, -5), true);
 
 	for(int i = 0; i < 1; i++)
 	{
-		TextRect text;
+		Rect text;
 		// text.position = Vec2((rand() % 10) + 1, (rand() % 10) + 1);
 		text.position = Vec2(5, 5);
 		text.text = "Hello";

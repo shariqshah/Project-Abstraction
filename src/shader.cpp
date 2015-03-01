@@ -1,6 +1,7 @@
 #include <GL/glew.h>
 #include <GL/gl.h>
 #include <string.h>
+#define NDEBUG
 #include <assert.h>
 #include <vector>
 

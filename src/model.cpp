@@ -392,7 +392,11 @@ namespace Renderer
 			}
 			else
 			{
-				*model = modelList[index];
+				CModel existingModel = modelList[index];
+				model->vertices = existingModel.vertices;
+				model->indices  = existingModel.indices;
+				model->normals  = existingModel.normals;
+				model->uvs      = existingModel.uvs;
 			}
 
 			return success;

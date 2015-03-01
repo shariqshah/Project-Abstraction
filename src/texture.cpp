@@ -2,6 +2,7 @@
 #include <vector>
 #include <string.h>
 #include <assert.h>
+#define NDEBUG
 
 #include "../include/SDL2/SDL_image.h"
 #include "../include/SDL2/SDL_surface.h"

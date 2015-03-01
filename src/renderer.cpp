@@ -42,10 +42,10 @@ namespace Renderer
 		std::vector<Vec2>     quadUVs;
 		std::vector<uint32_t> quadIndices;
 
-		std::vector<TextRect> textList;
+		std::vector<Rect> textList;
 		int textShader = -1;
 
-		Vec3 textColor = Vec3(0.8f);
+		Vec3 textColor = Vec3(1.f);
 	    Mat4 textProjMat;
 
 		int texture = -1;
@@ -91,7 +91,8 @@ namespace Renderer
 
 	void initText()
 	{
-		texture = Texture::create("test2.png");
+		// texture = Texture::create("font.bmp");
+		texture = Texture::create("chessboard.png");
 		// Load shader for text rendering
 	    textShader = Shader::create("quad.vert", "quad.frag");
 		
@@ -132,17 +133,32 @@ namespace Renderer
 		glBindVertexArray(0);
 		checkGLError("Renderer::initText::VAO");
 
-		quadVerts.push_back(Vec2(-0.5f,  0.5f));
-		quadVerts.push_back(Vec2(-0.5f, -0.5f));
-		quadVerts.push_back(Vec2( 0.5f, -0.5f));
-		quadVerts.push_back(Vec2( 0.5f,  0.5f));
+		// quadVerts.push_back(Vec2(-0.5f,  0.5f));
+		// quadVerts.push_back(Vec2(-0.5f, -0.5f));
+		// quadVerts.push_back(Vec2( 0.5f, -0.5f));
+		// quadVerts.push_back(Vec2( 0.5f,  0.5f));
 
+		quadVerts.push_back(Vec2(-1.f,  1.f));
+		quadVerts.push_back(Vec2(-1.f, -1.f));
+		quadVerts.push_back(Vec2( 1.f, -1.f));
+		quadVerts.push_back(Vec2( 1.f,  1.f));
+
+		char letter = 'A';
+		float x = (letter % 16)/16.f;
+		float y = (letter / 16)/16.f;
+		
+		// quadUVs.push_back(Vec2(x, 1.0f - y));
+		// quadUVs.push_back(Vec2(x, 1.0f - (y - (1.f/16.f))));
+		// quadUVs.push_back(Vec2(x + (1/16.f), 1.0f - (y - (1.f/16.f))));
+		// quadUVs.push_back(Vec2(x + (1/16.f), 1.0f - y));
+		
 		quadUVs.push_back(Vec2(0, 1));
+		// quadUVs.push_back(Vec2(0, 1));
 		quadUVs.push_back(Vec2(0, 0));
 		quadUVs.push_back(Vec2(1, 0));
-		quadUVs.push_back(Vec2(1, 0));
+		// quadUVs.push_back(Vec2(1, 0));
 		quadUVs.push_back(Vec2(1, 1));
-		quadUVs.push_back(Vec2(0, 1));
+		// quadUVs.push_back(Vec2(0, 1));
 
 		quadIndices.push_back(0);
 		quadIndices.push_back(1);
@@ -161,7 +177,7 @@ namespace Renderer
 		Shader::remove(textShader);
 	}
 
-	void addTextRect(TextRect text)
+	void addTextRect(Rect text)
 	{
 		Vec2 position = text.position;
 		Vec2 scale    = text.scale;
@@ -179,7 +195,7 @@ namespace Renderer
 	{
 		// TODO: Bitmap font rendering
 		Shader::bindShader(textShader);
-		// Shader::setUniformVec3(textShader, "textColor", textColor);
+		Shader::setUniformVec3(textShader, "textColor", textColor);
 		glBindVertexArray(textVAO);
 		// glEnable(GL_TEXTURE_2D);
 		Texture::bindTexture((unsigned int)texture);
@@ -376,7 +392,7 @@ namespace Renderer
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		Model::renderAllModels(camera, &renderParams);
-		// renderText();
+		renderText();
 	}
 	
     Node createGroupNode(const std::string& name, Node parent)
