@@ -192,7 +192,7 @@ namespace Renderer
 				Shader::bindShader(shaderIndex);
 
 				if((material == MAT_PHONG || material == MAT_PHONG_TEXTURED)
-				   && registeredMeshes->size() > 1)
+				   && registeredMeshes->size() > 0)
 				{
 					setLights(shaderIndex);					
 					GameObject* viewer = SceneManager::find(camera->node);
@@ -397,6 +397,7 @@ namespace Renderer
 				model->indices  = existingModel.indices;
 				model->normals  = existingModel.normals;
 				model->uvs      = existingModel.uvs;
+				model->filename = existingModel.filename;
 			}
 
 			return success;
@@ -404,10 +405,27 @@ namespace Renderer
 
 		void setMaterialType(CModel* model, Mat_Type material)
 		{
-			int index = findModelIndex(model->filename.c_str());
-			Material::unRegisterModel(index, (Mat_Type)model->material);
-			model->material = material;
-			Material::registerModel(index, material);
+			// int index = findModelIndex(model->filename.c_str());
+			int index = -1;
+			for(int i = 0; i < modelList.size(); i++)
+			{
+				if(model->node == modelList[i].node)
+				{
+					index = i;
+					break;
+				}
+			}
+
+			if(index != -1)
+			{
+				Material::unRegisterModel(index, (Mat_Type)model->material);
+				model->material = material;
+				Material::registerModel(index, material);
+			}
+			else
+			{
+				Log::error("Model::setMaterialtype", "Model not found");
+			}
 		}
 	}
 }

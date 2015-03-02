@@ -392,7 +392,7 @@ namespace Renderer
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		Model::renderAllModels(camera, &renderParams);
-		renderText();
+		//renderText();
 	}
 	
     Node createGroupNode(const std::string& name, Node parent)

@@ -23,10 +23,10 @@ class Reloader extends BaseBehaviourScript </ type = "Reloader" />
 
 	function update(deltaTime)
 	{
-		if(Input.isKeyReleased(Key.V))
+		if(Input.isKeyReleased(Key.C))
 		{
-			local player = SceneManager.findByName("TestOBJ")
-			::reloadScript(player, "Test")
+			local player = SceneManager.findByName("Debug")
+			::reloadScript(player, "Debug")
 		}
 
 		if(Input.isKeyReleased(Key.R))

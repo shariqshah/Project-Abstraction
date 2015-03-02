@@ -9,14 +9,27 @@ class Debug extends BaseBehaviourScript </ type = "Debug" />
 
 	function update(deltaTime)
 	{
-		local transform = CompManager.getTransform(gameObject);
-		Transform.rotate(transform, Vec3(1, 0, 0), 50 * deltaTime, Space.WORLD);
+		// local transform = CompManager.getTransform(gameObject);
+		// Transform.rotate(transform, Vec3(1, 0, 0), 50 * deltaTime, Space.WORLD);
 
-		// if(Input.isKeyReleased(Key.V))
-		// {
-		// 	local player = SceneManager.findByName("Player")
-		// 	this.reloadScriptByName(player, "PlayerBehaviour")
-		// }
+		if(Input.isKeyReleased(Key.V))
+		{
+			local model = getModel()
+			local val = model.materialUniforms.specularStrength
+			model.materialUniforms.specularStrength = 10
+			Log.message("Specularstrength : " + model.materialUniforms.specularStrength)
+		}
+
+		if(Input.isKeyReleased(Key.M))
+		{
+			local model = getModel()
+			local mat = Mat_Type.PHONG
+			if(Input.isKeyPressed(Key.LSHIFT))
+				mat = Mat_Type.PHONG_TEXTURED
+			else if(Input.isKeyPressed(Key.RCTRL))
+				mat = Mat_Type.UNSHADED_TEXTURED
+			Model.setMaterialType(model, mat)
+		}
 	}
 }
 

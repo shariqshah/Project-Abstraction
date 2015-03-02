@@ -98,13 +98,16 @@ Game::Game(const char* path)
 
 	GameObject* tea = SceneManager::create("Teapot");
 	CModel teapot;
-	teapot.material = MAT_PHONG_TEXTURED;
-	teapot.materialUniforms.diffuseColor = Vec4(1, 0.6, 0.0, 1);
+	// teapot.material = MAT_PHONG_TEXTURED;
+	teapot.material = MAT_PHONG;
+	// teapot.materialUniforms.diffuseColor = Vec4(1, 0.6, 0.0, 1);
+	teapot.materialUniforms.specularStrength = 60.f;
 	teapot.materialUniforms.texture = Texture::create("chessboard.png");
 	Renderer::Model::loadFromFile("teapot.pamesh", &teapot);
 	CModel* testModel = GO::addModel(tea, &teapot);
 	CTransform* tTran = GO::getTransform(tea);
 	Transform::setPosition(tTran, Vec3(0, 10, -5), true);
+	GO::attachScript(tea, "Debug");
 
 	for(int i = 0; i < 1; i++)
 	{
