@@ -35,7 +35,7 @@ namespace Renderer
 		unsigned int textIndexTop = 0;
 		
 		uint32_t MAX_TEXT_VERT_VBO = 4 * 1000 * sizeof(Vec2);
-		uint32_t MAX_TEXT_UV_VBO   = 6 * 1000 * sizeof(Vec2);
+		uint32_t MAX_TEXT_UV_VBO   = 4 * 1000 * sizeof(Vec2);
 		uint32_t MAX_TEXT_IND_VBO  = 6 * 1000 * sizeof(GLuint);
 
 		std::vector<Vec2>     quadVerts;
@@ -45,7 +45,7 @@ namespace Renderer
 		std::vector<Rect> textList;
 		int textShader = -1;
 
-		Vec3 textColor = Vec3(1.f);
+		Vec4 textColor = Vec4(1.f);
 	    Mat4 textProjMat;
 
 		int texture = -1;
@@ -87,12 +87,15 @@ namespace Renderer
 			checkGLError("Renderer::addRect::Indices");
 			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 		}
+
+		// uint temp_vao;
 	}
 
 	void initText()
 	{
-		// texture = Texture::create("font.bmp");
-		texture = Texture::create("chessboard.png");
+		texture = Texture::create("font.png");
+		// texture = Texture::create("chessboard.png");
+		
 		// Load shader for text rendering
 	    textShader = Shader::create("quad.vert", "quad.frag");
 		
@@ -133,15 +136,15 @@ namespace Renderer
 		glBindVertexArray(0);
 		checkGLError("Renderer::initText::VAO");
 
-		// quadVerts.push_back(Vec2(-0.5f,  0.5f));
-		// quadVerts.push_back(Vec2(-0.5f, -0.5f));
-		// quadVerts.push_back(Vec2( 0.5f, -0.5f));
-		// quadVerts.push_back(Vec2( 0.5f,  0.5f));
+		quadVerts.push_back(Vec2(-0.5f,  0.5f));
+		quadVerts.push_back(Vec2(-0.5f, -0.5f));
+		quadVerts.push_back(Vec2( 0.5f, -0.5f));
+		quadVerts.push_back(Vec2( 0.5f,  0.5f));
 
-		quadVerts.push_back(Vec2(-1.f,  1.f));
-		quadVerts.push_back(Vec2(-1.f, -1.f));
-		quadVerts.push_back(Vec2( 1.f, -1.f));
-		quadVerts.push_back(Vec2( 1.f,  1.f));
+		// quadVerts.push_back(Vec2(-1.f,  1.f));
+		// quadVerts.push_back(Vec2(-1.f, -1.f));
+		// quadVerts.push_back(Vec2( 1.f, -1.f));
+		// quadVerts.push_back(Vec2( 1.f,  1.f));
 
 		char letter = 'A';
 		float x = (letter % 16)/16.f;
@@ -158,7 +161,7 @@ namespace Renderer
 		quadUVs.push_back(Vec2(1, 0));
 		// quadUVs.push_back(Vec2(1, 0));
 		quadUVs.push_back(Vec2(1, 1));
-		// quadUVs.push_back(Vec2(0, 1));
+		// // quadUVs.push_back(Vec2(0, 1));
 
 		quadIndices.push_back(0);
 		quadIndices.push_back(1);
@@ -168,6 +171,51 @@ namespace Renderer
 		quadIndices.push_back(0);
 
 		textProjMat = glm::ortho(0.f, 10.f, 0.f, 10.f);
+
+
+
+		//////////////////////////////////////////////////////////////////////////////
+		//TESTING, DRAGONS AHOY!
+		//////////////////////////////////////////////////////////////////////////////
+		// glGenVertexArrays(1, &temp_vao);
+		// glBindVertexArray(temp_vao);
+
+		// // Vertices
+		// uint temp_vert_vbo;
+		// glGenBuffers(1, &temp_vert_vbo);
+		// glBindBuffer(GL_ARRAY_BUFFER, temp_vert_vbo);
+		// glBufferData(GL_ARRAY_BUFFER,
+		// 			 4 * sizeof(Vec2),
+		// 			 quadVerts.data(),
+		// 			 GL_STATIC_DRAW);
+		// glEnableVertexAttribArray(0);
+		// glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, 0);
+		// checkGLError("Renderer::initText::Vertices");
+		
+		// // UVs
+		// uint temp_uv_vbo;
+		// glGenBuffers(1, &temp_uv_vbo);
+		// glBindBuffer(GL_ARRAY_BUFFER, temp_uv_vbo);
+		// glBufferData(GL_ARRAY_BUFFER,
+		// 			 4 * sizeof(Vec2),
+		// 			 quadUVs.data(),
+		// 			 GL_STATIC_DRAW);
+		// glEnableVertexAttribArray(2);
+		// glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, 0);
+		// checkGLError("Renderer::initText::UVs");
+
+		// // Indices
+		// uint temp_index_vbo;
+		// glGenBuffers(1, &temp_index_vbo);
+		// glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, temp_index_vbo);
+		// glBufferData(GL_ELEMENT_ARRAY_BUFFER,
+		// 			 6 * sizeof(GLuint),
+		// 			 quadIndices.data(),
+		// 			 GL_STATIC_DRAW);
+		// checkGLError("Renderer::initText::Indices");
+		
+		// glBindVertexArray(0);
+		// checkGLError("Renderer::initText::VAO");
 	}
 
 	void cleanupText()
@@ -195,9 +243,10 @@ namespace Renderer
 	{
 		// TODO: Bitmap font rendering
 		Shader::bindShader(textShader);
-		Shader::setUniformVec3(textShader, "textColor", textColor);
+		Shader::setUniformVec4(textShader, "textColor", textColor);
 		glBindVertexArray(textVAO);
-		// glEnable(GL_TEXTURE_2D);
+		// glBindVertexArray(temp_vao);
+
 		Texture::bindTexture((unsigned int)texture);
 		
 		for(uint32_t i = 0; i < textList.size(); i++)
@@ -207,22 +256,11 @@ namespace Renderer
 			glDrawElementsBaseVertex(GL_TRIANGLES, 6, GL_UNSIGNED_INT, (void*) 0, (i * 4));
 		}
 
-		// glBegin (GL_QUADS);
-		// glTexCoord2f (0.0, 1.0);
-		// glVertex2f (-0.5, 0.5);
-
-		// glTexCoord2f (0.0, 0.0);
-		// glVertex2f (-0.5, -0.5);
-
-		// glTexCoord2f (1.0, 0.0);
-		// glVertex2f (0.5, -0.5);
-
-		// glTexCoord2f (1.0, 1.0);
-		// glVertex2f (0.5, 0.5);
-		// glEnd ();
+		// Mat4 mvp = textProjMat * Mat4(1.f);
+		// Shader::setUniformMat4(textShader, "mvp", mvp);
+		// glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, (void*)0);
 
 		Texture::unbindActiveTexture();
-		// glDisable(GL_TEXTURE_2D);
 		glBindVertexArray(0);
 		Shader::unbindActiveShader();
 	}
@@ -392,7 +430,7 @@ namespace Renderer
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		Model::renderAllModels(camera, &renderParams);
-		//renderText();
+		renderText();
 	}
 	
     Node createGroupNode(const std::string& name, Node parent)

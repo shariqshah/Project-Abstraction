@@ -109,11 +109,11 @@ Game::Game(const char* path)
 	Transform::setPosition(tTran, Vec3(0, 10, -5), true);
 	GO::attachScript(tea, "Debug");
 
-	for(int i = 0; i < 1; i++)
+	for(int i = 0; i < 3; i++)
 	{
 		Rect text;
 		// text.position = Vec2((rand() % 10) + 1, (rand() % 10) + 1);
-		text.position = Vec2(5, 5);
+		text.position = Vec2(5 * i, 5);
 		text.text = "Hello";
 		text.scale = Vec2(1, 1);
 		Renderer::addTextRect(text);
