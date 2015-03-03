@@ -45,7 +45,7 @@ namespace Renderer
 		std::vector<Rect> textList;
 		int textShader = -1;
 
-		Vec4 textColor = Vec4(1.f);
+		Vec4 textColor = Vec4(1, 1, 0, 1);
 	    Mat4 textProjMat;
 
 		int texture = -1;
@@ -93,7 +93,7 @@ namespace Renderer
 
 	void initText()
 	{
-		texture = Texture::create("font.png");
+		texture = Texture::create("font2.png");
 		// texture = Texture::create("chessboard.png");
 		
 		// Load shader for text rendering
@@ -146,21 +146,32 @@ namespace Renderer
 		// quadVerts.push_back(Vec2( 1.f, -1.f));
 		// quadVerts.push_back(Vec2( 1.f,  1.f));
 
-		char letter = 'A';
-		float x = (letter % 16)/16.f;
-		float y = (letter / 16)/16.f;
+		char letter = 'B';
+		// float x = (letter % 16)/16.f;
+		// float y = (letter / 16)/16.f;
+		float x = (letter % 16);
+		float y = (letter / 16);
+		x /= 16.f;
+		y = ((int)y % 16) / 16.f;
 		
-		// quadUVs.push_back(Vec2(x, 1.0f - y));
-		// quadUVs.push_back(Vec2(x, 1.0f - (y - (1.f/16.f))));
-		// quadUVs.push_back(Vec2(x + (1/16.f), 1.0f - (y - (1.f/16.f))));
-		// quadUVs.push_back(Vec2(x + (1/16.f), 1.0f - y));
+		// quadUVs.push_back(Vec2(x           , 1.f - y));
+		// quadUVs.push_back(Vec2(x           , 1.f - (y + 1.f/16.f)));
+		// quadUVs.push_back(Vec2(x + 1.f/16.f, 1.f - (y + 1.f/16.f)));
+		// quadUVs.push_back(Vec2(x + 1.f/16.f, 1.f - y));
+
+		float offset = 1.f/16.f;
+		// float start  = (6 % 16) / 16.f;
+		quadUVs.push_back(Vec2(x           , y));
+		quadUVs.push_back(Vec2(x           , y + offset));
+		quadUVs.push_back(Vec2(x + 1.f/16.f, y + offset));
+		quadUVs.push_back(Vec2(x + 1.f/16.f, y));
 		
-		quadUVs.push_back(Vec2(0, 1));
 		// quadUVs.push_back(Vec2(0, 1));
-		quadUVs.push_back(Vec2(0, 0));
-		quadUVs.push_back(Vec2(1, 0));
+		// // quadUVs.push_back(Vec2(0, 1));
+		// quadUVs.push_back(Vec2(0, 0));
 		// quadUVs.push_back(Vec2(1, 0));
-		quadUVs.push_back(Vec2(1, 1));
+		// // quadUVs.push_back(Vec2(1, 0));
+		// quadUVs.push_back(Vec2(1, 1));
 		// // quadUVs.push_back(Vec2(0, 1));
 
 		quadIndices.push_back(0);
@@ -216,6 +227,25 @@ namespace Renderer
 		
 		// glBindVertexArray(0);
 		// checkGLError("Renderer::initText::VAO");
+	}
+
+	void generateUVForChar(std::vector<Vec2>* uvs, char character)
+	{
+		float x = (character % 16);
+		float y = (character / 16);
+		x /= 16.f;
+		y = ((int)y % 16) / 16.f;
+
+		float offset = 1.f/16.f;
+		uvs->push_back(Vec2(x           , y));
+		uvs->push_back(Vec2(x           , y + offset));
+		uvs->push_back(Vec2(x + 1.f/16.f, y + offset));
+		uvs->push_back(Vec2(x + 1.f/16.f, y));
+	}
+
+	void addText(const char* text, Vec2 position)
+	{
+		
 	}
 
 	void cleanupText()
@@ -353,6 +383,8 @@ namespace Renderer
 		glEnable(GL_CULL_FACE);
 		glCullFace(GL_BACK);
 		glDepthFunc(GL_LEQUAL);
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		// glPolygonMode(GL_FRONT, GL_LINE);
 
         char* texturePath = (char *)malloc(sizeof(char) *
@@ -428,9 +460,9 @@ namespace Renderer
 	void renderFrame(CCamera* camera)
 	{
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
 		Model::renderAllModels(camera, &renderParams);
-		renderText();
+		// renderText();
+		// glDisable(GL_BLEND);
 	}
 	
     Node createGroupNode(const std::string& name, Node parent)

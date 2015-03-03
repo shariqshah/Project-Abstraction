@@ -70,8 +70,6 @@ namespace Texture
 			strcat(fullPath, filename);
 		
 			SDL_Surface* newSurface = IMG_Load(fullPath);
-			// int w, h, n;
-			// unsigned char *data = stbi_load(fullPath, &w, &h, &n, 0);
 			free(fullPath);
 
 			if(!newSurface)
@@ -83,36 +81,41 @@ namespace Texture
 			glGenTextures(1, &id);
 			glBindTexture(GL_TEXTURE_2D, id);
 
-			int format = GL_RGB;
-			// if(newSurface->format->BytesPerPixel == 4)
-			// 	format = GL_RGBA;
-
+			int format         = GL_RGB;
+			int internalFormat = GL_RGB;
+			int textureType    = GL_UNSIGNED_BYTE;
 			if (newSurface->format->BytesPerPixel == 4)
 			{
-				if (newSurface->format->Rmask == 0x000000ff)
+				if(newSurface->format->Rmask == 0xff)
+				{
 					format = GL_RGBA;
+					textureType = GL_UNSIGNED_INT_8_8_8_8_REV;
+				}
 				else
+				{
 					format = GL_BGRA;
+					textureType = GL_UNSIGNED_INT_8_8_8_8;
+				}
+				internalFormat = GL_RGBA8;
 			}
-			else if (newSurface->format->BytesPerPixel == 3)
+			else if(newSurface->format->BytesPerPixel == 3)
 			{
-				if (newSurface->format->Bmask == 0xff)
-					format = GL_BGR;
-				else
+				if(newSurface->format->Rmask == 0xff)
 					format = GL_RGB;
+				else
+					format = GL_BGR;
+				internalFormat = GL_RGB8;
 			}
 
 			SDL_LockSurface(newSurface);
-
-		
 			glTexImage2D(GL_TEXTURE_2D,
 						 0,
-						 format,
+						 internalFormat,
 						 newSurface->w,
 						 newSurface->h,
 						 0,
 						 format,
-						 GL_UNSIGNED_BYTE,
+						 textureType,
 						 newSurface->pixels);
 
 			// glTexImage2D(GL_TEXTURE_2D,
@@ -132,11 +135,8 @@ namespace Texture
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 			glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_REPEAT);
 			glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_REPEAT);
-
 			glBindTexture(GL_TEXTURE_2D, 0);
 
-			// free(data);
-		
 			if(!emptyIndices.empty())
 			{
 				index = emptyIndices.back();
@@ -158,7 +158,6 @@ namespace Texture
 		
 			newTexture->name = (char *)malloc(strlen(filename) + 1);
 			strcpy(newTexture->name, filename);
-
 			Log::message("Texture : " + std::string(filename) + " created.");
 		}
 		else

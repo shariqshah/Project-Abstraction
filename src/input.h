@@ -82,6 +82,11 @@ namespace Input
 		SPACE    = SDLK_SPACE,
 		ENTER    = SDLK_RETURN,
 		ESC      = SDLK_ESCAPE,
+		TAB      = SDLK_TAB,
+		HOME     = SDLK_HOME,
+		END      = SDLK_END,
+		DELETE   = SDLK_DELETE,
+		BACKSPC  = SDLK_BACKSPACE,
 		NP_PLUS  = SDLK_KP_PLUS,
 		NP_MINUS = SDLK_KP_MINUS
 	};
@@ -95,6 +100,7 @@ namespace Input
 	void updateMouseButtons(SDL_MouseButtonEvent event);
 	void updateReleasedKeys();
 	void updateMousePostion(SDL_MouseMotionEvent event);
+	void updateScroll(SDL_MouseWheelEvent event);
 
     void showCursor(bool show);
 	void setCursorLock(bool lock);
@@ -106,6 +112,8 @@ namespace Input
 	Sint32 getMouseY();
 	Sint32 getMouseRelX();
 	Sint32 getMouseRelY();
+	Sint32 getScrollX();
+	Sint32 getScrollY();
 	void   resetMouseRel();
 
 	void generateBindings();

@@ -16,12 +16,14 @@
 #include "utilities.h"
 #include "shader.h"
 #include "texture.h"
+#include "gui.h"
 
 Game::Game(const char* path)
 {
 	Renderer::initialize(path);
 	System::initialize();
-
+	Gui::initialize();
+	
 	CModel sphereModel;
 	Renderer::Model::loadFromFile("sphere.pamesh", &sphereModel);
 	sphereModel.material = MAT_UNSHADED;
@@ -109,21 +111,22 @@ Game::Game(const char* path)
 	Transform::setPosition(tTran, Vec3(0, 10, -5), true);
 	GO::attachScript(tea, "Debug");
 
-	for(int i = 0; i < 3; i++)
-	{
-		Rect text;
-		// text.position = Vec2((rand() % 10) + 1, (rand() % 10) + 1);
-		text.position = Vec2(5 * i, 5);
-		text.text = "Hello";
-		text.scale = Vec2(1, 1);
-		Renderer::addTextRect(text);
-	}
+	// for(int i = 0; i < 100; i++)
+	// {
+	// 	Rect text;
+	// 	text.position = Vec2((rand() % 10) + 1, (rand() % 10) + 1);
+	// 	// text.position = Vec2(5 * i, 5);
+	// 	text.text = "Hello";
+	// 	text.scale = Vec2(0.2f, 0.2f);
+	// 	Renderer::addTextRect(text);
+	// }
 }
 
 Game::~Game()
 {
 	System::cleanup();
 	Renderer::cleanup();
+	Gui::cleanup();
 }
 
 void Game::update(float deltaTime, bool* quit)
@@ -131,8 +134,12 @@ void Game::update(float deltaTime, bool* quit)
 	auto cube = SceneManager::find("Cube2");
 	auto tran = GO::getTransform(cube);
 	Transform::rotate(tran, Vec3(0, 1, 0), 30 * deltaTime);
-	
+
+	Gui::update(deltaTime);
 	System::update(deltaTime, quit);
+
+	Gui::text("Hello Gui!");
+	Gui::button("Hello");
 }
 
 void Game::draw()
@@ -140,7 +147,7 @@ void Game::draw()
 	GameObject* playerPtr = SceneManager::find(player);
 	CCamera*    camera    = GO::getCamera(playerPtr);
 	Renderer::renderFrame(camera);
-	
+	Gui::render();
 	// Physics::draw(activeTrans, activeCamera);
 }
 

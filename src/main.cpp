@@ -180,6 +180,9 @@ void handleEvents(SDL_Event* event, bool *quit)
 		if(event->type == SDL_MOUSEMOTION)
 			Input::updateMousePostion(event->motion);
 
+		if(event->type == SDL_MOUSEWHEEL)
+			Input::updateScroll(event->wheel);
+
 		if(event->type == SDL_WINDOWEVENT)
 			handleWindowEvent(event->window);
 	}

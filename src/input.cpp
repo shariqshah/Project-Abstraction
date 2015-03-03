@@ -8,18 +8,19 @@ namespace Input
 	namespace
 	{
         std::vector<int>releasedKeys;
-		const int cNumKeyboardKeys = 283;
-		const int cNumMouseButtons = 5;
-		const int cMaxDelta = 50;
-        Uint8  sKeyState[cNumKeyboardKeys];
-        Uint8  sMouseButtonState[cNumMouseButtons];
-		Sint32 sMouseX, sMouseY;
-		Sint32 sMouseRelX, sMouseRelY;
+		const int NUM_KEYBOARD_KEYS = 283;
+		const int NUM_MOUSE_BUTTONS = 5;
+		const int MAX_DELTA = 50;
+        Uint8  keyState[NUM_KEYBOARD_KEYS];
+        Uint8  mouseButtonState[NUM_MOUSE_BUTTONS];
+		Sint32 mouseX, mouseY;
+		Sint32 mouseRelX, mouseRelY;
+		Sint32 scrollX, scrollY;
 	}
 	
 	void updateKeys(SDL_KeyboardEvent event)
 	{
-		sKeyState[event.keysym.scancode] = event.state;
+		keyState[event.keysym.scancode] = event.state;
 		
 		if(event.state == (Uint8)KeyState::RELEASED)
 			releasedKeys.push_back(event.keysym.scancode);
@@ -27,12 +28,12 @@ namespace Input
 
 	void updateMouseButtons(SDL_MouseButtonEvent event)
 	{
-		sMouseButtonState[event.button] = event.state;
+		mouseButtonState[event.button] = event.state;
 	}
 
 	bool isPressed(Key key)
 	{
-		if(sKeyState[SDL_GetScancodeFromKey((SDL_Keycode)key)] == (Uint8)KeyState::PRESSED)
+		if(keyState[SDL_GetScancodeFromKey((SDL_Keycode)key)] == (Uint8)KeyState::PRESSED)
 			return true;
 		else
 			return false;
@@ -40,7 +41,7 @@ namespace Input
 
 	bool isReleased(Key key)
 	{
-		if(sKeyState[SDL_GetScancodeFromKey((SDL_Keycode)key)] == (Uint8)KeyState::RELEASED)
+		if(keyState[SDL_GetScancodeFromKey((SDL_Keycode)key)] == (Uint8)KeyState::RELEASED)
 			return true;
 		else
 			return false;
@@ -86,7 +87,7 @@ namespace Input
 
 	bool isPressed(MouseButton button)
 	{
-		if(sMouseButtonState[(int)button] == SDL_PRESSED)
+		if(mouseButtonState[(int)button] == SDL_PRESSED)
 			return true;
 		else
 			return false;
@@ -94,7 +95,7 @@ namespace Input
 
 	bool isReleased(MouseButton button)
 	{
-		if(sMouseButtonState[(int)button] == SDL_RELEASED)
+		if(mouseButtonState[(int)button] == SDL_RELEASED)
 			return true;
 		else
 			return false;
@@ -103,12 +104,12 @@ namespace Input
 	void updateReleasedKeys()
 	{
 		for(int key : releasedKeys)
-			sKeyState[key] = (Uint8)KeyState::INACTIVE;
+			keyState[key] = (Uint8)KeyState::INACTIVE;
 
-		for(int iCount = 0; iCount < cNumMouseButtons; iCount++)
+		for(int iCount = 0; iCount < NUM_MOUSE_BUTTONS; iCount++)
 		{
-			if(sMouseButtonState[iCount] == (Uint8)KeyState::RELEASED)
-				sMouseButtonState[iCount] = (Uint8)KeyState::INACTIVE;
+			if(mouseButtonState[iCount] == (Uint8)KeyState::RELEASED)
+				mouseButtonState[iCount] = (Uint8)KeyState::INACTIVE;
 		}
 
 		releasedKeys.clear();
@@ -119,56 +120,72 @@ namespace Input
 		SDL_PumpEvents();
 
 		// Initialize Keyboard and mouse keys to inactive
-		for(int iCount = 0; iCount < cNumKeyboardKeys; iCount++)
-			sKeyState[iCount] = (Uint8)KeyState::INACTIVE;
+		for(int iCount = 0; iCount < NUM_KEYBOARD_KEYS; iCount++)
+			keyState[iCount] = (Uint8)KeyState::INACTIVE;
 
-		for(int iCount = 0; iCount < cNumMouseButtons; iCount++)
-			sMouseButtonState[iCount] = (Uint8)KeyState::INACTIVE;
+		for(int iCount = 0; iCount < NUM_MOUSE_BUTTONS; iCount++)
+			mouseButtonState[iCount] = (Uint8)KeyState::INACTIVE;
 
 		// Get cursor positon and relative cursor position
-		SDL_GetMouseState(&sMouseX, &sMouseY);
-		SDL_GetRelativeMouseState(&sMouseRelX, &sMouseRelY);
+		SDL_GetMouseState(&mouseX, &mouseY);
+		SDL_GetRelativeMouseState(&mouseRelX, &mouseRelY);
 		SDL_SetRelativeMouseMode(SDL_FALSE);
 	}
 
 	void updateMousePostion(SDL_MouseMotionEvent event)
 	{
-		sMouseX = event.x;
-		sMouseY = event.y;
+		mouseX = event.x;
+		mouseY = event.y;
 
-		sMouseRelX = event.xrel;
-		sMouseRelY = event.yrel;
+		mouseRelX = event.xrel;
+		mouseRelY = event.yrel;
 
 		// if delta is unrealisticly large or small for some reason, ignore it
-		if(sMouseRelX > cMaxDelta || sMouseRelX < -cMaxDelta)
-			sMouseRelX = 0;
-		if(sMouseRelY > cMaxDelta || sMouseRelY < -cMaxDelta)
-			sMouseRelY = 0;
+		if(mouseRelX > MAX_DELTA || mouseRelX < -MAX_DELTA)
+			mouseRelX = 0;
+		if(mouseRelY > MAX_DELTA || mouseRelY < -MAX_DELTA)
+			mouseRelY = 0;
+	}
+
+	void updateScroll(SDL_MouseWheelEvent event)
+	{
+		scrollX = event.x;
+		scrollY = event.y;
 	}
 
 	Sint32 getMouseX()
 	{
-		return sMouseX;
+		return mouseX;
 	}
 	
 	Sint32 getMouseY()
 	{
-		return sMouseY;
+		return mouseY;
 	}
 	
 	Sint32 getMouseRelX()
 	{
-		return sMouseRelX;
+		return mouseRelX;
 	}
 	
 	Sint32 getMouseRelY()
 	{
-		return sMouseRelY;
+		return mouseRelY;
+	}
+
+	Sint32 getScrollX()
+	{
+		return scrollX;
+	}
+
+	Sint32 getScrollY()
+	{
+		return scrollY;
 	}
 
 	void resetMouseRel()
 	{
-		sMouseRelX = sMouseRelY = 0;
+		mouseRelX = mouseRelY = 0;
 	}
 
 	bool isKeyPressed(Key key)
@@ -252,6 +269,12 @@ namespace Input
 								 .Const("RCTRL", Key::RCTRL)
 								 .Const("SPACE", Key::SPACE)
 								 .Const("ENTER", Key::ENTER)
+								 .Const("ESC", Key::ESC)
+								 .Const("TAB", Key::TAB)
+								 .Const("HOME", Key::HOME)
+								 .Const("END", Key::END)
+								 .Const("DELETE", Key::DELETE)
+								 .Const("BACKSPC", Key::BACKSPC)
 								 .Const("NP_PLUS", Key::NP_PLUS)
 								 .Const("NP_MINUS", Key::NP_MINUS));
 
