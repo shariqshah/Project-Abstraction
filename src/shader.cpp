@@ -178,10 +178,10 @@ namespace Shader
 		glAttachShader(program, fragShader);
 
 		// Bind attribute locations
-		glBindAttribLocation(program, 0, "vPosition");
-		glBindAttribLocation(program, 1, "vNormal");
-		glBindAttribLocation(program, 2, "vUV");
-		glBindAttribLocation(program, 3, "vColor");
+		glBindAttribLocation(program, POSITION_LOC, "vPosition");
+		glBindAttribLocation(program, NORMAL_LOC,   "vNormal");
+		glBindAttribLocation(program, UV_LOC,       "vUV");
+		glBindAttribLocation(program, COLOR_LOC,    "vColor");
 		Renderer::checkGLError("Shader::create");
 		
 		glLinkProgram(program);
@@ -243,7 +243,7 @@ namespace Shader
 		glUseProgram(0);
 	}
 
-	GLint getUniformLocation(const unsigned int shaderIndex, const char* name)
+	int getUniformLocation(const unsigned int shaderIndex, const char* name)
 	{
 		ShaderObject shaderObject = shaderList[shaderIndex];
 		GLint handle = glGetUniformLocation(shaderObject.program, name);

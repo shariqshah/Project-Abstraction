@@ -138,8 +138,24 @@ void Game::update(float deltaTime, bool* quit)
 	Gui::update(deltaTime);
 	System::update(deltaTime, quit);
 
+	Gui::begin("Sphere", true);
 	Gui::text("Hello Gui!");
 	Gui::button("Hello");
+
+	GameObject* sphere = SceneManager::find("sphere");
+	CLight* light = GO::getLight(sphere);
+	CTransform* transform = GO::getTransform(sphere);
+	if(Gui::colorEdit4("Light Color", &light->color))
+	{
+		CModel* model = GO::getModel(sphere);
+		model->materialUniforms.diffuseColor = light->color;
+	}
+
+	if(Gui::inputVec3("Position", &transform->position))
+	{
+		Transform::setPosition(transform, transform->position);
+	}
+	Gui::end();
 }
 
 void Game::draw()
@@ -155,4 +171,5 @@ void Game::resize(int width, int height)
 {
 	glViewport(0, 0, width, height);
 	Renderer::Camera::updateAllCamerasAspectRatio((float)(width/height));
+	Gui::resize();
 }

@@ -14,6 +14,7 @@
 #include "material.h"
 #include "texture.h"
 #include "cpu.h"
+#include "gui.h"
 
 namespace System
 {
@@ -50,6 +51,7 @@ namespace System
 		Physics::generateBindings();
 		Physics::RigidBody::generateBindings();
 		SceneManager::generateBindings();
+		Gui::generateBindings();
 
 		ScriptEngine::runScript("../content/scripts/scriptManager.nut");
 		ScriptEngine::runScript("../content/scripts/init.nut");

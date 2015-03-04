@@ -1,8 +1,8 @@
 #include "gui.h"
 #include "input.h"
 #include "settings.h"
+#include "shader.h"
 
-#include "imgui.h"
 #include "../include/SDL2/SDL.h"
 
 #include "GL/glew.h"
@@ -12,11 +12,20 @@
 
 namespace Gui
 {
-	static int shader_handle, vert_handle, frag_handle;
-	static int texture_location, proj_mtx_location;
-	static int position_location, uv_location, colour_location;
+	static int shader_handle;
+	static int texture_location;
 	static size_t vbo_max_size = 20000;
 	static unsigned int vbo_handle, vao_handle;
+	static Mat4 projMat;
+
+	void resize()
+	{
+		ImGuiIO& io = ImGui::GetIO();
+		float winW = (float)Settings::getWindowWidth();
+		float winH = (float)Settings::getWindowHeight();
+		io.DisplaySize = ImVec2(winW, winH);
+		projMat = glm::ortho(0.f, winW, winH, 0.f);
+	}
 	
 	static void renderImguiDisplayLists(ImDrawList** const cmd_lists, int cmd_lists_count)
 	{
@@ -33,18 +42,10 @@ namespace Gui
 		glActiveTexture(GL_TEXTURE0);
 
 		// Setup orthographic projection matrix
-		const float width = ImGui::GetIO().DisplaySize.x;
 		const float height = ImGui::GetIO().DisplaySize.y;
-		const float ortho_projection[4][4] =
-			{
-				{ 2.0f/width,	0.0f,			0.0f,		0.0f },
-				{ 0.0f,			2.0f/-height,	0.0f,		0.0f },
-				{ 0.0f,			0.0f,			-1.0f,		0.0f },
-				{ -1.0f,		1.0f,			0.0f,		1.0f },
-			};
-		glUseProgram(shader_handle);
+		Shader::bindShader(shader_handle);
 		glUniform1i(texture_location, 0);
-		glUniformMatrix4fv(proj_mtx_location, 1, GL_FALSE, &ortho_projection[0][0]);
+		Shader::setUniformMat4(shader_handle, "projMat", projMat);
 
 		// Grow our buffer according to what we need
 		size_t total_vtx_count = 0;
@@ -93,7 +94,7 @@ namespace Gui
 
 		// Restore modified state
 		glBindVertexArray(0);
-		glUseProgram(0);
+		Shader::unbindActiveShader();
 		glDisable(GL_SCISSOR_TEST);
 		glBindTexture(GL_TEXTURE_2D, 0);
 		glEnable(GL_DEPTH_TEST);
@@ -110,14 +111,11 @@ namespace Gui
 		return SDL_GetClipboardText();
 	}
 
-	void LoadFontsTexture()
+	void loadFontsTexture()
 	{
 		ImGuiIO& io = ImGui::GetIO();
 		//ImFont* my_font1 = io.Fonts->AddFontDefault();
-		// ImFont* droidSans = io.Fonts->AddFontFromFileTTF("../content/fonts/DroidSans.ttf", 15.0f);
-		//ImFont* my_font3 = io.Fonts->AddFontFromFileTTF("extra_fonts/ProggyClean.ttf", 13.0f); my_font3->DisplayOffset.y += 1;
-		//ImFont* my_font4 = io.Fonts->AddFontFromFileTTF("extra_fonts/ProggyTiny.ttf", 10.0f); my_font4->DisplayOffset.y += 1;
-		//ImFont* my_font5 = io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf", 20.0f, io.Fonts->GetGlyphRangesJapanese());
+		ImFont* droidSans = io.Fonts->AddFontFromFileTTF("../content/fonts/DroidSans.ttf", 13.0f);
 
 		unsigned char* pixels;
 		int width, height;
@@ -138,9 +136,10 @@ namespace Gui
 	void update(float deltaTime)
 	{
 		ImGuiIO& io = ImGui::GetIO();
-		int winW = Settings::getWindowWidth();
-		int winH = Settings::getWindowHeight();
-		io.DisplaySize = ImVec2(winW, winH);
+		// int winW = Settings::getWindowWidth();
+		// int winH = Settings::getWindowHeight();
+		// io.DisplaySize = ImVec2(winW, winH);
+		resize();
 		io.DeltaTime   = deltaTime;
 
 		// Mouse
@@ -160,48 +159,8 @@ namespace Gui
 	
 	void initialize()
 	{
-		const GLchar *vertex_shader =
-			"#version 130\n"
-			"uniform mat4 ProjMtx;\n"
-			"in vec2 Position;\n"
-			"in vec2 UV;\n"
-			"in vec4 Color;\n"
-			"out vec2 Frag_UV;\n"
-			"out vec4 Frag_Color;\n"
-			"void main()\n"
-			"{\n"
-			"	Frag_UV = UV;\n"
-			"	Frag_Color = Color;\n"
-			"	gl_Position = ProjMtx * vec4(Position.xy,0,1);\n"
-			"}\n";
-
-		const GLchar* fragment_shader =
-			"#version 130\n"
-			"uniform sampler2D Texture;\n"
-			"in vec2 Frag_UV;\n"
-			"in vec4 Frag_Color;\n"
-			"out vec4 Out_Color;\n"
-			"void main()\n"
-			"{\n"
-			"	Out_Color = Frag_Color * texture( Texture, Frag_UV.st);\n"
-			"}\n";
-
-		shader_handle = glCreateProgram();
-		vert_handle = glCreateShader(GL_VERTEX_SHADER);
-		frag_handle = glCreateShader(GL_FRAGMENT_SHADER);
-		glShaderSource(vert_handle, 1, &vertex_shader, 0);
-		glShaderSource(frag_handle, 1, &fragment_shader, 0);
-		glCompileShader(vert_handle);
-		glCompileShader(frag_handle);
-		glAttachShader(shader_handle, vert_handle);
-		glAttachShader(shader_handle, frag_handle);
-		glLinkProgram(shader_handle);
-
-		texture_location = glGetUniformLocation(shader_handle, "Texture");
-		proj_mtx_location = glGetUniformLocation(shader_handle, "ProjMtx");
-		position_location = glGetAttribLocation(shader_handle, "Position");
-		uv_location = glGetAttribLocation(shader_handle, "UV");
-		colour_location = glGetAttribLocation(shader_handle, "Color");
+		shader_handle = Shader::create("gui.vert", "gui.frag");
+		texture_location = Shader::getUniformLocation(shader_handle, "sampler");
 
 		glGenBuffers(1, &vbo_handle);
 		glBindBuffer(GL_ARRAY_BUFFER, vbo_handle);
@@ -210,23 +169,23 @@ namespace Gui
 		glGenVertexArrays(1, &vao_handle);
 		glBindVertexArray(vao_handle);
 		glBindBuffer(GL_ARRAY_BUFFER, vbo_handle);
-		glEnableVertexAttribArray(position_location);
-		glEnableVertexAttribArray(uv_location);
-		glEnableVertexAttribArray(colour_location);
+		glEnableVertexAttribArray(Shader::POSITION_LOC);
+		glEnableVertexAttribArray(Shader::UV_LOC);
+		glEnableVertexAttribArray(Shader::COLOR_LOC);
 
-		glVertexAttribPointer(position_location,
+		glVertexAttribPointer(Shader::POSITION_LOC,
 							  2,
 							  GL_FLOAT,
 							  GL_FALSE,
 							  sizeof(ImDrawVert),
 							  (GLvoid*)OFFSETOF(ImDrawVert, pos));
-		glVertexAttribPointer(uv_location,
+		glVertexAttribPointer(Shader::UV_LOC,
 							  2,
 							  GL_FLOAT,
 							  GL_FALSE,
 							  sizeof(ImDrawVert),
 							  (GLvoid*)OFFSETOF(ImDrawVert, uv));
-		glVertexAttribPointer(colour_location,
+		glVertexAttribPointer(Shader::COLOR_LOC,
 							  4,
 							  GL_UNSIGNED_BYTE,
 							  GL_TRUE,
@@ -234,7 +193,6 @@ namespace Gui
 							  (GLvoid*)OFFSETOF(ImDrawVert, col));
 		glBindVertexArray(0);
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
-
 		
 		ImGuiIO& io = ImGui::GetIO();
 		io.DeltaTime = 1.0f / 60.0f;
@@ -260,19 +218,21 @@ namespace Gui
 		io.SetClipboardTextFn = setClipboardText;
 		io.GetClipboardTextFn = getClipboardText;
 
-		LoadFontsTexture();
+		resize();
+		loadFontsTexture();
 	}
 
 	void cleanup()
 	{
 		if (vao_handle) glDeleteVertexArrays(1, &vao_handle);
 		if (vbo_handle) glDeleteBuffers(1, &vbo_handle);
-		glDetachShader(shader_handle, vert_handle);
-		glDetachShader(shader_handle, frag_handle);
-		glDeleteShader(vert_handle);
-		glDeleteShader(frag_handle);
-		glDeleteProgram(shader_handle);
+		Shader::remove(shader_handle);
 		ImGui::Shutdown();
+	}
+
+	void generateBindings()
+	{
+		
 	}
 	
 	void text(const char* string)
@@ -283,5 +243,45 @@ namespace Gui
 	bool button(const char* string)
 	{
 		return ImGui::Button(string);
+	}
+
+	bool colorEdit3(const char* text, Vec3* color)
+	{
+		return ImGui::ColorEdit3(text, glm::value_ptr(*color));
+	}
+	
+	bool colorEdit4(const char* text, Vec4* color, bool showAlpha)
+	{
+		return ImGui::ColorEdit4(text, glm::value_ptr(*color), showAlpha);
+	}
+
+	bool inputfloat(const char* text, float* value)
+	{
+		return ImGui::InputFloat(text, value);
+	}
+	
+	bool inputVec2(const char* text, Vec2* value)
+	{
+		return ImGui::InputFloat2(text, glm::value_ptr(*value));
+	}
+
+	bool inputVec3(const char* text, Vec3* value)
+	{
+		return ImGui::InputFloat3(text, glm::value_ptr(*value));
+	}
+
+	bool inputVec4(const char* text, Vec4* value)
+	{
+		return ImGui::InputFloat4(text, glm::value_ptr(*value));
+	}
+
+	bool begin(const char* name, bool opened, Vec2 size, float alpha, WindowFlags flags)
+	{
+		return ImGui::Begin(name, &opened, ImVec2(size.x, size.y), alpha, flags);
+	}
+
+	void end()
+	{
+		ImGui::End();
 	}
 }
