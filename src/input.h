@@ -101,6 +101,7 @@ namespace Input
 	void updateReleasedKeys();
 	void updateMousePostion(SDL_MouseMotionEvent event);
 	void updateScroll(SDL_MouseWheelEvent event);
+	void textEntered(const char* text);
 
     void showCursor(bool show);
 	void setCursorLock(bool lock);
@@ -116,6 +117,7 @@ namespace Input
 	Sint32 getScrollY();
 	void   resetMouseRel();
 
+	void lockInput(bool lock);
 	void generateBindings();
 }
 

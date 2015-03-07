@@ -2,7 +2,7 @@
 #include <algorithm>
 #include "scriptengine.h"
 #include "input.h"
-
+#include "gui.h"
 namespace Input
 {
 	namespace
@@ -16,14 +16,35 @@ namespace Input
 		Sint32 mouseX, mouseY;
 		Sint32 mouseRelX, mouseRelY;
 		Sint32 scrollX, scrollY;
+		bool   textInputEnabled = false;
 	}
 	
 	void updateKeys(SDL_KeyboardEvent event)
 	{
-		keyState[event.keysym.scancode] = event.state;
+		bool  isDown = true;
+		Uint8 key    = event.keysym.scancode;
+
+		if(!textInputEnabled)
+		{
+			keyState[key] = event.state;
 		
-		if(event.state == (Uint8)KeyState::RELEASED)
-			releasedKeys.push_back(event.keysym.scancode);
+			if(event.state == (Uint8)KeyState::RELEASED)
+			{
+				releasedKeys.push_back(key);
+				isDown = false;
+			}
+		}
+		else
+		{
+			if(event.state == (Uint8)KeyState::RELEASED)
+				isDown = false;
+		}
+		
+		SDL_Keymod keyMod = SDL_GetModState();
+		bool modCtrl  = (keyMod & KMOD_CTRL);
+		bool modShift = (keyMod & KMOD_SHIFT);
+		
+		Gui::updateKeyDown(key, isDown, modCtrl, modShift);
 	}
 
 	void updateMouseButtons(SDL_MouseButtonEvent event)
@@ -33,18 +54,24 @@ namespace Input
 
 	bool isPressed(Key key)
 	{
-		if(keyState[SDL_GetScancodeFromKey((SDL_Keycode)key)] == (Uint8)KeyState::PRESSED)
-			return true;
-		else
-			return false;
+		bool pressed = false;
+		if(!textInputEnabled)
+		{
+			if(keyState[SDL_GetScancodeFromKey((SDL_Keycode)key)] == (Uint8)KeyState::PRESSED)
+				pressed = true;
+		}
+		return pressed;
 	}
 
 	bool isReleased(Key key)
 	{
-		if(keyState[SDL_GetScancodeFromKey((SDL_Keycode)key)] == (Uint8)KeyState::RELEASED)
-			return true;
-		else
-			return false;
+		bool released = false;
+		if(!textInputEnabled)
+		{
+			if(keyState[SDL_GetScancodeFromKey((SDL_Keycode)key)] == (Uint8)KeyState::RELEASED)
+				released = true;
+		}
+		return released;
 	}
 
 	void showCursor(bool show)
@@ -120,11 +147,14 @@ namespace Input
 		SDL_PumpEvents();
 
 		// Initialize Keyboard and mouse keys to inactive
-		for(int iCount = 0; iCount < NUM_KEYBOARD_KEYS; iCount++)
-			keyState[iCount] = (Uint8)KeyState::INACTIVE;
+		for(int count = 0; count < NUM_KEYBOARD_KEYS; count++)
+		{
+			keyState[count] = (Uint8)KeyState::INACTIVE;
+			Gui::updateKeyDown(SDL_GetScancodeFromKey(count), false, false, false);
+		}
 
-		for(int iCount = 0; iCount < NUM_MOUSE_BUTTONS; iCount++)
-			mouseButtonState[iCount] = (Uint8)KeyState::INACTIVE;
+		for(int count = 0; count < NUM_MOUSE_BUTTONS; count++)
+			mouseButtonState[count] = (Uint8)KeyState::INACTIVE;
 
 		// Get cursor positon and relative cursor position
 		SDL_GetMouseState(&mouseX, &mouseY);
@@ -299,4 +329,21 @@ namespace Input
 								.Func("isCursorVisible", &isCursorVisible)
 								.Func("isCursorLocked",  &isCursorLocked));
 	}
+	
+	void lockInput(bool lock)
+	{
+		textInputEnabled = lock;
+
+		if(textInputEnabled)
+			SDL_StartTextInput();
+		else
+			SDL_StopTextInput();
+	}
+
+	void textEntered(const char* text)
+	{
+		Gui::textEntered(text);
+	}
+	
 }
+

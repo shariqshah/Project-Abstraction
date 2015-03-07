@@ -26,6 +26,8 @@ namespace Gui
 	void render();
 	void resize();
 	void generateBindings();
+	void updateKeyDown(uint8_t key, bool isDown, bool modCtrl, bool modShift);
+	void textEntered(const char* text);
 
 	// Widgets
 	void text(const char* string);

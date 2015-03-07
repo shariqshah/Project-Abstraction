@@ -88,9 +88,17 @@ int main(int argc, char** args)
 bool init()
 {
 	bool success = true;
+
+	SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
+	SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
+	SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8);
+	SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, 8);
+	SDL_GL_SetAttribute(SDL_GL_BUFFER_SIZE, 32);
+	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
 	
 	//Initialize SDL
-    if(SDL_Init(SDL_INIT_VIDEO) < 0)
+    if(SDL_Init(SDL_INIT_EVERYTHING) < 0)
     {
 		std::cerr<<"ERROR : SDL could not initialize. "<<SDL_GetError()<<std::endl;
         success = false;
@@ -115,7 +123,7 @@ bool init()
 				success = false;
 			}
 			else
-			{
+			{	
 				//Create OpenGl context
 				context = SDL_GL_CreateContext(window);
 
@@ -168,10 +176,7 @@ void handleEvents(SDL_Event* event, bool *quit)
 		if(event->type == SDL_QUIT)
 			*quit = true;
 
-		if(event->type == SDL_KEYDOWN)
-			Input::updateKeys(event->key);
-
-		if(event->type == SDL_KEYUP)
+		if(event->type == SDL_KEYDOWN || event->type == SDL_KEYUP)
 			Input::updateKeys(event->key);
 
 		if(event->type == SDL_MOUSEBUTTONDOWN || event->type == SDL_MOUSEBUTTONUP)
@@ -182,6 +187,9 @@ void handleEvents(SDL_Event* event, bool *quit)
 
 		if(event->type == SDL_MOUSEWHEEL)
 			Input::updateScroll(event->wheel);
+
+		if(event->type == SDL_TEXTINPUT)
+			Input::textEntered(&event->text.text[0]);
 
 		if(event->type == SDL_WINDOWEVENT)
 			handleWindowEvent(event->window);

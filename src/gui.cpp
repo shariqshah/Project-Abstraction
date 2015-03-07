@@ -114,8 +114,7 @@ namespace Gui
 	void loadFontsTexture()
 	{
 		ImGuiIO& io = ImGui::GetIO();
-		//ImFont* my_font1 = io.Fonts->AddFontDefault();
-		ImFont* droidSans = io.Fonts->AddFontFromFileTTF("../content/fonts/DroidSans.ttf", 13.0f);
+		io.Fonts->AddFontFromFileTTF("../content/fonts/DroidSans.ttf", 14.0f);
 
 		unsigned char* pixels;
 		int width, height;
@@ -136,11 +135,8 @@ namespace Gui
 	void update(float deltaTime)
 	{
 		ImGuiIO& io = ImGui::GetIO();
-		// int winW = Settings::getWindowWidth();
-		// int winH = Settings::getWindowHeight();
-		// io.DisplaySize = ImVec2(winW, winH);
 		resize();
-		io.DeltaTime   = deltaTime;
+		io.DeltaTime = deltaTime;
 
 		// Mouse
 		int mouseX = Input::getMouseX();
@@ -150,6 +146,11 @@ namespace Gui
 		io.MouseDown[1] = Input::isPressed(Input::MouseButton::M_RIGHT);
 		
 		ImGui::NewFrame();
+
+		if(io.WantCaptureKeyboard)
+			Input::lockInput(true);
+		else
+			Input::lockInput(false);
 	}
 
 	void render()
@@ -196,23 +197,23 @@ namespace Gui
 		
 		ImGuiIO& io = ImGui::GetIO();
 		io.DeltaTime = 1.0f / 60.0f;
-		io.KeyMap[ImGuiKey_Tab]        = Input::Key::TAB;
-		io.KeyMap[ImGuiKey_LeftArrow]  = Input::Key::LEFT;
-		io.KeyMap[ImGuiKey_RightArrow] = Input::Key::RIGHT;
-		io.KeyMap[ImGuiKey_UpArrow]    = Input::Key::UP;
-		io.KeyMap[ImGuiKey_DownArrow]  = Input::Key::DOWN;
-		io.KeyMap[ImGuiKey_Home]       = Input::Key::HOME;
-		io.KeyMap[ImGuiKey_End]        = Input::Key::END;
-		io.KeyMap[ImGuiKey_Delete]     = Input::Key::DELETE;
-		io.KeyMap[ImGuiKey_Backspace]  = Input::Key::BACKSPC;
-		io.KeyMap[ImGuiKey_Enter]      = Input::Key::ENTER;
-		io.KeyMap[ImGuiKey_Escape]     = Input::Key::ESC;
-		io.KeyMap[ImGuiKey_A]          = Input::Key::A;
-		io.KeyMap[ImGuiKey_C]          = Input::Key::C;
-		io.KeyMap[ImGuiKey_V]          = Input::Key::V;
-		io.KeyMap[ImGuiKey_X]          = Input::Key::X;
-		io.KeyMap[ImGuiKey_Y]          = Input::Key::Y;
-		io.KeyMap[ImGuiKey_Z]          = Input::Key::Z;
+		io.KeyMap[ImGuiKey_Tab]        = SDL_GetScancodeFromKey(Input::Key::TAB);
+		io.KeyMap[ImGuiKey_LeftArrow]  = SDL_GetScancodeFromKey(Input::Key::LEFT);
+		io.KeyMap[ImGuiKey_RightArrow] = SDL_GetScancodeFromKey(Input::Key::RIGHT);
+		io.KeyMap[ImGuiKey_UpArrow]    = SDL_GetScancodeFromKey(Input::Key::UP);
+		io.KeyMap[ImGuiKey_DownArrow]  = SDL_GetScancodeFromKey(Input::Key::DOWN);
+		io.KeyMap[ImGuiKey_Home]       = SDL_GetScancodeFromKey(Input::Key::HOME);
+		io.KeyMap[ImGuiKey_End]        = SDL_GetScancodeFromKey(Input::Key::END);
+		io.KeyMap[ImGuiKey_Delete]     = SDL_GetScancodeFromKey(Input::Key::DELETE);
+		io.KeyMap[ImGuiKey_Backspace]  = SDL_GetScancodeFromKey(Input::Key::BACKSPC);
+		io.KeyMap[ImGuiKey_Enter]      = SDL_GetScancodeFromKey(Input::Key::ENTER);
+		io.KeyMap[ImGuiKey_Escape]     = SDL_GetScancodeFromKey(Input::Key::ESC);
+		io.KeyMap[ImGuiKey_A]          = SDL_GetScancodeFromKey(Input::Key::A);
+		io.KeyMap[ImGuiKey_C]          = SDL_GetScancodeFromKey(Input::Key::C);
+		io.KeyMap[ImGuiKey_V]          = SDL_GetScancodeFromKey(Input::Key::V);
+		io.KeyMap[ImGuiKey_X]          = SDL_GetScancodeFromKey(Input::Key::X);
+		io.KeyMap[ImGuiKey_Y]          = SDL_GetScancodeFromKey(Input::Key::Y);
+		io.KeyMap[ImGuiKey_Z]          = SDL_GetScancodeFromKey(Input::Key::Z);
 
 		io.RenderDrawListsFn  = renderImguiDisplayLists;
 		io.SetClipboardTextFn = setClipboardText;
@@ -234,6 +235,27 @@ namespace Gui
 	{
 		
 	}
+
+	void updateKeyDown(uint8_t key, bool isDown, bool modCtrl, bool modShift)
+	{
+		ImGuiIO& io = ImGui::GetIO();
+		io.KeysDown[key] = isDown;
+		io.KeyCtrl       = modCtrl;
+		io.KeyShift      = modShift;
+	}
+
+	void textEntered(const char* text)
+	{
+		ImGuiIO* io = &ImGui::GetIO();
+		for(size_t i = 0; i < strlen(text); i++)
+		{
+			io->AddInputCharacter(text[i]);
+		}
+	}
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////
+	// Widgets
+	////////////////////////////////////////////////////////////////////////////////////////////////////////
 	
 	void text(const char* string)
 	{
