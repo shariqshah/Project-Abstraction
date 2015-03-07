@@ -244,6 +244,12 @@ namespace Gui
 		io.KeyShift      = modShift;
 	}
 
+	void updateMouseWheel(float scroll)
+	{
+		ImGuiIO* io = &ImGui::GetIO();
+		io->MouseWheel += scroll;
+	}
+
 	void textEntered(const char* text)
 	{
 		ImGuiIO* io = &ImGui::GetIO();

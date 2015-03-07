@@ -181,6 +181,8 @@ namespace Input
 	{
 		scrollX = event.x;
 		scrollY = event.y;
+
+		Gui::updateMouseWheel(scrollY);
 	}
 
 	Sint32 getMouseX()

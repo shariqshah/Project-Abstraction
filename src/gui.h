@@ -27,6 +27,7 @@ namespace Gui
 	void resize();
 	void generateBindings();
 	void updateKeyDown(uint8_t key, bool isDown, bool modCtrl, bool modShift);
+	void updateMouseWheel(float scroll);
 	void textEntered(const char* text);
 
 	// Widgets
