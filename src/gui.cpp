@@ -148,9 +148,9 @@ namespace Gui
 		ImGui::NewFrame();
 
 		if(io.WantCaptureKeyboard)
-			Input::lockInput(true);
-		else
-			Input::lockInput(false);
+			Input::enableTextInput(true);
+		else if(Input::isTextInputActive())
+			Input::enableTextInput(false);
 	}
 
 	void render()
@@ -225,8 +225,8 @@ namespace Gui
 
 	void cleanup()
 	{
-		if (vao_handle) glDeleteVertexArrays(1, &vao_handle);
-		if (vbo_handle) glDeleteBuffers(1, &vbo_handle);
+		if(vao_handle) glDeleteVertexArrays(1, &vao_handle);
+		if(vbo_handle) glDeleteBuffers(1, &vbo_handle);
 		Shader::remove(shader_handle);
 		ImGui::Shutdown();
 	}

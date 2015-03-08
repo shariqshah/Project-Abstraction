@@ -166,7 +166,7 @@ namespace System
 			Log::setEnabled(true);
 		if(Input::isReleased(Input::Key::F10))
 			Log::setEnabled(false);
-		if(Input::isReleased(Input::Key::ESC))
+		if(Input::isReleased(Input::Key::Q) && Input::isPressed(Input::Key::LSUPER))
 			*quit = true;
 		
 		System::CameraSystem::updateFreeCamera(deltaTime);

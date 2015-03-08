@@ -24,25 +24,31 @@ namespace Input
 		bool  isDown = true;
 		Uint8 key    = event.keysym.scancode;
 
-		if(!textInputEnabled)
-		{
-			keyState[key] = event.state;
+		// if(!textInputEnabled)
+		// {
+		// 	keyState[key] = event.state;
 		
-			if(event.state == (Uint8)KeyState::RELEASED)
-			{
-				releasedKeys.push_back(key);
-				isDown = false;
-			}
-		}
-		else
+		// 	if(event.state == (Uint8)KeyState::RELEASED)
+		// 	{
+		// 		releasedKeys.push_back(key);
+		// 		isDown = false;
+		// 	}
+		// }
+		// else
+		// {
+		// 	if(event.state == (Uint8)KeyState::RELEASED)
+		// 		isDown = false;
+		// }
+		keyState[key] = event.state;		
+		if(event.state == (Uint8)KeyState::RELEASED)
 		{
-			if(event.state == (Uint8)KeyState::RELEASED)
-				isDown = false;
+			releasedKeys.push_back(key);
+			isDown = false;
 		}
 		
-		SDL_Keymod keyMod = SDL_GetModState();
-		bool modCtrl  = (keyMod & KMOD_CTRL);
-		bool modShift = (keyMod & KMOD_SHIFT);
+		SDL_Keymod modState = SDL_GetModState();
+		bool modCtrl  = (modState & KMOD_CTRL);
+		bool modShift = (modState & KMOD_SHIFT);
 		
 		Gui::updateKeyDown(key, isDown, modCtrl, modShift);
 	}
@@ -128,15 +134,15 @@ namespace Input
 			return false;
 	}
 
-	void updateReleasedKeys()
+    void updateReleasedKeys()
 	{
 		for(int key : releasedKeys)
 			keyState[key] = (Uint8)KeyState::INACTIVE;
 
-		for(int iCount = 0; iCount < NUM_MOUSE_BUTTONS; iCount++)
+        for(int count = 0; count < NUM_MOUSE_BUTTONS; count++)
 		{
-			if(mouseButtonState[iCount] == (Uint8)KeyState::RELEASED)
-				mouseButtonState[iCount] = (Uint8)KeyState::INACTIVE;
+            if(mouseButtonState[count] == (Uint8)KeyState::RELEASED)
+                mouseButtonState[count] = (Uint8)KeyState::INACTIVE;
 		}
 
 		releasedKeys.clear();
@@ -299,6 +305,8 @@ namespace Input
 								 .Const("RSHIFT", Key::RSHIFT)
 								 .Const("LCTRL", Key::LCTRL)
 								 .Const("RCTRL", Key::RCTRL)
+								 .Const("RSUPER", Key::RSUPER)
+								 .Const("LSUPER", Key::LSUPER)
 								 .Const("SPACE", Key::SPACE)
 								 .Const("ENTER", Key::ENTER)
 								 .Const("ESC", Key::ESC)
@@ -332,19 +340,28 @@ namespace Input
 								.Func("isCursorLocked",  &isCursorLocked));
 	}
 	
-	void lockInput(bool lock)
+    void enableTextInput(bool enable)
 	{
-		textInputEnabled = lock;
+        textInputEnabled = enable;
 
 		if(textInputEnabled)
 			SDL_StartTextInput();
 		else
+		{
 			SDL_StopTextInput();
+			Uint8 key = SDL_GetScancodeFromKey(Key::ESC);
+            keyState[key] = (Uint8)KeyState::INACTIVE;
+		}
 	}
 
 	void textEntered(const char* text)
 	{
 		Gui::textEntered(text);
+	}
+
+	bool isTextInputActive()
+	{
+		return textInputEnabled;
 	}
 	
 }

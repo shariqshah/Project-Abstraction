@@ -79,6 +79,8 @@ namespace Input
 		RSHIFT   = SDLK_RSHIFT,
 		LCTRL    = SDLK_LCTRL,
 		RCTRL    = SDLK_RCTRL,
+		RSUPER   = SDLK_RGUI,
+		LSUPER   = SDLK_LGUI,
 		SPACE    = SDLK_SPACE,
 		ENTER    = SDLK_RETURN,
 		ESC      = SDLK_ESCAPE,
@@ -95,6 +97,7 @@ namespace Input
 	bool isReleased(Key key);
 	bool isPressed(MouseButton button);
 	bool isReleased(MouseButton button);
+	bool isTextInputActive();
 	
 	void updateKeys(SDL_KeyboardEvent event);
 	void updateMouseButtons(SDL_MouseButtonEvent event);
@@ -117,7 +120,7 @@ namespace Input
 	Sint32 getScrollY();
 	void   resetMouseRel();
 
-	void lockInput(bool lock);
+    void enableTextInput(bool enable);
 	void generateBindings();
 }
 
