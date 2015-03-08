@@ -27,7 +27,6 @@ Game::Game(const char* path)
 	CModel sphereModel;
 	Renderer::Model::loadFromFile("sphere.pamesh", &sphereModel);
 	sphereModel.material = MAT_UNSHADED;
-
 	
 	{
 		Vec4 color = Vec4(0, 1, 1, 1);
@@ -137,25 +136,6 @@ void Game::update(float deltaTime, bool* quit)
 
 	Gui::update(deltaTime);
 	System::update(deltaTime, quit);
-
-	Gui::begin("Sphere", true);
-	Gui::text("Hello Gui!");
-	Gui::button("Hello");
-
-	GameObject* sphere = SceneManager::find("sphere");
-	CLight* light = GO::getLight(sphere);
-	CTransform* transform = GO::getTransform(sphere);
-	if(Gui::colorEdit4("Light Color", &light->color))
-	{
-		CModel* model = GO::getModel(sphere);
-		model->materialUniforms.diffuseColor = light->color;
-	}
-
-	if(Gui::inputVec3("Position", &transform->position))
-	{
-		Transform::setPosition(transform, transform->position);
-	}
-	Gui::end();
 }
 
 void Game::draw()

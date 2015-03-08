@@ -15,6 +15,7 @@
 #include "texture.h"
 #include "cpu.h"
 #include "gui.h"
+#include "editor.h"
 
 namespace System
 {
@@ -55,6 +56,8 @@ namespace System
 
 		ScriptEngine::runScript("../content/scripts/scriptManager.nut");
 		ScriptEngine::runScript("../content/scripts/init.nut");
+
+		Editor::initialize();
 	}
 	
 	Vec3 generateRandom()
@@ -170,7 +173,7 @@ namespace System
 			*quit = true;
 		
 		System::CameraSystem::updateFreeCamera(deltaTime);
-		// Cpu::update(deltaTime);
+		Editor::update(deltaTime, quit);
 		ScriptEngine::executeFunction("updateObjects", deltaTime);
 		
 		// GOMap* sceneObjects = SceneManager::getSceneObjects();
@@ -201,6 +204,7 @@ namespace System
 	{
 		SceneManager::cleanup();
 		Transform::cleanup();
+		Editor::cleanup();
 		//CompManager::cleanup();
 		// Physics::cleanup();
 		// Renderer::Model::cleanup();
