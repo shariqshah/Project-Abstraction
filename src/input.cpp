@@ -21,24 +21,8 @@ namespace Input
 	
 	void updateKeys(SDL_KeyboardEvent event)
 	{
-		bool  isDown = true;
-		Uint8 key    = event.keysym.scancode;
-
-		// if(!textInputEnabled)
-		// {
-		// 	keyState[key] = event.state;
-		
-		// 	if(event.state == (Uint8)KeyState::RELEASED)
-		// 	{
-		// 		releasedKeys.push_back(key);
-		// 		isDown = false;
-		// 	}
-		// }
-		// else
-		// {
-		// 	if(event.state == (Uint8)KeyState::RELEASED)
-		// 		isDown = false;
-		// }
+		bool  isDown  = true;
+		Uint8 key     = event.keysym.scancode;
 		keyState[key] = event.state;		
 		if(event.state == (Uint8)KeyState::RELEASED)
 		{
