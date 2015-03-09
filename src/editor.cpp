@@ -108,6 +108,7 @@ namespace Editor
 					ImGui::PushItemWidth(width);
 					// Position
 					bool updatePosition = false;
+					ImGui::PushID("Position");
 					if(ImGui::InputFloat("X", &transform->position.x, step, stepFast))
 						updatePosition = true;
 					
@@ -124,30 +125,13 @@ namespace Editor
 
 					ImGui::SameLine();
 					ImGui::Text("Position");
-
-					// Scale
-					bool updateScale = false;
-					if(ImGui::InputFloat("X", &transform->scale.x, step, stepFast))
-						updateScale = true;
-					
-					ImGui::SameLine();
-					if(ImGui::InputFloat("Y", &transform->scale.y, step, stepFast))
-						updateScale = true;
-					
-					ImGui::SameLine();
-					if(ImGui::InputFloat("Z", &transform->scale.z, step, stepFast))
-						updateScale = true;
-
-					if(updateScale)
-						Transform::setPosition(transform, transform->scale);
-
-					ImGui::SameLine();
-					ImGui::Text("Scale");
+					ImGui::PopID();
 
 					// Rotation
 					Vec3 eulerAngles = glm::eulerAngles(transform->rotation);
 					eulerAngles = glm::degrees(eulerAngles);
 					bool updateRotation = false;
+					ImGui::PushID("Rotation");
 					if(ImGui::InputFloat("X", &eulerAngles.x, step, stepFast))
 						updateRotation = true;
 					
@@ -167,8 +151,32 @@ namespace Editor
 					}
 					ImGui::SameLine();
 					ImGui::Text("Rotation");
+					ImGui::PopID();
+					
+					// Scale
+					bool updateScale = false;
+					ImGui::PushID("Scale");
+					if(ImGui::InputFloat("X", &transform->scale.x, step, stepFast))
+						updateScale = true;
+					
+					ImGui::SameLine();
+					if(ImGui::InputFloat("Y", &transform->scale.y, step, stepFast))
+						updateScale = true;
+					
+					ImGui::SameLine();
+					if(ImGui::InputFloat("Z", &transform->scale.z, step, stepFast))
+						updateScale = true;
+
+					if(updateScale)
+						Transform::setScale(transform, transform->scale);
+
+					ImGui::SameLine();
+					ImGui::Text("Scale");
+					ImGui::PopID();
 					ImGui::PopItemWidth();
-				}				
+				}
+
+				// Light Component
 				ImGui::End();
 			}
 		}
