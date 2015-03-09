@@ -17,10 +17,12 @@ namespace Editor
 		bool showLog          = false;
 		bool showSceneObjects = false;
 		bool showSelectedGO   = false;
+		bool tsWorld          = true;
+		bool tsLocal          = false;
 
 		int  currentItem = 1;
 		
-		const float OPACITY  = 0.9f;
+		const float OPACITY  = 0.85f;
 		const int   BUF_SIZE = 128;
 
 		char inputName[BUF_SIZE] = "";
@@ -28,6 +30,7 @@ namespace Editor
 
 		GameObject* selectedGO = NULL;
 		CTransform* transform  = NULL;
+		int transformSpace     = Transform::TS_WORLD;
 	}
 	
 	void initialize()
@@ -83,7 +86,7 @@ namespace Editor
 			// Show currently selected gameobject, if any
 			if(showSelectedGO)
 			{				
-				ImGui::Begin(selectedGO->name.c_str(), &showSelectedGO, Vec2(400, 400), OPACITY);
+				ImGui::Begin(selectedGO->name.c_str(), &showSelectedGO, Vec2(600, 400), OPACITY);
 
 				if(ImGui::InputText("Name", &inputName[0], BUF_SIZE, ImGuiInputTextFlags_EnterReturnsTrue))
 				{
@@ -96,30 +99,76 @@ namespace Editor
 				}
 
 				// Transform Component
-				ImGui::Separator();
-				ImGui::Text("Transform");
-
-				if(ImGui::InputFloat3("Position", glm::value_ptr(transform->position)))
+				if(ImGui::CollapsingHeader("Transform"))
 				{
-					Transform::setPosition(transform, transform->position);
-				}
+					float step     = 1.f;
+					float stepFast = 10.f;
 
-				if(ImGui::InputFloat3("Scale", glm::value_ptr(transform->scale)))
-				{
-					Transform::setScale(transform, transform->scale);
-				}
+					float width = ImGui::GetWindowWidth() / 5.f;
+					ImGui::PushItemWidth(width);
+					// Position
+					bool updatePosition = false;
+					if(ImGui::InputFloat("X", &transform->position.x, step, stepFast))
+						updatePosition = true;
+					
+					ImGui::SameLine();
+					if(ImGui::InputFloat("Y", &transform->position.y, step, stepFast))
+						updatePosition = true;
+					
+					ImGui::SameLine();
+					if(ImGui::InputFloat("Z", &transform->position.z, step, stepFast))
+						updatePosition = true;
 
-				Vec3 eulerAngles = glm::eulerAngles(transform->rotation);
-				eulerAngles = glm::degrees(eulerAngles);
-				if(ImGui::InputFloat3("Rotation", glm::value_ptr(eulerAngles)))
-				{
-					eulerAngles = glm::radians(eulerAngles);
-					Quat newRotation(eulerAngles);
-					Transform::setRotation(transform, newRotation);
-				}
+					if(updatePosition)
+						Transform::setPosition(transform, transform->position);
 
-				ImGui::Text("Add Toggles for switching transformation space between world and local");
-				
+					ImGui::SameLine();
+					ImGui::Text("Position");
+
+					// Scale
+					bool updateScale = false;
+					if(ImGui::InputFloat("X", &transform->scale.x, step, stepFast))
+						updateScale = true;
+					
+					ImGui::SameLine();
+					if(ImGui::InputFloat("Y", &transform->scale.y, step, stepFast))
+						updateScale = true;
+					
+					ImGui::SameLine();
+					if(ImGui::InputFloat("Z", &transform->scale.z, step, stepFast))
+						updateScale = true;
+
+					if(updateScale)
+						Transform::setPosition(transform, transform->scale);
+
+					ImGui::SameLine();
+					ImGui::Text("Scale");
+
+					// Rotation
+					Vec3 eulerAngles = glm::eulerAngles(transform->rotation);
+					eulerAngles = glm::degrees(eulerAngles);
+					bool updateRotation = false;
+					if(ImGui::InputFloat("X", &eulerAngles.x, step, stepFast))
+						updateRotation = true;
+					
+					ImGui::SameLine();
+					if(ImGui::InputFloat("Y", &eulerAngles.y, step, stepFast))
+						updateRotation = true;
+
+					ImGui::SameLine();
+					if(ImGui::InputFloat("Z", &eulerAngles.z, step, stepFast))
+						updateRotation = true;
+
+					if(updateRotation)
+					{
+						eulerAngles = glm::radians(eulerAngles);
+						Quat newRotation(eulerAngles);
+						Transform::setRotation(transform, newRotation);
+					}
+					ImGui::SameLine();
+					ImGui::Text("Rotation");
+					ImGui::PopItemWidth();
+				}				
 				ImGui::End();
 			}
 		}
