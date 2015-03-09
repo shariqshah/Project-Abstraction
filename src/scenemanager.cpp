@@ -19,13 +19,11 @@ namespace SceneManager
 			for(int i = 1; i < (int)Component::NUM_COMPONENTS; i++)
 			{
 				if(gameObject->compIndices[i] != -1)
-				{
 					GO::removeComponent(gameObject, (Component)i);
-				}
 			}
 
 			//remove scripts
-			// ScriptEngine::executeFunction("removeGameObject", gameObject);
+			ScriptEngine::executeFunction("removeGameObject", gameObject);
 
 			// remove the node from valid list and mark it's location in list as empty
 			int index = -1;
@@ -53,7 +51,6 @@ namespace SceneManager
 				if(node == nodeToMark)
 					return false;
 			}
-
 			removableNodes.push_back(nodeToMark);
 			return true;
 		}
@@ -62,7 +59,6 @@ namespace SceneManager
 	bool remove(Node node)
 	{
 		GOPtr gameObject = find(node);
-
 		if(gameObject)
 		{
 			if(markForDeletion(node))
@@ -72,7 +68,6 @@ namespace SceneManager
 			
 			return true;
 		}
-
 		Log::error("SceneManager", "GO " + std::to_string(node) +
 				   " not found in scene so cannot be removed.");
 		return false;
@@ -81,7 +76,6 @@ namespace SceneManager
 	bool remove(const std::string& name)
 	{
 		GOPtr gameObject = find(name);
-
 		if(gameObject)
 		{
 			if(markForDeletion(gameObject->node))
@@ -101,7 +95,7 @@ namespace SceneManager
 	{
 		GOPtr gameObject = NULL;
 		bool  found      = false;
-		
+
 		for(Node node : validNodes)
 		{
 			gameObject = &sceneObjects[node];
@@ -111,7 +105,6 @@ namespace SceneManager
 				break;
 			}
 		}
-
 		if(!found)
 			Log::warning(name + " not found in scene");
 		
@@ -120,8 +113,7 @@ namespace SceneManager
 
 	GOPtr find(Node nodeToFind)
 	{
-		GOPtr gameObject = NULL;
-		
+		GOPtr gameObject = NULL;		
 		for(Node node : validNodes)
 		{
 			if(node == nodeToFind)
@@ -130,7 +122,6 @@ namespace SceneManager
 				break;
 			}
 		}
-
 		if(!gameObject)
 			Log::warning("GO " + std::to_string(nodeToFind) + " not found in scene");
 		
@@ -146,31 +137,24 @@ namespace SceneManager
 		    {
 				GOPtr gameObject = find(node);
 				removeGameObject(gameObject);
-			}
-			
+			}			
 			removableNodes.clear();
 		}
 	}
 
 	void cleanup()
 	{
-		std::cout<<"Size before : "<<sceneObjects.size()<<std::endl;
-
 		for(Node node : validNodes)
 			markForDeletion(node);
 		
 		update();
-
 		sceneObjects.clear();
-		std::cout<<"Size after : "<<sceneObjects.size()<<std::endl;
-
 		removableNodes.clear();
 	}
 
 	GOPtr create(const std::string& name)
 	{
 		unsigned int index = 0;
-
 		if(!emptyIndices.empty())
 		{
 			index = emptyIndices.back();

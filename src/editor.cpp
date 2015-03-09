@@ -38,9 +38,18 @@ namespace Editor
 
 	bool selectGameObject(void* gameObjects, int index, const char** name)
 	{
-		GameObject* gameObject = SceneManager::find(index);
-		*name = gameObject->name.c_str();
-		return true;
+		std::vector<Node>* nodeList = (std::vector<Node>*)gameObjects;
+		Node node = nodeList->at(index);
+		GameObject* gameObject = SceneManager::find(node);
+		if(gameObject)
+		{
+			*name = gameObject->name.c_str();
+			return true;
+		}
+		else
+		{
+			return false;
+		}
 	}
 
 	void displayTransform()
@@ -175,7 +184,8 @@ namespace Editor
 			{
 				// Selected gameobject changed so update all pointers
 				showSelectedGO = true;
-				selectedGO = SceneManager::find(currentItem);
+				Node node = gameObjects->at(currentItem);
+				selectedGO = SceneManager::find(node);
 				memset(&inputName[0], '\0', BUF_SIZE);
 				int copySize = selectedGO->name.size() > BUF_SIZE ? BUF_SIZE : selectedGO->name.size();
 				memcpy(&inputName[0], &selectedGO->name[0], copySize);
@@ -187,6 +197,20 @@ namespace Editor
 					light = GO::getLight(selectedGO);
 				else
 					light = NULL;
+			}
+			
+			if(ImGui::Button("Remove"))
+			{
+				if(showSelectedGO && selectedGO)
+				{
+					// Remove the gameobject and reset state
+					SceneManager::remove(selectedGO->node);
+					showSelectedGO = false;
+					memset(&inputName[0], '\0', BUF_SIZE);
+					memset(&inputTag[0], '\0', BUF_SIZE);
+					transform = NULL;
+					light = NULL;
+				}
 			}
 			ImGui::End();
 

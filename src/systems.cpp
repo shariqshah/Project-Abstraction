@@ -173,8 +173,8 @@ namespace System
 			*quit = true;
 		
 		System::CameraSystem::updateFreeCamera(deltaTime);
-		Editor::update(deltaTime, quit);
 		ScriptEngine::executeFunction("updateObjects", deltaTime);
+		Editor::update(deltaTime, quit);
 		
 		// GOMap* sceneObjects = SceneManager::getSceneObjects();
 		// for(GOMap::iterator it = sceneObjects->begin();
