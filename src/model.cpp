@@ -345,50 +345,54 @@ namespace Renderer
 			
 				FILE* file = fopen(fullPath, "rb");
 				free(fullPath);
+				if(file)
+				{					
+					const uint32_t INDEX_SIZE = sizeof(uint32_t);
+					const uint32_t VEC3_SIZE  = sizeof(Vec3);
+					const uint32_t VEC2_SIZE  = sizeof(Vec2);
+					uint32_t header[4];
+					size_t bytesRead = 0;
+					if((bytesRead = fread(header, INDEX_SIZE, 4, file)) <= 0)
+					{
+						Log::error("Model::loadFromFile", "Read failed");
+					}
+					else
+					{
+						uint32_t indicesCount  = header[0];
+						uint32_t verticesCount = header[1];
+						uint32_t normalsCount  = header[2];
+						uint32_t uvsCount      = header[3];
 
-				assert(file);
+						// Log::message("IndicesCount : " + std::to_string(indicesCount));
+					
+						// Indices
+						model->indices.reserve(indicesCount);
+						model->indices.insert(model->indices.begin(), indicesCount, 0);				
+						bytesRead = fread(&model->indices[0], INDEX_SIZE, indicesCount, file);
 
-				const uint32_t INDEX_SIZE = sizeof(uint32_t);
-				const uint32_t VEC3_SIZE  = sizeof(Vec3);
-				const uint32_t VEC2_SIZE  = sizeof(Vec2);
-			
-				uint32_t header[4];
-				size_t bytesRead = 0;
-				if((bytesRead = fread(header, INDEX_SIZE, 4, file)) <= 0)
-					Log::error("Model::loadFromFile", "Read failed");
+						// Vertices
+						model->vertices.reserve(verticesCount);
+						model->vertices.insert(model->vertices.begin(), verticesCount, Vec3(0.f));
+						bytesRead = fread(&model->vertices[0], VEC3_SIZE, verticesCount, file);
+
+						// Normals
+						model->normals.reserve(normalsCount);
+						model->normals.insert(model->normals.begin(), normalsCount, Vec3(0.f));				
+						bytesRead = fread(&model->normals[0], VEC3_SIZE, normalsCount, file);
+
+						// UVs
+						model->uvs.reserve(uvsCount);
+						model->uvs.insert(model->uvs.begin(), uvsCount, Vec2(0.f));				
+						bytesRead = fread(&model->uvs[0], VEC2_SIZE, uvsCount, file);					
+					}
+					fclose(file);
+					model->filename = filename;
+					model->drawIndexed = true;
+				}
 				else
 				{
-					uint32_t indicesCount  = header[0];
-					uint32_t verticesCount = header[1];
-					uint32_t normalsCount  = header[2];
-					uint32_t uvsCount      = header[3];
-
-					// Log::message("IndicesCount : " + std::to_string(indicesCount));
-					
-					// Indices
-					model->indices.reserve(indicesCount);
-					model->indices.insert(model->indices.begin(), indicesCount, 0);				
-					bytesRead = fread(&model->indices[0], INDEX_SIZE, indicesCount, file);
-
-					// Vertices
-					model->vertices.reserve(verticesCount);
-					model->vertices.insert(model->vertices.begin(), verticesCount, Vec3(0.f));
-					bytesRead = fread(&model->vertices[0], VEC3_SIZE, verticesCount, file);
-
-					// Normals
-					model->normals.reserve(normalsCount);
-					model->normals.insert(model->normals.begin(), normalsCount, Vec3(0.f));				
-					bytesRead = fread(&model->normals[0], VEC3_SIZE, normalsCount, file);
-
-					// UVs
-					model->uvs.reserve(uvsCount);
-					model->uvs.insert(model->uvs.begin(), uvsCount, Vec2(0.f));				
-					bytesRead = fread(&model->uvs[0], VEC2_SIZE, uvsCount, file);					
+					success = false;
 				}
-
-				fclose(file);
-				model->filename = filename;
-				model->drawIndexed = true;
 			}
 			else
 			{

@@ -23,12 +23,14 @@ namespace Editor
 		const float OPACITY  = 0.75f;
 		const int   BUF_SIZE = 128;
 
-		char inputName[BUF_SIZE] = "";
-		char inputTag[BUF_SIZE]  = "";
+		char inputName[BUF_SIZE]       = "";
+		char inputTag[BUF_SIZE]        = "";
+		char inputModelName[BUF_SIZE]  = "";
 
 		GameObject* selectedGO = NULL;
 		CTransform* transform  = NULL;
 		CLight*     light      = NULL;
+		CModel*     model      = NULL;
 	}
 	
 	void initialize()
@@ -156,6 +158,32 @@ namespace Editor
 			}
 		}
 	}
+
+	void displayModel()
+	{
+		if(ImGui::CollapsingHeader("Model", "ModelComponent", true, true))
+		{
+			if(ImGui::InputText("File", &inputModelName[0], BUF_SIZE, ImGuiInputTextFlags_EnterReturnsTrue))
+			{
+				CModel newModel;
+				if(Renderer::Model::loadFromFile(&inputModelName[0], &newModel))
+				{
+					newModel.materialUniforms = model->materialUniforms;
+					newModel.material = model->material;
+					GO::addModel(selectedGO, &newModel);
+				}
+				else
+				{
+					// Display some error here? Possibly an overlay or log it?
+					Log::error("Editor::displayModel", "File " + std::string(&inputModelName[0]) + " not found!");
+				}
+			}
+			if(ImGui::IsItemHovered())
+				ImGui::SetTooltip("Enter new name and press Enter to reload Model");
+
+			// Material uniforms here!!!
+		}
+	}
 	
 	void update(float deltaTime, bool* quit)
 	{
@@ -197,6 +225,16 @@ namespace Editor
 					light = GO::getLight(selectedGO);
 				else
 					light = NULL;
+				if(GO::hasComponent(selectedGO, Component::MODEL))
+				{
+					model = GO::getModel(selectedGO);
+					memset(&inputModelName[0], '\0', BUF_SIZE);
+					strncpy(&inputModelName[0], model->filename.c_str(), model->filename.size());
+				}
+				else
+				{
+					model = NULL;
+				}
 			}
 			
 			if(ImGui::Button("Remove"))
@@ -208,8 +246,10 @@ namespace Editor
 					showSelectedGO = false;
 					memset(&inputName[0], '\0', BUF_SIZE);
 					memset(&inputTag[0], '\0', BUF_SIZE);
+					memset(&inputModelName[0], '\0', BUF_SIZE);
 					transform = NULL;
-					light = NULL;
+					light     = NULL;
+					model     = NULL;
 				}
 			}
 			ImGui::End();
@@ -235,6 +275,10 @@ namespace Editor
 				// Light Component
 				if(GO::hasComponent(selectedGO, Component::LIGHT))
 					displayLight();
+
+				// Model Component
+				if(GO::hasComponent(selectedGO, Component::MODEL))
+					displayModel();
 				
 				ImGui::End();
 			}

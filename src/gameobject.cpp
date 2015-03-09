@@ -139,13 +139,10 @@ namespace GO
 	CCamera* addCamera(GameObject* gameObject)
 	{
 		assert(gameObject);
-
 		CCamera* newCamera = NULL;
-
 		if(!hasComponent(gameObject, Component::CAMERA))
 		{
 			int index = Renderer::Camera::create(gameObject);
-
 			gameObject->compIndices[(int)Component::CAMERA] = index;
 			Log::message("Camera added to " + gameObject->name);
 			newCamera = Renderer::Camera::getCameraAtIndex(index);
@@ -155,20 +152,16 @@ namespace GO
 			Log::warning("Camera couldnot be added to " + gameObject->name +
 						 " because it already has one");
 		}
-
 		return newCamera;
 	}
 
 	CModel* addModel(GameObject* gameObject, CModel* model)
 	{
 		assert(gameObject);
-
 		CModel* newModel = NULL;
-
 		if(!hasComponent(gameObject, Component::MODEL))
 		{
 			int index = Renderer::Model::create(model);
-
 			gameObject->compIndices[(int)Component::MODEL] = index;
 			Log::message("Model added to " + gameObject->name);
 			newModel = Renderer::Model::getModelAtIndex(index);
@@ -176,10 +169,10 @@ namespace GO
 		}
 		else
 		{
-			Log::warning("Model couldnot be added to " + gameObject->name +
-						 " because it already has one");
+			Log::warning("Removing existing Model from " + gameObject->name);
+			removeComponent(gameObject, Component::MODEL);
+			newModel = addModel(gameObject, model);
 		}
-
 		return newModel;		
 	}
 
@@ -187,7 +180,6 @@ namespace GO
 	{
 		assert(gameObject);
 		CModel* model = NULL;
-		
 		if(hasComponent(gameObject, Component::MODEL))
 			model = Renderer::Model::getModelAtIndex(gameObject->compIndices[(Component::MODEL)]);
 		else
@@ -200,7 +192,6 @@ namespace GO
 	{
 		assert(gameObject);
 		CCamera* camera = NULL;
-		
 		if(hasComponent(gameObject, Component::CAMERA))
 			camera = Renderer::Camera::getCameraAtIndex(gameObject->compIndices[(Component::CAMERA)]);
 		else
@@ -213,8 +204,7 @@ namespace GO
 	CTransform* getTransform(GameObject* gameObject)
 	{
 		assert(gameObject);
-		CTransform* transform = NULL;
-		
+		CTransform* transform = NULL;		
 		if(hasComponent(gameObject, Component::TRANSFORM))
 			transform = Transform::getTransformAtIndex(gameObject->compIndices[(Component::TRANSFORM)]);
 		else
@@ -226,8 +216,7 @@ namespace GO
 	CLight* getLight(GameObject* gameObject)
 	{
 		assert(gameObject);
-		CLight* light = NULL;
-		
+		CLight* light = NULL;		
 		if(hasComponent(gameObject, Component::LIGHT))
 			light =Renderer::Light::getLightAtIndex(gameObject->compIndices[(Component::LIGHT)]);
 		else
@@ -240,7 +229,6 @@ namespace GO
 	void removeComponent(GameObject* gameObject, Component type)
 	{
 	    assert(gameObject);
-
 		if(hasComponent(gameObject, type))
 		{
 			int index = gameObject->compIndices[(int)type];
