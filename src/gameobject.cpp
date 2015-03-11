@@ -225,7 +225,6 @@ namespace GO
 		return light;
 	}
 
-
 	void removeComponent(GameObject* gameObject, Component type)
 	{
 	    assert(gameObject);
@@ -238,20 +237,16 @@ namespace GO
 			{
 			case Component::TRANSFORM:
 				Transform::remove(index);
-				break;
-					
+				break;					
 			case Component::CAMERA:
 				Renderer::Camera::remove(index);
 				break;
-
 			case Component::MODEL:
 				Renderer::Model::remove(index);
 				break;
-
 			case Component::LIGHT:
 				Renderer::Light::remove(index);
 				break;
-					
 			case Component::RIGIDBODY:
 				// Physics::RigidBody::remove(sRigidBodyList[index]);
 				// sRigidBodyList[index] = -1;

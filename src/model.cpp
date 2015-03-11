@@ -409,7 +409,6 @@ namespace Renderer
 
 		void setMaterialType(CModel* model, Mat_Type material)
 		{
-			// int index = findModelIndex(model->filename.c_str());
 			int index = -1;
 			for(int i = 0; i < modelList.size(); i++)
 			{

@@ -3,13 +3,14 @@
 
 namespace Texture
 {
-	int  create(const char* filename);
-    void remove(unsigned int textureIndex);
-	void initialize(const char* path);
-	void bindTexture(unsigned int textureIndex);	
-	void unbindActiveTexture();
-	void cleanup();
-	void generateBindings();
+	int         create(const char* filename);
+    void        remove(int textureIndex);
+	void        initialize(const char* path);
+	void        bindTexture(int textureIndex);
+	const char* getFilename(int textureIndex);
+	void        unbindActiveTexture();
+	void        cleanup();
+	void        generateBindings();
 }
 
 #endif

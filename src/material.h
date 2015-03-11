@@ -31,10 +31,6 @@ namespace Material
 														 MAT_UNSHADED_TEXTURED,
 														 MAT_PHONG,
 														 MAT_PHONG_TEXTURED };
-
-	// const static std::vector<Mat_Type> MATERIAL_LIST = { MAT_UNSHADED,
-	// 													 MAT_PHONG,
-	// 													 MAT_PHONG_TEXTURED};
 	void              initialize();
 	void              generateBindings();
 	void              cleanup();

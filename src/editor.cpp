@@ -8,15 +8,18 @@
 #include "material.h"
 #include "gameobject.h"
 #include "log.h"
+#include "texture.h"
 
 namespace Editor
 {
 	namespace
 	{
-		bool showMainToolBar  = true;
-		bool showLog          = false;
-		bool showSceneObjects = false;
-		bool showSelectedGO   = false;
+		bool showMainToolBar      = true;
+		bool showLog              = false;
+		bool showSceneObjects     = false;
+		bool showSelectedGO       = false;
+		bool showRendererSettings = false;
+		bool showScriptingWindow  = false;
 
 		int  currentItem = 1;
 		
@@ -26,6 +29,7 @@ namespace Editor
 		char inputName[BUF_SIZE]       = "";
 		char inputTag[BUF_SIZE]        = "";
 		char inputModelName[BUF_SIZE]  = "";
+		char inputModelTex[BUF_SIZE]   = "";
 
 		GameObject* selectedGO = NULL;
 		CTransform* transform  = NULL;
@@ -163,7 +167,7 @@ namespace Editor
 	{
 		if(ImGui::CollapsingHeader("Model", "ModelComponent", true, true))
 		{
-			if(ImGui::InputText("File", &inputModelName[0], BUF_SIZE, ImGuiInputTextFlags_EnterReturnsTrue))
+			if(ImGui::InputText("Mesh", &inputModelName[0], BUF_SIZE, ImGuiInputTextFlags_EnterReturnsTrue))
 			{
 				CModel newModel;
 				if(Renderer::Model::loadFromFile(&inputModelName[0], &newModel))
@@ -174,14 +178,70 @@ namespace Editor
 				}
 				else
 				{
-					// Display some error here? Possibly an overlay or log it?
+					memset(&inputModelName[0], '\0', BUF_SIZE);
+					int copySize = model->filename.size() > BUF_SIZE ? BUF_SIZE : model->filename.size();
+					strncpy(&inputModelName[0], model->filename.c_str(), copySize);
 					Log::error("Editor::displayModel", "File " + std::string(&inputModelName[0]) + " not found!");
 				}
 			}
 			if(ImGui::IsItemHovered())
 				ImGui::SetTooltip("Enter new name and press Enter to reload Model");
 
-			// Material uniforms here!!!
+			int material = model->material;
+			if(ImGui::Combo("Material Type",
+							&material,
+							"Unshaded\0Unshaded Textured\0Phong\0Phong Textured\0\0"))
+			{				
+				Renderer::Model::setMaterialType(model, (Mat_Type)material);
+				memset(&inputModelTex[0], '\0', BUF_SIZE);
+				// If model had texture before, copy its name otherwise copy NONE
+				if(model->materialUniforms.texture != -1)
+				{
+					const char* texName = Texture::getFilename(model->materialUniforms.texture);
+					size_t texNameLen = strlen(texName);
+					int copySize = texNameLen > BUF_SIZE ? BUF_SIZE : texNameLen;
+					strncpy(&inputModelTex[0], texName, copySize);
+				}
+				else
+				{
+					strcpy(&inputModelTex[0], "NONE");
+				}
+			}
+			ImGui::ColorEdit4("Diffuse Color", &model->materialUniforms.diffuseColor[0]);
+			// Texture
+			if(model->material == MAT_PHONG_TEXTURED || model->material == MAT_UNSHADED_TEXTURED)
+			{
+				if(ImGui::InputText("Texture", &inputModelTex[0], BUF_SIZE, ImGuiInputTextFlags_EnterReturnsTrue))
+				{
+					int index = Texture::create(&inputModelTex[0]);
+					if(index >= 0)
+					{
+						model->materialUniforms.texture = index;
+					}
+					else
+					{
+						memset(&inputModelTex[0], '\0', BUF_SIZE);
+						// If model had texture before, copy its name otherwise copy NONE
+						if(model->materialUniforms.texture != -1)
+						{
+							const char* texName = Texture::getFilename(model->materialUniforms.texture);
+							size_t texNameLen = strlen(texName);
+							int copySize = texNameLen > BUF_SIZE ? BUF_SIZE : texNameLen;
+							strncpy(&inputModelTex[0], texName, copySize);
+						}
+						else
+						{
+							strcpy(&inputModelTex[0], "NONE");
+						}
+					}
+				}
+			}
+			if(model->material == MAT_PHONG || model->material == MAT_PHONG_TEXTURED)
+			{
+				ImGui::SliderFloat("Diffuse", &model->materialUniforms.diffuse, 0.f, 1.f);
+				ImGui::SliderFloat("Specular", &model->materialUniforms.specular, 0.f, 1.f);
+				ImGui::InputFloat("Specular Strength", &model->materialUniforms.specularStrength, 1.f, 2.f);
+			}	
 		}
 	}
 	
@@ -189,8 +249,22 @@ namespace Editor
 	{
 		ImGui::Begin("Tools", &showMainToolBar, Vec2(100, 20), OPACITY, (WF_NoTitleBar | WF_NoCollapse));
 
-		if(ImGui::Button("Log"))   showLog = !showLog;                   ImGui::SameLine();
-		if(ImGui::Button("Scene")) showSceneObjects = !showSceneObjects; ImGui::SameLine();
+		//TODO : Use a union to switch between main windows related to the toolbar
+		if(ImGui::Button("Log"))
+			showLog = !showLog;
+		ImGui::SameLine();
+		
+		if(ImGui::Button("Scene"))
+			showSceneObjects = !showSceneObjects;
+		ImGui::SameLine();
+
+		if(ImGui::Button("Renderer"))
+			showRendererSettings = !showRendererSettings;
+		ImGui::SameLine();
+
+		if(ImGui::Button("Scripting"))
+			showScriptingWindow = !showScriptingWindow;
+		ImGui::SameLine();
 
 		ImGui::PushID("Exit_Button");
 		Vec4 exitColor(0.89f, 0.05f, 0.17f, 1.f);
@@ -208,6 +282,7 @@ namespace Editor
 		{
 			ImGui::Begin("SceneObjects", &showSceneObjects, Vec2(400, 400), OPACITY);
 			std::vector<Node>* gameObjects = SceneManager::getSceneObjects();
+			ImGui::Text("Total : %d", gameObjects->size());
 			if(ImGui::ListBox("GameObjects", &currentItem, &selectGameObject, gameObjects, gameObjects->size(), 10))
 			{
 				// Selected gameobject changed so update all pointers
@@ -229,7 +304,23 @@ namespace Editor
 				{
 					model = GO::getModel(selectedGO);
 					memset(&inputModelName[0], '\0', BUF_SIZE);
-					strncpy(&inputModelName[0], model->filename.c_str(), model->filename.size());
+					memset(&inputModelTex[0], '\0', BUF_SIZE);
+					copySize = model->filename.size() > BUF_SIZE ? BUF_SIZE : model->filename.size();
+					strncpy(&inputModelName[0], model->filename.c_str(), copySize);
+					if(model->material == MAT_UNSHADED_TEXTURED || model->material == MAT_PHONG_TEXTURED)
+					{
+						const char* textureName = Texture::getFilename(model->materialUniforms.texture);
+						if(textureName)
+						{
+							size_t textureNameLen = strlen(textureName);
+							copySize = textureNameLen > BUF_SIZE ? BUF_SIZE : textureNameLen;
+							strncpy(&inputModelTex[0], textureName, copySize);
+						}
+						else
+						{
+							strcpy(&inputModelTex[0], "NONE");
+						}
+					}
 				}
 				else
 				{
@@ -247,6 +338,7 @@ namespace Editor
 					memset(&inputName[0], '\0', BUF_SIZE);
 					memset(&inputTag[0], '\0', BUF_SIZE);
 					memset(&inputModelName[0], '\0', BUF_SIZE);
+					memset(&inputModelTex[0], '\0', BUF_SIZE);
 					transform = NULL;
 					light     = NULL;
 					model     = NULL;

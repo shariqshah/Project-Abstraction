@@ -2,5 +2,5 @@
 
 void main()
 {
-	fragColor = ambientLight + applyFog(diffuseColor);
+	fragColor = (ambientLight * diffuseColor) + applyFog(diffuseColor);
 }

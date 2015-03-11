@@ -29,11 +29,9 @@ namespace Input
 			releasedKeys.push_back(key);
 			isDown = false;
 		}
-		
 		SDL_Keymod modState = SDL_GetModState();
 		bool modCtrl  = (modState & KMOD_CTRL);
 		bool modShift = (modState & KMOD_SHIFT);
-		
 		Gui::updateKeyDown(key, isDown, modCtrl, modShift);
 	}
 

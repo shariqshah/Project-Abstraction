@@ -114,7 +114,6 @@ namespace Material
 	void setMaterialUniforms(const Mat_Uniforms* materialUniforms, Mat_Type material)
 	{
 		assert(materialUniforms);
-
 		unsigned int shaderIndex = getShaderIndex(material);
 
 		// Set diffuse color

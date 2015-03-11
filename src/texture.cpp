@@ -61,7 +61,6 @@ namespace Texture
 	int create(const char* filename)
 	{
 		int index = isLoaded(filename);
-
 		if(index == -1)
 		{
 			char* fullPath = (char *)malloc(sizeof(char) *
@@ -72,133 +71,161 @@ namespace Texture
 			SDL_Surface* newSurface = IMG_Load(fullPath);
 			free(fullPath);
 
-			if(!newSurface)
-				Log::error("Texture::create", IMG_GetError());
-		
-			assert(newSurface != NULL);
-		
-			GLuint id = 0;
-			glGenTextures(1, &id);
-			glBindTexture(GL_TEXTURE_2D, id);
+			if(newSurface)
+			{							
+				GLuint id = 0;
+				glGenTextures(1, &id);
+				glBindTexture(GL_TEXTURE_2D, id);
 
-			int format         = GL_RGB;
-			int internalFormat = GL_RGB;
-			int textureType    = GL_UNSIGNED_BYTE;
-			if (newSurface->format->BytesPerPixel == 4)
-			{
-				if(newSurface->format->Rmask == 0xff)
+				int format         = GL_RGB;
+				int internalFormat = GL_RGB;
+				int textureType    = GL_UNSIGNED_BYTE;
+				if (newSurface->format->BytesPerPixel == 4)
 				{
-					format = GL_RGBA;
-					textureType = GL_UNSIGNED_INT_8_8_8_8_REV;
+					if(newSurface->format->Rmask == 0xff)
+					{
+						format = GL_RGBA;
+						textureType = GL_UNSIGNED_INT_8_8_8_8_REV;
+					}
+					else
+					{
+						format = GL_BGRA;
+						textureType = GL_UNSIGNED_INT_8_8_8_8;
+					}
+					internalFormat = GL_RGBA8;
+				}
+				else if(newSurface->format->BytesPerPixel == 3)
+				{
+					if(newSurface->format->Rmask == 0xff)
+						format = GL_RGB;
+					else
+						format = GL_BGR;
+					internalFormat = GL_RGB8;
+				}
+
+				SDL_LockSurface(newSurface);
+				glTexImage2D(GL_TEXTURE_2D,
+							 0,
+							 internalFormat,
+							 newSurface->w,
+							 newSurface->h,
+							 0,
+							 format,
+							 textureType,
+							 newSurface->pixels);
+
+				// glTexImage2D(GL_TEXTURE_2D,
+				// 			 0,
+				// 			 format,
+				// 			 w,
+				// 			 h,
+				// 			 0,
+				// 			 format,
+				// 			 GL_UNSIGNED_BYTE,
+				// 			 data);
+
+				Renderer::checkGLError("Texture::create");
+				SDL_UnlockSurface(newSurface);
+		
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+				glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_REPEAT);
+				glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_REPEAT);
+				glBindTexture(GL_TEXTURE_2D, 0);
+
+				if(!emptyIndices.empty())
+				{
+					index = emptyIndices.back();
+					emptyIndices.pop_back();
 				}
 				else
 				{
-					format = GL_BGRA;
-					textureType = GL_UNSIGNED_INT_8_8_8_8;
+					textureList.push_back(TextureObj());
+					index = textureList.size() - 1;
 				}
-				internalFormat = GL_RGBA8;
-			}
-			else if(newSurface->format->BytesPerPixel == 3)
-			{
-				if(newSurface->format->Rmask == 0xff)
-					format = GL_RGB;
-				else
-					format = GL_BGR;
-				internalFormat = GL_RGB8;
-			}
 
-			SDL_LockSurface(newSurface);
-			glTexImage2D(GL_TEXTURE_2D,
-						 0,
-						 internalFormat,
-						 newSurface->w,
-						 newSurface->h,
-						 0,
-						 format,
-						 textureType,
-						 newSurface->pixels);
-
-			// glTexImage2D(GL_TEXTURE_2D,
-			// 			 0,
-			// 			 format,
-			// 			 w,
-			// 			 h,
-			// 			 0,
-			// 			 format,
-			// 			 GL_UNSIGNED_BYTE,
-			// 			 data);
-
-			Renderer::checkGLError("Texture::create");
-			SDL_UnlockSurface(newSurface);
+				TextureObj *newTexture = &textureList[index];
+				newTexture->id = id;
+				newTexture->surface = newSurface;
+				newTexture->refCount++;
+			
+				if(newTexture->name != NULL)
+					free(newTexture->name);
 		
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-			glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_REPEAT);
-			glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_REPEAT);
-			glBindTexture(GL_TEXTURE_2D, 0);
-
-			if(!emptyIndices.empty())
-			{
-				index = emptyIndices.back();
-				emptyIndices.pop_back();
+				newTexture->name = (char *)malloc(strlen(filename) + 1);
+				strcpy(newTexture->name, filename);
+				Log::message("Texture : " + std::string(filename) + " created.");
 			}
 			else
 			{
-				textureList.push_back(TextureObj());
-				index = textureList.size() - 1;
+				Log::error("Texture::create", IMG_GetError());
 			}
-
-			TextureObj *newTexture = &textureList[index];
-			newTexture->id = id;
-			newTexture->surface = newSurface;
-			newTexture->refCount++;
-			
-			if(newTexture->name != NULL)
-				free(newTexture->name);
-		
-			newTexture->name = (char *)malloc(strlen(filename) + 1);
-			strcpy(newTexture->name, filename);
-			Log::message("Texture : " + std::string(filename) + " created.");
 		}
 		else
 		{
 			textureList[index].refCount++;
 		}
-
 		return index;
 	}
 	
-	void remove(unsigned int textureIndex)
+	void remove(int textureIndex)
 	{
-		TextureObj *textureObj = &textureList[textureIndex];
-		if(textureObj->refCount == 1)
+		if(textureIndex >=0 && textureIndex < textureList.size())
 		{
-			glDeleteTextures(1, &textureObj->id);
-			textureObj->id = 0;
-			if(textureObj->surface != NULL)
+			TextureObj *textureObj = &textureList[textureIndex];
+			if(textureObj->refCount == 1)
 			{
-				// free(textureObj->surface->pixels);
-				SDL_FreeSurface(textureObj->surface);
-				textureObj->surface = NULL;
+				glDeleteTextures(1, &textureObj->id);
+				textureObj->id = 0;
+				if(textureObj->surface != NULL)
+				{
+					// free(textureObj->surface->pixels);
+					SDL_FreeSurface(textureObj->surface);
+					textureObj->surface = NULL;
+				}
+				if(textureObj->name != NULL)
+				{
+					free(textureObj->name);
+					textureObj->name = NULL;
+				}
+				emptyIndices.push_back(textureIndex);
 			}
-
-			if(textureObj->name != NULL)
-			{
-				free(textureObj->name);
-				textureObj->name = NULL;
-			}
-
-			emptyIndices.push_back(textureIndex);
+			textureObj->refCount--;
 		}
+		else
+		{
+			Log::error("Texture::remove", "Texture index " + std::to_string(textureIndex) + "is invalid");
+		}
+	}
+	
 
-		textureObj->refCount--;
+	void bindTexture(int textureIndex)
+	{
+		if(textureIndex >= 0 && textureIndex < textureList.size())
+		{
+			TextureObj obj = textureList[textureIndex];
+			glBindTexture(GL_TEXTURE_2D, obj.id);
+			Renderer::checkGLError("Texture::bind");
+		}
+		else
+		{
+			Log::error("Texture::bind", "Texture index " + std::to_string(textureIndex) + "is invalid");
+		}
 	}
 
-	void bindTexture(unsigned int textureIndex)
-	{
-		TextureObj obj = textureList[textureIndex];
-		glBindTexture(GL_TEXTURE_2D, obj.id);
-		Renderer::checkGLError("Texture::bind");
+	const char* getFilename(int textureIndex)
+	{		
+		if(textureIndex >= 0 && textureIndex < textureList.size())
+		{
+			TextureObj obj = textureList[textureIndex];
+			return obj.name;
+		}
+		else
+		{
+			Log::error("Texture::getFilename",
+					   "Texture index " + std::to_string(textureIndex) + "is invalid");
+			return NULL;
+		}
 	}
 
 	void unbindActiveTexture()
@@ -208,14 +235,12 @@ namespace Texture
 	
 	void cleanup()
 	{
-		free(texturePath);
-		
+		free(texturePath);		
 		for(unsigned int i = 0; i < textureList.size(); i ++)
 			remove(i);
 
 		textureList.clear();
 		emptyIndices.clear();
-		
 		IMG_Quit();
 	}
 
