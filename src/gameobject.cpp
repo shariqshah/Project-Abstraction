@@ -155,25 +155,53 @@ namespace GO
 		return newCamera;
 	}
 
-	CModel* addModel(GameObject* gameObject, CModel* model)
+	// CModel* addModel(GameObject* gameObject, CModel* model)
+	// {
+	// 	assert(gameObject);
+	// 	CModel* newModel = NULL;
+	// 	if(!hasComponent(gameObject, Component::MODEL))
+	// 	{
+	// 		int index = Renderer::Model::create(model);
+	// 		gameObject->compIndices[(int)Component::MODEL] = index;
+	// 		Log::message("Model added to " + gameObject->name);
+	// 		newModel = Renderer::Model::getModelAtIndex(index);
+	// 		newModel->node = gameObject->node;
+	// 	}
+	// 	else
+	// 	{
+	// 		Log::warning("Removing existing Model from " + gameObject->name);			
+	// 		removeComponent(gameObject, Component::MODEL);
+	// 		newModel = addModel(gameObject, model);
+	// 	}
+	// 	return newModel;		
+	// }
+
+	CModel* addModel(GameObject* gameObject, const char* filename)
 	{
 		assert(gameObject);
 		CModel* newModel = NULL;
 		if(!hasComponent(gameObject, Component::MODEL))
 		{
-			int index = Renderer::Model::create(model);
-			gameObject->compIndices[(int)Component::MODEL] = index;
-			Log::message("Model added to " + gameObject->name);
-			newModel = Renderer::Model::getModelAtIndex(index);
-			newModel->node = gameObject->node;
+			int index = Renderer::Model::create(filename);
+			if(index != -1)
+			{
+				gameObject->compIndices[Component::MODEL] = index;
+				Log::message("Model added to " + gameObject->name);
+				newModel = Renderer::Model::getModelAtIndex(index);
+				newModel->node = gameObject->node;
+			}
+			else
+			{
+				Log::error("GO::addModel", "Model component not added to " + gameObject->name);
+			}
 		}
 		else
 		{
 			Log::warning("Removing existing Model from " + gameObject->name);
 			removeComponent(gameObject, Component::MODEL);
-			newModel = addModel(gameObject, model);
+			newModel = addModel(gameObject, filename);
 		}
-		return newModel;		
+		return newModel;
 	}
 
 	CModel* getModel(GameObject* gameObject)

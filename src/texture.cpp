@@ -54,7 +54,6 @@ namespace Texture
 
 		int flags = IMG_INIT_JPG | IMG_INIT_PNG | IMG_INIT_TIF;
 		int success = IMG_Init(flags);
-
 		assert(flags == success);
 	}
 	
@@ -170,7 +169,7 @@ namespace Texture
 	
 	void remove(int textureIndex)
 	{
-		if(textureIndex >=0 && textureIndex < textureList.size())
+		if(textureIndex >=0 && textureIndex < (int)textureList.size())
 		{
 			TextureObj *textureObj = &textureList[textureIndex];
 			if(textureObj->refCount == 1)
@@ -201,7 +200,7 @@ namespace Texture
 
 	void bindTexture(int textureIndex)
 	{
-		if(textureIndex >= 0 && textureIndex < textureList.size())
+		if(textureIndex >= 0 && textureIndex < (int)textureList.size())
 		{
 			TextureObj obj = textureList[textureIndex];
 			glBindTexture(GL_TEXTURE_2D, obj.id);
@@ -215,7 +214,7 @@ namespace Texture
 
 	const char* getFilename(int textureIndex)
 	{		
-		if(textureIndex >= 0 && textureIndex < textureList.size())
+		if(textureIndex >= 0 && textureIndex < (int)textureList.size())
 		{
 			TextureObj obj = textureList[textureIndex];
 			return obj.name;
@@ -232,6 +231,33 @@ namespace Texture
 	{
 		glBindTexture(GL_TEXTURE_2D, 0);
 	}
+
+	void increaseRefCount(int textureIndex)
+	{
+		if(textureIndex >= 0 && textureIndex < (int)textureList.size())
+		{
+			textureList[textureIndex].refCount++;
+		}
+		else
+		{
+			Log::error("Texture::increaseRefcount",
+					   "Texture index " + std::to_string(textureIndex) + "is invalid");
+		}
+	}
+
+	void decreaseRefCount(int textureIndex)
+	{
+		if(textureIndex >= 0 && textureIndex < (int)textureList.size())
+		{
+			textureList[textureIndex].refCount--;
+		}
+		else
+		{
+			Log::error("Texture::decreaseRefcount",
+					   "Texture index " + std::to_string(textureIndex) + "is invalid");
+		}
+	}
+
 	
 	void cleanup()
 	{

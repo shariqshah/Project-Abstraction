@@ -10,12 +10,26 @@
 #include "log.h"
 #include "scriptengine.h"
 
+// Overloaded assignment operator for Mat_Uniform
+void Mat_Uniforms::operator=(Mat_Uniforms* other)
+{
+	other->diffuseColor     = this->diffuseColor;
+	other->diffuse          = this->diffuse;
+	other->specular         = this->specular;
+	other->specularStrength = this->specularStrength;
+	if(this->texture != -1)
+		Texture::increaseRefCount(this->texture);
+	if(other->texture != -1)
+		Texture::decreaseRefCount(other->texture);
+	other->texture = this->texture;
+}
+
 namespace Material
 {
 	struct Material
 	{
-        std::vector<int>  registeredModels;
-		int               shaderIndex;
+        std::vector<int> registeredModels;
+		int              shaderIndex;
 	};
 	
 	namespace
@@ -26,7 +40,7 @@ namespace Material
 		Material phongTextured;
 		const Vec4  DEFAULT_COLOR(1.0f, 1.0f, 1.0f, 1.0f);
 	}
-
+	
 	void initialize()
 	{
 		unshaded.shaderIndex         = Shader::create("unshaded.vert", "unshaded.frag");

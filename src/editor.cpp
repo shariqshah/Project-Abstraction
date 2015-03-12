@@ -38,8 +38,7 @@ namespace Editor
 	}
 	
 	void initialize()
-	{
-		
+	{		
 	}
 
 	bool selectGameObject(void* gameObjects, int index, const char** name)
@@ -64,7 +63,6 @@ namespace Editor
 		{
 			float step     = 1.f;
 			float stepFast = 10.f;
-
 			float width = ImGui::GetWindowWidth() / 5.f;
 			ImGui::PushItemWidth(width);
 			// Position
@@ -169,12 +167,17 @@ namespace Editor
 		{
 			if(ImGui::InputText("Mesh", &inputModelName[0], BUF_SIZE, ImGuiInputTextFlags_EnterReturnsTrue))
 			{
-				CModel newModel;
-				if(Renderer::Model::loadFromFile(&inputModelName[0], &newModel))
+				CModel testModel;
+				if(Renderer::Model::loadFromFile(&inputModelName[0], &testModel))
 				{
-					newModel.materialUniforms = model->materialUniforms;
-					newModel.material = model->material;
-					GO::addModel(selectedGO, &newModel);
+					// newModel.materialUniforms = model->materialUniforms;
+					// newModel.material = model->material;
+					CModel* newModel = GO::addModel(selectedGO, &inputModelName[0]);
+					if(!newModel)
+					{
+						memset(&inputModelName[0], '\0', BUF_SIZE);
+						strcpy(&inputModelName[0], "NONE");
+					}
 				}
 				else
 				{
@@ -216,6 +219,7 @@ namespace Editor
 					int index = Texture::create(&inputModelTex[0]);
 					if(index >= 0)
 					{
+						Texture::remove(model->materialUniforms.texture);
 						model->materialUniforms.texture = index;
 					}
 					else

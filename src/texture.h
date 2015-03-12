@@ -11,6 +11,8 @@ namespace Texture
 	void        unbindActiveTexture();
 	void        cleanup();
 	void        generateBindings();
+	void        increaseRefCount(int textureIndex);
+	void        decreaseRefCount(int textureIndex);
 }
 
 #endif

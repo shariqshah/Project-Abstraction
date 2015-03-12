@@ -231,33 +231,61 @@ namespace Renderer
 			}
 		}
 
-		int create(CModel* model)
+		// int create(CModel* model)
+		// {
+		// 	assert(model);
+		// 	createVAO(model); // Create VAO for the model that will be used in rendering
+		// 	int index = -1;
+		// 	if(emptyIndices.empty())
+		// 	{
+		// 		modelList.push_back(*model);
+		// 		index = modelList.size() - 1;
+		// 	}
+		// 	else
+		// 	{
+		// 		index = emptyIndices.back();
+		// 		modelList[index] = *model;
+		// 		emptyIndices.pop_back();
+		// 	}
+
+		// 	if(Material::registerModel(index, (Mat_Type)model->material))
+		// 		Log::message("Model " + model->filename + " registered");
+		// 	else
+		// 		Log::warning("Model " + model->filename + " already registered!");
+
+		// 	return index;
+		// }
+
+		int create(const char* filename)
 		{
-			assert(model);
-
-			// Create VAO for the model that will be used in rendering
-			createVAO(model);
-			
 			int index = -1;
-			if(emptyIndices.empty())
+			CModel model;
+			if(loadFromFile(filename, &model))
 			{
-				modelList.push_back(*model);
-				index = modelList.size() - 1;
+				createVAO(&model); // Create VAO for the model that will be used in rendering
+				if(emptyIndices.empty())
+				{
+					modelList.push_back(model);
+					index = modelList.size() - 1;
+				}
+				else
+				{
+					index = emptyIndices.back();
+					modelList[index] = model;
+					emptyIndices.pop_back();
+				}
+				if(Material::registerModel(index, (Mat_Type)model.material))
+					Log::message("Model " + model.filename + " registered");
+				else
+					Log::warning("Model " + model.filename + " already registered!");
 			}
 			else
 			{
-				index = emptyIndices.back();
-				modelList[index] = *model;
-				emptyIndices.pop_back();
+				Log::error("Model::create", std::string(filename) + " not found!");
 			}
-
-			if(Material::registerModel(index, (Mat_Type)model->material))
-				Log::message("Model " + model->filename + " registered");
-			else
-				Log::warning("Model " + model->filename + " already registered!");
-
 			return index;
 		}
+
 
 		CModel* getModelAtIndex(unsigned int modelIndex)
 		{

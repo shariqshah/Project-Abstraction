@@ -103,9 +103,9 @@ namespace Utils
         return vectorString;
     }
 
-	std::string loadFileIntoString(const char* name)
+	std::string loadFileIntoString(const char* filename)
 	{
-		std::ifstream input(name);
+		std::ifstream input(filename);
 		std::stringstream sstr;
 		sstr << input.rdbuf();
 
@@ -114,11 +114,10 @@ namespace Utils
 		return sstr.str();
 	}
 	
-	char* loadFileIntoCString(const char* name, bool addNull)
+	char* loadFileIntoCString(const char* filename, bool addNull)
 	{
-		FILE* file = fopen(name, "r");
+		FILE* file = fopen(filename, "r");
 		char* fileContents = NULL;
-
 		if(file)
 		{
 			int rc = fseek(file, 0L, SEEK_END);
@@ -127,7 +126,6 @@ namespace Utils
 				long offsetTillEnd = ftell(file);
 				size_t size = (size_t)offsetTillEnd;
 				rewind(file);
-
 				if(addNull)
 					fileContents = (char *)calloc(sizeof(char), size + 1);
 				else
@@ -142,21 +140,32 @@ namespace Utils
 						fileContents[size] = '\0';
 				}
 				else
-					Log::error("Utils loadFileintostring", "Alloc failed");
+				{
+					Log::error("Utils::loadFileintostring", "Alloc failed");
+				}
 			}
 			else
 			{
 				Log::error("Utils::loadFileintostring", "Fseek failed");
 			}
-
 			fclose(file);
 		}
 		else
 		{
-			Log::error("Utils::loadFileintostring",
-					   "Couldn't open file " + std::string(name));
-		}
-		
+			Log::error("Utils::loadFileintostring", "Couldn't open file " + std::string(filename));
+		}		
 		return fileContents;
+	}
+
+	bool fileExists(const char* filename)
+	{
+		bool exists = false;
+		FILE* file = fopen(filename, "r");
+		if(file)
+		{
+			exists = true;
+			fclose(file);
+		}
+		return exists;
 	}
 }
