@@ -16,9 +16,6 @@ class Reloader extends BaseBehaviourScript </ type = "Reloader" />
 		color = Vec4(0, 1, 0, 1)
 		model = CModel()
 		Model.loadFromFile("suzanne.pamesh", model)
-		model.material = Mat_Type.UNSHADED;
-		model.materialUniforms.diffuseColor = color
-		model.materialUniforms.texture = Texture.create("test2.png")
 	}
 
 	function update(deltaTime)
@@ -36,10 +33,13 @@ class Reloader extends BaseBehaviourScript </ type = "Reloader" />
 		{
 			count++
 			local temp = SceneManager.create("Test" + count)
-			
+
+			local model = GO.addModel(temp, "suzanne.pamesh")
+			model.materialUniforms.diffuseColor = color
+			model.materialUniforms.texture = Texture.create("test2.png")
 			if(Input.isKeyPressed(Key.LCTRL))
-				model.material = Mat_Type.PHONG
-			GO.addModel(temp, model)
+				Model.setMaterialType(model, Mat_Type.PHONG)
+			
 			local player = SceneManager.findByName("Player")
 			local pt = GO.getTransform(player)
 			local t = GO.getTransform(temp)

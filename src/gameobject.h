@@ -43,7 +43,6 @@ namespace GO
 
 	CTransform* addTransform(GameObject* gameObject);
 	CCamera*    addCamera(GameObject* gameObject);
-	// CModel*     addModel(GameObject* gameObject, CModel* model);
 	CModel*     addModel(GameObject* gameObject, const char* filename);
 	CLight*     addLight(GameObject* gameObject);
 	

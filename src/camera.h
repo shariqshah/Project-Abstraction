@@ -10,15 +10,15 @@ struct CTransform;
 
 struct CCamera
 {
-	Node     node        = 0;
-	float    nearZ       = 0.1f;
-	float    farZ        = 1000.f;
-	float    fov         = 75.f;
-	float    aspectRatio = 4.f/3.f;
-	bool     valid       = true;
-	Mat4     viewMat;
-	Mat4     projMat;
-	Mat4     viewProjMat;
+	Node  node        = 0;
+	float nearZ       = 0.1f;
+	float farZ        = 1000.f;
+	float fov         = 75.f;
+	float aspectRatio = 4.f/3.f;
+	bool  valid       = true;
+	Mat4  viewMat;
+	Mat4  projMat;
+	Mat4  viewProjMat;
 };
 
 namespace Renderer

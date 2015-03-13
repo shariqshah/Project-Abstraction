@@ -35,6 +35,7 @@ namespace Editor
 		CTransform* transform  = NULL;
 		CLight*     light      = NULL;
 		CModel*     model      = NULL;
+		CCamera*    camera     = NULL;
 	}
 	
 	void initialize()
@@ -170,8 +171,6 @@ namespace Editor
 				CModel testModel;
 				if(Renderer::Model::loadFromFile(&inputModelName[0], &testModel))
 				{
-					// newModel.materialUniforms = model->materialUniforms;
-					// newModel.material = model->material;
 					CModel* newModel = GO::addModel(selectedGO, &inputModelName[0]);
 					if(!newModel)
 					{
@@ -181,10 +180,11 @@ namespace Editor
 				}
 				else
 				{
+					Log::error("Editor::displayModel",
+							   "File " + std::string(&inputModelName[0]) + " not found, reverting back to previously attached");
 					memset(&inputModelName[0], '\0', BUF_SIZE);
 					int copySize = model->filename.size() > BUF_SIZE ? BUF_SIZE : model->filename.size();
 					strncpy(&inputModelName[0], model->filename.c_str(), copySize);
-					Log::error("Editor::displayModel", "File " + std::string(&inputModelName[0]) + " not found!");
 				}
 			}
 			if(ImGui::IsItemHovered())
@@ -248,6 +248,22 @@ namespace Editor
 			}	
 		}
 	}
+
+	void displayCamera()
+	{
+		if(ImGui::CollapsingHeader("Camera", "CameraComponent", true, true))
+		{
+			bool updateProj = false;
+			if(ImGui::InputFloat("NearZ", &camera->nearZ, 0.1f, 1.f))
+				updateProj = true;
+			if(ImGui::InputFloat("FarZ", &camera->farZ, 1.f, 5.f))
+				updateProj = true;
+			if(ImGui::InputFloat("Fov", &camera->fov, 1.f, 5.f))
+				updateProj = true;
+			if(updateProj)
+				Renderer::Camera::updateProjection(camera);
+		}		
+	}
 	
 	void update(float deltaTime, bool* quit)
 	{
@@ -300,10 +316,12 @@ namespace Editor
 				memcpy(&inputTag[0], &selectedGO->tag[0], copySize);
 
 				transform = GO::getTransform(selectedGO);
+				// Check light
 				if(GO::hasComponent(selectedGO, Component::LIGHT))
 					light = GO::getLight(selectedGO);
 				else
 					light = NULL;
+				// Check Model
 				if(GO::hasComponent(selectedGO, Component::MODEL))
 				{
 					model = GO::getModel(selectedGO);
@@ -330,6 +348,11 @@ namespace Editor
 				{
 					model = NULL;
 				}
+				// Check camera
+				if(GO::hasComponent(selectedGO, Component::CAMERA))
+				{
+					camera = GO::getCamera(selectedGO);
+				}
 			}
 			
 			if(ImGui::Button("Remove"))
@@ -346,6 +369,7 @@ namespace Editor
 					transform = NULL;
 					light     = NULL;
 					model     = NULL;
+					camera    = NULL;
 				}
 			}
 			ImGui::End();
@@ -375,6 +399,10 @@ namespace Editor
 				// Model Component
 				if(GO::hasComponent(selectedGO, Component::MODEL))
 					displayModel();
+
+				// Camera Component
+				if(GO::hasComponent(selectedGO, Component::CAMERA))
+					displayCamera();
 				
 				ImGui::End();
 			}
