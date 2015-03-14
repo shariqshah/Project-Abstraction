@@ -27,6 +27,7 @@ namespace Editor
 		const int   BUF_SIZE = 128;
 
 		char inputName[BUF_SIZE]       = "";
+		char inputNewName[BUF_SIZE]    = "";
 		char inputTag[BUF_SIZE]        = "";
 		char inputModelName[BUF_SIZE]  = "";
 		char inputModelTex[BUF_SIZE]   = "";
@@ -40,6 +41,48 @@ namespace Editor
 	
 	void initialize()
 	{		
+	}
+
+	void updateComponentViewers()
+	{
+		transform = GO::getTransform(selectedGO);
+		// Check light
+		if(GO::hasComponent(selectedGO, Component::LIGHT))
+			light = GO::getLight(selectedGO);
+		else
+			light = NULL;
+		// Check Model
+		if(GO::hasComponent(selectedGO, Component::MODEL))
+		{
+			model = GO::getModel(selectedGO);
+			memset(&inputModelName[0], '\0', BUF_SIZE);
+			memset(&inputModelTex[0], '\0', BUF_SIZE);
+			size_t copySize = model->filename.size() > BUF_SIZE ? BUF_SIZE : model->filename.size();
+			strncpy(&inputModelName[0], model->filename.c_str(), copySize);
+			if(model->material == MAT_UNSHADED_TEXTURED || model->material == MAT_PHONG_TEXTURED)
+			{
+				const char* textureName = Texture::getFilename(model->materialUniforms.texture);
+				if(textureName)
+				{
+					size_t textureNameLen = strlen(textureName);
+					copySize = textureNameLen > BUF_SIZE ? BUF_SIZE : textureNameLen;
+					strncpy(&inputModelTex[0], textureName, copySize);
+				}
+				else
+				{
+					strcpy(&inputModelTex[0], "NONE");
+				}
+			}
+		}
+		else
+		{
+			model = NULL;
+		}
+		// Check camera
+		if(GO::hasComponent(selectedGO, Component::CAMERA))
+			camera = GO::getCamera(selectedGO);
+		else
+			camera = NULL;
 	}
 
 	bool selectGameObject(void* gameObjects, int index, const char** name)
@@ -171,11 +214,24 @@ namespace Editor
 				CModel testModel;
 				if(Renderer::Model::loadFromFile(&inputModelName[0], &testModel))
 				{
+					int prevMaterial = model->material;
+					Mat_Uniforms prevUniforms = model->materialUniforms;
+					const char* textureName =
+						prevUniforms.texture != -1 ? Texture::getFilename(prevUniforms.texture) : NULL;
+					int texture = textureName ? Texture::create(textureName) : -1;
 					CModel* newModel = GO::addModel(selectedGO, &inputModelName[0]);
 					if(!newModel)
 					{
 						memset(&inputModelName[0], '\0', BUF_SIZE);
 						strcpy(&inputModelName[0], "NONE");
+					}
+					else
+					{
+						Renderer::Model::setMaterialType(newModel, (Mat_Type)prevMaterial);
+						newModel->materialUniforms = prevUniforms;
+						newModel->materialUniforms.texture = texture;
+						updateComponentViewers();
+						return;
 					}
 				}
 				else
@@ -314,45 +370,7 @@ namespace Editor
 				memcpy(&inputName[0], &selectedGO->name[0], copySize);
 				copySize = selectedGO->tag.size() > BUF_SIZE ? BUF_SIZE : selectedGO->tag.size();
 				memcpy(&inputTag[0], &selectedGO->tag[0], copySize);
-
-				transform = GO::getTransform(selectedGO);
-				// Check light
-				if(GO::hasComponent(selectedGO, Component::LIGHT))
-					light = GO::getLight(selectedGO);
-				else
-					light = NULL;
-				// Check Model
-				if(GO::hasComponent(selectedGO, Component::MODEL))
-				{
-					model = GO::getModel(selectedGO);
-					memset(&inputModelName[0], '\0', BUF_SIZE);
-					memset(&inputModelTex[0], '\0', BUF_SIZE);
-					copySize = model->filename.size() > BUF_SIZE ? BUF_SIZE : model->filename.size();
-					strncpy(&inputModelName[0], model->filename.c_str(), copySize);
-					if(model->material == MAT_UNSHADED_TEXTURED || model->material == MAT_PHONG_TEXTURED)
-					{
-						const char* textureName = Texture::getFilename(model->materialUniforms.texture);
-						if(textureName)
-						{
-							size_t textureNameLen = strlen(textureName);
-							copySize = textureNameLen > BUF_SIZE ? BUF_SIZE : textureNameLen;
-							strncpy(&inputModelTex[0], textureName, copySize);
-						}
-						else
-						{
-							strcpy(&inputModelTex[0], "NONE");
-						}
-					}
-				}
-				else
-				{
-					model = NULL;
-				}
-				// Check camera
-				if(GO::hasComponent(selectedGO, Component::CAMERA))
-				{
-					camera = GO::getCamera(selectedGO);
-				}
+				updateComponentViewers();
 			}
 			
 			if(ImGui::Button("Remove"))
@@ -363,6 +381,7 @@ namespace Editor
 					SceneManager::remove(selectedGO->node);
 					showSelectedGO = false;
 					memset(&inputName[0], '\0', BUF_SIZE);
+					memset(&inputNewName[0], '\0', BUF_SIZE);
 					memset(&inputTag[0], '\0', BUF_SIZE);
 					memset(&inputModelName[0], '\0', BUF_SIZE);
 					memset(&inputModelTex[0], '\0', BUF_SIZE);
@@ -372,34 +391,88 @@ namespace Editor
 					camera    = NULL;
 				}
 			}
+
+			if(ImGui::InputText("Create New",
+								&inputNewName[0],
+								BUF_SIZE,
+								ImGuiInputTextFlags_EnterReturnsTrue))
+			{
+				if(strlen(&inputNewName[0]) > 0)
+				{
+					SceneManager::create(&inputNewName[0]);
+					memset(&inputNewName[0], '\0', BUF_SIZE);
+				}
+				else
+				{
+					Log::error("Editor::addNewGameObject", "Name not entered, no gameobject created");
+				}
+			}
+			if(ImGui::IsItemHovered())
+				ImGui::SetTooltip("Insert name of new GameObject and press Enter to add it to the scene");
 			ImGui::End();
 
 			// Show currently selected gameobject, if any
 			if(showSelectedGO)
-			{				
-				ImGui::Begin(selectedGO->name.c_str(), &showSelectedGO, Vec2(600, 400), OPACITY);
-
+			{
+				ImGui::Begin(selectedGO->name.c_str(), &showSelectedGO, Vec2(450, 400), OPACITY);
 				if(ImGui::InputText("Name", &inputName[0], BUF_SIZE, ImGuiInputTextFlags_EnterReturnsTrue))
-				{
 					selectedGO->name = inputName;
-				}
 
 				if(ImGui::InputText("Tag", &inputTag[0], BUF_SIZE, ImGuiInputTextFlags_EnterReturnsTrue))
-				{
 					selectedGO->tag = inputTag;
+
+				int selected = 0;
+				const char* components = "None\0Camera\0Model\0Light\0Rigidbody\0\0";
+				if(ImGui::Combo("Add New Component", &selected, components, 5))
+				{
+					CModel* newModel = NULL;
+					switch(selected)
+					{
+					case 1:
+						if(GO::hasComponent(selectedGO, Component::CAMERA))
+						{
+							Log::warning("Removing existing camera from " + selectedGO->name);
+							GO::removeComponent(selectedGO, Component::CAMERA);
+						}
+						GO::addCamera(selectedGO);
+						break;
+					case 2:
+						// if(GO::hasComponent(selectedGO, Component::MODEL))
+						// {
+						// 	Log::warning("Removing existing model from " + selectedGO->name);
+						// 	GO::removeComponent(selectedGO, Component::MODEL);
+						// }
+						newModel = GO::addModel(selectedGO, "default.pamesh");
+						Renderer::Model::setMaterialType(newModel, MAT_UNSHADED_TEXTURED);						
+						newModel->materialUniforms.texture = Texture::create("default.png");
+						newModel->materialUniforms.diffuseColor = Vec4(1.f, 0.f, 1.f, 1.f);						
+						break;
+					case 3:
+						if(GO::hasComponent(selectedGO, Component::LIGHT))
+						{
+							Log::warning("Removing existing light from " + selectedGO->name);
+							GO::removeComponent(selectedGO, Component::LIGHT);
+						}
+						GO::addLight(selectedGO);
+						break;
+					case 4:
+						Log::warning("Not implemented!");
+						break;
+					default:
+						break;
+					}
+					updateComponentViewers();
 				}
 
+				// Display Components
 				// Transform Component
 				displayTransform();
-
 				// Light Component
 				if(GO::hasComponent(selectedGO, Component::LIGHT))
 					displayLight();
-
 				// Model Component
 				if(GO::hasComponent(selectedGO, Component::MODEL))
 					displayModel();
-
 				// Camera Component
 				if(GO::hasComponent(selectedGO, Component::CAMERA))
 					displayCamera();
@@ -407,9 +480,6 @@ namespace Editor
 				ImGui::End();
 			}
 		}
-
-		
-		ImGui::ShowTestWindow(&showLog);
 	}
 	
 	void cleanup()

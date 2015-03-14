@@ -24,7 +24,7 @@ struct Mat_Uniforms
 	float specularStrength  = 50.f;
 	int   texture           = -1;
 
-	void operator=(Mat_Uniforms* other);
+	Mat_Uniforms& operator=(const Mat_Uniforms& other);
 };
 
 namespace Material

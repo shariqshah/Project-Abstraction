@@ -258,7 +258,6 @@ namespace Texture
 		}
 	}
 
-	
 	void cleanup()
 	{
 		free(texturePath);		

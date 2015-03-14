@@ -11,17 +11,23 @@
 #include "scriptengine.h"
 
 // Overloaded assignment operator for Mat_Uniform
-void Mat_Uniforms::operator=(Mat_Uniforms* other)
+Mat_Uniforms& Mat_Uniforms::operator=(const Mat_Uniforms& other)
 {
-	other->diffuseColor     = this->diffuseColor;
-	other->diffuse          = this->diffuse;
-	other->specular         = this->specular;
-	other->specularStrength = this->specularStrength;
-	if(this->texture != -1)
-		Texture::increaseRefCount(this->texture);
-	if(other->texture != -1)
-		Texture::decreaseRefCount(other->texture);
-	other->texture = this->texture;
+	if(&other != this)			// If assigning self, just return
+	{
+		this->diffuseColor     = other.diffuseColor;
+		this->diffuse          = other.diffuse;
+		this->specular         = other.specular;
+		this->specularStrength = other.specularStrength;
+		if(this->texture != -1)
+			Texture::decreaseRefCount(this->texture);
+		if(other.texture != -1)
+			Texture::increaseRefCount(other.texture);
+
+		// *this = other;
+		this->texture = other.texture;
+	}
+	return *this;
 }
 
 namespace Material

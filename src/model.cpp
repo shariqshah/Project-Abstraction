@@ -286,10 +286,14 @@ namespace Renderer
 			return index;
 		}
 
-
-		CModel* getModelAtIndex(unsigned int modelIndex)
+		CModel* getModelAtIndex(int modelIndex)
 		{
-			return &modelList[modelIndex];
+			CModel* model = NULL;
+			if(modelIndex > -1 && modelIndex < (int)modelList.size())
+				model = &modelList[modelIndex];
+			else
+				Log::error("Model::getModelAtindex", "Invalid modelIndex");
+			return model;
 		}
 
 
@@ -361,9 +365,7 @@ namespace Renderer
 			assert(model);
 			assert(filename);
 			bool success = true;
-
 			int index = findModelIndex(filename);
-
 			if(index == -1)
 			{
 				char* fullPath = (char *)malloc(sizeof(char) *

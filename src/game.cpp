@@ -103,16 +103,6 @@ Game::Game(const char* path)
 	CTransform* tTran = GO::getTransform(tea);
 	Transform::setPosition(tTran, Vec3(0, 10, -5), true);
 	GO::attachScript(tea, "Debug");
-
-	// for(int i = 0; i < 100; i++)
-	// {
-	// 	Rect text;
-	// 	text.position = Vec2((rand() % 10) + 1, (rand() % 10) + 1);
-	// 	// text.position = Vec2(5 * i, 5);
-	// 	text.text = "Hello";
-	// 	text.scale = Vec2(0.2f, 0.2f);
-	// 	Renderer::addTextRect(text);
-	// }
 }
 
 Game::~Game()
