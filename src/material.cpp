@@ -44,7 +44,7 @@ namespace Material
 		Material phong;
 		Material unshadedTextured;
 		Material phongTextured;
-		const Vec4  DEFAULT_COLOR(1.0f, 1.0f, 1.0f, 1.0f);
+		const Vec4 DEFAULT_COLOR(1.0f, 1.0f, 1.0f, 1.0f);
 	}
 	
 	void initialize()

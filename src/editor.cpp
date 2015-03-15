@@ -244,7 +244,7 @@ namespace Editor
 				}
 			}
 			if(ImGui::IsItemHovered())
-				ImGui::SetTooltip("Enter new name and press Enter to reload Model");
+				ImGui::SetTooltip("Insert new name and press Enter to reload Model");
 
 			int material = model->material;
 			if(ImGui::Combo("Material Type",
@@ -437,15 +437,10 @@ namespace Editor
 						GO::addCamera(selectedGO);
 						break;
 					case 2:
-						// if(GO::hasComponent(selectedGO, Component::MODEL))
-						// {
-						// 	Log::warning("Removing existing model from " + selectedGO->name);
-						// 	GO::removeComponent(selectedGO, Component::MODEL);
-						// }
 						newModel = GO::addModel(selectedGO, "default.pamesh");
-						Renderer::Model::setMaterialType(newModel, MAT_UNSHADED_TEXTURED);						
+						Renderer::Model::setMaterialType(newModel, MAT_UNSHADED_TEXTURED);
 						newModel->materialUniforms.texture = Texture::create("default.png");
-						newModel->materialUniforms.diffuseColor = Vec4(1.f, 0.f, 1.f, 1.f);						
+						newModel->materialUniforms.diffuseColor = Vec4(1.f, 0.f, 1.f, 1.f);
 						break;
 					case 3:
 						if(GO::hasComponent(selectedGO, Component::LIGHT))
@@ -463,6 +458,27 @@ namespace Editor
 					}
 					updateComponentViewers();
 				}
+				if(ImGui::IsItemHovered())
+					ImGui::SetTooltip("Components attached will be removed and attached again with defaults");
+
+				// Remove component
+				selected  = 0;
+				if(ImGui::Combo("Remove Component", &selected, components, 5))
+				{
+					Component componentToRemove = Component::EMPTY;
+					switch(selected)
+					{
+					case 1:	componentToRemove = Component::CAMERA; break;
+					case 2: componentToRemove = Component::MODEL;  break;
+					case 3:	componentToRemove = Component::LIGHT;  break;
+					case 4:	Log::warning("Not implemented!");      break;
+					default: break;
+					}
+					GO::removeComponent(selectedGO, componentToRemove);
+					updateComponentViewers();
+				}
+				if(ImGui::IsItemHovered())
+					ImGui::SetTooltip("Only components attached can be removed");
 
 				// Display Components
 				// Transform Component
