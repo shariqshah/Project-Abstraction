@@ -18,9 +18,7 @@ namespace Transform
 		CTransform newTransform;
 		newTransform.node = node;
 		Transform::updateTransformMatrix(&newTransform);
-		
-		int index = 0;
-			
+		int index = 0;	
 		if(emptyIndices.empty())
 		{
 			transformList.push_back(newTransform);
@@ -32,7 +30,6 @@ namespace Transform
 			transformList[index] = newTransform;
 			emptyIndices.pop_back();
 		}
-
 		return index;
 	}
 
@@ -58,23 +55,20 @@ namespace Transform
 				break;
 			}
 		}
-
 		if(!alreadyRemoved)
 			emptyIndices.push_back(transformIndex);
 		else
 			Log::warning("Transform at index " + std::to_string(transformIndex) + " already removed!");
-
 		return alreadyRemoved ? false : true;
 	}
 
 	void updateTransformMatrix(CTransform* transform)
 	{
-		Mat4 translationMat = glm::translate(Mat4(1.0f), transform->position);
-		Mat4 scaleMat       = glm::scale(Mat4(1.0f), transform->scale);
-		Mat4 rotationMat    = glm::toMat4(glm::normalize(transform->rotation));
-
-		transform->transMat = translationMat * rotationMat * scaleMat;
-		// Renderer::setNodeTransform(transform->node, transform->transMat);
+		Mat4 translationMat   = glm::translate(Mat4(1.0f), transform->position);
+		Mat4 scaleMat         = glm::scale(Mat4(1.0f), transform->scale);
+		Mat4 rotationMat      = glm::toMat4(glm::normalize(transform->rotation));
+		transform->transMat   = translationMat * rotationMat * scaleMat;
+		transform->isModified = true;
 	}
 
 	void updateLookAt(CTransform* transform)
@@ -97,7 +91,6 @@ namespace Transform
 	{
 		assert(transform);
 		transform->position = position;
-
 		if(updateTransMat)
 			updateTransformMatrix(transform);
 	}
@@ -107,9 +100,7 @@ namespace Transform
 		assert(transform);
 		if(transformSpace == Space::TS_LOCAL)
 			offset = transform->rotation * offset;
-		
 		transform->position += offset;
-
 		updateLookAt(transform);
 		updateTransformMatrix(transform);
 	}
@@ -120,11 +111,9 @@ namespace Transform
 		//TODO: Fix this function by comparing with jDoom
 		Vec3  newForward = glm::normalize(direction);
 		float angle      = glm::dot(transform->forward, newForward);
-	
 		//angle = glm::clamp(angle, -1.f, 1.f);
 		angle = glm::acos(angle);
 		angle = glm::degrees(-angle);
-
 		if(angle > epsilon || angle < -epsilon)
 		{
 			Vec3 rotationAxis = glm::cross(newForward, transform->forward);
@@ -139,13 +128,10 @@ namespace Transform
 		if(transformSpace == Space::TS_LOCAL)
 			transform->rotation *= glm::normalize(glm::angleAxis(angle, axis));
 		else
-			transform->rotation  = glm::normalize(glm::angleAxis(angle, axis))*
-				                   transform->rotation;
-
+			transform->rotation  = glm::normalize(glm::angleAxis(angle, axis)) * transform->rotation;
 		updateUpVector(transform);
 		updateLookAt(transform);
 		updateForward(transform);
-
 		updateTransformMatrix(transform);
 	}
 
@@ -185,18 +171,17 @@ namespace Transform
 	{
 		assert(transform);
 		transform->rotation = newRotation;
-
 		updateUpVector(transform);
 		updateLookAt(transform);
 		updateForward(transform);
-
 		if(updateTransMat)
 			updateTransformMatrix(transform);
 	}
 
-	void resetTransformFlag(CTransform* transform)
+	void resetAllTransformFlags()
 	{
-		// Renderer::resetTransformFlag(transform->node);
+		for(CTransform& transform : transformList)
+			transform.isModified = false;
 	}
 
 	void generateBindings()
@@ -249,7 +234,6 @@ namespace Transform
 								.Func("setRotation", &setRotation)
 								.Func("setUpVector", &setUpVector)
 								.Func("setForward", &setForward)
-								.Func("resetTransformFlag", &resetTransformFlag)
 								.Func("updateTransformMatrix", &updateTransformMatrix));
 	}
 }

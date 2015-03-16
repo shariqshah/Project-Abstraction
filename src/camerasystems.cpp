@@ -14,7 +14,8 @@ namespace System
 	{
 		namespace
 		{
-			const float cMaxUpDownRot   = 80.f;
+			const float maxUpDownRot = 80.f;
+			const float epsilon = 0.0001;
 			
 			float sTotalUpDownRot = 0.f;
 			float sMovSpeed       = 20.f;
@@ -81,54 +82,40 @@ namespace System
 				upDownRot -= sRotSpeed * deltaTime;
 			if(Input::isPressed(Input::Key::K))
 				upDownRot += sRotSpeed * deltaTime;
-				
-
+			
 			leftRightRot = glm::degrees(leftRightRot);
 			upDownRot = glm::degrees(upDownRot);
 			sTotalUpDownRot += upDownRot;
 			    
-			if(sTotalUpDownRot >= cMaxUpDownRot)
+			if(sTotalUpDownRot >= maxUpDownRot)
 			{
-				sTotalUpDownRot = cMaxUpDownRot;
+				sTotalUpDownRot = maxUpDownRot;
 				upDownRot = 0.f;
 			}
-			else if(sTotalUpDownRot <= -cMaxUpDownRot)
+			else if(sTotalUpDownRot <= -maxUpDownRot)
 			{
-				sTotalUpDownRot = -cMaxUpDownRot;
+				sTotalUpDownRot = -maxUpDownRot;
 				upDownRot = 0.f;
 			}
-
-			float epsilon = 0.0001;
-			bool  updateCamera = false;
-			
 			if(upDownRot > epsilon || upDownRot < -epsilon)
 			{
 				Transform::rotate(transform,
 								  Vec3(-1, 0, 0),
 								  upDownRot,
 								  Transform::Space::TS_LOCAL);
-				updateCamera = true;
 			} 
-			
 			if(leftRightRot > epsilon || leftRightRot < -epsilon)
 			{
 				Transform::rotate(transform,
 								  Vec3(0, 1, 0),
 								  -leftRightRot,
 								  Transform::Space::TS_WORLD);
-				updateCamera = true;
 			}
-			
-
 			if(translation.x != 0 || translation.y != 0 || translation.z != 0)
 			{
 				Transform::translate(transform, translation, Transform::Space::TS_LOCAL);
 				Log::message("Player : " + Utils::toString(transform->position));
-				updateCamera = true;
 			}
-
-			if(updateCamera)
-				Renderer::Camera::updateView(camera, transform);
 		}
 	}
 }

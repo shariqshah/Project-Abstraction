@@ -114,9 +114,9 @@ Game::~Game()
 
 void Game::update(float deltaTime, bool* quit)
 {
-	auto cube = SceneManager::find("Cube2");
-	auto tran = GO::getTransform(cube);
-	Transform::rotate(tran, Vec3(0, 1, 0), 30 * deltaTime);
+	// auto cube = SceneManager::find("Cube2");
+	// auto tran = GO::getTransform(cube);
+	// Transform::rotate(tran, Vec3(0, 1, 0), 30 * deltaTime);
 
 	Gui::update(deltaTime);
 	System::update(deltaTime, quit);

@@ -38,6 +38,7 @@ namespace Renderer
 		void     updateAllCamerasAspectRatio(float aspectRatio);		
 		CCamera* getCameraAtIndex(int cameraIndex);
 		int      create(GameObject* gameObject);
+		void     updateAllCameraViews();
 	}
 }
 

@@ -3,6 +3,7 @@
 #include "transform.h"
 #include "componentmanager.h"
 #include "gameobject.h"
+#include "scenemanager.h"
 
 namespace Renderer
 {
@@ -11,8 +12,7 @@ namespace Renderer
 		std::vector<Node>    cameras;
 		std::vector<CCamera> cameraList;
 		std::vector<int>     emptyIndices;
-        Resource             pipelineList[4];
-
+		
 		void updateViewProjection(CCamera* camera)
 		{
 			camera->viewProjMat = camera->projMat * camera->viewMat;
@@ -49,6 +49,20 @@ namespace Renderer
 			updateProjection(camera);
 		}
 
+		void updateAllCameraViews()
+		{
+			for(CCamera& camera : cameraList)
+			{
+				GameObject* gameObject = SceneManager::find(camera.node);
+				CTransform* transform = GO::getTransform(gameObject);
+				if(transform->isModified)
+				{
+					updateView(&camera, transform);
+				}
+			}
+		}
+		
+
 		void generateBindings()
 		{
 			Sqrat::RootTable().Bind("CCamera", Sqrat::Class<CCamera>()
@@ -76,14 +90,13 @@ namespace Renderer
 
 		void updateAllCamerasAspectRatio(float aspectRatio)
 		{
-			for(CCamera camera : cameraList)
+			for(CCamera& camera : cameraList)
 				setAspectRatio(&camera, aspectRatio);
 		}
 
 		void updateProjection(CCamera* camera)
 		{
 			assert(camera);
-			
 			camera->projMat = glm::perspective(glm::radians(camera->fov),
 											   camera->aspectRatio,
 											   camera->nearZ,
@@ -95,25 +108,20 @@ namespace Renderer
 		{
 			assert(camera);
 			assert(transform);
-			
 			camera->viewMat = glm::lookAt(transform->position,
 										  transform->lookAt,
 										  transform->up);
-
 			updateViewProjection(camera);
 		}
 		
 		int create(GameObject* gameObject)
 		{
 			assert(gameObject);
-			
 			CCamera newCamera;
 			newCamera.node = gameObject->node;
 			CTransform* transform = GO::getTransform(gameObject);
-
 			updateView(&newCamera, transform);
-			updateProjection(&newCamera);
-			
+			updateProjection(&newCamera);			
 			int index = -1;
 			if(emptyIndices.empty())
 			{
@@ -126,7 +134,6 @@ namespace Renderer
 				emptyIndices.pop_back();
 				cameraList[index] = newCamera;
 			}
-
 			return index;
 		}
 
@@ -141,12 +148,10 @@ namespace Renderer
 					break;
 				}
 			}
-
 			if(!alreadyRemoved)
 				emptyIndices.push_back(cameraIndex);
 			else
 				Log::warning("Camera at index " + std::to_string(cameraIndex) + " already removed!");
-
 			return alreadyRemoved ? false : true;
 		}
 

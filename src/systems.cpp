@@ -65,59 +65,7 @@ namespace System
 		float r = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
 		float g = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
 		float b = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
-
 		return Vec3 (r, g, b);
-	}
-
-	void debug(float deltaTime, GameObject *gameObject)
-	{
-		// // auto transform = CompManager::getTransform(gameObject);
-
-		// if(GO::hasComponent(gameObject, Component::CAMERA))
-		// {
-		// 	// auto camera = CompManager::getCamera(gameObject);
-
-		// 	if(Input::isReleased(Input::Key::ENTER))
-		// 	{
-		// 		GOPtr newLight = SceneManager::create("newLight");
-		// 		newLight->tag = "child";
-		// 		// auto light = newLight->addComponent<Light>(newLight->getNode(),
-		// 		// 										   "newLight");
-		// 		// CompManager::addModel(newLight, "models/test/test.scene.xml");
-		// 		// light->setColor(generateRandom());
-		// 		// light->setShadowCaster(false);
-		// 		// auto lightTransform = CompManager::getTransform(newLight);
-				
-		// 		// auto falcon = SceneManager::find("Falcon");
-		// 		// bool success = SceneManager::setParent(newLight.get(), falcon.get());
-		// 		Transform::setPosition(lightTransform, transform->position);
-		// 		Transform::setForward(lightTransform, transform->forward);
-		// 		//lightTransform->translate(Vec3(0, 20, 0));
-		// 		// success ? Log::message("success") : Log::message("fail");
-
-		// 		CRigidBody rigidBody = -1;
-		// 		if(Input::isPressed(Input::Key::LCTRL))
-		// 		{
-		// 			// rigidBody = CompManager::addRigidBody(newLight,
-		// 												  statCollMesh,
-		// 												  0.f);
-		// 		}
-		// 		else if(Input::isPressed(Input::Key::LSHIFT))
-		// 		{
-		// 			// rigidBody = CompManager::addRigidBody(newLight,
-		// 												  hullCollMesh);
-		// 		}
-		// 		else
-		// 		{
-		// 			// rigidBody = CompManager::addRigidBody(newLight,
-		// 												  tmpShape);
-		// 		}
-
-		// 		Physics::RigidBody::applyForce(rigidBody,
-		// 									   transform->forward * 2000.f);
-					
-		// 	}
-		// }
 	}
 
 	void syncPhysicsTransform(GameObject* gameObject)
@@ -140,8 +88,7 @@ namespace System
 	}
 	
 	void update(float deltaTime, GameObject* gameObject)
-	{	
-		debug(deltaTime, gameObject);
+	{
 		syncPhysicsTransform(gameObject); // Should be the last thing so as to
 		                                  // do to let other systems modify the
 		                                  // transform then sync Physics.
@@ -189,9 +136,9 @@ namespace System
 
 		// if(sPhysicsEnabled)
 		// 	Physics::update(deltaTime);
-		
+		Renderer::Camera::updateAllCameraViews();
+		Transform::resetAllTransformFlags();
 		SceneManager::update();
-
 		// if(Input::isReleased(Input::Key::K9))
 		// {
 		// 	// auto test = SceneManager::find("TestOBJ");

@@ -385,6 +385,7 @@ namespace Renderer
 					if((bytesRead = fread(header, INDEX_SIZE, 4, file)) <= 0)
 					{
 						Log::error("Model::loadFromFile", "Read failed");
+						success = false;
 					}
 					else
 					{
@@ -392,28 +393,22 @@ namespace Renderer
 						uint32_t verticesCount = header[1];
 						uint32_t normalsCount  = header[2];
 						uint32_t uvsCount      = header[3];
-
-						// Log::message("IndicesCount : " + std::to_string(indicesCount));
-					
 						// Indices
 						model->indices.reserve(indicesCount);
 						model->indices.insert(model->indices.begin(), indicesCount, 0);				
-						bytesRead = fread(&model->indices[0], INDEX_SIZE, indicesCount, file);
-
+						fread(&model->indices[0], INDEX_SIZE, indicesCount, file);
 						// Vertices
 						model->vertices.reserve(verticesCount);
 						model->vertices.insert(model->vertices.begin(), verticesCount, Vec3(0.f));
-						bytesRead = fread(&model->vertices[0], VEC3_SIZE, verticesCount, file);
-
+						fread(&model->vertices[0], VEC3_SIZE, verticesCount, file);
 						// Normals
 						model->normals.reserve(normalsCount);
 						model->normals.insert(model->normals.begin(), normalsCount, Vec3(0.f));				
-						bytesRead = fread(&model->normals[0], VEC3_SIZE, normalsCount, file);
-
+						fread(&model->normals[0], VEC3_SIZE, normalsCount, file);
 						// UVs
 						model->uvs.reserve(uvsCount);
 						model->uvs.insert(model->uvs.begin(), uvsCount, Vec2(0.f));				
-						bytesRead = fread(&model->uvs[0], VEC2_SIZE, uvsCount, file);					
+						fread(&model->uvs[0], VEC2_SIZE, uvsCount, file);					
 					}
 					fclose(file);
 					model->filename = filename;

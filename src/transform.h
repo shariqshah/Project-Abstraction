@@ -11,54 +11,37 @@ typedef uint32_t Node;
 
 struct CTransform
 {
-    Vec3 position = Vec3(0.f);
-    Vec3 scale    = Vec3(1.f);
-    Vec3 lookAt   = Vec3(0.f, 0.f, -5.f);
-    Vec3 up       = Vec3(0.f, 1.f, 0.f);
-    Vec3 forward  = Vec3(0.f, 0.f, 1.f);
-    Quat rotation = Quat();
-	Node node     = 0;
-	Mat4 transMat = Mat4();
-	bool valid    = true;
+    Vec3 position   = Vec3(0.f);
+    Vec3 scale      = Vec3(1.f);
+    Vec3 lookAt     = Vec3(0.f, 0.f, -5.f);
+    Vec3 up         = Vec3(0.f, 1.f, 0.f);
+    Vec3 forward    = Vec3(0.f, 0.f, 1.f);
+    Quat rotation   = Quat();
+	Node node       = 0;
+	Mat4 transMat   = Mat4();
+	bool valid      = true;
+	bool isModified = false;
 };
 
 namespace Transform
 {
-	static const Vec3 UNIT_X = Vec3(1, 0, 0);
-	static const Vec3 UNIT_Y = Vec3(0, 1, 0);
-	static const Vec3 UNIT_Z = Vec3(0, 0, 1);
-	
 	enum Space
     {
         TS_LOCAL = 0,
         TS_WORLD
     };
-
-	void setPosition(CTransform* transform,
-					 Vec3        position,
-					 bool        updateTransMat = true);
-	
-    void translate(CTransform* transform,
-				   Vec3        offset,
-                   Space       transformSpace = Space::TS_WORLD);
-	
-    void rotate(CTransform* transform,
-				Vec3        axis,
-				float       angle,
-                Space       transformSpace = Space::TS_WORLD);
-	
-    void setScale(CTransform* transform,
-				  Vec3        newScale,
-				  bool        updateTransMat = true);
-
-	void setRotation(CTransform* transform,
-					 Quat        newRotation,
-					 bool        updateTransMat = true);
-	
+	static const Vec3 UNIT_X = Vec3(1, 0, 0);
+	static const Vec3 UNIT_Y = Vec3(0, 1, 0);
+	static const Vec3 UNIT_Z = Vec3(0, 0, 1);
+	void setPosition(CTransform* transform,	Vec3 position, bool updateTransMat = true);	
+    void translate(CTransform* transform, Vec3 offset, Space transformSpace = Space::TS_WORLD);
+    void rotate(CTransform* transform, Vec3 axis, float angle, Space transformSpace = Space::TS_WORLD);
+    void setScale(CTransform* transform, Vec3 newScale, bool updateTransMat = true);
+	void setRotation(CTransform* transform, Quat newRotation, bool updateTransMat = true);
     void setLookAt(CTransform* transform, Vec3 lookAt);
 	void setUpVector(CTransform* transform, Vec3 up);
     void setForward(CTransform* transform, Vec3 direction);
-	void resetTransformFlag(CTransform* transform);
+	void resetAllTransformFlags();
 	void updateTransformMatrix(CTransform* transform);
 	void generateBindings();
 	void cleanup();
