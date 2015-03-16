@@ -18,6 +18,7 @@ namespace Renderer
 		DebugLevel sDebugLevel;
 		bool       sRenderWireframe;
 		bool       sRenderDebugView;
+		Vec4       clearColor = Vec4(1.f);
 		std::vector<std::string> sTextList;
 		const char* texDir         = "/textures/";
 		const char* shaderDir      = "/shaders/";
@@ -365,9 +366,10 @@ namespace Renderer
 							&scale->x   , &scale->y   , &scale->z);
 	}
 
-	void setClearColor(const Vec3 clearColor)
+	void setClearColor(const Vec4 newClearColor)
 	{
-		glClearColor(clearColor.r, clearColor.g, clearColor.b, 1.0);
+		clearColor = newClearColor;
+		glClearColor(clearColor.r, clearColor.g, clearColor.b, clearColor.a);
 	}
 
 	void initialize(const char* path)
@@ -378,7 +380,7 @@ namespace Renderer
         strcpy(contentDir, path);
 		strcat(contentDir, contentDirName);
 
-		glClearColor(0.55, 0.6, 0.8, 1.0);
+		setClearColor(Vec4(0.55, 0.6, 0.8, 1.0));
 		glEnable(GL_DEPTH_TEST);
 		glEnable(GL_CULL_FACE);
 		glCullFace(GL_BACK);
@@ -463,6 +465,16 @@ namespace Renderer
 		Model::renderAllModels(camera, &renderParams);
 		// renderText();
 		// glDisable(GL_BLEND);
+	}
+
+	Vec4 getClearColor()
+	{
+		return clearColor;
+	}
+	
+	RenderParams* getRenderParams()
+	{
+		return &renderParams;
 	}
 	
     Node createGroupNode(const std::string& name, Node parent)

@@ -9,6 +9,7 @@
 #include "gameobject.h"
 #include "log.h"
 #include "texture.h"
+#include "renderer.h"
 
 namespace Editor
 {
@@ -320,27 +321,172 @@ namespace Editor
 				Renderer::Camera::updateProjection(camera);
 		}		
 	}
+
+	void displaySceneObjects()
+    {
+		ImGui::Begin("SceneObjects", &showSceneObjects, Vec2(400, 400), OPACITY);
+		std::vector<Node>* gameObjects = SceneManager::getSceneObjects();
+		ImGui::Text("Total : %d", gameObjects->size());
+		if(ImGui::ListBox("GameObjects", &currentItem, &selectGameObject, gameObjects, gameObjects->size(), 10))
+		{
+			// Selected gameobject changed so update all pointers
+			showSelectedGO = true;
+			Node node = gameObjects->at(currentItem);
+			selectedGO = SceneManager::find(node);
+			memset(&inputName[0], '\0', BUF_SIZE);
+			int copySize = selectedGO->name.size() > BUF_SIZE ? BUF_SIZE : selectedGO->name.size();
+			memcpy(&inputName[0], &selectedGO->name[0], copySize);
+			copySize = selectedGO->tag.size() > BUF_SIZE ? BUF_SIZE : selectedGO->tag.size();
+			memcpy(&inputTag[0], &selectedGO->tag[0], copySize);
+			updateComponentViewers();
+		}
+			
+		if(ImGui::Button("Remove"))
+		{
+			if(showSelectedGO && selectedGO)
+			{
+				// Remove the gameobject and reset state
+				SceneManager::remove(selectedGO->node);
+				showSelectedGO = false;
+				memset(&inputName[0], '\0', BUF_SIZE);
+				memset(&inputNewName[0], '\0', BUF_SIZE);
+				memset(&inputTag[0], '\0', BUF_SIZE);
+				memset(&inputModelName[0], '\0', BUF_SIZE);
+				memset(&inputModelTex[0], '\0', BUF_SIZE);
+				transform = NULL;
+				light     = NULL;
+				model     = NULL;
+				camera    = NULL;
+			}
+		}
+
+		if(ImGui::InputText("Create New",
+							&inputNewName[0],
+							BUF_SIZE,
+							ImGuiInputTextFlags_EnterReturnsTrue))
+		{
+			if(strlen(&inputNewName[0]) > 0)
+			{
+				SceneManager::create(&inputNewName[0]);
+				memset(&inputNewName[0], '\0', BUF_SIZE);
+			}
+			else
+			{
+				Log::error("Editor::addNewGameObject", "Name not entered, no gameobject created");
+			}
+		}
+		if(ImGui::IsItemHovered())
+			ImGui::SetTooltip("Insert name of new GameObject and press Enter to add it to the scene");
+		ImGui::End();
+
+		// Show currently selected gameobject, if any
+		if(showSelectedGO)
+		{
+			ImGui::Begin(selectedGO->name.c_str(), &showSelectedGO, Vec2(450, 400), OPACITY);
+			if(ImGui::InputText("Name", &inputName[0], BUF_SIZE, ImGuiInputTextFlags_EnterReturnsTrue))
+				selectedGO->name = inputName;
+
+			if(ImGui::InputText("Tag", &inputTag[0], BUF_SIZE, ImGuiInputTextFlags_EnterReturnsTrue))
+				selectedGO->tag = inputTag;
+
+			int selected = 0;
+			const char* components = "None\0Camera\0Model\0Light\0Rigidbody\0\0";
+			if(ImGui::Combo("Add New Component", &selected, components, 5))
+			{
+				CModel* newModel = NULL;
+				switch(selected)
+				{
+				case 1:
+					if(GO::hasComponent(selectedGO, Component::CAMERA))
+					{
+						Log::warning("Removing existing camera from " + selectedGO->name);
+						GO::removeComponent(selectedGO, Component::CAMERA);
+					}
+					GO::addCamera(selectedGO);
+					break;
+				case 2:
+					newModel = GO::addModel(selectedGO, "default.pamesh");
+					Renderer::Model::setMaterialType(newModel, MAT_UNSHADED_TEXTURED);
+					newModel->materialUniforms.texture = Texture::create("default.png");
+					newModel->materialUniforms.diffuseColor = Vec4(1.f, 0.f, 1.f, 1.f);
+					break;
+				case 3:
+					if(GO::hasComponent(selectedGO, Component::LIGHT))
+					{
+						Log::warning("Removing existing light from " + selectedGO->name);
+						GO::removeComponent(selectedGO, Component::LIGHT);
+					}
+					GO::addLight(selectedGO);
+					break;
+				case 4:
+					Log::warning("Not implemented!");
+					break;
+				default:
+					break;
+				}
+				updateComponentViewers();
+			}
+			if(ImGui::IsItemHovered())
+				ImGui::SetTooltip("Components attached will be removed and attached again with defaults");
+
+			// Remove component
+			selected  = 0;
+			if(ImGui::Combo("Remove Component", &selected, components, 5))
+			{
+				Component componentToRemove = Component::EMPTY;
+				switch(selected)
+				{
+				case 1:	componentToRemove = Component::CAMERA; break;
+				case 2: componentToRemove = Component::MODEL;  break;
+				case 3:	componentToRemove = Component::LIGHT;  break;
+				case 4:	Log::warning("Not implemented!");      break;
+				default: break;
+				}
+				GO::removeComponent(selectedGO, componentToRemove);
+				updateComponentViewers();
+			}
+			if(ImGui::IsItemHovered())
+				ImGui::SetTooltip("Only components attached can be removed");
+
+			// Display Components
+			displayTransform();
+			if(GO::hasComponent(selectedGO, Component::LIGHT))	displayLight();
+			if(GO::hasComponent(selectedGO, Component::MODEL))  displayModel();
+			if(GO::hasComponent(selectedGO, Component::CAMERA))	displayCamera();				
+			ImGui::End();
+		}
+	}
+
+	void displayRendererSettings()
+	{
+		ImGui::Begin("Renderer Settings", &showRendererSettings, Vec2(400, 200), OPACITY);
+		Vec4          clearColor    = Renderer::getClearColor();
+		RenderParams* renderParams  = Renderer::getRenderParams();
+		const char*   fogModeString = "None\0Linear\0Exponential\0Exponential Squared\0\0";
+		if(ImGui::ColorEdit4("Clear Color", glm::value_ptr(clearColor), true)) Renderer::setClearColor(clearColor);
+		ImGui::ColorEdit4("Ambient Light", glm::value_ptr(renderParams->ambientLight), true);
+		if(ImGui::CollapsingHeader("Fog", "RS_FOG", false, true))
+		{
+			ImGui::Combo("Mode", &renderParams->fog.fogMode, fogModeString, 4);
+			if(renderParams->fog.fogMode != FG_NONE)
+			{
+				ImGui::ColorEdit4("Color", glm::value_ptr(renderParams->fog.color), true);
+				ImGui::InputFloat("Density", &renderParams->fog.density, 0.001f, 0.01f);
+				ImGui::InputFloat("Start",   &renderParams->fog.start, 1.f, 5.f);
+				ImGui::InputFloat("Max",     &renderParams->fog.max, 1.f, 5.f);
+			}
+		}
+		ImGui::End();		
+	}
 	
 	void update(float deltaTime, bool* quit)
 	{
 		ImGui::Begin("Tools", &showMainToolBar, Vec2(100, 20), OPACITY, (WF_NoTitleBar | WF_NoCollapse));
 
-		//TODO : Use a union to switch between main windows related to the toolbar
-		if(ImGui::Button("Log"))
-			showLog = !showLog;
-		ImGui::SameLine();
-		
-		if(ImGui::Button("Scene"))
-			showSceneObjects = !showSceneObjects;
-		ImGui::SameLine();
-
-		if(ImGui::Button("Renderer"))
-			showRendererSettings = !showRendererSettings;
-		ImGui::SameLine();
-
-		if(ImGui::Button("Scripting"))
-			showScriptingWindow = !showScriptingWindow;
-		ImGui::SameLine();
+		if(ImGui::Button("Log"))       showLog = !showLog;                           ImGui::SameLine();		
+		if(ImGui::Button("Scene"))     showSceneObjects = !showSceneObjects;	     ImGui::SameLine();
+		if(ImGui::Button("Renderer"))  showRendererSettings = !showRendererSettings; ImGui::SameLine();
+		if(ImGui::Button("Scripting")) showScriptingWindow = !showScriptingWindow; 	 ImGui::SameLine();
 
 		ImGui::PushID("Exit_Button");
 		Vec4 exitColor(0.89f, 0.05f, 0.17f, 1.f);
@@ -354,148 +500,8 @@ namespace Editor
 		ImGui::End();
 
 		// Selectable list of gameobjects currently in the scene
-		if(showSceneObjects)
-		{
-			ImGui::Begin("SceneObjects", &showSceneObjects, Vec2(400, 400), OPACITY);
-			std::vector<Node>* gameObjects = SceneManager::getSceneObjects();
-			ImGui::Text("Total : %d", gameObjects->size());
-			if(ImGui::ListBox("GameObjects", &currentItem, &selectGameObject, gameObjects, gameObjects->size(), 10))
-			{
-				// Selected gameobject changed so update all pointers
-				showSelectedGO = true;
-				Node node = gameObjects->at(currentItem);
-				selectedGO = SceneManager::find(node);
-				memset(&inputName[0], '\0', BUF_SIZE);
-				int copySize = selectedGO->name.size() > BUF_SIZE ? BUF_SIZE : selectedGO->name.size();
-				memcpy(&inputName[0], &selectedGO->name[0], copySize);
-				copySize = selectedGO->tag.size() > BUF_SIZE ? BUF_SIZE : selectedGO->tag.size();
-				memcpy(&inputTag[0], &selectedGO->tag[0], copySize);
-				updateComponentViewers();
-			}
-			
-			if(ImGui::Button("Remove"))
-			{
-				if(showSelectedGO && selectedGO)
-				{
-					// Remove the gameobject and reset state
-					SceneManager::remove(selectedGO->node);
-					showSelectedGO = false;
-					memset(&inputName[0], '\0', BUF_SIZE);
-					memset(&inputNewName[0], '\0', BUF_SIZE);
-					memset(&inputTag[0], '\0', BUF_SIZE);
-					memset(&inputModelName[0], '\0', BUF_SIZE);
-					memset(&inputModelTex[0], '\0', BUF_SIZE);
-					transform = NULL;
-					light     = NULL;
-					model     = NULL;
-					camera    = NULL;
-				}
-			}
-
-			if(ImGui::InputText("Create New",
-								&inputNewName[0],
-								BUF_SIZE,
-								ImGuiInputTextFlags_EnterReturnsTrue))
-			{
-				if(strlen(&inputNewName[0]) > 0)
-				{
-					SceneManager::create(&inputNewName[0]);
-					memset(&inputNewName[0], '\0', BUF_SIZE);
-				}
-				else
-				{
-					Log::error("Editor::addNewGameObject", "Name not entered, no gameobject created");
-				}
-			}
-			if(ImGui::IsItemHovered())
-				ImGui::SetTooltip("Insert name of new GameObject and press Enter to add it to the scene");
-			ImGui::End();
-
-			// Show currently selected gameobject, if any
-			if(showSelectedGO)
-			{
-				ImGui::Begin(selectedGO->name.c_str(), &showSelectedGO, Vec2(450, 400), OPACITY);
-				if(ImGui::InputText("Name", &inputName[0], BUF_SIZE, ImGuiInputTextFlags_EnterReturnsTrue))
-					selectedGO->name = inputName;
-
-				if(ImGui::InputText("Tag", &inputTag[0], BUF_SIZE, ImGuiInputTextFlags_EnterReturnsTrue))
-					selectedGO->tag = inputTag;
-
-				int selected = 0;
-				const char* components = "None\0Camera\0Model\0Light\0Rigidbody\0\0";
-				if(ImGui::Combo("Add New Component", &selected, components, 5))
-				{
-					CModel* newModel = NULL;
-					switch(selected)
-					{
-					case 1:
-						if(GO::hasComponent(selectedGO, Component::CAMERA))
-						{
-							Log::warning("Removing existing camera from " + selectedGO->name);
-							GO::removeComponent(selectedGO, Component::CAMERA);
-						}
-						GO::addCamera(selectedGO);
-						break;
-					case 2:
-						newModel = GO::addModel(selectedGO, "default.pamesh");
-						Renderer::Model::setMaterialType(newModel, MAT_UNSHADED_TEXTURED);
-						newModel->materialUniforms.texture = Texture::create("default.png");
-						newModel->materialUniforms.diffuseColor = Vec4(1.f, 0.f, 1.f, 1.f);
-						break;
-					case 3:
-						if(GO::hasComponent(selectedGO, Component::LIGHT))
-						{
-							Log::warning("Removing existing light from " + selectedGO->name);
-							GO::removeComponent(selectedGO, Component::LIGHT);
-						}
-						GO::addLight(selectedGO);
-						break;
-					case 4:
-						Log::warning("Not implemented!");
-						break;
-					default:
-						break;
-					}
-					updateComponentViewers();
-				}
-				if(ImGui::IsItemHovered())
-					ImGui::SetTooltip("Components attached will be removed and attached again with defaults");
-
-				// Remove component
-				selected  = 0;
-				if(ImGui::Combo("Remove Component", &selected, components, 5))
-				{
-					Component componentToRemove = Component::EMPTY;
-					switch(selected)
-					{
-					case 1:	componentToRemove = Component::CAMERA; break;
-					case 2: componentToRemove = Component::MODEL;  break;
-					case 3:	componentToRemove = Component::LIGHT;  break;
-					case 4:	Log::warning("Not implemented!");      break;
-					default: break;
-					}
-					GO::removeComponent(selectedGO, componentToRemove);
-					updateComponentViewers();
-				}
-				if(ImGui::IsItemHovered())
-					ImGui::SetTooltip("Only components attached can be removed");
-
-				// Display Components
-				// Transform Component
-				displayTransform();
-				// Light Component
-				if(GO::hasComponent(selectedGO, Component::LIGHT))
-					displayLight();
-				// Model Component
-				if(GO::hasComponent(selectedGO, Component::MODEL))
-					displayModel();
-				// Camera Component
-				if(GO::hasComponent(selectedGO, Component::CAMERA))
-					displayCamera();
-				
-				ImGui::End();
-			}
-		}
+		if(showSceneObjects)     displaySceneObjects();
+		if(showRendererSettings) displayRendererSettings();
 	}
 	
 	void cleanup()

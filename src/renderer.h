@@ -99,11 +99,11 @@ enum FogMode
 
 struct Fog
 {
-	FogMode fogMode = FG_EXP;
-	float   density = 0.01f;
-	float   start   = 50.f;
-	float   max     = 150.f;
-	Vec4    color   = Vec4(60.f/255.f, 60.f/255.f, 75.f/255.f, 1.0f);
+	int   fogMode = FG_EXP;
+	float density = 0.01f;
+	float start   = 50.f;
+	float max     = 150.f;
+	Vec4  color   = Vec4(60.f/255.f, 60.f/255.f, 75.f/255.f, 1.0f);
 };
 
 struct RenderParams
@@ -121,7 +121,9 @@ namespace Renderer
     void addTextRect(Rect text);
 	void checkGLError(const char* context);
 	void renderFrame(CCamera* camera);
-	void setClearColor(const Vec3 clearColor);
+	void setClearColor(const Vec4 clearColor);
+	Vec4 getClearColor();
+	RenderParams* getRenderParams();
 	void setNodeTransform(Node       node,
 						  const Vec3 position,
 						  const Vec3 rotation,
