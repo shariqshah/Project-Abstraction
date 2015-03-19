@@ -44,15 +44,15 @@ namespace Shader
 	char* runPreProcessor(char* shaderText)
 	{
 		char* includeLoc = strstr(shaderText, "//include");
-
 		if(includeLoc)
 		{
 			// size_t len = strlen(includeLoc);
 			char* lineEnd = strchr(includeLoc, '\n');
 			int lineSize = lineEnd - includeLoc;
-			char* incLine = (char*)malloc(sizeof(char) * lineSize);
+			char* incLine = (char*)malloc((sizeof(char) * lineSize) + 1);
 			strncpy(incLine, includeLoc, lineSize);
-			// Log::message(std::string(incLine));
+			incLine[lineSize] = '\0';
+			Log::message(std::string(incLine));
 
 			char* filename = strtok(incLine, " ");
 			while(filename)
@@ -116,7 +116,11 @@ namespace Shader
 		assert(vertSource != NULL);
 		assert(fragSource != NULL);
 
-		vertSource = runPreProcessor(vertSource);
+		Log::message("VS : " + std::string(vertexShader));
+		debugPrintShader(vertSource);
+		vertSource = runPreProcessor(vertSource);		
+		Log::message("FS : " + std::string(fragmentShader));
+		debugPrintShader(fragSource);
 		fragSource = runPreProcessor(fragSource);
 		
 		GLint vSize = (GLint)strlen(vertSource);

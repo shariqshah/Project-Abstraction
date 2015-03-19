@@ -21,6 +21,7 @@ namespace Editor
 		bool showSelectedGO       = false;
 		bool showRendererSettings = false;
 		bool showScriptingWindow  = false;
+		bool showStatsWindow      = true;
 
 		int  currentItem = 1;
 		
@@ -478,16 +479,21 @@ namespace Editor
 		}
 		ImGui::End();		
 	}
+
+	void displayStatsWindow()
+	{
+		ImGui::Begin("Stats", &showStatsWindow, Vec2(10, 20), OPACITY, (WF_NoTitleBar | WF_NoCollapse));
+		ImGui::Text("Fps : %d", ImGui::GetIO().Framerate);
+		ImGui::End();
+	}
 	
 	void update(float deltaTime, bool* quit)
 	{
 		ImGui::Begin("Tools", &showMainToolBar, Vec2(100, 20), OPACITY, (WF_NoTitleBar | WF_NoCollapse));
-
 		if(ImGui::Button("Log"))       showLog = !showLog;                           ImGui::SameLine();		
 		if(ImGui::Button("Scene"))     showSceneObjects = !showSceneObjects;	     ImGui::SameLine();
 		if(ImGui::Button("Renderer"))  showRendererSettings = !showRendererSettings; ImGui::SameLine();
 		if(ImGui::Button("Scripting")) showScriptingWindow = !showScriptingWindow; 	 ImGui::SameLine();
-
 		ImGui::PushID("Exit_Button");
 		Vec4 exitColor(0.89f, 0.05f, 0.17f, 1.f);
 		ImGui::PushStyleColor(ImGuiCol_Button, exitColor);
@@ -496,12 +502,12 @@ namespace Editor
 		if(ImGui::Button("Exit")) *quit = true;
 		ImGui::PopStyleColor(3);
 		ImGui::PopID();
-		
 		ImGui::End();
-
+		
 		// Selectable list of gameobjects currently in the scene
 		if(showSceneObjects)     displaySceneObjects();
 		if(showRendererSettings) displayRendererSettings();
+		if(showStatsWindow) displayStatsWindow();
 	}
 	
 	void cleanup()

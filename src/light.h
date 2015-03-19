@@ -31,7 +31,7 @@ struct CLight
 	Node        node        = 0;
 	bool        castShadow  = false;
 	bool        valid       = true;
-	int         type        = LT_SPOT;
+	int         type        = LT_POINT;
 	Attenuation attenuation;
 };
 

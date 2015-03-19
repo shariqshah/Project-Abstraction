@@ -55,10 +55,7 @@ namespace Renderer
 			{
 				GameObject* gameObject = SceneManager::find(camera.node);
 				CTransform* transform = GO::getTransform(gameObject);
-				if(transform->isModified)
-				{
-					updateView(&camera, transform);
-				}
+				if(transform->isModified) updateView(&camera, transform);
 			}
 		}
 		
