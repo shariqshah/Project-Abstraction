@@ -1,7 +1,6 @@
 #include <GL/glew.h>
 #include <GL/gl.h>
 #include <string.h>
-#define NDEBUG
 #include <assert.h>
 #include <vector>
 
@@ -14,8 +13,8 @@ namespace Shader
 {
 	struct ShaderObject
 	{
-		// TODO: Add name field to shader
-		unsigned int fragmentShader;		unsigned int vertexShader;
+		unsigned int vertexShader;
+		unsigned int fragmentShader;
 		unsigned int program; 
 	};
 	
@@ -52,7 +51,6 @@ namespace Shader
 			char* incLine = (char*)malloc((sizeof(char) * lineSize) + 1);
 			strncpy(incLine, includeLoc, lineSize);
 			incLine[lineSize] = '\0';
-			Log::message(std::string(incLine));
 
 			char* filename = strtok(incLine, " ");
 			while(filename)
@@ -96,16 +94,16 @@ namespace Shader
 		strcpy(shaderPath, path);
 	}
 	
-	int create(const char* vertexShader, const char* fragmentShader)
+	int create(const char* vertexShaderName, const char* fragmentShaderName)
 	{
 		char* vsPath = (char *)malloc(sizeof(char) *
-									  (strlen(shaderPath) + strlen(vertexShader)) + 1);
+									  (strlen(shaderPath) + strlen(vertexShaderName)) + 1);
 		strcpy(vsPath, shaderPath);
-		strcat(vsPath, vertexShader);
+		strcat(vsPath, vertexShaderName);
 		char* fsPath = (char *)malloc(sizeof(char) *
-									  (strlen(shaderPath) + strlen(fragmentShader)) + 1);
+									  (strlen(shaderPath) + strlen(fragmentShaderName)) + 1);
 		strcpy(fsPath, shaderPath);
-		strcat(fsPath, fragmentShader);
+		strcat(fsPath, fragmentShaderName);
 		
 		GLuint vertShader = glCreateShader(GL_VERTEX_SHADER);
 		GLuint fragShader = glCreateShader(GL_FRAGMENT_SHADER);
@@ -116,11 +114,7 @@ namespace Shader
 		assert(vertSource != NULL);
 		assert(fragSource != NULL);
 
-		Log::message("VS : " + std::string(vertexShader));
-		debugPrintShader(vertSource);
 		vertSource = runPreProcessor(vertSource);		
-		Log::message("FS : " + std::string(fragmentShader));
-		debugPrintShader(fragSource);
 		fragSource = runPreProcessor(fragSource);
 		
 		GLint vSize = (GLint)strlen(vertSource);
@@ -150,7 +144,7 @@ namespace Shader
 			char* message = (char *)malloc(sizeof(char) * logSize);
 			glGetShaderInfoLog(vertShader, logSize, NULL, message);
 
-			Log::error("COMPILING VS " + std::string(vertexShader), std::string(message));
+			Log::error("COMPILING VS " + std::string(vertexShaderName), std::string(message));
 			debugPrintShader(vertSource);
 			free(message);
 		}
@@ -162,7 +156,7 @@ namespace Shader
 			char* message = (char *)malloc(sizeof(char) * logSize);
 			glGetShaderInfoLog(fragShader, logSize, NULL, message);
 
-			Log::error("COMPILING FS " + std::string(fragmentShader), std::string(message));
+			Log::error("COMPILING FS " + std::string(fragmentShaderName), std::string(message));
 			debugPrintShader(fragSource);
 			free(message);
 		}
@@ -187,12 +181,10 @@ namespace Shader
 		glBindAttribLocation(program, UV_LOC,       "vUV");
 		glBindAttribLocation(program, COLOR_LOC,    "vColor");
 		Renderer::checkGLError("Shader::create");
-		
 		glLinkProgram(program);
 
 		GLint isLinked = 0;
 		glGetProgramiv(program, GL_LINK_STATUS, &isLinked);
-
 		if(!isLinked)
 		{
 			GLint logSize = 0;
@@ -208,7 +200,6 @@ namespace Shader
 			
 			return -1;
 		}
-
 		ShaderObject newObject;
 		newObject.vertexShader   = vertShader;
 		newObject.fragmentShader = fragShader;
@@ -227,8 +218,7 @@ namespace Shader
 			shaderList.push_back(newObject);
 			index = shaderList.size() - 1;
 		}
-
-		Log::message(std::string(vertexShader) + ", " + std::string(fragmentShader) +
+		Log::message(std::string(vertexShaderName) + ", " + std::string(fragmentShaderName) +
 					 " compiled into shader program");
 		free(vsPath);
 		free(fsPath);

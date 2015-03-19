@@ -12,6 +12,7 @@ namespace Renderer
 		std::vector<Node>    cameras;
 		std::vector<CCamera> cameraList;
 		std::vector<int>     emptyIndices;
+		int                  activeCameraIndex;
 		
 		void updateViewProjection(CCamera* camera)
 		{
@@ -23,6 +24,22 @@ namespace Renderer
 	{
 		void initialize()
 		{
+			activeCameraIndex = -1;
+		}
+
+		CCamera* getActiveCamera()
+		{
+			return getCameraAtIndex(activeCameraIndex);
+		}
+		
+		void setActiveCamera(CCamera* camera)
+		{
+			assert(camera);
+			Node node = camera->node;
+			if(node < cameraList.size())
+				activeCameraIndex = node;
+			else
+				Log::error("Camera::setActivecamera", "Invalid Camera");
 		}
 		
 		void setFarZ(CCamera* camera, float farZ)

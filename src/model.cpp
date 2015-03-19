@@ -203,27 +203,27 @@ namespace Renderer
 				
 				for(int modelIndex : *registeredMeshes)
 				{
-					CModel      model      = modelList[modelIndex];
-					GameObject* gameObject = SceneManager::find(model.node);
-					CTransform* transform  = GO::getTransform(gameObject);
+					const CModel* model      = &modelList[modelIndex];
+					GameObject*   gameObject = SceneManager::find(model->node);
+					CTransform*   transform  = GO::getTransform(gameObject);
 
 					Mat4 mvp = camera->viewProjMat * transform->transMat;
 					Shader::setUniformMat4(shaderIndex, "mvp", mvp);
 					if(material == MAT_PHONG || material == MAT_PHONG_TEXTURED)
 						Shader::setUniformMat4(shaderIndex, "modelMat", transform->transMat);
 					
-					Material::setMaterialUniforms(&model.materialUniforms, (Mat_Type)model.material);
+					Material::setMaterialUniforms(&model->materialUniforms, (Mat_Type)model->material);
 					
-					glBindVertexArray(model.vao);
+					glBindVertexArray(model->vao);
 
-					if(model.drawIndexed)
-						glDrawElements(GL_TRIANGLES, model.indices.size(), GL_UNSIGNED_INT, (void*)0);
+					if(model->drawIndexed)
+						glDrawElements(GL_TRIANGLES, model->indices.size(), GL_UNSIGNED_INT, (void*)0);
 					else
-						glDrawArrays(GL_TRIANGLES, 0, model.vertices.size());
+						glDrawArrays(GL_TRIANGLES, 0, model->vertices.size());
 
 					glBindVertexArray(0);
 
-					if(model.material == MAT_UNSHADED_TEXTURED || model.material == MAT_PHONG_TEXTURED)
+					if(model->material == MAT_UNSHADED_TEXTURED || model->material == MAT_PHONG_TEXTURED)
 						Texture::unbindActiveTexture();
 				}
 				

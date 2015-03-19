@@ -39,6 +39,8 @@ namespace Renderer
 		CCamera* getCameraAtIndex(int cameraIndex);
 		int      create(GameObject* gameObject);
 		void     updateAllCameraViews();
+		CCamera* getActiveCamera();
+		void     setActiveCamera(CCamera* camera);
 	}
 }
 

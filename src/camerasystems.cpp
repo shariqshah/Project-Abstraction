@@ -40,8 +40,6 @@ namespace System
 		{
 			GameObject* activeObjectPtr = SceneManager::find(activeObject);
 			auto transform = GO::getTransform(activeObjectPtr);
-			auto camera    = Renderer::Camera::getCameraAtIndex(activeObjectPtr->compIndices[(int)Component::CAMERA]);
-			
 			// if(!Input::isCursorLocked())
 			// 	Input::setCursorLock(true);
 					

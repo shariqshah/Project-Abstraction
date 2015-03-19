@@ -251,7 +251,7 @@ public:
 			// float* vertices = Renderer::Model::getVertices(mModel);
 			// int vertexCount = Renderer::Model::getVertexCount(mModel);
 			float* vertices = NULL;
-			int vertexCount = NULL;
+			int vertexCount = 0;
 
 			// TODO: Fix by adding check if mesh has indices and modifying the loop below accordingly
 			assert(vertices);

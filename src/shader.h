@@ -11,7 +11,7 @@ namespace Shader
 	const int UV_LOC       = 2;
 	const int COLOR_LOC    = 3;
     
-	int  create(const char* vertexShader, const char* fragmentShader);
+	int  create(const char* vertexShaderName, const char* fragmentShaderName);
 	void initialize(const char* path);
 	void bindShader(const unsigned int shaderIndex);
 	void remove(const unsigned int shaderIndex);
