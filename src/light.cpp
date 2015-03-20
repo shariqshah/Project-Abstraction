@@ -167,11 +167,6 @@ namespace Renderer
 									 .Const("DIR",   LightType::LT_DIR)
 									 .Const("POINT", LightType::LT_POINT));
 			
-			Sqrat::RootTable().Bind("Attenuation", Sqrat::Class<Attenuation>()
-									.Var("linear",    &Attenuation::linear)
-									.Var("constant",  &Attenuation::constant)
-									.Var("quadratic", &Attenuation::quadratic));
-			
 			Sqrat::RootTable().Bind("CLight", Sqrat::Class<CLight>()
 								.Var("intensity",   &CLight::intensity)
 								.Var("color",       &CLight::color)
@@ -181,8 +176,7 @@ namespace Renderer
 								.Var("node",        &CLight::node)
 								.Var("castShadow",  &CLight::castShadow)
 								.Var("valid",       &CLight::valid)
-								.Var("lightType",        &CLight::type)
-								.Var("attenuation", &CLight::attenuation));
+								.Var("lightType",   &CLight::type));
 
 			Sqrat::RootTable().Bind("Light", Sqrat::Table(ScriptEngine::getVM())
 									.Func("create", &create));

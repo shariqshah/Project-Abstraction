@@ -34,11 +34,9 @@ vec4 applyFog(vec4 color)
 		{
 			fogFactor = exp(-pow(fog.density * distFromEye, 2));
 		}
-
 		fogFactor = clamp(fogFactor, 0.0, 1.0);
 		finalColor = mix(fog.color, color, fogFactor);
 	}
-
 	return finalColor;
 }
 

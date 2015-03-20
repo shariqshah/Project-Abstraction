@@ -14,25 +14,19 @@ enum LightType
 	LT_POINT
 };
 
-struct Attenuation
-{
-	float constant  = 1.f;
-	float linear    = 0.1f;
-	float quadratic = 0.001f;
-};
-
 struct CLight
 {
 	float       outerAngle  = glm::radians(30.f);
 	float       innerAngle  = glm::radians(20.f);
 	float       exponent    = 4.f;
+	float       falloff     = 1.5f;
 	float       intensity   = 1.0f;
 	Vec4        color       = Vec4(1.f);
 	Node        node        = 0;
 	bool        castShadow  = false;
 	bool        valid       = true;
 	int         type        = LT_POINT;
-	Attenuation attenuation;
+	int         radius      = 30;
 };
 
 namespace Renderer

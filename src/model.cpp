@@ -118,7 +118,6 @@ namespace Renderer
 	    {
 			// TODO: Add light culling!
 			std::vector<uint32_t>* activeLights = Light::getActiveLights();
-
 			uint32_t count = 0;
 			for(uint32_t lightIndex : *activeLights)
 			{
@@ -138,14 +137,11 @@ namespace Renderer
 										std::string(arrayIndex + "innerAngle").c_str(),
 										light->innerAngle);
 				Shader::setUniformFloat(shaderIndex,
-										std::string(arrayIndex + "attenuation.constant").c_str(),
-										light->attenuation.constant);
-				Shader::setUniformFloat(shaderIndex,
-										std::string(arrayIndex + "attenuation.linear").c_str(),
-										light->attenuation.linear);
-				Shader::setUniformFloat(shaderIndex,
-										std::string(arrayIndex + "attenuation.quadratic").c_str(),
-										light->attenuation.quadratic);
+										std::string(arrayIndex + "falloff").c_str(),
+										light->falloff);
+				Shader::setUniformInt(shaderIndex,
+									  std::string(arrayIndex + "radius").c_str(),
+									  light->radius);
 				Shader::setUniformInt(shaderIndex,
 									  std::string(arrayIndex + "type").c_str(),
 									  light->type);
@@ -231,31 +227,6 @@ namespace Renderer
 			}
 		}
 
-		// int create(CModel* model)
-		// {
-		// 	assert(model);
-		// 	createVAO(model); // Create VAO for the model that will be used in rendering
-		// 	int index = -1;
-		// 	if(emptyIndices.empty())
-		// 	{
-		// 		modelList.push_back(*model);
-		// 		index = modelList.size() - 1;
-		// 	}
-		// 	else
-		// 	{
-		// 		index = emptyIndices.back();
-		// 		modelList[index] = *model;
-		// 		emptyIndices.pop_back();
-		// 	}
-
-		// 	if(Material::registerModel(index, (Mat_Type)model->material))
-		// 		Log::message("Model " + model->filename + " registered");
-		// 	else
-		// 		Log::warning("Model " + model->filename + " already registered!");
-
-		// 	return index;
-		// }
-
 		int create(const char* filename)
 		{
 			int index = -1;
@@ -306,14 +277,6 @@ namespace Renderer
 			modelList.clear();
 			emptyIndices.clear();
 		}
-
-		// CModel* create(const std::string& filename)
-		// {
-		// 	// If model is created without a parent node then it cannot be
-		// 	// added to gameobjects. It can only be used to provide collision
-		// 	// mesh.
-			
-		// }
 
 		void generateBindings()
 		{
@@ -428,14 +391,13 @@ namespace Renderer
 				model->uvs      = existingModel.uvs;
 				model->filename = existingModel.filename;
 			}
-
 			return success;
 		}
 
 		void setMaterialType(CModel* model, Mat_Type material)
 		{
 			int index = -1;
-			for(int i = 0; i < modelList.size(); i++)
+			for(int i = 0; i < (int)modelList.size(); i++)
 			{
 				if(model->node == modelList[i].node)
 				{
@@ -443,7 +405,6 @@ namespace Renderer
 					break;
 				}
 			}
-
 			if(index != -1)
 			{
 				Material::unRegisterModel(index, (Mat_Type)model->material);

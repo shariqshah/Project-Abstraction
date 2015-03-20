@@ -192,16 +192,12 @@ namespace Editor
 			ImGui::Checkbox("Cast Shadows", &light->castShadow);
 			if(light->type == LT_SPOT || light->type == LT_POINT)
 			{
+				ImGui::InputInt("Radius", &light->radius, 1.f, 5.f);
+				ImGui::InputFloat("Falloff", &light->falloff, 0.5f, 5.f);
 				if(light->type == LT_SPOT)
 				{
 					ImGui::SliderAngle("Inner", &light->innerAngle, 0, 180);
 					ImGui::SliderAngle("Outer", &light->outerAngle, 0, 180);
-				}
-				if(ImGui::CollapsingHeader("Attenuation", "LC_Attenuation", false, false))
-				{
-					ImGui::InputFloat("Constant", &light->attenuation.constant, 0.1f, 0.25f);
-					ImGui::InputFloat("Linear", &light->attenuation.linear, 0.01f, 0.1f);
-					ImGui::InputFloat("Quadratic", &light->attenuation.quadratic, 0.0001f, 0.001f);
 				}
 			}
 		}
@@ -334,7 +330,7 @@ namespace Editor
 
 	void displaySceneObjects()
     {
-		ImGui::Begin("SceneObjects", &showSceneObjects, Vec2(400, 400), OPACITY);
+		ImGui::Begin("SceneObjects", &showSceneObjects, Vec2(400, 350), OPACITY);
 		std::vector<Node>* gameObjects = SceneManager::getSceneObjects();
 		ImGui::Text("Total : %d", gameObjects->size());
 		if(ImGui::ListBox("GameObjects", &currentItem, &selectGameObject, gameObjects, gameObjects->size(), 10))
@@ -517,7 +513,7 @@ namespace Editor
 		// Selectable list of gameobjects currently in the scene
 		if(showSceneObjects)     displaySceneObjects();
 		if(showRendererSettings) displayRendererSettings();
-		if(showStatsWindow) displayStatsWindow();
+		if(showStatsWindow)      displayStatsWindow();
 	}
 	
 	void cleanup()

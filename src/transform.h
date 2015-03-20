@@ -15,7 +15,7 @@ struct CTransform
     Vec3 scale      = Vec3(1.f);
     Vec3 lookAt     = Vec3(0.f, 0.f, -5.f);
     Vec3 up         = Vec3(0.f, 1.f, 0.f);
-    Vec3 forward    = Vec3(0.f, 0.f, 1.f);
+    Vec3 forward    = Vec3(0.f, 0.f, -1.f);
     Quat rotation   = Quat();
 	Node node       = 0;
 	Mat4 transMat   = Mat4();
