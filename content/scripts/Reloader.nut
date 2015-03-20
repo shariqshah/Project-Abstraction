@@ -13,7 +13,7 @@ class Reloader extends BaseBehaviourScript </ type = "Reloader" />
 		speed = 50.0
 		count = 0
 
-		color = Vec4(0, 1, 0, 1)
+		color = Vec4(0.5, 0.5, 0, 1)
 		model = CModel()
 		Model.loadFromFile("suzanne.pamesh", model)
 	}

@@ -1,6 +1,6 @@
-//include fog.glsl commonFrag.glsl common.glsl version.glsl
+//include fog.glsl common.glsl commonFrag.glsl version.glsl
 
 void main()
 {
-	fragColor = (ambientLight * diffuseColor) + applyFog(diffuseColor);
+	fragColor = applyFog(diffuseColor);
 }

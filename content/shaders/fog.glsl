@@ -17,11 +17,10 @@ const int FOG_EXPONENTIAL_SQRD = 3;
 vec4 applyFog(vec4 color)
 {
 	vec4 finalColor = color;
-	float fogFactor;
-	float distFromEye = abs(length(vertex - eyePos));
-
 	if(fog.fogMode != FOG_NONE)
 	{
+		float fogFactor;
+		float distFromEye = abs(length(vertex - eyePos));
 		if(fog.fogMode == FOG_LINEAR)
 		{
 			fogFactor = (fog.max - distFromEye) / (fog.max - fog.start);

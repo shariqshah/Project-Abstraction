@@ -166,16 +166,6 @@ namespace Renderer
 			}
 			Shader::setUniformInt(shaderIndex, "numLights", count);
 		}
-
-		void setRenderParams(int shaderIndex, RenderParams* renderParams)
-		{
-			Shader::setUniformFloat(shaderIndex, "fog.density",  renderParams->fog.density);
-			Shader::setUniformFloat(shaderIndex, "fog.start",    renderParams->fog.start);
-			Shader::setUniformFloat(shaderIndex, "fog.max",      renderParams->fog.max);
-			Shader::setUniformInt(shaderIndex,   "fog.fogMode",  renderParams->fog.fogMode);
-			Shader::setUniformVec4(shaderIndex,  "fog.color",    renderParams->fog.color);
-			Shader::setUniformVec4(shaderIndex,  "ambientLight", renderParams->ambientLight);
-		}
 		
 		void renderAllModels(CCamera* camera, RenderParams* renderParams)
 		{
@@ -186,16 +176,23 @@ namespace Renderer
 				int shaderIndex = Material::getShaderIndex(material);
 
 				Shader::bindShader(shaderIndex);
-
+				GameObject* viewer = SceneManager::find(camera->node);
+				CTransform* viewerTransform = GO::getTransform(viewer);
+				
 				if((material == MAT_PHONG || material == MAT_PHONG_TEXTURED)
 				   && registeredMeshes->size() > 0)
 				{
 					setLights(shaderIndex);					
-					GameObject* viewer = SceneManager::find(camera->node);
-					CTransform* viewerTransform = GO::getTransform(viewer);
-					Shader::setUniformVec3(shaderIndex, "eyePos", viewerTransform->position);
 				}
-				setRenderParams(shaderIndex, renderParams);
+				// Setup uniforms for material
+				Shader::setUniformVec3(shaderIndex, "eyePos", viewerTransform->position);
+				Shader::setUniformFloat(shaderIndex, "fog.density",  renderParams->fog.density);
+				Shader::setUniformFloat(shaderIndex, "fog.start",    renderParams->fog.start);
+				Shader::setUniformFloat(shaderIndex, "fog.max",      renderParams->fog.max);
+				Shader::setUniformInt(shaderIndex,   "fog.fogMode",  renderParams->fog.fogMode);
+				Shader::setUniformVec4(shaderIndex,  "fog.color",    renderParams->fog.color);
+				if(material == MAT_PHONG || material == MAT_PHONG_TEXTURED)
+					Shader::setUniformVec4(shaderIndex,  "ambientLight", renderParams->ambientLight);
 				
 				for(int modelIndex : *registeredMeshes)
 				{
@@ -205,18 +202,14 @@ namespace Renderer
 
 					Mat4 mvp = camera->viewProjMat * transform->transMat;
 					Shader::setUniformMat4(shaderIndex, "mvp", mvp);
-					if(material == MAT_PHONG || material == MAT_PHONG_TEXTURED)
-						Shader::setUniformMat4(shaderIndex, "modelMat", transform->transMat);
-					
+					Shader::setUniformMat4(shaderIndex, "modelMat", transform->transMat);
 					Material::setMaterialUniforms(&model->materialUniforms, (Mat_Type)model->material);
 					
 					glBindVertexArray(model->vao);
-
 					if(model->drawIndexed)
 						glDrawElements(GL_TRIANGLES, model->indices.size(), GL_UNSIGNED_INT, (void*)0);
 					else
 						glDrawArrays(GL_TRIANGLES, 0, model->vertices.size());
-
 					glBindVertexArray(0);
 
 					if(model->material == MAT_UNSHADED_TEXTURED || model->material == MAT_PHONG_TEXTURED)

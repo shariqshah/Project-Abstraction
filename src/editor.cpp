@@ -469,7 +469,8 @@ namespace Editor
 		Vec4          clearColor    = Renderer::getClearColor();
 		RenderParams* renderParams  = Renderer::getRenderParams();
 		const char*   fogModeString = "None\0Linear\0Exponential\0Exponential Squared\0\0";
-		if(ImGui::ColorEdit4("Clear Color", glm::value_ptr(clearColor), true)) Renderer::setClearColor(clearColor);
+		if(ImGui::ColorEdit4("Clear Color", glm::value_ptr(clearColor), true))
+			Renderer::setClearColor(clearColor);
 		ImGui::ColorEdit4("Ambient Light", glm::value_ptr(renderParams->ambientLight), true);
 		if(ImGui::CollapsingHeader("Fog", "RS_FOG", false, true))
 		{
@@ -478,8 +479,11 @@ namespace Editor
 			{
 				ImGui::ColorEdit4("Color", glm::value_ptr(renderParams->fog.color), true);
 				ImGui::InputFloat("Density", &renderParams->fog.density, 0.001f, 0.01f);
-				ImGui::InputFloat("Start",   &renderParams->fog.start, 1.f, 5.f);
-				ImGui::InputFloat("Max",     &renderParams->fog.max, 1.f, 5.f);
+				if(renderParams->fog.fogMode == FG_LINEAR)
+				{
+					ImGui::InputFloat("Start",   &renderParams->fog.start, 1.f, 5.f);
+					ImGui::InputFloat("Max",     &renderParams->fog.max, 1.f, 5.f);
+				}
 			}
 		}
 		ImGui::End();		

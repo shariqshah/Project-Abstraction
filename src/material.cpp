@@ -135,10 +135,8 @@ namespace Material
 	{
 		assert(materialUniforms);
 		unsigned int shaderIndex = getShaderIndex(material);
-
 		// Set diffuse color
 		Shader::setUniformVec4(shaderIndex, "diffuseColor", materialUniforms->diffuseColor);
-
 		// Bind texture if applicable
 		if(material == MAT_UNSHADED_TEXTURED || material == MAT_PHONG_TEXTURED)
 			Texture::bindTexture(materialUniforms->texture);

@@ -5,5 +5,5 @@ uniform sampler2D sampler;
 void main()
 {
 	vec4 pixelColor = diffuseColor * texture(sampler, uv);
-	fragColor       = (ambientLight * pixelColor) + applyFog(pixelColor);
+	fragColor       = applyFog(pixelColor);
 }

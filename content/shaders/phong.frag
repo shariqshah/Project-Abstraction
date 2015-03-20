@@ -2,8 +2,6 @@
 
 void main()
 {
-	vec4 pixelColor      = diffuseColor;
 	vec4 totalLightColor = doForwardLightLoop();
-	vec4 finalColor      = applyFog(totalLightColor);
-	fragColor = (pixelColor * ambientLight) + (pixelColor * finalColor);
+	fragColor            = applyFog(diffuseColor * (totalLightColor + ambientLight));
 }
