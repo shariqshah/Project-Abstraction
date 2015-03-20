@@ -87,7 +87,8 @@ Game::Game(const char* path)
 	playerPtr->tag = "FreeCamera";
 	CTransform* transform = GO::getTransform(playerPtr);
 	Transform::translate(transform, Vec3(0, 3, 5));
-	GO::addCamera(playerPtr);
+	CCamera* camera = GO::addCamera(playerPtr);
+	Renderer::Camera::setActiveCamera(camera);
 	System::CameraSystem::setActiveObject(playerPtr);
 
 	GameObject* plane = SceneManager::create("Ground");
@@ -114,26 +115,20 @@ Game::~Game()
 
 void Game::update(float deltaTime, bool* quit)
 {
-	// auto cube = SceneManager::find("Cube2");
-	// auto tran = GO::getTransform(cube);
-	// Transform::rotate(tran, Vec3(0, 1, 0), 30 * deltaTime);
-
 	Gui::update(deltaTime);
 	System::update(deltaTime, quit);
 }
 
 void Game::draw()
 {
-	GameObject* playerPtr = SceneManager::find(player);
-	CCamera*    camera    = GO::getCamera(playerPtr);
-	Renderer::renderFrame(camera);
+	Renderer::renderFrame();
 	Gui::render();
 	// Physics::draw(activeTrans, activeCamera);
 }
 
 void Game::resize(int width, int height)
 {
-	glViewport(0, 0, width, height);
+	glViewport(0, 0, width, height); // TODO: Probably move viewport stuff to camera?
 	Renderer::Camera::updateAllCamerasAspectRatio((float)(width/height));
 	Gui::resize();
 }

@@ -34,12 +34,21 @@ namespace Renderer
 		
 		void setActiveCamera(CCamera* camera)
 		{
-			assert(camera);
-			Node node = camera->node;
-			if(node < cameraList.size())
-				activeCameraIndex = node;
+			if(camera)
+			{
+				for(int i = 0; i < (int)cameraList.size(); i++)
+				{
+					if(camera->node == cameraList[i].node)
+					{
+						activeCameraIndex = i;
+						break;
+					}
+				}
+			}
 			else
-				Log::error("Camera::setActivecamera", "Invalid Camera");
+			{
+				activeCameraIndex = -1;
+			}
 		}
 		
 		void setFarZ(CCamera* camera, float farZ)
@@ -99,7 +108,12 @@ namespace Renderer
 
 		CCamera* getCameraAtIndex(int cameraIndex)
 		{
-			return &cameraList[cameraIndex];
+			CCamera* camera = NULL;
+			if(cameraIndex >= 0 && cameraIndex < (int)cameraList.size())
+				camera = &cameraList[cameraIndex];
+			else
+				Log::error("Camera::getCameraAtIndex", "Invalid cameraIndex " + std::to_string(cameraIndex));
+			return camera;
 		}
 
 		void updateAllCamerasAspectRatio(float aspectRatio)

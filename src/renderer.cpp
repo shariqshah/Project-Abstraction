@@ -445,7 +445,6 @@ namespace Renderer
 			sRenderDebugView = false;
 		else
 			sRenderDebugView = true;
-		
 		h3dSetOption(H3DOptions::DebugViewMode, sRenderDebugView ? 1.0f : 0.0f);
 	}
 
@@ -455,16 +454,17 @@ namespace Renderer
 			sRenderWireframe = false;
 		else
 			sRenderWireframe = true;
-		
 		h3dSetOption(H3DOptions::WireframeMode, sRenderWireframe ? 1.0f : 0.0f);
 	}
 
-	void renderFrame(CCamera* camera)
+	void renderFrame()
 	{
+		CCamera* camera = Camera::getActiveCamera();
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		Model::renderAllModels(camera, &renderParams);
-		// renderText();
-		// glDisable(GL_BLEND);
+		if(camera)
+			Model::renderAllModels(camera, &renderParams);
+		else
+			Log::error("Renderer::renderFrame", "Can't render, no active camera set!");
 	}
 
 	Vec4 getClearColor()

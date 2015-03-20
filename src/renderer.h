@@ -120,7 +120,7 @@ namespace Renderer
 	void cleanup();
     void addTextRect(Rect text);
 	void checkGLError(const char* context);
-	void renderFrame(CCamera* camera);
+	void renderFrame();
 	void setClearColor(const Vec4 clearColor);
 	Vec4 getClearColor();
 	RenderParams* getRenderParams();

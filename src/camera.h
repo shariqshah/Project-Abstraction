@@ -40,7 +40,7 @@ namespace Renderer
 		int      create(GameObject* gameObject);
 		void     updateAllCameraViews();
 		CCamera* getActiveCamera();
-		void     setActiveCamera(CCamera* camera);
+		void     setActiveCamera(CCamera* camera); // Pass camera as NULL to reset active camera to none
 	}
 }
 

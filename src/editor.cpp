@@ -312,15 +312,24 @@ namespace Editor
 		if(ImGui::CollapsingHeader("Camera", "CameraComponent", true, true))
 		{
 			bool updateProj = false;
-			if(ImGui::InputFloat("NearZ", &camera->nearZ, 0.1f, 1.f))
-				updateProj = true;
-			if(ImGui::InputFloat("FarZ", &camera->farZ, 1.f, 5.f))
-				updateProj = true;
-			if(ImGui::InputFloat("Fov", &camera->fov, 1.f, 5.f))
-				updateProj = true;
-			if(updateProj)
-				Renderer::Camera::updateProjection(camera);
-		}		
+			if(ImGui::InputFloat("NearZ", &camera->nearZ, 0.1f, 1.f)) updateProj = true;
+			if(ImGui::InputFloat("FarZ", &camera->farZ, 1.f, 5.f))    updateProj = true;
+			if(ImGui::InputFloat("Fov", &camera->fov, 1.f, 5.f))	  updateProj = true;
+			if(updateProj) Renderer::Camera::updateProjection(camera);
+
+			CCamera* activeCamera = Renderer::Camera::getActiveCamera();
+			bool isActive = false;
+			if(activeCamera)
+				isActive = camera->node == activeCamera->node ? true : false;
+			if(ImGui::Checkbox("Is Active", &isActive))
+			{
+				if(isActive)
+					Renderer::Camera::setActiveCamera(camera);
+				else
+					Renderer::Camera::setActiveCamera(NULL);
+			}
+			if(ImGui::IsItemHovered()) ImGui::SetTooltip("Check to make the camera the active viewer for the scene");
+		}
 	}
 
 	void displaySceneObjects()
@@ -483,7 +492,8 @@ namespace Editor
 	void displayStatsWindow()
 	{
 		ImGui::Begin("Stats", &showStatsWindow, Vec2(10, 20), OPACITY, (WF_NoTitleBar | WF_NoCollapse));
-		ImGui::Text("Fps : %d", ImGui::GetIO().Framerate);
+		ImGuiIO& io = ImGui::GetIO();
+		ImGui::Text("Fps : %d", io.Framerate);
 		ImGui::End();
 	}
 	
