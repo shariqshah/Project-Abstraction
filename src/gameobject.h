@@ -6,7 +6,7 @@
 
 #include "componentTypes.h"
 
-typedef uint32_t Node;
+typedef int32_t Node;
 
 struct CollisionData;
 struct CTransform;

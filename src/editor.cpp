@@ -33,12 +33,7 @@ namespace Editor
 		char inputTag[BUF_SIZE]        = "";
 		char inputModelName[BUF_SIZE]  = "";
 		char inputModelTex[BUF_SIZE]   = "";
-
-		GameObject* selectedGO = NULL;
-		CTransform* transform  = NULL;
-		CLight*     light      = NULL;
-		CModel*     model      = NULL;
-		CCamera*    camera     = NULL;
+		Node selectedGONode = -1;
 	}
 	
 	void initialize()
@@ -47,16 +42,17 @@ namespace Editor
 
 	void updateComponentViewers()
 	{
-		transform = GO::getTransform(selectedGO);
+		GameObject* selectedGO = SceneManager::find(selectedGONode);
+		// transformIndex = selectedGO->compIndices[Component::TRANSFORM];
 		// Check light
-		if(GO::hasComponent(selectedGO, Component::LIGHT))
-			light = GO::getLight(selectedGO);
-		else
-			light = NULL;
+		// if(GO::hasComponent(selectedGO, Component::LIGHT))
+		// 	lightIndex = selectedGO->compIndices[Component::LIGHT];
+		// else
+		// 	lightIndex = -1;
 		// Check Model
 		if(GO::hasComponent(selectedGO, Component::MODEL))
 		{
-			model = GO::getModel(selectedGO);
+			CModel *model = GO::getModel(selectedGO);
 			memset(&inputModelName[0], '\0', BUF_SIZE);
 			memset(&inputModelTex[0], '\0', BUF_SIZE);
 			size_t copySize = model->filename.size() > BUF_SIZE ? BUF_SIZE : model->filename.size();
@@ -78,18 +74,13 @@ namespace Editor
 		}
 		else
 		{
-			model = NULL;
+			// model = NULL;
 		}
-		// Check camera
-		if(GO::hasComponent(selectedGO, Component::CAMERA))
-			camera = GO::getCamera(selectedGO);
-		else
-			camera = NULL;
 	}
 
-	bool selectGameObject(void* gameObjects, int index, const char** name)
+	bool selectGameObject(void* gameObjectNodes, int index, const char** name)
 	{
-		std::vector<Node>* nodeList = (std::vector<Node>*)gameObjects;
+		std::vector<Node>* nodeList = (std::vector<Node>*)gameObjectNodes;
 		Node node = nodeList->at(index);
 		GameObject* gameObject = SceneManager::find(node);
 		if(gameObject)
@@ -105,6 +96,8 @@ namespace Editor
 
 	void displayTransform()
 	{
+		GameObject* selectedGO = SceneManager::find(selectedGONode);
+		CTransform* transform  = GO::getTransform(selectedGO);
 		if(ImGui::CollapsingHeader("Transform", "TransformComponent", true, true))
 		{
 			float step     = 1.f;
@@ -184,6 +177,8 @@ namespace Editor
 
 	void displayLight()
 	{
+		GameObject* selectedGO = SceneManager::find(selectedGONode);
+		CLight*     light      = GO::getLight(selectedGO);
 		if(ImGui::CollapsingHeader("Light", "LightComponent", true, true))
 		{
 			ImGui::SliderFloat("Intensity", &light->intensity, 0.f, 10.f);
@@ -205,6 +200,8 @@ namespace Editor
 
 	void displayModel()
 	{
+		GameObject* selectedGO = SceneManager::find(selectedGONode);
+		CModel*     model      = GO::getModel(selectedGO);
 		if(ImGui::CollapsingHeader("Model", "ModelComponent", true, true))
 		{
 			if(ImGui::InputText("Mesh", &inputModelName[0], BUF_SIZE, ImGuiInputTextFlags_EnterReturnsTrue))
@@ -305,6 +302,8 @@ namespace Editor
 
 	void displayCamera()
 	{
+		GameObject* selectedGO = SceneManager::find(selectedGONode);
+		CCamera*    camera     = GO::getCamera(selectedGO);
 		if(ImGui::CollapsingHeader("Camera", "CameraComponent", true, true))
 		{
 			bool updateProj = false;
@@ -315,30 +314,28 @@ namespace Editor
 
 			CCamera* activeCamera = Renderer::Camera::getActiveCamera();
 			bool isActive = false;
-			if(activeCamera)
-				isActive = camera->node == activeCamera->node ? true : false;
+			if(activeCamera) isActive = camera->node == activeCamera->node ? true : false;
 			if(ImGui::Checkbox("Is Active", &isActive))
 			{
-				if(isActive)
-					Renderer::Camera::setActiveCamera(camera);
-				else
-					Renderer::Camera::setActiveCamera(NULL);
+				if(isActive) Renderer::Camera::setActiveCamera(camera);
+				else		 Renderer::Camera::setActiveCamera(NULL);
 			}
-			if(ImGui::IsItemHovered()) ImGui::SetTooltip("Check to make the camera the active viewer for the scene");
+			if(ImGui::IsItemHovered())
+				ImGui::SetTooltip("Check to make the camera the active viewer for the scene");
 		}
 	}
 
 	void displaySceneObjects()
     {
 		ImGui::Begin("SceneObjects", &showSceneObjects, Vec2(400, 350), OPACITY);
-		std::vector<Node>* gameObjects = SceneManager::getSceneObjects();
-		ImGui::Text("Total : %d", gameObjects->size());
-		if(ImGui::ListBox("GameObjects", &currentItem, &selectGameObject, gameObjects, gameObjects->size(), 10))
+		std::vector<Node>* gameObjectNodes = SceneManager::getSceneObjects();
+		ImGui::Text("Total : %d", gameObjectNodes->size());
+		if(ImGui::ListBox("GameObjects", &currentItem, &selectGameObject, gameObjectNodes, gameObjectNodes->size(), 10))
 		{
 			// Selected gameobject changed so update all pointers
 			showSelectedGO = true;
-			Node node = gameObjects->at(currentItem);
-			selectedGO = SceneManager::find(node);
+			selectedGONode = gameObjectNodes->at(currentItem);
+			GameObject* selectedGO = SceneManager::find(selectedGONode);
 			memset(&inputName[0], '\0', BUF_SIZE);
 			int copySize = selectedGO->name.size() > BUF_SIZE ? BUF_SIZE : selectedGO->name.size();
 			memcpy(&inputName[0], &selectedGO->name[0], copySize);
@@ -349,20 +346,16 @@ namespace Editor
 			
 		if(ImGui::Button("Remove"))
 		{
-			if(showSelectedGO && selectedGO)
+			if(showSelectedGO && selectedGONode != -1)
 			{
 				// Remove the gameobject and reset state
-				SceneManager::remove(selectedGO->node);
+				SceneManager::remove(selectedGONode);
 				showSelectedGO = false;
 				memset(&inputName[0], '\0', BUF_SIZE);
 				memset(&inputNewName[0], '\0', BUF_SIZE);
 				memset(&inputTag[0], '\0', BUF_SIZE);
 				memset(&inputModelName[0], '\0', BUF_SIZE);
 				memset(&inputModelTex[0], '\0', BUF_SIZE);
-				transform = NULL;
-				light     = NULL;
-				model     = NULL;
-				camera    = NULL;
 			}
 		}
 
@@ -388,6 +381,7 @@ namespace Editor
 		// Show currently selected gameobject, if any
 		if(showSelectedGO)
 		{
+			GameObject* selectedGO = SceneManager::find(selectedGONode);
 			ImGui::Begin(selectedGO->name.c_str(), &showSelectedGO, Vec2(450, 400), OPACITY);
 			if(ImGui::InputText("Name", &inputName[0], BUF_SIZE, ImGuiInputTextFlags_EnterReturnsTrue))
 				selectedGO->name = inputName;
@@ -469,9 +463,11 @@ namespace Editor
 		Vec4          clearColor    = Renderer::getClearColor();
 		RenderParams* renderParams  = Renderer::getRenderParams();
 		const char*   fogModeString = "None\0Linear\0Exponential\0Exponential Squared\0\0";
+		
 		if(ImGui::ColorEdit4("Clear Color", glm::value_ptr(clearColor), true))
 			Renderer::setClearColor(clearColor);
 		ImGui::ColorEdit4("Ambient Light", glm::value_ptr(renderParams->ambientLight), true);
+		
 		if(ImGui::CollapsingHeader("Fog", "RS_FOG", false, true))
 		{
 			ImGui::Combo("Mode", &renderParams->fog.fogMode, fogModeString, 4);
@@ -504,6 +500,7 @@ namespace Editor
 		if(ImGui::Button("Scene"))     showSceneObjects = !showSceneObjects;	     ImGui::SameLine();
 		if(ImGui::Button("Renderer"))  showRendererSettings = !showRendererSettings; ImGui::SameLine();
 		if(ImGui::Button("Scripting")) showScriptingWindow = !showScriptingWindow; 	 ImGui::SameLine();
+		
 		ImGui::PushID("Exit_Button");
 		Vec4 exitColor(0.89f, 0.05f, 0.17f, 1.f);
 		ImGui::PushStyleColor(ImGuiCol_Button, exitColor);

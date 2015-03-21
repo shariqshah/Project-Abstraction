@@ -5,8 +5,7 @@
 #include <iostream>
 
 #include "mathdefs.h"
-
-typedef uint32_t Node;
+#include "datatypes.h"
 
 enum Mat_Type
 {

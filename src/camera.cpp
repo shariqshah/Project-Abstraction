@@ -1,7 +1,6 @@
 #include "camera.h"
 #include "scriptengine.h"
 #include "transform.h"
-#include "componentmanager.h"
 #include "gameobject.h"
 #include "scenemanager.h"
 

@@ -1,6 +1,5 @@
 #include "scenemanager.h"
 #include "gameobject.h"
-#include "componentmanager.h"
 #include "transform.h"
 #include "scriptengine.h"
 
@@ -13,7 +12,7 @@ namespace SceneManager
 		std::vector<GameObject>   sceneObjects;
 		std::vector<unsigned int> emptyIndices;
 		
-		void removeGameObject(GOPtr gameObject)
+		void removeGameObject(GameObject* gameObject)
 		{
 			//remove components
 			for(int i = 1; i < (int)Component::NUM_COMPONENTS; i++)
@@ -58,7 +57,7 @@ namespace SceneManager
 	
 	bool remove(Node node)
 	{
-		GOPtr gameObject = find(node);
+		GameObject* gameObject = find(node);
 		if(gameObject)
 		{
 			if(markForDeletion(node))
@@ -75,7 +74,7 @@ namespace SceneManager
 	
 	bool remove(const std::string& name)
 	{
-		GOPtr gameObject = find(name);
+		GameObject* gameObject = find(name);
 		if(gameObject)
 		{
 			if(markForDeletion(gameObject->node))
@@ -91,9 +90,9 @@ namespace SceneManager
 		return false;
 	}
 	
-	GOPtr find(const std::string& name)
+	GameObject* find(const std::string& name)
 	{
-		GOPtr gameObject = NULL;
+		GameObject* gameObject = NULL;
 		bool  found      = false;
 
 		for(Node node : validNodes)
@@ -111,9 +110,9 @@ namespace SceneManager
 		return gameObject;
 	}
 
-	GOPtr find(Node nodeToFind)
+	GameObject* find(Node nodeToFind)
 	{
-		GOPtr gameObject = NULL;		
+		GameObject* gameObject = NULL;		
 		for(Node node : validNodes)
 		{
 			if(node == nodeToFind)
@@ -135,7 +134,7 @@ namespace SceneManager
 		{
 			for(Node node : removableNodes)
 		    {
-				GOPtr gameObject = find(node);
+				GameObject* gameObject = find(node);
 				removeGameObject(gameObject);
 			}			
 			removableNodes.clear();
@@ -152,7 +151,7 @@ namespace SceneManager
 		removableNodes.clear();
 	}
 
-	GOPtr create(const std::string& name)
+	GameObject* create(const std::string& name)
 	{
 		unsigned int index = 0;
 		if(!emptyIndices.empty())
@@ -169,7 +168,7 @@ namespace SceneManager
 			validNodes.push_back(index);
 		}
 		
-		GOPtr newObj = &sceneObjects[index];
+		GameObject* newObj = &sceneObjects[index];
 		newObj->name = name;
 		newObj->node = index;
 		GO::addTransform(newObj);
@@ -193,12 +192,12 @@ namespace SceneManager
 		return remove(node);
 	}
 
-	GOPtr findByName(const std::string& name)
+	GameObject* findByName(const std::string& name)
 	{
 		return find(name);
 	}
 	
-	GOPtr findByNode(Node node)
+	GameObject* findByNode(Node node)
 	{
 		return find(node);
 	}

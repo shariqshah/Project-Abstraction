@@ -4,6 +4,7 @@
 #include "componentTypes.h"
 #include "mathdefs.h"
 #include "material.h"
+#include "datatypes.h"
 
 struct CCamera;
 struct GameObject;

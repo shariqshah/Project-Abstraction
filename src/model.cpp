@@ -215,7 +215,6 @@ namespace Renderer
 					if(model->material == MAT_UNSHADED_TEXTURED || model->material == MAT_PHONG_TEXTURED)
 						Texture::unbindActiveTexture();
 				}
-				
 				Shader::unbindActiveShader();
 			}
 		}

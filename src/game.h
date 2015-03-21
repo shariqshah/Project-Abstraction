@@ -2,10 +2,9 @@
 #define _game_H
 
 #include <iostream>
+#include "datatypes.h"
 
 struct GameObject;
-
-typedef uint32_t Node;
 
 class Game
 {

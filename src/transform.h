@@ -1,13 +1,10 @@
 #ifndef _transform_H
 #define _transform_H
 
-// #include <iostream>
-
 #include "mathdefs.h"
 #include "componentTypes.h"
 #include "renderer.h"
-
-typedef uint32_t Node;
+#include "datatypes.h"
 
 struct CTransform
 {

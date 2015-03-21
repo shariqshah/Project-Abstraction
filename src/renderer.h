@@ -7,12 +7,13 @@
 #include "log.h"
 #include "settings.h"
 #include "mathdefs.h"
+#include "datatypes.h"
 
 #include <iostream>
 #include <vector>
 #include <algorithm>
 
-typedef uint32_t Node;
+
 typedef H3DRes   Resource;
 typedef std::vector<Node> NodeList;
 

@@ -4,8 +4,7 @@
 #include <vector>
 #include "mathdefs.h"
 #include "componentTypes.h"
-
-typedef uint32_t Node;
+#include "datatypes.h"
 
 enum LightType
 {

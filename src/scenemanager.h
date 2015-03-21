@@ -4,19 +4,18 @@
 #include <algorithm>
 #include <vector>
 
-struct GameObject;
+#include "datatypes.h"
 
-typedef uint32_t    Node;
-typedef GameObject* GOPtr;
+struct GameObject;
 
 namespace SceneManager
 {
 	bool remove(const std::string& name);
 	bool remove(Node node);
 	
-	GOPtr find(const std::string& name);
-	GOPtr find(Node node);
-	GOPtr create(const std::string& name);
+	GameObject* find(const std::string& name);
+	GameObject* find(Node node);
+	GameObject* create(const std::string& name);
 
 	void update();
 	void cleanup();

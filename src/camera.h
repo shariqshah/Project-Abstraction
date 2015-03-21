@@ -4,6 +4,7 @@
 #include "componentTypes.h"
 #include "renderer.h"
 #include "mathdefs.h"
+#include "datatypes.h"
 
 struct GameObject;
 struct CTransform;
