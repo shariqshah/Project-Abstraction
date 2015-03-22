@@ -320,6 +320,123 @@ namespace Input
 								.Func("lockCursor",      &setCursorLock)
 								.Func("isCursorVisible", &isCursorVisible)
 								.Func("isCursorLocked",  &isCursorLocked));
+
+		asIScriptEngine* engine = ScriptEngine::getEngine();
+		int rc = engine->RegisterEnum("Key"); assert(rc >= 0);
+		engine->RegisterEnumValue("Key", "A", (int)Key::A);
+		engine->RegisterEnumValue("Key", "B", (int)Key::B);
+		engine->RegisterEnumValue("Key", "C", (int)Key::C);
+		engine->RegisterEnumValue("Key", "D", (int)Key::D);
+		engine->RegisterEnumValue("Key", "E", (int)Key::E);
+		engine->RegisterEnumValue("Key", "F", (int)Key::F);
+		engine->RegisterEnumValue("Key", "G", (int)Key::G);
+		engine->RegisterEnumValue("Key", "H", (int)Key::H);
+		engine->RegisterEnumValue("Key", "I", (int)Key::I);
+		engine->RegisterEnumValue("Key", "J", (int)Key::J);
+		engine->RegisterEnumValue("Key", "K", (int)Key::K);
+		engine->RegisterEnumValue("Key", "L", (int)Key::L);
+		engine->RegisterEnumValue("Key", "M", (int)Key::M);
+		engine->RegisterEnumValue("Key", "N", (int)Key::N);
+		engine->RegisterEnumValue("Key", "O", (int)Key::O);
+		engine->RegisterEnumValue("Key", "P", (int)Key::P);
+		engine->RegisterEnumValue("Key", "Q", (int)Key::Q);
+		engine->RegisterEnumValue("Key", "R", (int)Key::R);
+		engine->RegisterEnumValue("Key", "S", (int)Key::S);
+		engine->RegisterEnumValue("Key", "T", (int)Key::T);
+		engine->RegisterEnumValue("Key", "U", (int)Key::U);
+		engine->RegisterEnumValue("Key", "V", (int)Key::V);
+		engine->RegisterEnumValue("Key", "W", (int)Key::W);
+		engine->RegisterEnumValue("Key", "X", (int)Key::X);
+		engine->RegisterEnumValue("Key", "Y", (int)Key::Y);
+		engine->RegisterEnumValue("Key", "Z", (int)Key::Z);
+		engine->RegisterEnumValue("Key", "K0", (int)Key::K0);
+		engine->RegisterEnumValue("Key", "K1", (int)Key::K1);
+		engine->RegisterEnumValue("Key", "K2", (int)Key::K2);
+		engine->RegisterEnumValue("Key", "K3", (int)Key::K3);
+		engine->RegisterEnumValue("Key", "K4", (int)Key::K4);
+		engine->RegisterEnumValue("Key", "K5", (int)Key::K5);
+		engine->RegisterEnumValue("Key", "K6", (int)Key::K6);
+		engine->RegisterEnumValue("Key", "K7", (int)Key::K7);
+		engine->RegisterEnumValue("Key", "K8", (int)Key::K8);
+		engine->RegisterEnumValue("Key", "K9", (int)Key::K9);
+		engine->RegisterEnumValue("Key", "F1", (int)Key::F1);
+		engine->RegisterEnumValue("Key", "F2", (int)Key::F2);
+		engine->RegisterEnumValue("Key", "F3", (int)Key::F3);
+		engine->RegisterEnumValue("Key", "F4", (int)Key::F4);
+		engine->RegisterEnumValue("Key", "F5", (int)Key::F5);
+		engine->RegisterEnumValue("Key", "F6", (int)Key::F6);
+		engine->RegisterEnumValue("Key", "F7", (int)Key::F7);
+		engine->RegisterEnumValue("Key", "F8", (int)Key::F8);
+		engine->RegisterEnumValue("Key", "F9", (int)Key::F9);
+		engine->RegisterEnumValue("Key", "F10", (int)Key::F10);
+		engine->RegisterEnumValue("Key", "F11", (int)Key::F11);
+		engine->RegisterEnumValue("Key", "F12", (int)Key::F12);
+		engine->RegisterEnumValue("Key", "UP", (int)Key::UP);
+		engine->RegisterEnumValue("Key", "DOWN", (int)Key::DOWN);
+		engine->RegisterEnumValue("Key", "LEFT", (int)Key::LEFT);
+		engine->RegisterEnumValue("Key", "RIGHT", (int)Key::RIGHT);
+		engine->RegisterEnumValue("Key", "LSHIFT", (int)Key::LSHIFT);
+		engine->RegisterEnumValue("Key", "RSHIFT", (int)Key::RSHIFT);
+		engine->RegisterEnumValue("Key", "LCTRL", (int)Key::LCTRL);
+		engine->RegisterEnumValue("Key", "RCTRL", (int)Key::RCTRL);
+		engine->RegisterEnumValue("Key", "RSUPER", (int)Key::RSUPER);
+		engine->RegisterEnumValue("Key", "LSUPER", (int)Key::LSUPER);
+		engine->RegisterEnumValue("Key", "SPACE", (int)Key::SPACE);
+		engine->RegisterEnumValue("Key", "ENTER", (int)Key::ENTER);
+		engine->RegisterEnumValue("Key", "ESC", (int)Key::ESC);
+		engine->RegisterEnumValue("Key", "TAB", (int)Key::TAB);
+		engine->RegisterEnumValue("Key", "HOME", (int)Key::HOME);
+		engine->RegisterEnumValue("Key", "END", (int)Key::END);
+		engine->RegisterEnumValue("Key", "DELETE", (int)Key::DELETE);
+		engine->RegisterEnumValue("Key", "BACKSPC", (int)Key::BACKSPC);
+		engine->RegisterEnumValue("Key", "NP_PLUS", (int)Key::NP_PLUS);
+		engine->RegisterEnumValue("Key", "NP_MINUS", (int)Key::NP_MINUS);
+
+		rc = engine->RegisterEnum("MouseButton"); assert(rc >= 0);
+		engine->RegisterEnumValue("MouseButton", "LEFT",   MouseButton::M_LEFT);
+		engine->RegisterEnumValue("MouseButton", "RIGHT",  MouseButton::M_RIGHT);
+		engine->RegisterEnumValue("MouseButton", "MIDDLE", MouseButton::M_MIDDLE);
+		engine->RegisterEnumValue("MouseButton", "X1",     MouseButton::M_X1);
+		engine->RegisterEnumValue("MouseButton", "X2",     MouseButton::M_X2);
+
+		engine->SetDefaultNamespace("Input");
+		engine->RegisterGlobalFunction("int32 getMouseX()", asFUNCTION(getMouseX), asCALL_CDECL);
+		assert(rc >= 0);
+		engine->RegisterGlobalFunction("int32 getMouseY()", asFUNCTION(getMouseY), asCALL_CDECL);
+		assert(rc >= 0);
+		engine->RegisterGlobalFunction("int32 getMouseRelX()", asFUNCTION(getMouseRelX), asCALL_CDECL);
+		assert(rc >= 0);
+		engine->RegisterGlobalFunction("int32 getMouseRelY()", asFUNCTION(getMouseRelY), asCALL_CDECL);
+		assert(rc >= 0);
+		engine->RegisterGlobalFunction("bool isPressed(Key)",
+									   asFUNCTIONPR(isPressed, (Key), bool),
+									   asCALL_CDECL);
+		assert(rc >= 0);
+		engine->RegisterGlobalFunction("bool isPressed(MouseButton)",
+									   asFUNCTIONPR(isPressed, (MouseButton), bool),
+									   asCALL_CDECL);
+		assert(rc >= 0);
+		engine->RegisterGlobalFunction("bool isReleased(Key)",
+									   asFUNCTIONPR(isReleased, (Key), bool),
+									   asCALL_CDECL);
+		assert(rc >= 0);
+		engine->RegisterGlobalFunction("bool isReleased(MouseButton)",
+									   asFUNCTIONPR(isReleased, (MouseButton), bool),
+									   asCALL_CDECL);
+		assert(rc >= 0);
+		engine->RegisterGlobalFunction("int32 getMouseScrollX()", asFUNCTION(getScrollX), asCALL_CDECL);
+		assert(rc >= 0);
+		engine->RegisterGlobalFunction("int32 getMouseScrollY()", asFUNCTION(getScrollY), asCALL_CDECL);
+		assert(rc >= 0);
+		engine->RegisterGlobalFunction("void showCursor(bool)", asFUNCTION(showCursor), asCALL_CDECL);
+		assert(rc >= 0);
+		engine->RegisterGlobalFunction("void lockCursor(bool)", asFUNCTION(setCursorLock), asCALL_CDECL);
+		assert(rc >= 0);
+		engine->RegisterGlobalFunction("bool isCursorVisible()", asFUNCTION(isCursorVisible), asCALL_CDECL);
+		assert(rc >= 0);
+		engine->RegisterGlobalFunction("bool isCursorLocked()", asFUNCTION(isCursorLocked), asCALL_CDECL);
+		assert(rc >= 0);
+		engine->SetDefaultNamespace("");
 	}
 	
     void enableTextInput(bool enable)
@@ -344,7 +461,6 @@ namespace Input
 	bool isTextInputActive()
 	{
 		return textInputEnabled;
-	}
-	
+	}	
 }
 

@@ -115,8 +115,7 @@ namespace Renderer
 									.Func("create", &create));
 
 			asIScriptEngine* engine = ScriptEngine::getEngine();
-			int rc = -1;
-			engine->RegisterEnum("LightType");
+			int rc = engine->RegisterEnum("LightType"); assert(rc >= 0);
 			rc = engine->RegisterEnumValue("LightType", "SPOT", (int)LightType::LT_SPOT);
 			rc = engine->RegisterEnumValue("LightType", "DIR", (int)LightType::LT_DIR);
 			rc = engine->RegisterEnumValue("LightType", "POINT", (int)LightType::LT_POINT);

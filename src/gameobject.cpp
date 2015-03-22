@@ -87,6 +87,16 @@ namespace GO
 										  asCALL_CDECL_OBJFIRST);
 		assert(rc >= 0);
 		rc = engine->RegisterObjectMethod("GameObject",
+										  "Model@ getModel()",
+										  asFUNCTION(getModel),
+										  asCALL_CDECL_OBJFIRST);
+		assert(rc >= 0);
+		rc = engine->RegisterObjectMethod("GameObject",
+										  "Model@ addModel(string)",
+										  asFUNCTION(addModel),
+										  asCALL_CDECL_OBJFIRST);
+		assert(rc >= 0);
+		rc = engine->RegisterObjectMethod("GameObject",
 										  "void removeComponent(Component)",
 										  asFUNCTION(removeComponent),
 										  asCALL_CDECL_OBJFIRST);

@@ -270,6 +270,86 @@ namespace Renderer
 			emptyIndices.clear();
 		}
 
+		//////////////////////////////////////////////////////////////////////////////////////////
+		// Proxy functions for binding
+		//////////////////////////////////////////////////////////////////////////////////////////
+
+		Vec3 getVertex(CModel* model, int index)
+		{
+			Vec3 vertex;
+			if(index >= 0 && index < (int)model->vertices.size()) vertex = model->vertices.at(index);
+			else Log::error("Model::getVertex", "Invalid index");
+			return vertex;
+		}
+		
+		Vec3 getNormal(CModel* model, int index)
+		{
+			Vec3 normal;
+			if(index >= 0 && index < (int)model->normals.size()) normal = model->normals.at(index);
+			else Log::error("Model::getNormal", "Invalid index");
+			return normal;
+		}
+
+		Vec2 getUV(CModel* model, int index)
+		{
+			Vec2 uvCoord;
+			if(index >= 0 && index < (int)model->uvs.size()) uvCoord = model->uvs.at(index);
+			else Log::error("Model::getUV", "Invalid index");
+			return uvCoord;
+		}
+
+		uint getIndex(CModel* model, int index)
+		{
+			uint meshIndex = 0;
+			if(index >= 0 && index < (int)model->indices.size()) meshIndex = model->indices.at(index);
+			else Log::error("Model::getIndex", "Invalid index");
+			return meshIndex;
+		}
+
+		void setVertex(CModel* model, int index, Vec3 value)
+		{
+			if(index >= 0 && index < (int)model->vertices.size()) model->vertices[index] = value;
+			else Log::error("Model::setVertex", "Invalid index");
+		}
+		
+		void setNormal(CModel* model, int index, Vec3 value)
+		{
+			if(index >= 0 && index < (int)model->normals.size()) model->normals[index] = value;
+			else Log::error("Model::setNormal", "Invalid index");
+		}
+
+		void setUV(CModel* model, int index, Vec2 value)
+		{
+			if(index >= 0 && index < (int)model->uvs.size()) model->uvs[index] = value;
+			else Log::error("Model::setUV", "Invalid index");
+		}
+
+		void setIndex(CModel* model, int index, uint value)
+		{
+			if(index >= 0 && index < (int)model->indices.size()) model->indices[index] = value;
+			else Log::error("Model::setIndex", "Invalid index");
+		}
+
+		void appendVertex(CModel* model, Vec3 vertex)
+		{
+			model->vertices.push_back(vertex);
+		}
+
+		void appendNormal(CModel* model, Vec3 normal)
+		{
+			model->normals.push_back(normal);
+		}
+
+		void appendUV(CModel* model, Vec2 uv)
+		{
+			model->uvs.push_back(uv);
+		}
+
+		void appendIndex(CModel* model, uint index)
+		{
+			model->indices.push_back(index);
+		}
+		
 		void generateBindings()
 		{
 			Sqrat::RootTable().Bind("CModel", Sqrat::Class<CModel>()
@@ -291,6 +371,86 @@ namespace Renderer
 									.Func("loadFromFile",    &loadFromFile)
 									.Func("setMaterialType", &setMaterialType)
 									.Func("getModelAtIndex", &getModelAtIndex));
+
+			asIScriptEngine* engine = ScriptEngine::getEngine();
+			int rc = engine->RegisterObjectType("Model", sizeof(CModel), asOBJ_REF | asOBJ_NOCOUNT);
+			assert(rc >= 0);
+
+			rc = engine->RegisterObjectProperty("Model", "int32 node", asOFFSET(CModel, node));
+			assert(rc >= 0);
+			rc = engine->RegisterObjectProperty("Model", "string filename", asOFFSET(CModel, filename));
+			assert(rc >= 0);
+			rc = engine->RegisterObjectProperty("Model", "int32 material", asOFFSET(CModel, material));
+			assert(rc >= 0);
+			rc = engine->RegisterObjectProperty("Model",
+												"Mat_Uniforms materialUniforms",
+												asOFFSET(CModel, materialUniforms));
+			assert(rc >= 0);
+			rc = engine->RegisterObjectMethod("Model",
+											  "void setMaterialType(Mat_Type)",
+											  asFUNCTION(setMaterialType),
+											  asCALL_CDECL_OBJFIRST);
+			assert(rc >= 0);
+			rc = engine->RegisterObjectMethod("Model",
+											  "Vec3 getVertex(int)",
+											  asFUNCTION(getVertex),
+											  asCALL_CDECL_OBJFIRST);
+			assert(rc >= 0);
+			rc = engine->RegisterObjectMethod("Model",
+											  "Vec3 getNormal(int)",
+											  asFUNCTION(getNormal),
+											  asCALL_CDECL_OBJFIRST);
+			assert(rc >= 0);
+			rc = engine->RegisterObjectMethod("Model",
+											  "Vec2 getUV(int)",
+											  asFUNCTION(getUV),
+											  asCALL_CDECL_OBJFIRST);
+			assert(rc >= 0);
+			rc = engine->RegisterObjectMethod("Model",
+											  "uint getIndex(int)",
+											  asFUNCTION(getIndex),
+											  asCALL_CDECL_OBJFIRST);
+			assert(rc >= 0);
+			rc = engine->RegisterObjectMethod("Model",
+											  "void setVertex(int, Vec3)",
+											  asFUNCTION(setVertex),
+											  asCALL_CDECL_OBJFIRST);
+			assert(rc >= 0);
+			rc = engine->RegisterObjectMethod("Model",
+											  "void setNormal(int, Vec3)",
+											  asFUNCTION(setNormal),
+											  asCALL_CDECL_OBJFIRST);
+			assert(rc >= 0);
+			rc = engine->RegisterObjectMethod("Model",
+											  "void setUV(int, Vec2)",
+											  asFUNCTION(setUV),
+											  asCALL_CDECL_OBJFIRST);
+			assert(rc >= 0);
+			rc = engine->RegisterObjectMethod("Model",
+											  "void setIndex(int, uint)",
+											  asFUNCTION(setIndex),
+											  asCALL_CDECL_OBJFIRST);
+			assert(rc >= 0);
+			rc = engine->RegisterObjectMethod("Model",
+											  "void appendVertex(Vec3)",
+											  asFUNCTION(appendVertex),
+											  asCALL_CDECL_OBJFIRST);
+			assert(rc >= 0);
+			rc = engine->RegisterObjectMethod("Model",
+											  "void appendNormal(Vec3)",
+											  asFUNCTION(appendNormal),
+											  asCALL_CDECL_OBJFIRST);
+			assert(rc >= 0);
+			rc = engine->RegisterObjectMethod("Model",
+											  "void appendUV(Vec2)",
+											  asFUNCTION(appendUV),
+											  asCALL_CDECL_OBJFIRST);
+			assert(rc >= 0);
+			rc = engine->RegisterObjectMethod("Model",
+											  "void appendIndex(uint)",
+											  asFUNCTION(appendIndex),
+											  asCALL_CDECL_OBJFIRST);
+			assert(rc >= 0);
 		}
 
 		void remove(unsigned int modelIndex)

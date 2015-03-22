@@ -274,5 +274,11 @@ namespace Texture
 		Sqrat::RootTable().Bind("Texture", Sqrat::Table(ScriptEngine::getVM())
 								.Func("create", &create)
 								.Func("remove", &remove));
+
+		asIScriptEngine* engine = ScriptEngine::getEngine();
+		engine->SetDefaultNamespace("Texture");
+		engine->RegisterGlobalFunction("int create(string)", asFUNCTION(create), asCALL_CDECL);
+		engine->RegisterGlobalFunction("void remove(string)", asFUNCTION(remove), asCALL_CDECL);
+		engine->SetDefaultNamespace("");
 	}
 }

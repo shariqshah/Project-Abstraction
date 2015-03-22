@@ -187,5 +187,35 @@ namespace Material
 								.Var("specular",         &Mat_Uniforms::specular)
 								.Var("specularStrength", &Mat_Uniforms::specularStrength)
 								.Var("texture",          &Mat_Uniforms::texture));
+
+		asIScriptEngine* engine = ScriptEngine::getEngine();
+		int rc = engine->RegisterEnum("Mat_Type");
+		rc = engine->RegisterEnumValue("Mat_Type", "UNSHADED", (int)Mat_Type::MAT_UNSHADED);
+		rc = engine->RegisterEnumValue("Mat_Type", "UNSHADED_TEXTURED", (int)Mat_Type::MAT_UNSHADED_TEXTURED);
+		rc = engine->RegisterEnumValue("Mat_Type", "PHONG", (int)Mat_Type::MAT_PHONG);
+		rc = engine->RegisterEnumValue("Mat_Type", "PHONG_TEXTURED", (int)Mat_Type::MAT_PHONG_TEXTURED);
+
+		rc = engine->RegisterObjectType("Mat_Uniforms", sizeof(Mat_Uniforms), asOBJ_REF | asOBJ_NOCOUNT);
+		assert(rc >= 0);
+		rc = engine->RegisterObjectProperty("Mat_Uniforms",
+											"Vec4 diffuseColor",
+											asOFFSET(Mat_Uniforms, diffuseColor));
+		assert(rc >= 0);
+		rc = engine->RegisterObjectProperty("Mat_Uniforms",
+											"float specular",
+											asOFFSET(Mat_Uniforms, specular));
+		assert(rc >= 0);
+		rc = engine->RegisterObjectProperty("Mat_Uniforms",
+											"float specularStrength",
+											asOFFSET(Mat_Uniforms, specularStrength));
+		assert(rc >= 0);
+		rc = engine->RegisterObjectProperty("Mat_Uniforms",
+											"float diffuse",
+											asOFFSET(Mat_Uniforms, diffuse));
+		assert(rc >= 0);
+		rc = engine->RegisterObjectProperty("Mat_Uniforms",
+											"int texture",
+											asOFFSET(Mat_Uniforms, texture));
+		assert(rc >= 0);
 	} 
 }
