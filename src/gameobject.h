@@ -5,6 +5,7 @@
 #include <iostream>
 
 #include "componentTypes.h"
+#include "mathdefs.h"
 
 typedef int32_t Node;
 
@@ -44,7 +45,7 @@ namespace GO
 	CTransform* addTransform(GameObject* gameObject);
 	CCamera*    addCamera(GameObject* gameObject);
 	CModel*     addModel(GameObject* gameObject, const char* filename);
-	CLight*     addLight(GameObject* gameObject);
+	CLight*     addLight(GameObject* gameObject, Vec4 color = Vec4(1.f));
 	
 	CTransform* getTransform(GameObject* gameObject);
 	CCamera*    getCamera(GameObject* gameObject);

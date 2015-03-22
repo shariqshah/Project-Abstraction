@@ -10,30 +10,23 @@ namespace Log
 	
     void message(const std::string& message)
     {
-		if(isEnabled)
-			std::cout<<"MESSAGE : " + message<<std::endl;
+		if(isEnabled) std::cout<<"MESSAGE : " + message<<std::endl;
     }
 
     void error(const std::string& context, const std::string& error)
     {
-		if(isEnabled)
-			std::cerr<<"ERROR " + context + " : " + error<<std::endl;
+		if(isEnabled) std::cerr<<"ERROR " + context + " : " + error<<std::endl;
     }
 
 	void warning(const std::string& warningMessage)
 	{
-		if(isEnabled)
-			std::cout<<"WARNING : " + warningMessage<<std::endl;
+		if(isEnabled) std::cout<<"WARNING : " + warningMessage<<std::endl;
 	}
 
 	void setEnabled(bool enabled)
 	{
 		isEnabled = enabled;
-		
-		if(isEnabled)
-			message("Logging enabled");
-		else
-			message("Logging disabled");
+		isEnabled ? message("Logging enabled") : message("logging disabled");
 	}
 
 	void generateBindings()
@@ -43,5 +36,26 @@ namespace Log
 								.Func("error", &error)
 								.Func("warning", &warning)
 								.Func("setEnabled", &setEnabled));
+
+		asIScriptEngine* engine = ScriptEngine::getEngine();
+		engine->SetDefaultNamespace("Log");
+		int rc = -1;
+		rc = engine->RegisterGlobalFunction("void message(const string)",
+											asFUNCTION(message),
+											asCALL_CDECL);
+		assert(rc >= 0);
+		rc = engine->RegisterGlobalFunction("void warning(const string)",
+											asFUNCTION(warning),
+											asCALL_CDECL);
+		assert(rc >= 0);
+		rc = engine->RegisterGlobalFunction("void error(const string, const string)",
+											asFUNCTION(error),
+											asCALL_CDECL);
+		assert(rc >= 0);
+		rc = engine->RegisterGlobalFunction("void setEnabled(const bool)",
+											asFUNCTION(setEnabled),
+											asCALL_CDECL);
+		assert(rc >= 0);
+		engine->SetDefaultNamespace("");
 	}
 }

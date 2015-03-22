@@ -113,6 +113,35 @@ namespace Renderer
 
 			Sqrat::RootTable().Bind("Light", Sqrat::Table(ScriptEngine::getVM())
 									.Func("create", &create));
+
+			asIScriptEngine* engine = ScriptEngine::getEngine();
+			int rc = -1;
+			engine->RegisterEnum("LightType");
+			rc = engine->RegisterEnumValue("LightType", "SPOT", (int)LightType::LT_SPOT);
+			rc = engine->RegisterEnumValue("LightType", "DIR", (int)LightType::LT_DIR);
+			rc = engine->RegisterEnumValue("LightType", "POINT", (int)LightType::LT_POINT);
+
+			rc = engine->RegisterObjectType("Light", sizeof(CLight), asOBJ_REF | asOBJ_NOCOUNT);
+			assert(rc >= 0);
+			rc = engine->RegisterObjectProperty("Light", "float intensity", asOFFSET(CLight, intensity));
+			assert(rc >= 0);
+			rc = engine->RegisterObjectProperty("Light", "Vec4 color", asOFFSET(CLight, color));
+			assert(rc >= 0);
+			rc = engine->RegisterObjectProperty("Light", "float outerAngle", asOFFSET(CLight, outerAngle));
+			assert(rc >= 0);
+			rc = engine->RegisterObjectProperty("Light", "float innerAngle", asOFFSET(CLight, innerAngle));
+			assert(rc >= 0);
+			rc = engine->RegisterObjectProperty("Light", "int32 node", asOFFSET(CLight, node));
+			assert(rc >= 0);
+			rc = engine->RegisterObjectProperty("Light", "bool castShadow", asOFFSET(CLight, castShadow));
+			assert(rc >= 0);
+			rc = engine->RegisterObjectProperty("Light", "float falloff", asOFFSET(CLight, falloff));
+			assert(rc >= 0);
+			rc = engine->RegisterObjectProperty("Light", "float radius", asOFFSET(CLight, radius));
+			assert(rc >= 0);
+			rc = engine->RegisterObjectProperty("Light", "LightType type", asOFFSET(CLight, type));
+			assert(rc >= 0);
+		
 		}
 	}
 

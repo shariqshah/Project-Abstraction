@@ -39,9 +39,12 @@ namespace Transform
 		emptyIndices.clear();
 	}
 
-	CTransform* getTransformAtIndex(unsigned int transformIndex)
+	CTransform* getTransformAtIndex(int transformIndex)
 	{
-		return &transformList[transformIndex];
+		CTransform* transform = NULL;
+		if(transformIndex >= 0 && transformIndex < (int)transformList.size())
+			transform = &transformList[transformIndex];
+		return transform;
 	}
 
 	bool remove(unsigned int transformIndex)
@@ -184,6 +187,15 @@ namespace Transform
 			transform.isModified = false;
 	}
 
+	//////////////////////////////////////////////////////////////////////////////////////////
+	// Proxy functions for binding
+	//////////////////////////////////////////////////////////////////////////////////////////
+
+	void setRotationProxy(CTransform* transform, Vec4 newRot, bool updateTransMat)
+	{
+		setRotation(transform, Quat(newRot.x, newRot.y, newRot.z, newRot.w), updateTransMat);
+	}
+
 	void generateBindings()
 	{
 		Sqrat::RootTable().Bind("Vec3", Sqrat::Class<glm::vec3>()
@@ -235,5 +247,73 @@ namespace Transform
 								.Func("setUpVector", &setUpVector)
 								.Func("setForward", &setForward)
 								.Func("updateTransformMatrix", &updateTransformMatrix));
+
+		asIScriptEngine* engine = ScriptEngine::getEngine();
+		engine->RegisterEnum("Space");
+		int rc = engine->RegisterEnumValue("Space", "LOCAL", (int)TS_LOCAL);
+		rc = engine->RegisterEnumValue("Space", "WORLD", (int)TS_WORLD);
+		
+		engine->RegisterObjectType("Transform", sizeof(CTransform), asOBJ_REF | asOBJ_NOCOUNT); assert(rc >= 0);
+		rc = engine->RegisterObjectProperty("Transform", "Vec3 position", asOFFSET(CTransform, position));
+		assert(rc >= 0);
+		rc = engine->RegisterObjectProperty("Transform", "Vec3 forward", asOFFSET(CTransform, forward));
+		assert(rc >= 0);
+		rc = engine->RegisterObjectProperty("Transform", "Vec3 scale", asOFFSET(CTransform, scale));
+		assert(rc >= 0);
+		rc = engine->RegisterObjectProperty("Transform", "Quat rotation", asOFFSET(CTransform, rotation));
+		assert(rc >= 0);
+		rc = engine->RegisterObjectProperty("Transform", "Vec3 lookAt", asOFFSET(CTransform, lookAt));
+		assert(rc >= 0);
+		rc = engine->RegisterObjectProperty("Transform", "Vec3 up", asOFFSET(CTransform, up));
+		assert(rc >= 0);
+		rc = engine->RegisterObjectMethod("Transform",
+										  "void translate(Vec3, Space = Space::WORLD)",
+										  asFUNCTION(translate),
+										  asCALL_CDECL_OBJFIRST);
+		assert(rc >= 0);
+		rc = engine->RegisterObjectMethod("Transform",
+										  "void rotate(Vec3, Space = Space::WORLD)",
+										  asFUNCTION(rotate),
+										  asCALL_CDECL_OBJFIRST);
+		assert(rc >= 0);
+		rc = engine->RegisterObjectMethod("Transform",
+										  "void setScale(Vec3, bool = true)",
+										  asFUNCTION(setScale),
+										  asCALL_CDECL_OBJFIRST);
+		assert(rc >= 0);
+		rc = engine->RegisterObjectMethod("Transform",
+										  "void setRotation(Vec4, bool = true)",
+										  asFUNCTION(setRotationProxy),
+										  asCALL_CDECL_OBJFIRST);
+		assert(rc >= 0);
+		rc = engine->RegisterObjectMethod("Transform",
+										  "void setPosition(Vec3, bool = true)",
+										  asFUNCTION(setPosition),
+										  asCALL_CDECL_OBJFIRST);
+		assert(rc >= 0);
+		rc = engine->RegisterObjectMethod("Transform",
+										  "void setLookAt(Vec3)",
+										  asFUNCTION(setLookAt),
+										  asCALL_CDECL_OBJFIRST);
+		assert(rc >= 0);
+		rc = engine->RegisterObjectMethod("Transform",
+										  "void setUp(Vec3)",
+										  asFUNCTION(setUpVector),
+										  asCALL_CDECL_OBJFIRST);
+		assert(rc >= 0);
+		rc = engine->RegisterObjectMethod("Transform",
+										  "void setForward(Vec3)",
+										  asFUNCTION(setForward),
+										  asCALL_CDECL_OBJFIRST);
+		assert(rc >= 0);
+		rc = engine->RegisterObjectMethod("Transform",
+										  "void updateTransformMatrix()",
+										  asFUNCTION(updateTransformMatrix),
+										  asCALL_CDECL_OBJFIRST);
+		assert(rc >= 0);
+		
+		rc = engine->RegisterGlobalProperty("const Vec3 UNIT_X", (void *)&UNIT_X); assert( rc >= 0 );
+		rc = engine->RegisterGlobalProperty("const Vec3 UNIT_Y", (void *)&UNIT_Y); assert( rc >= 0 );
+		rc = engine->RegisterGlobalProperty("const Vec3 UNIT_Z", (void *)&UNIT_Z); assert( rc >= 0 );
 	}
 }

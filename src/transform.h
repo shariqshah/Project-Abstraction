@@ -44,7 +44,7 @@ namespace Transform
 	void cleanup();
 	bool remove(unsigned int transformIndex);
 	int  create(Node node);
-	CTransform* getTransformAtIndex(unsigned int transformIndex);
+	CTransform* getTransformAtIndex(int transformIndex);
 }
 
 #endif

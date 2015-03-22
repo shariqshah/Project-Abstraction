@@ -15,4 +15,9 @@ typedef glm::mat4 Mat4;
 typedef glm::mat3 Mat3;
 typedef glm::quat Quat;
 
+namespace MathTypes
+{
+	void generateBindings();
+}
+
 #endif

@@ -43,6 +43,60 @@ namespace GO
 								// .Func("getRigidBody", &getRigidBody)
 								.Func("getModel", &getModel)
 								.Func("removeComponent", &removeComponent));
+
+		asIScriptEngine* engine = ScriptEngine::getEngine();
+		int rc = -1;
+		engine->RegisterEnum("Component");
+		rc = engine->RegisterEnumValue("Component", "TRANSFORM", (int)Component::TRANSFORM);
+		rc = engine->RegisterEnumValue("Component", "CAMERA",    (int)Component::CAMERA);
+		rc = engine->RegisterEnumValue("Component", "MODEL",     (int)Component::MODEL);
+		rc = engine->RegisterEnumValue("Component", "LIGHT",     (int)Component::RIGIDBODY);
+		rc = engine->RegisterEnumValue("Component", "RIGIDBODY", (int)Component::LIGHT);
+		
+		rc = engine->RegisterObjectType("GameObject", sizeof(GameObject), asOBJ_REF | asOBJ_NOCOUNT);
+		assert(rc >= 0);
+		rc = engine->RegisterObjectProperty("GameObject", "string name", asOFFSET(GameObject, name));
+		assert(rc >= 0);
+		rc = engine->RegisterObjectProperty("GameObject", "string tag", asOFFSET(GameObject, tag));
+		assert(rc >= 0);
+		rc = engine->RegisterObjectProperty("GameObject", "int32 node", asOFFSET(GameObject, node));
+		assert(rc >= 0);
+		rc = engine->RegisterObjectMethod("GameObject",
+										  "Transform@ getTransform()",
+										  asFUNCTION(getTransform),
+										  asCALL_CDECL_OBJFIRST);
+		assert(rc >= 0);
+		rc = engine->RegisterObjectMethod("GameObject",
+										  "Camera@ getCamera()",
+										  asFUNCTION(getCamera),
+										  asCALL_CDECL_OBJFIRST);
+		assert(rc >= 0);
+		rc = engine->RegisterObjectMethod("GameObject",
+										  "Camera@ addCamera()",
+										  asFUNCTION(addCamera),
+										  asCALL_CDECL_OBJFIRST);
+		assert(rc >= 0);
+		rc = engine->RegisterObjectMethod("GameObject",
+										  "Light@ getLight()",
+										  asFUNCTION(getLight),
+										  asCALL_CDECL_OBJFIRST);
+		assert(rc >= 0);
+		rc = engine->RegisterObjectMethod("GameObject",
+										  "Light@ addLight(Vec4 = Vec4(1.0f))",
+										  asFUNCTION(addLight),
+										  asCALL_CDECL_OBJFIRST);
+		assert(rc >= 0);
+		rc = engine->RegisterObjectMethod("GameObject",
+										  "void removeComponent(Component)",
+										  asFUNCTION(removeComponent),
+										  asCALL_CDECL_OBJFIRST);
+		assert(rc >= 0);
+		rc = engine->RegisterObjectMethod("GameObject",
+										  "bool hasComponent(Component)",
+										  asFUNCTION(hasComponent),
+										  asCALL_CDECL_OBJFIRST);
+		assert(rc >= 0);
+		
 	}
 
 	void attachScript(GameObject* gameObject, const std::string& name)
@@ -106,19 +160,16 @@ namespace GO
 		}
 		else
 		{
-			Log::warning("Transform couldnot be added to " + gameObject->name +
-						 " because it already has one");
+			Log::warning("Transform not be added to " + gameObject->name +" because it already has one");
 		}
 
 		return newTransform;
 	}
 
-	CLight* addLight(GameObject* gameObject)
+	CLight* addLight(GameObject* gameObject, Vec4 color)
 	{
 		assert(gameObject);
-
 		CLight* newLight = NULL;
-		
 		if(!hasComponent(gameObject, Component::LIGHT))
 		{
 			int index = Renderer::Light::create(gameObject->node);
@@ -126,15 +177,14 @@ namespace GO
 			gameObject->compIndices[(int)Component::LIGHT] = index;
 			Log::message("Light added to " + gameObject->name);
 			newLight = Renderer::Light::getLightAtIndex(index);
+			newLight->color = color;
 		}
 		else
 		{
 			Log::warning("Light couldnot be added to " + gameObject->name + " because it already has one");
 		}
-
 		return newLight;
 	}
-
 
 	CCamera* addCamera(GameObject* gameObject)
 	{

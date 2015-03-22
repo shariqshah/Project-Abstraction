@@ -9,6 +9,8 @@ project(ProjectAbstraction)
 cmake_minimum_required(VERSION 2.8)
 aux_source_directory(src/ SRC_LIST)
 aux_source_directory(${PROJECT_SOURCE_DIR}/include/imgui SRC_LIST)
+aux_source_directory(${PROJECT_SOURCE_DIR}/include/angelscript/add_on/scriptstdstring SRC_LIST)
+aux_source_directory(${PROJECT_SOURCE_DIR}/include/angelscript/add_on/scriptarray SRC_LIST)
 
 add_executable(${PROJECT_NAME} ${SRC_LIST})
 
@@ -36,6 +38,12 @@ if (OPENGL_FOUND)
   target_link_libraries(${PROJECT_NAME} m)  # if you use maths.h
 endif()
 
+# Threads
+find_package(Threads REQUIRED)
+if(THREADS_FOUND)
+  target_link_libraries(${PROJECT_NAME} ${CMAKE_THREAD_LIBS_INIT})
+endif()
+
 ##link directories
 #LINK_DIRECTORIES(${PROJECT_SOURCE_DIR}/lib)
 
@@ -43,17 +51,17 @@ endif()
 
 if(${CMAKE_BUILD_TYPE} MATCHES "Release")
   message("Release Build")
-  set(CMAKE_CXX_FLAGS	"-Wall -std=c++11 -O3 -ftree-vectorize")
+  set(CMAKE_CXX_FLAGS	"-Wall -std=c++11 -O3 -ftree-vectorize -fno-strict-aliasing") #no aliasing because of angelscript, see angelscript docs section Manual->Getting Started->Compile the library
   target_link_libraries(${PROJECT_NAME} ${PROJECT_SOURCE_DIR}/lib/sdl2/release/libSDL2.so
                                         ${PROJECT_SOURCE_DIR}/lib/sdl2/release/libSDL2_image.so	
 	                                    ${PROJECT_SOURCE_DIR}/lib/bullet/release/libBulletCollision.so
 										${PROJECT_SOURCE_DIR}/lib/bullet/release/libBulletDynamics.so
 										${PROJECT_SOURCE_DIR}/lib/bullet/release/libLinearMath.so
-										# ${PROJECT_SOURCE_DIR}/lib/bullet/release/libGIMPACTUtils.so
                                         ${PROJECT_SOURCE_DIR}/lib/horde3d/release/libHorde3D.so
 										${PROJECT_SOURCE_DIR}/lib/horde3d/release/libHorde3DUtils.so
 										${PROJECT_SOURCE_DIR}/lib/squirrel/libsquirrel.a
-										${PROJECT_SOURCE_DIR}/lib/squirrel/libsqstdlib.a)
+										${PROJECT_SOURCE_DIR}/lib/squirrel/libsqstdlib.a
+										${PROJECT_SOURCE_DIR}/lib/angelscript/release/libangelscript.a)
 else()
   message("Debug Build")
   set(CMAKE_CXX_FLAGS	"-Wall -std=c++11 -g")
@@ -62,12 +70,9 @@ else()
 	                                    ${PROJECT_SOURCE_DIR}/lib/bullet/release/libBulletCollision.so
 										${PROJECT_SOURCE_DIR}/lib/bullet/release/libBulletDynamics.so
 										${PROJECT_SOURCE_DIR}/lib/bullet/release/libLinearMath.so
-										# ${PROJECT_SOURCE_DIR}/lib/bullet/release/libGIMPACTUtils.so
-	                                    # ${PROJECT_SOURCE_DIR}/lib/bullet/debug/libBulletCollision-d.so
-										# ${PROJECT_SOURCE_DIR}/lib/bullet/debug/libBulletDynamics-d.so
-										# ${PROJECT_SOURCE_DIR}/lib/bullet/debug/libLinearMath-d.so
                                         ${PROJECT_SOURCE_DIR}/lib/horde3d/debug/libHorde3D.so
 										${PROJECT_SOURCE_DIR}/lib/horde3d/debug/libHorde3DUtils.so
 										${PROJECT_SOURCE_DIR}/lib/squirrel/libsquirrel.a
-										${PROJECT_SOURCE_DIR}/lib/squirrel/libsqstdlib.a)
+										${PROJECT_SOURCE_DIR}/lib/squirrel/libsqstdlib.a
+										${PROJECT_SOURCE_DIR}/lib/angelscript/debug/libangelscript.a)
 endif()

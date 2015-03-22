@@ -103,6 +103,60 @@ namespace Renderer
 									.Func("getCameraAtIndex", &getCameraAtIndex)
 									.Func("remove",           &remove)
 									.Func("create",           &create));
+
+			asIScriptEngine* engine = ScriptEngine::getEngine();
+			int rc = -1;
+			rc = engine->RegisterObjectType("Camera", sizeof(CCamera), asOBJ_REF | asOBJ_NOCOUNT); assert(rc >= 0);
+			rc = engine->RegisterObjectProperty("Camera", "int32 node", asOFFSET(CCamera, node));
+			assert(rc >= 0);
+			rc = engine->RegisterObjectProperty("Camera", "float nearZ", asOFFSET(CCamera, nearZ));
+			assert(rc >= 0);
+			rc = engine->RegisterObjectProperty("Camera", "float farZ", asOFFSET(CCamera, farZ));
+			assert(rc >= 0);
+			rc = engine->RegisterObjectProperty("Camera", "float fov", asOFFSET(CCamera, fov));
+			assert(rc >= 0);
+			rc = engine->RegisterObjectProperty("Camera", "float aspectRatio", asOFFSET(CCamera, aspectRatio));
+			assert(rc >= 0);
+			rc = engine->RegisterObjectMethod("Camera",
+											  "void setNearZ(float)",
+											  asFUNCTION(setNearZ),
+											  asCALL_CDECL_OBJFIRST);
+			assert(rc >= 0);
+			rc = engine->RegisterObjectMethod("Camera",
+											  "void setFarZ(float)",
+											  asFUNCTION(setFarZ),
+											  asCALL_CDECL_OBJFIRST);
+			assert(rc >= 0);
+			rc = engine->RegisterObjectMethod("Camera",
+											  "void setFov(float)",
+											  asFUNCTION(setFov),
+											  asCALL_CDECL_OBJFIRST);
+			assert(rc >= 0);
+			rc = engine->RegisterObjectMethod("Camera",
+											  "void setAspectratio(float)",
+											  asFUNCTION(setAspectRatio),
+											  asCALL_CDECL_OBJFIRST);
+			assert(rc >= 0);
+			rc = engine->RegisterObjectMethod("Camera",
+											  "void updateView(Transform &in)",
+											  asFUNCTION(updateView),
+											  asCALL_CDECL_OBJFIRST);
+			assert(rc >= 0);
+			rc = engine->RegisterObjectMethod("Camera",
+											  "void updateProjection()",
+											  asFUNCTION(updateView),
+											  asCALL_CDECL_OBJFIRST);
+			assert(rc >= 0);
+			engine->SetDefaultNamespace("Renderer");
+			rc = engine->RegisterGlobalFunction("Camera@ getActiveCamera()",
+												asFUNCTION(getActiveCamera),
+												asCALL_CDECL);
+			assert(rc >= 0);
+			rc = engine->RegisterGlobalFunction("void setActiveCamera(Camera@)",
+												asFUNCTION(setActiveCamera),
+												asCALL_CDECL);
+			assert(rc >= 0);
+			engine->SetDefaultNamespace("");
 		}
 
 		CCamera* getCameraAtIndex(int cameraIndex)

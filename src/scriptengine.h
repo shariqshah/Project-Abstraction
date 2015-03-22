@@ -3,6 +3,7 @@
 
 #include <sqrat.h>
 #include <sqrat/sqratVM.h>
+#include "../include/angelscript/angelscript.h"
 
 #include "log.h"
 
@@ -16,7 +17,7 @@ namespace ScriptEngine
 {
 	VM getVM();
 	
-	void initialize();
+	bool initialize();
 	void cleanup();
 	void runScript(const std::string& scriptName);
 	int  createScript(const std::string& name);
@@ -31,6 +32,11 @@ namespace ScriptEngine
 		else
 			function.Execute(params...);
 	}
+
+	bool addScript(const std::string& name);
+	void executeFunction(const char* declaration);
+
+	asIScriptEngine* getEngine();
 }
 
 #endif

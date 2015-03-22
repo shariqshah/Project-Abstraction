@@ -210,5 +210,29 @@ namespace SceneManager
 								.Func("findByNode",      &findByNode)
 								.Func("findByName",      &findByName)
 								.Func("create",          &create));
+		asIScriptEngine* engine = ScriptEngine::getEngine();
+		engine->SetDefaultNamespace("SceneManager");
+		int rc = -1;
+		rc = engine->RegisterGlobalFunction("void remove(const string)",
+											asFUNCTIONPR(remove, (const std::string&), bool),
+											asCALL_CDECL);
+		assert(rc >= 0);
+		rc = engine->RegisterGlobalFunction("void remove(int32)",
+											asFUNCTIONPR(remove, (Node), bool),
+											asCALL_CDECL);
+		assert(rc >= 0);
+		rc = engine->RegisterGlobalFunction("GameObject@ find(const string)",
+											asFUNCTIONPR(find, (const std::string&), GameObject*),
+											asCALL_CDECL);
+		assert(rc >= 0);
+		rc = engine->RegisterGlobalFunction("GameObject@ find(int32)",
+											asFUNCTIONPR(find, (Node), GameObject*),
+											asCALL_CDECL);
+		assert(rc >= 0);
+		rc = engine->RegisterGlobalFunction("GameObject@ create(const string)",
+											asFUNCTION(create),
+											asCALL_CDECL);
+		assert(rc >= 0);
+		engine->SetDefaultNamespace("");
 	}
 }

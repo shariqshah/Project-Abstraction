@@ -41,6 +41,7 @@ namespace System
 		ScriptEngine::initialize();
 
 		Log::generateBindings();
+		MathTypes::generateBindings();
 		Input::generateBindings();
 		Transform::generateBindings();
 		Material::generateBindings();
@@ -57,6 +58,7 @@ namespace System
 		ScriptEngine::runScript("../content/scripts/scriptManager.nut");
 		ScriptEngine::runScript("../content/scripts/init.nut");
 
+		ScriptEngine::addScript("../content/scripts/helloAngel.as");
 		Editor::initialize();
 	}
 	
@@ -145,6 +147,7 @@ namespace System
 		// 	// GO::reloadScript(test, "Test");
 		// 	GO::reloadScript("TestOBJ", "Test");
 		// }
+		ScriptEngine::executeFunction("void main()");
 	}
 
 	void cleanup()
