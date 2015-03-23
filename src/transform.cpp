@@ -94,8 +94,7 @@ namespace Transform
 	{
 		assert(transform);
 		transform->position = position;
-		if(updateTransMat)
-			updateTransformMatrix(transform);
+		if(updateTransMat) updateTransformMatrix(transform);
 	}
 
 	void translate(CTransform* transform, Vec3 offset, Space transformSpace)
@@ -142,9 +141,7 @@ namespace Transform
 	{
 		assert(transform);
 		transform->scale = newScale;
-
-		if(updateTransMat)
-			updateTransformMatrix(transform);
+		if(updateTransMat) updateTransformMatrix(transform);
 	}
 
 	void setLookAt(CTransform* transform, Vec3 lookAt)
@@ -159,7 +156,6 @@ namespace Transform
 		assert(transform);
 		Vec3  newUp = glm::normalize(up);
 		float angle = glm::dot(transform->up, newUp);
-
 		angle = glm::acos(angle);
 		angle = glm::degrees(-angle);
 	
@@ -177,23 +173,13 @@ namespace Transform
 		updateUpVector(transform);
 		updateLookAt(transform);
 		updateForward(transform);
-		if(updateTransMat)
-			updateTransformMatrix(transform);
+		if(updateTransMat) updateTransformMatrix(transform);
 	}
 
 	void resetAllTransformFlags()
 	{
 		for(CTransform& transform : transformList)
 			transform.isModified = false;
-	}
-
-	//////////////////////////////////////////////////////////////////////////////////////////
-	// Proxy functions for binding
-	//////////////////////////////////////////////////////////////////////////////////////////
-
-	void setRotationProxy(CTransform* transform, Vec4 newRot, bool updateTransMat)
-	{
-		setRotation(transform, Quat(newRot.x, newRot.y, newRot.z, newRot.w), updateTransMat);
 	}
 
 	void generateBindings()
@@ -282,8 +268,8 @@ namespace Transform
 										  asCALL_CDECL_OBJFIRST);
 		assert(rc >= 0);
 		rc = engine->RegisterObjectMethod("Transform",
-										  "void setRotation(Vec4, bool = true)",
-										  asFUNCTION(setRotationProxy),
+										  "void setRotation(Quat, bool = true)",
+										  asFUNCTION(setRotation),
 										  asCALL_CDECL_OBJFIRST);
 		assert(rc >= 0);
 		rc = engine->RegisterObjectMethod("Transform",
@@ -310,8 +296,7 @@ namespace Transform
 										  "void updateTransformMatrix()",
 										  asFUNCTION(updateTransformMatrix),
 										  asCALL_CDECL_OBJFIRST);
-		assert(rc >= 0);
-		
+		assert(rc >= 0);		
 		rc = engine->RegisterGlobalProperty("const Vec3 UNIT_X", (void *)&UNIT_X); assert( rc >= 0 );
 		rc = engine->RegisterGlobalProperty("const Vec3 UNIT_Y", (void *)&UNIT_Y); assert( rc >= 0 );
 		rc = engine->RegisterGlobalProperty("const Vec3 UNIT_Z", (void *)&UNIT_Z); assert( rc >= 0 );

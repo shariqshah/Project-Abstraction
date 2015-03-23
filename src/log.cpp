@@ -1,6 +1,8 @@
 #include "log.h"
 #include "scriptengine.h"
 
+#include <stdio.h>
+
 namespace Log
 {
 	namespace
@@ -10,17 +12,17 @@ namespace Log
 	
     void message(const std::string& message)
     {
-		if(isEnabled) std::cout<<"MESSAGE : " + message<<std::endl;
+		if(isEnabled) printf("MESSAGE : %s\n", message.c_str());
     }
 
     void error(const std::string& context, const std::string& error)
     {
-		if(isEnabled) std::cerr<<"ERROR " + context + " : " + error<<std::endl;
+		if(isEnabled) fprintf(stderr, "ERROR %s : %s\n", context.c_str(), error.c_str());
     }
 
 	void warning(const std::string& warningMessage)
 	{
-		if(isEnabled) std::cout<<"WARNING : " + warningMessage<<std::endl;
+		if(isEnabled) printf("WARNING : %s\n", warningMessage.c_str());
 	}
 
 	void setEnabled(bool enabled)
