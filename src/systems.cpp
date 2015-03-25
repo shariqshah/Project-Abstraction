@@ -123,6 +123,7 @@ namespace System
 		
 		System::CameraSystem::updateFreeCamera(deltaTime);
 		ScriptEngine::executeFunction("updateObjects", deltaTime);
+		ScriptEngine::updateAllScripts(deltaTime);
 		Editor::update(deltaTime, quit);
 		
 		// GOMap* sceneObjects = SceneManager::getSceneObjects();

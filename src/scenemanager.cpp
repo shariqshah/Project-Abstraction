@@ -23,7 +23,8 @@ namespace SceneManager
 
 			//remove scripts
 			ScriptEngine::executeFunction("removeGameObject", gameObject);
-
+			ScriptEngine::unRegisterGameObject(gameObject);
+			
 			// remove the node from valid list and mark it's location in list as empty
 			int index = -1;
 			for(size_t i = 0; i < validNodes.size(); i++)
@@ -172,6 +173,7 @@ namespace SceneManager
 		newObj->name = name;
 		newObj->node = index;
 		GO::addTransform(newObj);
+		ScriptEngine::registerGameObject(newObj);
 		Log::message(name + " added to scene");
 		
 		return newObj;

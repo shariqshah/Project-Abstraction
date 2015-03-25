@@ -17,6 +17,7 @@
 #include "shader.h"
 #include "texture.h"
 #include "gui.h"
+#include "scriptengine.h"
 
 Game::Game(const char* path)
 {
@@ -60,6 +61,7 @@ Game::Game(const char* path)
 		cubeModel->materialUniforms.texture = Texture::create("layingrock.png");
 		CTransform* cubeTran = GO::getTransform(cube);
 		Transform::setPosition(cubeTran, Vec3(5, 0, -5), true);
+		ScriptEngine::addScript(cube, "test");
 	}
 	
 	for(int i = 0; i < 10; i++)

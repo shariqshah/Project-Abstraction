@@ -6,8 +6,7 @@
 
 #include "componentTypes.h"
 #include "mathdefs.h"
-
-typedef int32_t Node;
+#include "datatypes.h"
 
 struct CollisionData;
 struct CTransform;
@@ -23,7 +22,7 @@ struct GameObject
 	std::string name   = "DefaultGameobjectName";
 	std::string tag    = "DefaultTag";
 	bool        remove = false;
-	
+	int         scriptIndex = -1;
 	int compIndices[6] = {-1, -1, -1, -1, -1, -1};
 };
 
