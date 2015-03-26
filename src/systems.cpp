@@ -58,7 +58,6 @@ namespace System
 		ScriptEngine::runScript("../content/scripts/scriptManager.nut");
 		ScriptEngine::runScript("../content/scripts/init.nut");
 
-		ScriptEngine::addScript("../content/scripts/helloAngel.as");
 		Editor::initialize();
 	}
 	
@@ -142,13 +141,10 @@ namespace System
 		Renderer::Camera::updateAllCameraViews();
 		Transform::resetAllTransformFlags();
 		SceneManager::update();
-		// if(Input::isReleased(Input::Key::K9))
-		// {
-		// 	// auto test = SceneManager::find("TestOBJ");
-		// 	// GO::reloadScript(test, "Test");
-		// 	GO::reloadScript("TestOBJ", "Test");
-		// }
-		ScriptEngine::executeFunction("void main()");
+		if(Input::isReleased(Input::Key::K9))
+		{
+			ScriptEngine::reloadScript("test");
+		} 
 	}
 
 	void cleanup()

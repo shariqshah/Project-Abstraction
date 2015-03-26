@@ -3,20 +3,20 @@
 #include <vector>
 #include "log.h"
 #include "gameobject.h"
+#include "scenemanager.h"
 #include "utilities.h"
-#include "physics.h"
 #include "datatypes.h"
 #include "../include/angelscript/add_on/scriptstdstring/scriptstdstring.h"
 #include "../include/angelscript/add_on/scriptbuilder/scriptbuilder.h"
 
 struct Script
 {
-	bool                  enabled;
-	std::string           module;
-	asIScriptFunction*    updateFunc = NULL;
-	asIScriptFunction*    initFunc   = NULL;
-	asIObjectType*        objType    = NULL;
-	asIScriptObject*  scriptObj  = NULL;
+	std::string        module;
+	bool               enabled    = false;
+	asIScriptFunction* updateFunc = NULL;
+	asIScriptFunction* initFunc   = NULL;
+	asIObjectType*     objType    = NULL;
+	asIScriptObject*   scriptObj  = NULL;
 };
 
 struct ScriptContainer
@@ -52,6 +52,21 @@ namespace ScriptEngine
 					   context->GetExceptionLineNumber());
 			}
 			return rc;
+		}
+
+		int findScriptLocation(ScriptContainer* container, const std::string& scriptName)
+		{
+			int scriptLocation = -1;
+			for(int i = 0; i < (int)container->scripts.size(); i++)
+			{
+				Script& script = container->scripts[i];
+				if(script.module == scriptName)
+				{
+					scriptLocation = i;
+					break;
+				}
+			}
+			return scriptLocation;
 		}
 	}
 
@@ -189,56 +204,6 @@ namespace ScriptEngine
 		}	
 	}
 
-	bool addScript(const std::string& name)
-	{
-		bool success = true;
-		char* scriptText = Utils::loadFileIntoCString(name.c_str());
-		if(scriptText && engine)
-		{
-			asIScriptModule *module = engine->GetModule(0, asGM_ALWAYS_CREATE);
-			int rc = module->AddScriptSection(name.c_str(), scriptText, strlen(scriptText));
-			if(rc < 0)
-			{
-				success = false;
-				Log::error("ScriptEngine::addScript", "Adding module failed");
-			}
-			else
-			{
-				rc = module->Build();
-				if(rc < 0)
-				{
-					success = false;
-					Log::error("ScriptEngine::addScript", "Building script " + name + " failed");
-				}
-				else
-				{
-					Log::message("Script " + name + " added successfully");
-				}
-			}
-			free(scriptText);
-		}
-		else
-		{
-			Log::error("ScriptEngine::addScript", name + " not found");
-			success = false;
-		}
-		return success;
-	}
-
-	void executeFunction(const char* declaration)
-	{
-		asIScriptFunction* function = engine->GetModule(0)->GetFunctionByDecl(declaration);
-		if(function == 0)
-		{
-			Log::error("ScriptEngine::executeFunction",
-					   "Function : " + std::string(declaration) + " not found");
-			assert(function != 0);
-			return;
-		}
-		context->Prepare(function);
-		context->Execute();
-	}
-
 	asIScriptEngine* getEngine()
 	{
 		return engine;
@@ -282,11 +247,13 @@ namespace ScriptEngine
 		Log::message(gameObject->name + " registered with scripting engine");
 	}
 
-	bool createModule(const std::string& scriptName)
+	bool createModule(const std::string& scriptName, bool isReloading = false)
 	{
 		bool success = true;
 		CScriptBuilder builder;
-		int rc = builder.StartNewModule(engine, scriptName.c_str());
+		// If isReloading is true then append TEMP to name to avoid collision with existing module
+		std::string moduleName = isReloading ? scriptName + "TEMP" : scriptName;
+		int rc = builder.StartNewModule(engine, moduleName.c_str());
 		std::string scriptPath(scriptDir + scriptName + ".as");
 		if(Utils::fileExists(scriptPath.c_str()))
 		{
@@ -301,7 +268,7 @@ namespace ScriptEngine
 				rc = builder.BuildModule();
 				if(rc < 0)
 				{
-					Log::error("ScriptEngine::createModule", "Error building module " + scriptName);
+					Log::error("ScriptEngine::createModule", "Error building module " + moduleName);
 					success = false;
 				}
 			}
@@ -362,7 +329,7 @@ namespace ScriptEngine
 		if(type == NULL)
 		{
 			Log::error("ScriptEngine::addScript",
-					   "No class implmenting ISciptable interface found in " + scriptName);
+					   "No class implmenting IScriptable interface found in " + scriptName);
 			Log::error("ScriptEngine::addScript", scriptName + " not added to " + gameObject->name);
 			container->scripts.pop_back();
 			return;
@@ -384,7 +351,7 @@ namespace ScriptEngine
 			// Get the newly created scriptobject and increase it's reference count
 			newScript.scriptObj = *((asIScriptObject**)context->GetAddressOfReturnValue());
 			newScript.scriptObj->AddRef();
-			Log::message(scriptName + " added to " + gameObject->name);
+			Log::message("Script '" + scriptName + "' added to " + gameObject->name);
 		}
 		else if(rc == asEXECUTION_EXCEPTION)
 		{
@@ -409,6 +376,28 @@ namespace ScriptEngine
 				}
 			}
 		}
+	}
+
+	bool removeScript(GameObject* gameobject, const std::string& scriptName)
+	{
+		bool success = true;
+		assert(gameobject);
+		ScriptContainer* container = &scriptContainerList[gameobject->scriptIndex];
+		int scriptLocation = findScriptLocation(container, scriptName);
+		if(scriptLocation > -1)
+		{
+			Script& script = container->scripts[scriptLocation];
+			script.scriptObj->Release();
+			container->scripts.erase(container->scripts.begin() + scriptLocation);
+			Log::message("Script '" + scriptName + "' removed from " + gameobject->name);
+		}
+		else
+		{
+			Log::error("ScriptingEngine::removeScript",
+					   "Script '" + scriptName + "' not found on" + gameobject->name);
+			success = false;
+		}			  
+		return success;
 	}
 
 	void unRegisterGameObject(GameObject* gameObject)
@@ -447,5 +436,102 @@ namespace ScriptEngine
 		{
 			Log::error("ScriptEngine::unregisterGameObject", gameObject->name + " not registered");
 		}
+	}
+
+	bool reloadScript(const std::string& scriptName)
+	{
+		// - Create temp module, compile the script, test if it has Interface implemented
+		// - If it passes all checks, discard the temp module and the existing module and create new one
+		// - For each script container, check if it has the script attached, remove it then add it again
+		bool success = true;
+		std::string moduleName = std::string(scriptName + "TEMP");
+		bool moduleCreated = createModule(scriptName.c_str(), true);
+		asIScriptModule* module = NULL;
+		asIObjectType*   type   = NULL;
+		if(moduleCreated)
+		{
+			// Check if it has IScriptable interface implemented
+			module = engine->GetModule(moduleName.c_str(), asGM_ONLY_IF_EXISTS);
+			int objectCount = module->GetObjectTypeCount();
+			for(int i = 0; i < objectCount; i++)
+			{
+				bool found = false;
+				type = module->GetObjectTypeByIndex(i);
+				int interfaceCount = type->GetInterfaceCount();
+				for(int j = 0; j < interfaceCount; j++)
+				{
+					if(strcmp(type->GetInterface(i)->GetName(), "IScriptable") == 0)
+					{
+						found = true;
+						break;
+					}
+				}
+				if(found) break;
+			}
+			if(!type)
+			{
+				Log::error("ScriptEngine::reloadScript", "Could not reload script '" + scriptName + "'");
+				success = false;
+			}
+			else
+			{
+				std::string typeName = std::string(type->GetName());
+				std::string initFuncDecl = typeName + "@ " + typeName + "(int32)";
+				std::string updateFuncDecl = "void update(float)";
+				asIScriptFunction* initFunc   = type->GetFactoryByDecl(initFuncDecl.c_str());
+				asIScriptFunction* updateFunc = type->GetMethodByDecl(updateFuncDecl.c_str());
+				// Create new objects of script type and replace previous ones
+				if(initFunc && updateFunc)
+				{
+					// If any script was reloaded, match found will be true so that previous module is
+					// discarded and new temp module is renamed otherwise temp module will be discarded
+					bool matchFound = false;
+					for(ScriptContainer& container : scriptContainerList)
+					{
+						GameObject* gameObject = SceneManager::find(container.gameObjectNode);
+						for(Script& script : container.scripts)
+						{
+							if(script.module == scriptName)
+							{
+								matchFound = true;
+								context->Prepare(initFunc);
+								context->SetArgDWord(0, container.gameObjectNode);
+								int rc = execute();
+								if(rc == asEXECUTION_FINISHED)
+								{
+									// Get the newly created scriptobject and increase it's reference count
+									script.scriptObj = *((asIScriptObject**)context->GetAddressOfReturnValue());
+									script.scriptObj->AddRef();
+									Log::message("Script '" + scriptName + "' reloaded for " + gameObject->name);
+								}
+								else if(rc == asEXECUTION_EXCEPTION)
+								{
+									Log::error("ScriptEngine::reloadScript",
+											   scriptName + " not added to " + gameObject->name);
+								}
+							}
+						}
+					}
+					// Discard previous module and rename temporary one
+					if(matchFound)
+					{
+						asIScriptModule* prevModule = engine->GetModule(scriptName.c_str(), asGM_ONLY_IF_EXISTS);
+						prevModule->Discard();
+						module->SetName(scriptName.c_str());
+					}
+					else
+					{
+						module->Discard();
+					}
+				}
+				else
+				{
+					Log::error("ScriotEngine::reloadScript",
+							   "Required functions not implemented in '" + scriptName + "'");
+					success = false;
+				}
+			}
+		}
+		return success;
 	}
 }

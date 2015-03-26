@@ -34,12 +34,12 @@ namespace ScriptEngine
 			function.Execute(params...);
 	}
 
-	bool addScript(const std::string& name);
-	void executeFunction(const char* declaration);
 	void updateAllScripts(float deltaTime);
 	void addScript(GameObject* gameObject, const std::string& scriptName);
     void unRegisterGameObject(GameObject* gameObject);
-    void registerGameObject(GameObject* gameObject);	
+    void registerGameObject(GameObject* gameObject);
+	bool removeScript(GameObject* gameobject, const std::string& scriptName);
+	bool reloadScript(const std::string& scriptName);
 	asIScriptEngine* getEngine();
 }
 
