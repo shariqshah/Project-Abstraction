@@ -1,8 +1,6 @@
 #include <GL/gl.h>
 #include <vector>
 #include <string.h>
-#include <assert.h>
-#define NDEBUG
 
 #include "../include/SDL2/SDL_image.h"
 #include "../include/SDL2/SDL_surface.h"
@@ -12,6 +10,7 @@
 #include "log.h"
 #include "renderer.h"
 #include "scriptengine.h"
+#include "passert.h"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "../include/stb_image.h"
@@ -42,7 +41,6 @@ namespace Texture
 					break;
 				}
 			}
-
 			return loaded;
 		}
 	}
@@ -51,10 +49,10 @@ namespace Texture
 	{
 		texturePath   = (char *)malloc(sizeof(char) * strlen(path) + 1);
 		strcpy(texturePath, path);
-
-		int flags = IMG_INIT_JPG | IMG_INIT_PNG | IMG_INIT_TIF;
+		// int flags = IMG_INIT_JPG | IMG_INIT_PNG | IMG_INIT_TIF;
+		int flags = IMG_INIT_PNG | IMG_INIT_TIF;
 		int success = IMG_Init(flags);
-		assert(flags == success);
+		PA_ASSERT(flags == success);
 	}
 	
 	int create(const char* filename)
@@ -263,7 +261,6 @@ namespace Texture
 		free(texturePath);		
 		for(unsigned int i = 0; i < textureList.size(); i ++)
 			remove(i);
-
 		textureList.clear();
 		emptyIndices.clear();
 		IMG_Quit();
@@ -271,10 +268,6 @@ namespace Texture
 
 	void generateBindings()
 	{
-		Sqrat::RootTable().Bind("Texture", Sqrat::Table(ScriptEngine::getVM())
-								.Func("create", &create)
-								.Func("remove", &remove));
-
 		asIScriptEngine* engine = ScriptEngine::getEngine();
 		engine->SetDefaultNamespace("Texture");
 		engine->RegisterGlobalFunction("int create(string)", asFUNCTION(create), asCALL_CDECL);

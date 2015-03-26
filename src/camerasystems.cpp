@@ -6,6 +6,7 @@
 #include "utilities.h"
 #include "scenemanager.h"
 #include "camera.h"
+#include "passert.h"
 
 namespace System
 {

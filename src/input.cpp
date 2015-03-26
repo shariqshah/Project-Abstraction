@@ -3,6 +3,8 @@
 #include "scriptengine.h"
 #include "input.h"
 #include "gui.h"
+#include "passert.h"
+
 namespace Input
 {
 	namespace
@@ -230,99 +232,8 @@ namespace Input
 
 	void generateBindings()
 	{
-		Sqrat::ConstTable().Enum("Key", Sqrat::Enumeration()
-								 .Const("A", Key::A)
-								 .Const("B", Key::B)
-								 .Const("C", Key::C)
-								 .Const("D", Key::D)
-								 .Const("E", Key::E)
-								 .Const("F", Key::F)
-								 .Const("G", Key::G)
-								 .Const("H", Key::H)
-								 .Const("I", Key::I)
-								 .Const("J", Key::J)
-								 .Const("K", Key::K)
-								 .Const("L", Key::L)
-								 .Const("M", Key::M)
-								 .Const("N", Key::N)
-								 .Const("O", Key::O)
-								 .Const("P", Key::P)
-								 .Const("Q", Key::Q)
-								 .Const("R", Key::R)
-								 .Const("S", Key::S)
-								 .Const("T", Key::T)
-								 .Const("U", Key::U)
-								 .Const("V", Key::V)
-								 .Const("W", Key::W)
-								 .Const("X", Key::X)
-								 .Const("Y", Key::Y)
-								 .Const("Z", Key::Z)
-								 .Const("K0", Key::K0)
-								 .Const("K1", Key::K1)
-								 .Const("K2", Key::K2)
-								 .Const("K3", Key::K3)
-								 .Const("K4", Key::K4)
-								 .Const("K5", Key::K5)
-								 .Const("K6", Key::K6)
-								 .Const("K7", Key::K7)
-								 .Const("K8", Key::K8)
-								 .Const("K9", Key::K9)
-								 .Const("F1", Key::F1)
-								 .Const("F2", Key::F2)
-								 .Const("F3", Key::F3)
-								 .Const("F4", Key::F4)
-								 .Const("F5", Key::F5)
-								 .Const("F6", Key::F6)
-								 .Const("F7", Key::F7)
-								 .Const("F8", Key::F8)
-								 .Const("F9", Key::F9)
-								 .Const("F10", Key::F10)
-								 .Const("F11", Key::F11)
-								 .Const("F12", Key::F12)
-								 .Const("UP", Key::UP)
-								 .Const("DOWN", Key::DOWN)
-								 .Const("LEFT", Key::LEFT)
-								 .Const("RIGHT", Key::RIGHT)
-								 .Const("LSHIFT", Key::LSHIFT)
-								 .Const("RSHIFT", Key::RSHIFT)
-								 .Const("LCTRL", Key::LCTRL)
-								 .Const("RCTRL", Key::RCTRL)
-								 .Const("RSUPER", Key::RSUPER)
-								 .Const("LSUPER", Key::LSUPER)
-								 .Const("SPACE", Key::SPACE)
-								 .Const("ENTER", Key::ENTER)
-								 .Const("ESC", Key::ESC)
-								 .Const("TAB", Key::TAB)
-								 .Const("HOME", Key::HOME)
-								 .Const("END", Key::END)
-								 .Const("DELETE", Key::DELETE)
-								 .Const("BACKSPC", Key::BACKSPC)
-								 .Const("NP_PLUS", Key::NP_PLUS)
-								 .Const("NP_MINUS", Key::NP_MINUS));
-
-		Sqrat::ConstTable().Enum("MouseButton", Sqrat::Enumeration()
-								 .Const("M_LEFT",   MouseButton::M_LEFT)
-								 .Const("M_RIGHT",  MouseButton::M_RIGHT)
-								 .Const("M_MIDDLE", MouseButton::M_MIDDLE)
-								 .Const("M_X1",     MouseButton::M_X1)
-								 .Const("M_X2",     MouseButton::M_X2));
-
-		Sqrat::RootTable().Bind("Input", Sqrat::Table(ScriptEngine::getVM())
-								.Func("getMouseX",       &getMouseX)
-								.Func("getMouseY",       &getMouseY)
-								.Func("getMouseRelX",    &getMouseRelX)
-								.Func("getMouseRelY",    &getMouseRelY)
-								.Func("isKeyPressed",    &isKeyPressed)
-								.Func("isKeyReleased",   &isKeyReleased)
-								.Func("isMousePressed",  &isMousePressed)
-								.Func("isMouseReleased", &isMouseReleased)
-								.Func("showCursor",      &showCursor)
-								.Func("lockCursor",      &setCursorLock)
-								.Func("isCursorVisible", &isCursorVisible)
-								.Func("isCursorLocked",  &isCursorLocked));
-
 		asIScriptEngine* engine = ScriptEngine::getEngine();
-		int rc = engine->RegisterEnum("Key"); assert(rc >= 0);
+		int rc = engine->RegisterEnum("Key"); PA_ASSERT(rc >= 0);
 		engine->RegisterEnumValue("Key", "A", (int)Key::A);
 		engine->RegisterEnumValue("Key", "B", (int)Key::B);
 		engine->RegisterEnumValue("Key", "C", (int)Key::C);
@@ -392,7 +303,7 @@ namespace Input
 		engine->RegisterEnumValue("Key", "NP_PLUS", (int)Key::NP_PLUS);
 		engine->RegisterEnumValue("Key", "NP_MINUS", (int)Key::NP_MINUS);
 
-		rc = engine->RegisterEnum("MouseButton"); assert(rc >= 0);
+		rc = engine->RegisterEnum("MouseButton"); PA_ASSERT(rc >= 0);
 		engine->RegisterEnumValue("MouseButton", "LEFT",   MouseButton::M_LEFT);
 		engine->RegisterEnumValue("MouseButton", "RIGHT",  MouseButton::M_RIGHT);
 		engine->RegisterEnumValue("MouseButton", "MIDDLE", MouseButton::M_MIDDLE);
@@ -401,41 +312,41 @@ namespace Input
 
 		engine->SetDefaultNamespace("Input");
 		engine->RegisterGlobalFunction("int32 getMouseX()", asFUNCTION(getMouseX), asCALL_CDECL);
-		assert(rc >= 0);
+		PA_ASSERT(rc >= 0);
 		engine->RegisterGlobalFunction("int32 getMouseY()", asFUNCTION(getMouseY), asCALL_CDECL);
-		assert(rc >= 0);
+		PA_ASSERT(rc >= 0);
 		engine->RegisterGlobalFunction("int32 getMouseRelX()", asFUNCTION(getMouseRelX), asCALL_CDECL);
-		assert(rc >= 0);
+		PA_ASSERT(rc >= 0);
 		engine->RegisterGlobalFunction("int32 getMouseRelY()", asFUNCTION(getMouseRelY), asCALL_CDECL);
-		assert(rc >= 0);
+		PA_ASSERT(rc >= 0);
 		engine->RegisterGlobalFunction("bool isPressed(Key)",
 									   asFUNCTIONPR(isPressed, (Key), bool),
 									   asCALL_CDECL);
-		assert(rc >= 0);
+		PA_ASSERT(rc >= 0);
 		engine->RegisterGlobalFunction("bool isPressed(MouseButton)",
 									   asFUNCTIONPR(isPressed, (MouseButton), bool),
 									   asCALL_CDECL);
-		assert(rc >= 0);
+		PA_ASSERT(rc >= 0);
 		engine->RegisterGlobalFunction("bool isReleased(Key)",
 									   asFUNCTIONPR(isReleased, (Key), bool),
 									   asCALL_CDECL);
-		assert(rc >= 0);
+		PA_ASSERT(rc >= 0);
 		engine->RegisterGlobalFunction("bool isReleased(MouseButton)",
 									   asFUNCTIONPR(isReleased, (MouseButton), bool),
 									   asCALL_CDECL);
-		assert(rc >= 0);
+		PA_ASSERT(rc >= 0);
 		engine->RegisterGlobalFunction("int32 getMouseScrollX()", asFUNCTION(getScrollX), asCALL_CDECL);
-		assert(rc >= 0);
+		PA_ASSERT(rc >= 0);
 		engine->RegisterGlobalFunction("int32 getMouseScrollY()", asFUNCTION(getScrollY), asCALL_CDECL);
-		assert(rc >= 0);
+		PA_ASSERT(rc >= 0);
 		engine->RegisterGlobalFunction("void showCursor(bool)", asFUNCTION(showCursor), asCALL_CDECL);
-		assert(rc >= 0);
+		PA_ASSERT(rc >= 0);
 		engine->RegisterGlobalFunction("void lockCursor(bool)", asFUNCTION(setCursorLock), asCALL_CDECL);
-		assert(rc >= 0);
+		PA_ASSERT(rc >= 0);
 		engine->RegisterGlobalFunction("bool isCursorVisible()", asFUNCTION(isCursorVisible), asCALL_CDECL);
-		assert(rc >= 0);
+		PA_ASSERT(rc >= 0);
 		engine->RegisterGlobalFunction("bool isCursorLocked()", asFUNCTION(isCursorLocked), asCALL_CDECL);
-		assert(rc >= 0);
+		PA_ASSERT(rc >= 0);
 		engine->SetDefaultNamespace("");
 	}
 	
@@ -463,4 +374,3 @@ namespace Input
 		return textInputEnabled;
 	}	
 }
-

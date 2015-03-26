@@ -11,6 +11,7 @@
 #include "light.h"
 #include "texture.h"
 #include "renderer.h"
+#include "passert.h"
 
 namespace Renderer
 {
@@ -25,7 +26,7 @@ namespace Renderer
 			void createVAO(CModel* model)
 			{
 				// TODO : Add support for different model formats and interleaving VBO
-				assert(model);
+				PA_ASSERT(model);
 
 				glGenVertexArrays(1, &model->vao);
 				glBindVertexArray(model->vao);
@@ -352,105 +353,85 @@ namespace Renderer
 		
 		void generateBindings()
 		{
-			Sqrat::RootTable().Bind("CModel", Sqrat::Class<CModel>()
-									.Var("node",             &CModel::node)
-									.Var("filename",         &CModel::filename)
-									.Var("vertices",         &CModel::vertices)
-									.Var("vertexColors",     &CModel::vertexColors)
-									.Var("normals",          &CModel::normals)
-									.Var("uvs",              &CModel::uvs)
-									.Var("indices",          &CModel::indices)
-									.Var("material",         &CModel::material)
-									.Var("materialUniforms", &CModel::materialUniforms)
-									.Var("drawIndexed",      &CModel::drawIndexed));
-
-
-			Sqrat::RootTable().Bind("Model", Sqrat::Table(ScriptEngine::getVM())
-									.Func("create",          &create)
-									.Func("remove",          &remove)
-									.Func("loadFromFile",    &loadFromFile)
-									.Func("setMaterialType", &setMaterialType)
-									.Func("getModelAtIndex", &getModelAtIndex));
-
 			asIScriptEngine* engine = ScriptEngine::getEngine();
 			int rc = engine->RegisterObjectType("Model", sizeof(CModel), asOBJ_REF | asOBJ_NOCOUNT);
-			assert(rc >= 0);
+			PA_ASSERT(rc >= 0);
 
 			rc = engine->RegisterObjectProperty("Model", "int32 node", asOFFSET(CModel, node));
-			assert(rc >= 0);
+			PA_ASSERT(rc >= 0);
 			rc = engine->RegisterObjectProperty("Model", "string filename", asOFFSET(CModel, filename));
-			assert(rc >= 0);
+			PA_ASSERT(rc >= 0);
 			rc = engine->RegisterObjectProperty("Model", "int32 material", asOFFSET(CModel, material));
-			assert(rc >= 0);
+			PA_ASSERT(rc >= 0);
 			rc = engine->RegisterObjectProperty("Model",
 												"Mat_Uniforms materialUniforms",
 												asOFFSET(CModel, materialUniforms));
-			assert(rc >= 0);
+			PA_ASSERT(rc >= 0);
 			rc = engine->RegisterObjectMethod("Model",
 											  "void setMaterialType(Mat_Type)",
 											  asFUNCTION(setMaterialType),
 											  asCALL_CDECL_OBJFIRST);
-			assert(rc >= 0);
+			PA_ASSERT(rc >= 0);
 			rc = engine->RegisterObjectMethod("Model",
 											  "Vec3 getVertex(int)",
 											  asFUNCTION(getVertex),
 											  asCALL_CDECL_OBJFIRST);
-			assert(rc >= 0);
+			PA_ASSERT(rc >= 0);
 			rc = engine->RegisterObjectMethod("Model",
 											  "Vec3 getNormal(int)",
 											  asFUNCTION(getNormal),
 											  asCALL_CDECL_OBJFIRST);
-			assert(rc >= 0);
+			PA_ASSERT(rc >= 0);
 			rc = engine->RegisterObjectMethod("Model",
 											  "Vec2 getUV(int)",
 											  asFUNCTION(getUV),
 											  asCALL_CDECL_OBJFIRST);
-			assert(rc >= 0);
+			PA_ASSERT(rc >= 0);
 			rc = engine->RegisterObjectMethod("Model",
 											  "uint getIndex(int)",
 											  asFUNCTION(getIndex),
 											  asCALL_CDECL_OBJFIRST);
-			assert(rc >= 0);
+			PA_ASSERT(rc >= 0);
 			rc = engine->RegisterObjectMethod("Model",
 											  "void setVertex(int, Vec3)",
 											  asFUNCTION(setVertex),
 											  asCALL_CDECL_OBJFIRST);
-			assert(rc >= 0);
+			PA_ASSERT(rc >= 0);
 			rc = engine->RegisterObjectMethod("Model",
 											  "void setNormal(int, Vec3)",
 											  asFUNCTION(setNormal),
 											  asCALL_CDECL_OBJFIRST);
-			assert(rc >= 0);
+			PA_ASSERT(rc >= 0);
 			rc = engine->RegisterObjectMethod("Model",
 											  "void setUV(int, Vec2)",
 											  asFUNCTION(setUV),
 											  asCALL_CDECL_OBJFIRST);
-			assert(rc >= 0);
+			PA_ASSERT(rc >= 0);
 			rc = engine->RegisterObjectMethod("Model",
 											  "void setIndex(int, uint)",
 											  asFUNCTION(setIndex),
 											  asCALL_CDECL_OBJFIRST);
-			assert(rc >= 0);
+			PA_ASSERT(rc >= 0);
 			rc = engine->RegisterObjectMethod("Model",
 											  "void appendVertex(Vec3)",
 											  asFUNCTION(appendVertex),
 											  asCALL_CDECL_OBJFIRST);
-			assert(rc >= 0);
+			PA_ASSERT(rc >= 0);
 			rc = engine->RegisterObjectMethod("Model",
 											  "void appendNormal(Vec3)",
 											  asFUNCTION(appendNormal),
 											  asCALL_CDECL_OBJFIRST);
-			assert(rc >= 0);
+			PA_ASSERT(rc >= 0);
 			rc = engine->RegisterObjectMethod("Model",
 											  "void appendUV(Vec2)",
 											  asFUNCTION(appendUV),
 											  asCALL_CDECL_OBJFIRST);
-			assert(rc >= 0);
+			PA_ASSERT(rc >= 0);
 			rc = engine->RegisterObjectMethod("Model",
 											  "void appendIndex(uint)",
 											  asFUNCTION(appendIndex),
 											  asCALL_CDECL_OBJFIRST);
-			assert(rc >= 0);
+			PA_ASSERT(rc >= 0);
 		}
 
 		void remove(unsigned int modelIndex)
@@ -477,8 +458,8 @@ namespace Renderer
 
 		bool loadFromFile(const char* filename, CModel* model)
 		{
-			assert(model);
-			assert(filename);
+			PA_ASSERT(model);
+			PA_ASSERT(filename);
 			bool success = true;
 			int index = findModelIndex(filename);
 			if(index == -1)

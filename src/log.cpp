@@ -1,6 +1,6 @@
 #include "log.h"
 #include "scriptengine.h"
-
+#include "passert.h"
 #include <stdio.h>
 
 namespace Log
@@ -33,31 +33,25 @@ namespace Log
 
 	void generateBindings()
 	{
-		Sqrat::RootTable().Bind("Log", Sqrat::Table(ScriptEngine::getVM())
-								.Func("message", &message)
-								.Func("error", &error)
-								.Func("warning", &warning)
-								.Func("setEnabled", &setEnabled));
-
 		asIScriptEngine* engine = ScriptEngine::getEngine();
 		engine->SetDefaultNamespace("Log");
 		int rc = -1;
 		rc = engine->RegisterGlobalFunction("void message(const string)",
 											asFUNCTION(message),
 											asCALL_CDECL);
-		assert(rc >= 0);
+		PA_ASSERT(rc >= 0);
 		rc = engine->RegisterGlobalFunction("void warning(const string)",
 											asFUNCTION(warning),
 											asCALL_CDECL);
-		assert(rc >= 0);
+		PA_ASSERT(rc >= 0);
 		rc = engine->RegisterGlobalFunction("void error(const string, const string)",
 											asFUNCTION(error),
 											asCALL_CDECL);
-		assert(rc >= 0);
+		PA_ASSERT(rc >= 0);
 		rc = engine->RegisterGlobalFunction("void setEnabled(const bool)",
 											asFUNCTION(setEnabled),
 											asCALL_CDECL);
-		assert(rc >= 0);
+		PA_ASSERT(rc >= 0);
 		engine->SetDefaultNamespace("");
 	}
 }

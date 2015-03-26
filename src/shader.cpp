@@ -1,13 +1,13 @@
 #include <GL/glew.h>
 #include <GL/gl.h>
 #include <string.h>
-#include <assert.h>
 #include <vector>
 
 #include "shader.h"
 #include "utilities.h"
 #include "log.h"
 #include "renderer.h"
+#include "passert.h"
 
 namespace Shader
 {
@@ -111,8 +111,8 @@ namespace Shader
 		char* vertSource = Utils::loadFileIntoCString(vsPath);
 		char* fragSource = Utils::loadFileIntoCString(fsPath);
 
-		assert(vertSource != NULL);
-		assert(fragSource != NULL);
+		PA_ASSERT(vertSource != NULL);
+		PA_ASSERT(fragSource != NULL);
 
 		vertSource = runPreProcessor(vertSource);		
 		fragSource = runPreProcessor(fragSource);

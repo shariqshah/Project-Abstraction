@@ -78,10 +78,9 @@ namespace Physics
 					collisionData.worldPosA    = Utils::toGlm(ptA);
 					collisionData.worldPosB    = Utils::toGlm(ptB);
  
-					GO::processCollision(gameObjectA, collisionData);
-
+					// GO::processCollision(gameObjectA, collisionData);
 					collisionData.collidingObj = gameObjectA;
-					GO::processCollision(gameObjectB, collisionData);
+					// GO::processCollision(gameObjectB, collisionData);
 				}
 			}
 		}
@@ -89,35 +88,34 @@ namespace Physics
 
 	void draw(CTransform* viewerTransform, CCamera* viewerCamera)
 	{
-		if(sEnableDebugDraw && viewerTransform != NULL && viewerCamera != NULL)
-		{
-			Mat4 camTranMat = viewerTransform->transMat;
-			Mat4 camProjMat;
+		// if(sEnableDebugDraw && viewerTransform != NULL && viewerCamera != NULL)
+		// {
+		// 	Mat4 camTranMat = viewerTransform->transMat;
+		// 	Mat4 camProjMat;
 		
-			h3dGetCameraProjMat(viewerCamera->node,
-								glm::value_ptr(camProjMat));
+		// 	h3dGetCameraProjMat(viewerCamera->node,
+		// 						glm::value_ptr(camProjMat));
 
-			glPushAttrib(GL_ALL_ATTRIB_BITS);
-			glMatrixMode(GL_MODELVIEW);
-			glPushMatrix();
-			glLoadMatrixf(glm::value_ptr(glm::inverse(camTranMat)));
+		// 	glPushAttrib(GL_ALL_ATTRIB_BITS);
+		// 	glMatrixMode(GL_MODELVIEW);
+		// 	glPushMatrix();
+		// 	glLoadMatrixf(glm::value_ptr(glm::inverse(camTranMat)));
 		
-			glMatrixMode(GL_PROJECTION);
-			glPushMatrix();
-			glLoadMatrixf(glm::value_ptr(camProjMat));
+		// 	glMatrixMode(GL_PROJECTION);
+		// 	glPushMatrix();
+		// 	glLoadMatrixf(glm::value_ptr(camProjMat));
 
-			glMatrixMode(GL_MODELVIEW);
+		// 	glMatrixMode(GL_MODELVIEW);
 		
-			sWorld->debugDrawWorld();
+		// 	sWorld->debugDrawWorld();
 
-			glMatrixMode(GL_PROJECTION);
-			glPopMatrix();
+		// 	glMatrixMode(GL_PROJECTION);
+		// 	glPopMatrix();
 
-			glMatrixMode(GL_MODELVIEW);
-			glPopMatrix();
-			glPopAttrib();
-		}
-		
+		// 	glMatrixMode(GL_MODELVIEW);
+		// 	glPopMatrix();
+		// 	glPopAttrib();
+		// }
 	}
 
 	void enableDebugDraw(bool enable)
@@ -263,38 +261,6 @@ namespace Physics
 
 	void generateBindings()
 	{
-		Sqrat::Class<CollisionShape> collisionShape(ScriptEngine::getVM());
-		Sqrat::RootTable().Bind("CollisionShape", collisionShape);
-		
-		Sqrat::RootTable().Bind("Sphere", Sqrat::DerivedClass<Sphere, CollisionShape>()
-								.Ctor<float>());
-		Sqrat::RootTable().Bind("Box", Sqrat::DerivedClass<Box, CollisionShape>()
-								.Ctor<Vec3>());
-		Sqrat::RootTable().Bind("Capsule", Sqrat::DerivedClass<Capsule, CollisionShape>()
-								.Ctor<float, float>());
-		Sqrat::RootTable().Bind("Plane", Sqrat::DerivedClass<Plane, CollisionShape>()
-								.Ctor<Vec3, float>());
-		Sqrat::RootTable().Bind("Cone", Sqrat::DerivedClass<Cone, CollisionShape>()
-								.Ctor<float, float>());
-		Sqrat::RootTable().Bind("Cylinder", Sqrat::DerivedClass<Cylinder, CollisionShape>()
-								.Ctor<Vec3, Vec3>());
-		Sqrat::RootTable().Bind("CollisionMesh",
-								Sqrat::DerivedClass<CollisionMesh, CollisionShape>()
-								.Ctor<CModel*, bool>());
-
-		Sqrat::RootTable().Bind("CollisionData", Sqrat::Class<CollisionData>()
-								.Var("collidingObj", &CollisionData::collidingObj)
-								.Var("worldPosA",    &CollisionData::worldPosA)
-								.Var("worldPosB",    &CollisionData::worldPosB)
-								.Var("normal",       &CollisionData::normal));
-
-		Sqrat::RootTable().Bind("CollisionShapes", Sqrat::Table(ScriptEngine::getVM())
-								.Func("createSphere",   &CollisionShapes::createSphere)
-								.Func("createBox",      &CollisionShapes::createBox)
-								.Func("createCapsule",  &CollisionShapes::createCapsule)
-								.Func("createPlane",    &CollisionShapes::createPlane)
-								.Func("createCylinder", &CollisionShapes::createCylinder)
-								.Func("createMesh",     &CollisionShapes::createCollisionMesh));
 		
 	}
 
@@ -442,11 +408,6 @@ namespace Physics
 
 		void generateBindings()
 		{
-			Sqrat::RootTable().Bind("RigidBody", Sqrat::Table(ScriptEngine::getVM())
-									.Func("applyForce", &applyForce)
-									.Func("remove", &remove)
-									.Func("setMass", &setMass)
-									.Func("setKinematic", &setKinematic));
 		}
 	}
 }

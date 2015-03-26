@@ -1,5 +1,4 @@
 #include "scriptengine.h"
-#include <stdarg.h>
 #include <vector>
 #include "log.h"
 #include "gameobject.h"
@@ -8,6 +7,7 @@
 #include "datatypes.h"
 #include "../include/angelscript/add_on/scriptstdstring/scriptstdstring.h"
 #include "../include/angelscript/add_on/scriptbuilder/scriptbuilder.h"
+#include "passert.h"
 
 struct Script
 {
@@ -29,11 +29,6 @@ namespace ScriptEngine
 {
 	namespace
 	{
-		VM vmInstance;
-		Sqrat::SqratVM *vm;
-		std::vector<Sqrat::Script> scriptList;
-		std::vector<int> scriptFreeIndices;
-
 		asIScriptEngine*  engine = NULL;
 		asIScriptContext* context = NULL;
 		std::vector<ScriptContainer> scriptContainerList;
@@ -70,22 +65,6 @@ namespace ScriptEngine
 		}
 	}
 
-	void printfunc(HSQUIRRELVM v,const SQChar *s,...)
-	{
-		va_list vl;
-		va_start(vl, s);
-		vfprintf(stdout, s, vl);
-		va_end(vl);
-	}
-
-	void errorfunc(HSQUIRRELVM v,const SQChar *s,...)
-	{
-		va_list vl;
-		va_start(vl, s);
-		vfprintf(stderr, s, vl);
-		va_end(vl);
-	}
-
 	void MessageCallback(const asSMessageInfo *msg, void *param)
 	{
 		const char *type = "ERR ";
@@ -100,14 +79,7 @@ namespace ScriptEngine
 	
 	bool initialize()
 	{
-		bool success = true;
-		vm = new Sqrat::SqratVM(1024);
-		vm->SetPrintFunc(printfunc, errorfunc);
-		vmInstance = vm->GetVM();
-		Sqrat::DefaultVM::Set(vm->GetVM());
-
-		//////////////////////////////////////////////////////////////////////////////////////////
-		
+		bool success = true;		
 		engine = asCreateScriptEngine(ANGELSCRIPT_VERSION);
 		if(engine == 0)
 		{
@@ -130,80 +102,13 @@ namespace ScriptEngine
 
 	void cleanup()
 	{
-		for(Sqrat::Script script : scriptList)
-			script.Release();
-
-		scriptList.clear();
-		delete vm;
-
-		////////////////////////////////////////////////////////////////////////////////////////////
-
 		if(engine)
 		{
 			context->Release();
 			engine->ShutDownAndRelease();
 		}
 	}
-
-	VM getVM()
-	{
-		return vmInstance;
-	}
-
-	void runScript(const std::string& scriptName)
-	{
-		Sqrat::Script script(vmInstance);
-		std::string error;
-		
-		if(script.CompileFile(scriptName, error))
-		{
-			Log::message("Script : " + scriptName + " compiled");
-			if(!script.Run(error))
-				Log::error("Script Runtime", error);
-			else
-				script.Release();
-		}
-		else
-			Log::error("Script Compile", error);
-	}
-
-	int createScript(const std::string& name)
-	{
-		Sqrat::Script newScript;
-		std::string error;
-		
-		if(newScript.CompileFile(name, error))
-		{
-			if(newScript.Run(error))
-			{
-				int index = -1;
-				if(!scriptFreeIndices.empty())
-				{
-					index = scriptFreeIndices.back();
-					scriptList[index] = newScript;
-				}
-				else
-				{
-					scriptList.push_back(newScript);
-					index = scriptList.size() - 1;
-				}
-
-				return index;
-			}
-			else
-			{
-				Log::error("Script Runtime", error);
-				return -1;
-			}
-			
-		}
-		else
-		{
-			Log::error("Compiling " + name, error);
-			return -1;
-		}	
-	}
-
+	
 	asIScriptEngine* getEngine()
 	{
 		return engine;
@@ -211,7 +116,7 @@ namespace ScriptEngine
 
 	void registerGameObject(GameObject* gameObject)
 	{
-		assert(gameObject);
+		PA_ASSERT(gameObject);
 		bool found = false;
 		// Check that gameObject is not already registered
 		for(int activeContainerIndex : activeScriptContainers)
@@ -282,7 +187,7 @@ namespace ScriptEngine
 	
 	void addScript(GameObject* gameObject, const std::string& scriptName)
 	{
-		assert(gameObject);
+		PA_ASSERT(gameObject);
 		ScriptContainer* container = &scriptContainerList[gameObject->scriptIndex];
 		// Check if module has already been created
 		asIScriptModule* module = engine->GetModule(scriptName.c_str(), asGM_ONLY_IF_EXISTS);
@@ -381,7 +286,7 @@ namespace ScriptEngine
 	bool removeScript(GameObject* gameobject, const std::string& scriptName)
 	{
 		bool success = true;
-		assert(gameobject);
+		PA_ASSERT(gameobject);
 		ScriptContainer* container = &scriptContainerList[gameobject->scriptIndex];
 		int scriptLocation = findScriptLocation(container, scriptName);
 		if(scriptLocation > -1)
@@ -394,7 +299,7 @@ namespace ScriptEngine
 		else
 		{
 			Log::error("ScriptingEngine::removeScript",
-					   "Script '" + scriptName + "' not found on" + gameobject->name);
+					   "Script '" + scriptName + "' not found on " + gameobject->name);
 			success = false;
 		}			  
 		return success;
@@ -402,7 +307,7 @@ namespace ScriptEngine
 
 	void unRegisterGameObject(GameObject* gameObject)
 	{
-		assert(gameObject);
+		PA_ASSERT(gameObject);
 		if(gameObject->scriptIndex >= 0)
 		{
 			int index = gameObject->scriptIndex;

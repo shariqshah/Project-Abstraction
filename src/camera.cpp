@@ -3,6 +3,7 @@
 #include "transform.h"
 #include "gameobject.h"
 #include "scenemanager.h"
+#include "passert.h"
 
 namespace Renderer
 {
@@ -87,75 +88,58 @@ namespace Renderer
 
 		void generateBindings()
 		{
-			Sqrat::RootTable().Bind("CCamera", Sqrat::Class<CCamera>()
-									.Var("node",        &CCamera::node)
-									.Var("nearZ",       &CCamera::nearZ)
-									.Var("farZ",        &CCamera::farZ)
-									.Var("fov",         &CCamera::fov)
-									.Var("aspectRatio", &CCamera::aspectRatio));
-
-			Sqrat::RootTable().Bind("Camera", Sqrat::Table(ScriptEngine::getVM())
-									.Func("setAspectratio",   &setAspectRatio)
-									.Func("setFov",           &setFov)
-									.Func("setNearZ",         &setNearZ)
-									.Func("updateView",       &updateView)
-									.Func("updateProjection", &updateProjection)
-									.Func("getCameraAtIndex", &getCameraAtIndex)
-									.Func("remove",           &remove)
-									.Func("create",           &create));
-
 			asIScriptEngine* engine = ScriptEngine::getEngine();
 			int rc = -1;
-			rc = engine->RegisterObjectType("Camera", sizeof(CCamera), asOBJ_REF | asOBJ_NOCOUNT); assert(rc >= 0);
+			rc = engine->RegisterObjectType("Camera", sizeof(CCamera), asOBJ_REF | asOBJ_NOCOUNT); PA_ASSERT(rc >= 0);
 			rc = engine->RegisterObjectProperty("Camera", "int32 node", asOFFSET(CCamera, node));
-			assert(rc >= 0);
+			PA_ASSERT(rc >= 0);
 			rc = engine->RegisterObjectProperty("Camera", "float nearZ", asOFFSET(CCamera, nearZ));
-			assert(rc >= 0);
+			PA_ASSERT(rc >= 0);
 			rc = engine->RegisterObjectProperty("Camera", "float farZ", asOFFSET(CCamera, farZ));
-			assert(rc >= 0);
+			PA_ASSERT(rc >= 0);
 			rc = engine->RegisterObjectProperty("Camera", "float fov", asOFFSET(CCamera, fov));
-			assert(rc >= 0);
+			PA_ASSERT(rc >= 0);
 			rc = engine->RegisterObjectProperty("Camera", "float aspectRatio", asOFFSET(CCamera, aspectRatio));
-			assert(rc >= 0);
+			PA_ASSERT(rc >= 0);
 			rc = engine->RegisterObjectMethod("Camera",
 											  "void setNearZ(float)",
 											  asFUNCTION(setNearZ),
 											  asCALL_CDECL_OBJFIRST);
-			assert(rc >= 0);
+			PA_ASSERT(rc >= 0);
 			rc = engine->RegisterObjectMethod("Camera",
 											  "void setFarZ(float)",
 											  asFUNCTION(setFarZ),
 											  asCALL_CDECL_OBJFIRST);
-			assert(rc >= 0);
+			PA_ASSERT(rc >= 0);
 			rc = engine->RegisterObjectMethod("Camera",
 											  "void setFov(float)",
 											  asFUNCTION(setFov),
 											  asCALL_CDECL_OBJFIRST);
-			assert(rc >= 0);
+			PA_ASSERT(rc >= 0);
 			rc = engine->RegisterObjectMethod("Camera",
 											  "void setAspectratio(float)",
 											  asFUNCTION(setAspectRatio),
 											  asCALL_CDECL_OBJFIRST);
-			assert(rc >= 0);
+			PA_ASSERT(rc >= 0);
 			rc = engine->RegisterObjectMethod("Camera",
 											  "void updateView(Transform &in)",
 											  asFUNCTION(updateView),
 											  asCALL_CDECL_OBJFIRST);
-			assert(rc >= 0);
+			PA_ASSERT(rc >= 0);
 			rc = engine->RegisterObjectMethod("Camera",
 											  "void updateProjection()",
 											  asFUNCTION(updateView),
 											  asCALL_CDECL_OBJFIRST);
-			assert(rc >= 0);
+			PA_ASSERT(rc >= 0);
 			engine->SetDefaultNamespace("Renderer");
 			rc = engine->RegisterGlobalFunction("Camera@ getActiveCamera()",
 												asFUNCTION(getActiveCamera),
 												asCALL_CDECL);
-			assert(rc >= 0);
+			PA_ASSERT(rc >= 0);
 			rc = engine->RegisterGlobalFunction("void setActiveCamera(Camera@)",
 												asFUNCTION(setActiveCamera),
 												asCALL_CDECL);
-			assert(rc >= 0);
+			PA_ASSERT(rc >= 0);
 			engine->SetDefaultNamespace("");
 		}
 
@@ -177,7 +161,7 @@ namespace Renderer
 
 		void updateProjection(CCamera* camera)
 		{
-			assert(camera);
+			PA_ASSERT(camera);
 			camera->projMat = glm::perspective(glm::radians(camera->fov),
 											   camera->aspectRatio,
 											   camera->nearZ,
@@ -187,8 +171,8 @@ namespace Renderer
 
 		void updateView(CCamera* camera, CTransform* transform)
 		{
-			assert(camera);
-			assert(transform);
+			PA_ASSERT(camera);
+			PA_ASSERT(transform);
 			camera->viewMat = glm::lookAt(transform->position,
 										  transform->lookAt,
 										  transform->up);
@@ -197,7 +181,7 @@ namespace Renderer
 		
 		int create(GameObject* gameObject)
 		{
-			assert(gameObject);
+			PA_ASSERT(gameObject);
 			CCamera newCamera;
 			newCamera.node = gameObject->node;
 			CTransform* transform = GO::getTransform(gameObject);

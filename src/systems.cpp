@@ -1,6 +1,5 @@
 #include "systems.h"
 #include "scenemanager.h"
-// #include "componentmanager.h"
 #include "scriptengine.h"
 #include "input.h"
 #include "camerasystems.h"
@@ -37,7 +36,6 @@ namespace System
 		// statCollMesh = new CollisionMesh(suzanneModel, true);
 		// hullCollMesh = new CollisionMesh(suzanneModel, false);
 		// tmpShape = new Sphere(1.f);
-
 		ScriptEngine::initialize();
 
 		Log::generateBindings();
@@ -54,9 +52,6 @@ namespace System
 		Physics::RigidBody::generateBindings();
 		SceneManager::generateBindings();
 		Gui::generateBindings();
-
-		ScriptEngine::runScript("../content/scripts/scriptManager.nut");
-		ScriptEngine::runScript("../content/scripts/init.nut");
 
 		Editor::initialize();
 	}
@@ -121,7 +116,6 @@ namespace System
 			*quit = true;
 		
 		System::CameraSystem::updateFreeCamera(deltaTime);
-		ScriptEngine::executeFunction("updateObjects", deltaTime);
 		ScriptEngine::updateAllScripts(deltaTime);
 		Editor::update(deltaTime, quit);
 		
@@ -143,7 +137,8 @@ namespace System
 		SceneManager::update();
 		if(Input::isReleased(Input::Key::K9))
 		{
-			ScriptEngine::reloadScript("test");
+			GameObject* gameobject = SceneManager::find("Cube");
+			ScriptEngine::removeScript(gameobject, "test");
 		} 
 	}
 

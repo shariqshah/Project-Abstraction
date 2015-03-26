@@ -10,6 +10,7 @@
 #include "log.h"
 #include "texture.h"
 #include "renderer.h"
+#include "passert.h"
 
 namespace Editor
 {

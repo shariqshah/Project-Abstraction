@@ -2,6 +2,7 @@
 #include "input.h"
 #include "settings.h"
 #include "shader.h"
+#include "passert.h"
 
 #include "../include/SDL2/SDL.h"
 

@@ -1,6 +1,5 @@
 #include "physicsdebugdrawer.h"
-
-#include <stdio.h> //printf debugging
+#include <stdio.h>
 
 namespace Physics
 {

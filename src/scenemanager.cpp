@@ -2,6 +2,7 @@
 #include "gameobject.h"
 #include "transform.h"
 #include "scriptengine.h"
+#include "passert.h"
 
 namespace SceneManager
 {
@@ -20,9 +21,7 @@ namespace SceneManager
 				if(gameObject->compIndices[i] != -1)
 					GO::removeComponent(gameObject, (Component)i);
 			}
-
 			//remove scripts
-			ScriptEngine::executeFunction("removeGameObject", gameObject);
 			ScriptEngine::unRegisterGameObject(gameObject);
 			
 			// remove the node from valid list and mark it's location in list as empty
@@ -206,35 +205,29 @@ namespace SceneManager
 
 	void generateBindings()
 	{
-		Sqrat::RootTable().Bind("SceneManager", Sqrat::Table(ScriptEngine::getVM())
-								.Func("removeByNode",    &removeByNode)
-								.Func("removeByName",    &removeByName)
-								.Func("findByNode",      &findByNode)
-								.Func("findByName",      &findByName)
-								.Func("create",          &create));
 		asIScriptEngine* engine = ScriptEngine::getEngine();
 		engine->SetDefaultNamespace("SceneManager");
 		int rc = -1;
 		rc = engine->RegisterGlobalFunction("void remove(const string)",
 											asFUNCTIONPR(remove, (const std::string&), bool),
 											asCALL_CDECL);
-		assert(rc >= 0);
+		PA_ASSERT(rc >= 0);
 		rc = engine->RegisterGlobalFunction("void remove(int32)",
 											asFUNCTIONPR(remove, (Node), bool),
 											asCALL_CDECL);
-		assert(rc >= 0);
+		PA_ASSERT(rc >= 0);
 		rc = engine->RegisterGlobalFunction("GameObject@ find(const string)",
 											asFUNCTIONPR(find, (const std::string&), GameObject*),
 											asCALL_CDECL);
-		assert(rc >= 0);
+		PA_ASSERT(rc >= 0);
 		rc = engine->RegisterGlobalFunction("GameObject@ find(int32)",
 											asFUNCTIONPR(find, (Node), GameObject*),
 											asCALL_CDECL);
-		assert(rc >= 0);
+		PA_ASSERT(rc >= 0);
 		rc = engine->RegisterGlobalFunction("GameObject@ create(const string)",
 											asFUNCTION(create),
 											asCALL_CDECL);
-		assert(rc >= 0);
+		PA_ASSERT(rc >= 0);
 		engine->SetDefaultNamespace("");
 	}
 }

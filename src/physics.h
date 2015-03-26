@@ -254,8 +254,8 @@ public:
 			int vertexCount = 0;
 
 			// TODO: Fix by adding check if mesh has indices and modifying the loop below accordingly
-			assert(vertices);
-			assert(vertexCount > 0);
+			// PA_ASSERT(vertices);
+			// PA_ASSERT(vertexCount > 0);
 			
 			btTriangleMesh *triMesh = new btTriangleMesh();
 

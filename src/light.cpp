@@ -1,5 +1,6 @@
 #include "light.h"
 #include "scriptengine.h"
+#include "passert.h"
 
 namespace Renderer
 {
@@ -95,51 +96,32 @@ namespace Renderer
 
 		void generateBindings()
 		{
-			Sqrat::ConstTable().Enum("LightType", Sqrat::Enumeration ()
-									 .Const("SPOT",  LightType::LT_SPOT)
-									 .Const("DIR",   LightType::LT_DIR)
-									 .Const("POINT", LightType::LT_POINT));
-			
-			Sqrat::RootTable().Bind("CLight", Sqrat::Class<CLight>()
-								.Var("intensity",   &CLight::intensity)
-								.Var("color",       &CLight::color)
-								.Var("outerAngle",  &CLight::outerAngle)
-								.Var("innderAngle", &CLight::innerAngle)
-								.Var("exponent",    &CLight::exponent)
-								.Var("node",        &CLight::node)
-								.Var("castShadow",  &CLight::castShadow)
-								.Var("valid",       &CLight::valid)
-								.Var("lightType",   &CLight::type));
-
-			Sqrat::RootTable().Bind("Light", Sqrat::Table(ScriptEngine::getVM())
-									.Func("create", &create));
-
 			asIScriptEngine* engine = ScriptEngine::getEngine();
-			int rc = engine->RegisterEnum("LightType"); assert(rc >= 0);
+			int rc = engine->RegisterEnum("LightType"); PA_ASSERT(rc >= 0);
 			rc = engine->RegisterEnumValue("LightType", "SPOT", (int)LightType::LT_SPOT);
 			rc = engine->RegisterEnumValue("LightType", "DIR", (int)LightType::LT_DIR);
 			rc = engine->RegisterEnumValue("LightType", "POINT", (int)LightType::LT_POINT);
-
+			
 			rc = engine->RegisterObjectType("Light", sizeof(CLight), asOBJ_REF | asOBJ_NOCOUNT);
-			assert(rc >= 0);
+			PA_ASSERT(rc >= 0);
 			rc = engine->RegisterObjectProperty("Light", "float intensity", asOFFSET(CLight, intensity));
-			assert(rc >= 0);
+			PA_ASSERT(rc >= 0);
 			rc = engine->RegisterObjectProperty("Light", "Vec4 color", asOFFSET(CLight, color));
-			assert(rc >= 0);
+			PA_ASSERT(rc >= 0);
 			rc = engine->RegisterObjectProperty("Light", "float outerAngle", asOFFSET(CLight, outerAngle));
-			assert(rc >= 0);
+			PA_ASSERT(rc >= 0);
 			rc = engine->RegisterObjectProperty("Light", "float innerAngle", asOFFSET(CLight, innerAngle));
-			assert(rc >= 0);
+			PA_ASSERT(rc >= 0);
 			rc = engine->RegisterObjectProperty("Light", "int32 node", asOFFSET(CLight, node));
-			assert(rc >= 0);
+			PA_ASSERT(rc >= 0);
 			rc = engine->RegisterObjectProperty("Light", "bool castShadow", asOFFSET(CLight, castShadow));
-			assert(rc >= 0);
+			PA_ASSERT(rc >= 0);
 			rc = engine->RegisterObjectProperty("Light", "float falloff", asOFFSET(CLight, falloff));
-			assert(rc >= 0);
+			PA_ASSERT(rc >= 0);
 			rc = engine->RegisterObjectProperty("Light", "float radius", asOFFSET(CLight, radius));
-			assert(rc >= 0);
+			PA_ASSERT(rc >= 0);
 			rc = engine->RegisterObjectProperty("Light", "LightType type", asOFFSET(CLight, type));
-			assert(rc >= 0);
+			PA_ASSERT(rc >= 0);
 		
 		}
 	}

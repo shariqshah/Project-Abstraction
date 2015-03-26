@@ -30,14 +30,6 @@ namespace GO
 {
     bool hasComponent(GameObject* gameOjbject, Component type);
 	void generateBindings();
-	void attachScript(GameObject* gameObject, const std::string& name);
-	void reloadScript(GameObject* gameObject, const std::string& name);
-	void reloadScript(const std::string& goName, const std::string& name);
-	void reloadAllScripts(GameObject* gameObject);
-	void reloadAllScripts(const std::string& goName);
-	void reloadScriptType(const std::string& typeName);
-	void removeScript(GameObject* gameObject, const std::string& name);
-	void removeScript(const std::string& goName, const std::string& name);
 	void processCollision(GameObject* gameObject, const CollisionData& collisionData);
 	void removeComponent(GameObject* gameObject, Component type);
 

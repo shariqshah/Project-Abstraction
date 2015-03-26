@@ -18,6 +18,7 @@
 #include "texture.h"
 #include "gui.h"
 #include "scriptengine.h"
+#include "passert.h"
 
 Game::Game(const char* path)
 {
@@ -105,7 +106,6 @@ Game::Game(const char* path)
 	teapot->materialUniforms.texture = Texture::create("chessboard.png");
 	CTransform* tTran = GO::getTransform(tea);
 	Transform::setPosition(tTran, Vec3(0, 10, -5), true);
-	GO::attachScript(tea, "Debug");
 }
 
 Game::~Game()

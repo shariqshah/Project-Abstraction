@@ -8,13 +8,13 @@
 #include "model.h"
 #include "camera.h"
 #include "settings.h"
+#include "passert.h"
 
 namespace Renderer
 {
 	namespace
 	{
         char*      contentDir;
-		Vec2       sFontPos;
 		DebugLevel sDebugLevel;
 		bool       sRenderWireframe;
 		bool       sRenderDebugView;
@@ -334,38 +334,6 @@ namespace Renderer
 			Log::error(context, errorString);
 	}
 
-	void setNodeTransform(Node node, glm::mat4 transformMat)
-	{
-		h3dSetNodeTransMat(node, glm::value_ptr(transformMat));
-	}
-
-	void setNodeName(Node node, const std::string& name)
-	{
-		h3dSetNodeParamStr(node, H3DNodeParams::NameStr, name.c_str());
-	}
-	
-	void setNodeTransform(Node node,
-						  const Vec3 position,
-						  const Vec3 rotation,
-						  const Vec3 scale)
-	{	
-		h3dSetNodeTransform(node,						        
-							position.x, position.y, position.z,
-							rotation.x, rotation.y, rotation.z,
-							scale.x   , scale.y   , scale.z);	
-	}
-
-	void getNodeTransform(Node node,
-						  Vec3* position,
-						  Vec3* rotation,
-						  Vec3* scale)
-	{
-		h3dGetNodeTransform(node,						       
-							&position->x, &position->y, &position->z,
-							&rotation->x, &rotation->y, &rotation->z,
-							&scale->x   , &scale->y   , &scale->z);
-	}
-
 	void setClearColor(const Vec4 newClearColor)
 	{
 		clearColor = newClearColor;
@@ -375,7 +343,7 @@ namespace Renderer
 	void initialize(const char* path)
 	{
 		contentDir = (char*)malloc(sizeof(char) * (strlen(path) + strlen(contentDirName)) + 1);
-		assert(contentDir != NULL);
+		PA_ASSERT(contentDir != NULL);
 		
         strcpy(contentDir, path);
 		strcat(contentDir, contentDirName);
@@ -409,8 +377,7 @@ namespace Renderer
 		Material::initialize();
 		Model::initialize(modelPath);
 
-		initText();
-		
+		initText();	
 		free(texturePath);
 		free(shaderPath);
 		free(modelPath);
@@ -445,7 +412,6 @@ namespace Renderer
 			sRenderDebugView = false;
 		else
 			sRenderDebugView = true;
-		h3dSetOption(H3DOptions::DebugViewMode, sRenderDebugView ? 1.0f : 0.0f);
 	}
 
 	void toggleWireframe()
@@ -454,7 +420,6 @@ namespace Renderer
 			sRenderWireframe = false;
 		else
 			sRenderWireframe = true;
-		h3dSetOption(H3DOptions::WireframeMode, sRenderWireframe ? 1.0f : 0.0f);
 	}
 
 	void renderFrame()
@@ -476,167 +441,9 @@ namespace Renderer
 	{
 		return &renderParams;
 	}
-	
-    Node createGroupNode(const std::string& name, Node parent)
-	{
-		Node node = h3dAddGroupNode(parent, name.c_str());
-		return node;
-	}
-
-	Node createNode(Resource resource, Node parent)
-	{
-		Node node = h3dAddNodes(parent, resource);
-		return node;
-	}
-
-	void setNodeParam(Node node, int param, int value)
-	{
-		h3dSetNodeParamI(node, param, value);
-	}
-	
-    void setNodeParam(Node node, int param, int compID, float value)
-	{
-		h3dSetNodeParamF(node, param, compID,  value);
-	}
-	
-	Node getParent(Node node)
-	{
-		Node parent = h3dGetNodeParent(node);
-		return parent;
-	}
-
-	bool getNodeChildren(Node node,
-						 const std::string& name,
-						 NodeList* children,
-						 NodeType  childType)
-	{
-		int childCount = h3dFindNodes(node, name.c_str(), (int)childType);
-
-		if(childCount > 1)
-		{
-			for(int i = 1; i < childCount; i++)
-				children->push_back(h3dGetNodeFindResult(i));
-		}
-
-		return childCount > 1 ? true : false;
-	}
-
-	bool isTransformed(Node node)
-	{
-		return h3dCheckNodeTransFlag(node, false);
-	}
-
-	void resetTransformFlag(Node node)
-	{
-		h3dCheckNodeTransFlag(node, true);
-	}
-
+    
 	void addText(const std::string& text)
     {
 		sTextList.push_back(text);
     }
-
-	bool removeNode(Node node)
-	{
-		if(node == 0)
-			return false;
-		else
-			h3dRemoveNode(node);
-
-		return true;
-	}
-
-	bool setParent(Node child, Node parent)
-	{
-		if(h3dSetNodeParent(child, parent))
-			return true;
-		else
-			return false;
-	}
-
-	void setNodeFlags(Node node, NodeFlag flag, bool recursive)
-	{
-		h3dSetNodeFlags(node, (int)flag, recursive);
-	}
-
-	namespace Resources
-	{	
-		bool loadAddedResources()
-		{
-            // return h3dutLoadResourcesFromDisk(contentDir.c_str());
-			return true;
-		}
-
-		bool remove(Resource resource)
-		{
-			if(h3dRemoveResource(resource) == -1)
-				return false;
-
-			return true;
-		}
-
-		bool isLoaded(Resource resource)
-		{
-			return h3dIsResLoaded(resource);
-		}
-
-		Resource add(ResourceType type, const std::string& name, int flag)
-		{
-			Resource res = h3dAddResource((int)type, name.c_str(), flag);
-			return res;
-		}
-		
-		Resource get(ResourceType type, const std::string& name)
-		{
-			Resource res = h3dFindResource((int)type, name.c_str());
-
-			if(res == 0)
-			{
-				Log::message(name + " is not loaded yet. Loading now..");
-				res = add(type, name);
-				
-				if(!loadAddedResources())
-					Log::error("Renderer", name + " not found!");
-				else
-					Log::message(name + " has been loaded!");
-			}
-
-			return res;
-		}
-
-		bool setUniform(Resource material,
-						const std::string& name,
-						glm::vec4 value)
-		{
-			bool success = h3dSetMaterialUniform(material,
-												 name.c_str(),
-												 value.x,
-												 value.y,
-												 value.z,
-												 value.w);
-			if(!success)
-			{
-				Log::error("Renderer", "could not set value for uniform " + name);
-				return false;
-			}
-
-			return true;
-			
-		}
-
-		Resource createTexture(const std::string& name,
-							   int                width,
-							   int                height,
-							   TextureFormat      format,
-							   ResourceFlags      flags)
-		{
-			Resource texture = h3dCreateTexture(name.c_str(), width, height, (int)format, (int)flags);
-
-			if(texture == 0)
-				Log::error("Renderer", "Could not create texture, check renderer logs");
-
-			return texture;
-		}
-	}
-
 }

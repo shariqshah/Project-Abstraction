@@ -5,6 +5,7 @@
 #include "model.h"
 #include "camera.h"
 #include "light.h"
+#include "passert.h"
 
 namespace GO
 {
@@ -18,32 +19,6 @@ namespace GO
 	
 	void generateBindings()
 	{
-		Sqrat::RootTable().Bind("GameObject", Sqrat::Class<GameObject>()
-								.Var("node",   &GameObject::node)
-								.Var("name",   &GameObject::name)
-								.Var("tag",    &GameObject::tag)
-								.Var("remove", &GameObject::remove));
-
-		Sqrat::ConstTable().Enum("Component", Sqrat::Enumeration()
-								 .Const("TRANSFORM", Component::TRANSFORM)
-								 .Const("CAMERA",    Component::CAMERA)
-								 .Const("MODEL",     Component::MODEL)
-								 .Const("RIGIDBODY", Component::RIGIDBODY)
-								 .Const("LIGHT",     Component::LIGHT));
-
-		Sqrat::RootTable().Bind("GO", Sqrat::Table (ScriptEngine::getVM())
-								.Func("hasComponent", &hasComponent)
- 								.Func("addTransform", &addTransform)
-								.Func("addModel", &addModel)
-								.Func("addLight", &addLight)
-								// .Func("addRigidBody", &addRigidBody)
-								.Func("getTransform", &getTransform)
-								.Func("getCamera", &getCamera)
-								.Func("getLight", &getLight)
-								// .Func("getRigidBody", &getRigidBody)
-								.Func("getModel", &getModel)
-								.Func("removeComponent", &removeComponent));
-
 		asIScriptEngine* engine = ScriptEngine::getEngine();
 		int rc = -1;
 		engine->RegisterEnum("Component");
@@ -54,109 +29,69 @@ namespace GO
 		rc = engine->RegisterEnumValue("Component", "RIGIDBODY", (int)Component::LIGHT);
 		
 		rc = engine->RegisterObjectType("GameObject", sizeof(GameObject), asOBJ_REF | asOBJ_NOCOUNT);
-		assert(rc >= 0);
+		PA_ASSERT(rc >= 0);
 		rc = engine->RegisterObjectProperty("GameObject", "string name", asOFFSET(GameObject, name));
-		assert(rc >= 0);
+		PA_ASSERT(rc >= 0);
 		rc = engine->RegisterObjectProperty("GameObject", "string tag", asOFFSET(GameObject, tag));
-		assert(rc >= 0);
+		PA_ASSERT(rc >= 0);
 		rc = engine->RegisterObjectProperty("GameObject", "int32 node", asOFFSET(GameObject, node));
-		assert(rc >= 0);
+		PA_ASSERT(rc >= 0);
 		rc = engine->RegisterObjectMethod("GameObject",
 										  "Transform@ getTransform()",
 										  asFUNCTION(getTransform),
 										  asCALL_CDECL_OBJFIRST);
-		assert(rc >= 0);
+		PA_ASSERT(rc >= 0);
 		rc = engine->RegisterObjectMethod("GameObject",
 										  "Camera@ getCamera()",
 										  asFUNCTION(getCamera),
 										  asCALL_CDECL_OBJFIRST);
-		assert(rc >= 0);
+		PA_ASSERT(rc >= 0);
 		rc = engine->RegisterObjectMethod("GameObject",
 										  "Camera@ addCamera()",
 										  asFUNCTION(addCamera),
 										  asCALL_CDECL_OBJFIRST);
-		assert(rc >= 0);
+		PA_ASSERT(rc >= 0);
 		rc = engine->RegisterObjectMethod("GameObject",
 										  "Light@ getLight()",
 										  asFUNCTION(getLight),
 										  asCALL_CDECL_OBJFIRST);
-		assert(rc >= 0);
+		PA_ASSERT(rc >= 0);
 		rc = engine->RegisterObjectMethod("GameObject",
 										  "Light@ addLight(Vec4 = Vec4(1.0f))",
 										  asFUNCTION(addLight),
 										  asCALL_CDECL_OBJFIRST);
-		assert(rc >= 0);
+		PA_ASSERT(rc >= 0);
 		rc = engine->RegisterObjectMethod("GameObject",
 										  "Model@ getModel()",
 										  asFUNCTION(getModel),
 										  asCALL_CDECL_OBJFIRST);
-		assert(rc >= 0);
+		PA_ASSERT(rc >= 0);
 		rc = engine->RegisterObjectMethod("GameObject",
 										  "Model@ addModel(string)",
 										  asFUNCTION(addModel),
 										  asCALL_CDECL_OBJFIRST);
-		assert(rc >= 0);
+		PA_ASSERT(rc >= 0);
 		rc = engine->RegisterObjectMethod("GameObject",
 										  "void removeComponent(Component)",
 										  asFUNCTION(removeComponent),
 										  asCALL_CDECL_OBJFIRST);
-		assert(rc >= 0);
+		PA_ASSERT(rc >= 0);
 		rc = engine->RegisterObjectMethod("GameObject",
 										  "bool hasComponent(Component)",
 										  asFUNCTION(hasComponent),
 										  asCALL_CDECL_OBJFIRST);
-		assert(rc >= 0);
+		PA_ASSERT(rc >= 0);
 		
 	}
 
-	void attachScript(GameObject* gameObject, const std::string& name)
-	{
-		ScriptEngine::executeFunction("attachScript", gameObject, name);
-	}
-
-	void reloadScript(GameObject* gameObject, const std::string& name)
-	{
-		ScriptEngine::executeFunction("reloadScript", gameObject, name);
-	}
-
-	void reloadScript(const std::string& goName, const std::string& name)
-	{
-		ScriptEngine::executeFunction("reloadScript", goName, name);
-	}
-
-	void reloadAllScripts(GameObject* gameObject)
-	{
-		ScriptEngine::executeFunction("reloadAllScripts", gameObject);
-	}
-
-	void reloadAllScripts(const std::string& goName)
-	{
-		ScriptEngine::executeFunction("reloadAllScripts", goName);
-	}
-	
-	void removeScript(GameObject* gameObject, const std::string& name)
-	{
-		ScriptEngine::executeFunction("removeScript", gameObject, name);
-	}
-
-	void removeScript(const std::string& goName, const std::string& name)
-	{
-		ScriptEngine::executeFunction("removeScript", goName, name);
-	}
-
-	void reloadScriptType(const std::string& typeName)
-	{
-		ScriptEngine::executeFunction("reloadScriptType", typeName);
-	}
-
-	void processCollision(GameObject* gameObject, const CollisionData& collisionData)
-	{
-		ScriptEngine::executeFunction("processCollision", gameObject, collisionData);
-	}
+	// void processCollision(GameObject* gameObject, const CollisionData& collisionData)
+	// {
+	// 	ScriptEngine::executeFunction("processCollision", gameObject, collisionData);
+	// }
 
 	CTransform* addTransform(GameObject* gameObject)
 	{
-		assert(gameObject);
+		PA_ASSERT(gameObject);
 
 		CTransform* newTransform = NULL;
 		
@@ -178,7 +113,7 @@ namespace GO
 
 	CLight* addLight(GameObject* gameObject, Vec4 color)
 	{
-		assert(gameObject);
+		PA_ASSERT(gameObject);
 		CLight* newLight = NULL;
 		if(!hasComponent(gameObject, Component::LIGHT))
 		{
@@ -198,7 +133,7 @@ namespace GO
 
 	CCamera* addCamera(GameObject* gameObject)
 	{
-		assert(gameObject);
+		PA_ASSERT(gameObject);
 		CCamera* newCamera = NULL;
 		if(!hasComponent(gameObject, Component::CAMERA))
 		{
@@ -217,7 +152,7 @@ namespace GO
 
 	// CModel* addModel(GameObject* gameObject, CModel* model)
 	// {
-	// 	assert(gameObject);
+	// 	PA_ASSERT(gameObject);
 	// 	CModel* newModel = NULL;
 	// 	if(!hasComponent(gameObject, Component::MODEL))
 	// 	{
@@ -238,7 +173,7 @@ namespace GO
 
 	CModel* addModel(GameObject* gameObject, const char* filename)
 	{
-		assert(gameObject);
+		PA_ASSERT(gameObject);
 		CModel* newModel = NULL;
 		if(!hasComponent(gameObject, Component::MODEL))
 		{
@@ -266,7 +201,7 @@ namespace GO
 
 	CModel* getModel(GameObject* gameObject)
 	{
-		assert(gameObject);
+		PA_ASSERT(gameObject);
 		CModel* model = NULL;
 		if(hasComponent(gameObject, Component::MODEL))
 			model = Renderer::Model::getModelAtIndex(gameObject->compIndices[(Component::MODEL)]);
@@ -278,7 +213,7 @@ namespace GO
 
 	CCamera* getCamera(GameObject* gameObject)
 	{
-		assert(gameObject);
+		PA_ASSERT(gameObject);
 		CCamera* camera = NULL;
 		if(hasComponent(gameObject, Component::CAMERA))
 			camera = Renderer::Camera::getCameraAtIndex(gameObject->compIndices[(Component::CAMERA)]);
@@ -291,7 +226,7 @@ namespace GO
 
 	CTransform* getTransform(GameObject* gameObject)
 	{
-		assert(gameObject);
+		PA_ASSERT(gameObject);
 		CTransform* transform = NULL;		
 		if(hasComponent(gameObject, Component::TRANSFORM))
 			transform = Transform::getTransformAtIndex(gameObject->compIndices[(Component::TRANSFORM)]);
@@ -303,7 +238,7 @@ namespace GO
 
 	CLight* getLight(GameObject* gameObject)
 	{
-		assert(gameObject);
+		PA_ASSERT(gameObject);
 		CLight* light = NULL;		
 		if(hasComponent(gameObject, Component::LIGHT))
 			light =Renderer::Light::getLightAtIndex(gameObject->compIndices[(Component::LIGHT)]);
@@ -315,7 +250,7 @@ namespace GO
 
 	void removeComponent(GameObject* gameObject, Component type)
 	{
-	    assert(gameObject);
+	    PA_ASSERT(gameObject);
 		if(hasComponent(gameObject, type))
 		{
 			int index = gameObject->compIndices[(int)type];

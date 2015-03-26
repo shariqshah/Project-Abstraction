@@ -9,18 +9,10 @@ namespace Cpu
 {
 	namespace
 	{
-		Resource    screenTexture;
-		GameObject* cpuGO;
-		GameObject* test;
 	}
 	
 	void initialize()
 	{
-		screenTexture = Renderer::Resources::createTexture("CPU_Screen",
-														   512, 512,
-														   TextureFormat::RGBA32F,
-														   ResourceFlags::TEX_RENDERABLE);
-		cpuGO = SceneManager::create("CPU_GO");
 		// auto model = CompManager::addModel(cpuGO, "models/terminal/terminal.scene.xml");
 
 		// auto transform = CompManager::getTransform(cpuGO);
