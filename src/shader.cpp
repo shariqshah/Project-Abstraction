@@ -29,15 +29,14 @@ namespace Shader
 	{
 		size_t len = strlen(shaderText);
 		int lineCount = 1;
-		std::cout<<std::to_string(lineCount) + ". ";
+		// std::cout<<std::to_string(lineCount) + ". ";
+		printf("%d. ", lineCount);
 		for(uint i = 0; i < len; i++)
 		{
-			if(shaderText[i] != '\n')
-				std::cout<<shaderText[i];
-			else
-				std::cout<<std::endl<<std::to_string(++lineCount) + ". ";
+			if(shaderText[i] != '\n') printf("%c", shaderText[i]);
+			else                      printf("\n%d. ", ++lineCount);
 		}
-		std::cout<<"\n END_DEBUG_PRINT\n\n";
+		printf("\n END_DEBUG_PRINT\n\n");
 	}
 
 	char* runPreProcessor(char* shaderText)

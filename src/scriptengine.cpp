@@ -67,13 +67,23 @@ namespace ScriptEngine
 
 	void MessageCallback(const asSMessageInfo *msg, void *param)
 	{
-		const char *type = "ERR ";
+		const char *type = "ERROR";
 		if( msg->type == asMSGTYPE_WARNING ) 
-			type = "WARN";
+			type = "WARNING";
 		else if( msg->type == asMSGTYPE_INFORMATION ) 
 			type = "INFO";
 
-		printf("%s (%d, %d) : %s : %s\n", msg->section, msg->row, msg->col, type, msg->message);
+		std::string error = "";
+		error += msg->section;
+		error += "(";
+		error += std::to_string(msg->row);
+		error += ", ";
+		error += std::to_string(msg->col);
+		error += ") : ";
+		error += type;
+		error += " : ";
+		error += msg->message;
+		Log::message("AngelScript " +  error);
 	}
 
 	
@@ -95,7 +105,14 @@ namespace ScriptEngine
 
 			engine->RegisterInterface("IScriptable");
 			engine->RegisterInterfaceMethod("IScriptable", "void update(float)");
-			engine->RegisterInterfaceMethod("IScriptable", "void initialize(int32)");
+
+			// Bind functions for script reloading
+			engine->SetDefaultNamespace("ScriptEngine");
+			int rc = engine->RegisterGlobalFunction("bool reloadScript(const string &in)",
+													asFUNCTION(reloadScript),
+													asCALL_CDECL);
+			PA_ASSERT(rc >= 0);
+			engine->SetDefaultNamespace("");
 		}
 		return success;
 	}
@@ -399,6 +416,7 @@ namespace ScriptEngine
 							if(script.module == scriptName)
 							{
 								matchFound = true;
+								context->PushState();
 								context->Prepare(initFunc);
 								context->SetArgDWord(0, container.gameObjectNode);
 								int rc = execute();
@@ -411,9 +429,9 @@ namespace ScriptEngine
 								}
 								else if(rc == asEXECUTION_EXCEPTION)
 								{
-									Log::error("ScriptEngine::reloadScript",
-											   scriptName + " not added to " + gameObject->name);
+									success = false;
 								}
+								context->PushState();
 							}
 						}
 					}
@@ -427,6 +445,7 @@ namespace ScriptEngine
 					else
 					{
 						module->Discard();
+						success = false;
 					}
 				}
 				else
@@ -437,6 +456,11 @@ namespace ScriptEngine
 				}
 			}
 		}
+		else
+		{
+			success = false;
+		}
+		if(!success) Log::error("ScriptEngine::reloadScript", "Reloading '" + scriptName + "' failed");
 		return success;
 	}
 }

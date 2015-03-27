@@ -81,6 +81,17 @@ namespace GO
 										  asFUNCTION(hasComponent),
 										  asCALL_CDECL_OBJFIRST);
 		PA_ASSERT(rc >= 0);
+		// Functions for adding and removing script
+		rc = engine->RegisterObjectMethod("GameObject",
+										  "void addScript(const string &in)",
+										  asFUNCTION(ScriptEngine::addScript),
+										  asCALL_CDECL_OBJFIRST);
+		PA_ASSERT(rc >= 0);
+		rc = engine->RegisterObjectMethod("GameObject",
+										  "bool removeScript(const string &in)",
+										  asFUNCTION(ScriptEngine::removeScript),
+										  asCALL_CDECL_OBJFIRST);
+		PA_ASSERT(rc >= 0);
 		
 	}
 

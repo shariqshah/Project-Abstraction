@@ -13,16 +13,19 @@ namespace Log
     void message(const std::string& message)
     {
 		if(isEnabled) printf("MESSAGE : %s\n", message.c_str());
+		fflush(stdout);
     }
 
     void error(const std::string& context, const std::string& error)
     {
 		if(isEnabled) fprintf(stderr, "ERROR %s : %s\n", context.c_str(), error.c_str());
+		fflush(stdout);
     }
 
 	void warning(const std::string& warningMessage)
 	{
 		if(isEnabled) printf("WARNING : %s\n", warningMessage.c_str());
+		fflush(stdout);
 	}
 
 	void setEnabled(bool enabled)
@@ -36,7 +39,7 @@ namespace Log
 		asIScriptEngine* engine = ScriptEngine::getEngine();
 		engine->SetDefaultNamespace("Log");
 		int rc = -1;
-		rc = engine->RegisterGlobalFunction("void message(const string)",
+		rc = engine->RegisterGlobalFunction("void message(string)",
 											asFUNCTION(message),
 											asCALL_CDECL);
 		PA_ASSERT(rc >= 0);

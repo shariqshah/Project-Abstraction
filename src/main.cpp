@@ -15,6 +15,7 @@
 #include "settings.h"
 #include "input.h"
 #include "renderer.h"
+#include "log.h"
 
 // #define NDEBUG
 
@@ -77,11 +78,9 @@ int main(int argc, char** args)
             SDL_GL_SwapWindow(window);
         }
     }
-
     //Free resources
     close();
-	std::cout<<"Program exiting!"<<std::endl;
-
+	Log::message("Program exiting!");
     return 0;
 }
 

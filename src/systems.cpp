@@ -134,12 +134,7 @@ namespace System
 		// 	Physics::update(deltaTime);
 		Renderer::Camera::updateAllCameraViews();
 		Transform::resetAllTransformFlags();
-		SceneManager::update();
-		if(Input::isReleased(Input::Key::K9))
-		{
-			GameObject* gameobject = SceneManager::find("Cube");
-			ScriptEngine::removeScript(gameobject, "test");
-		} 
+		SceneManager::update(); 
 	}
 
 	void cleanup()

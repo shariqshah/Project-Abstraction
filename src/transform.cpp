@@ -209,7 +209,7 @@ namespace Transform
 										  asCALL_CDECL_OBJFIRST);
 		PA_ASSERT(rc >= 0);
 		rc = engine->RegisterObjectMethod("Transform",
-										  "void rotate(Vec3, Space = Space::WORLD)",
+										  "void rotate(Vec3, float, Space = Space::WORLD)",
 										  asFUNCTION(rotate),
 										  asCALL_CDECL_OBJFIRST);
 		PA_ASSERT(rc >= 0);
