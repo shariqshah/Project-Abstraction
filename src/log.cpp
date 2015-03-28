@@ -39,15 +39,15 @@ namespace Log
 		asIScriptEngine* engine = ScriptEngine::getEngine();
 		engine->SetDefaultNamespace("Log");
 		int rc = -1;
-		rc = engine->RegisterGlobalFunction("void message(string)",
+		rc = engine->RegisterGlobalFunction("void message(const string &in)",
 											asFUNCTION(message),
 											asCALL_CDECL);
 		PA_ASSERT(rc >= 0);
-		rc = engine->RegisterGlobalFunction("void warning(const string)",
+		rc = engine->RegisterGlobalFunction("void warning(const string &in)",
 											asFUNCTION(warning),
 											asCALL_CDECL);
 		PA_ASSERT(rc >= 0);
-		rc = engine->RegisterGlobalFunction("void error(const string, const string)",
+		rc = engine->RegisterGlobalFunction("void error(const string &in, const string &in)",
 											asFUNCTION(error),
 											asCALL_CDECL);
 		PA_ASSERT(rc >= 0);
