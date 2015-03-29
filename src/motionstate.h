@@ -2,22 +2,19 @@
 #define _motionstate_H
 
 #include "../include/bullet/LinearMath/btMotionState.h"
+#include "datatypes.h"
 
 struct GameObject;
 
-typedef GameObject* GOPtr;
-
 class MotionState : public btMotionState
 {
-	GOPtr mGameObject;
+	Node node;
 public:
-	MotionState(GOPtr gameObject);
+	MotionState(GameObject* gameObject);
 
 	virtual ~MotionState();
-
 	virtual void getWorldTransform(btTransform& worldTrans) const;
 	virtual void setWorldTransform(const btTransform& worldTrans);
-   
 };
 
 #endif

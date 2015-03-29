@@ -12,11 +12,12 @@
 struct Script
 {
 	std::string        module;
-	bool               enabled    = false;
-	asIScriptFunction* updateFunc = NULL;
-	asIScriptFunction* initFunc   = NULL;
-	asIObjectType*     objType    = NULL;
-	asIScriptObject*   scriptObj  = NULL;
+	bool               enabled       = false;
+	asIScriptFunction* updateFunc    = NULL;
+	asIScriptFunction* initFunc      = NULL;
+	asIScriptFunction* collisionFunc = NULL;
+	asIObjectType*     objType       = NULL;
+	asIScriptObject*   scriptObj     = NULL;
 };
 
 struct ScriptContainer
@@ -102,10 +103,6 @@ namespace ScriptEngine
 			engine->SetMessageCallback(asFUNCTION(MessageCallback), 0, asCALL_CDECL);
 			context = engine->CreateContext();
 			RegisterStdString(engine); // Register string type
-
-			engine->RegisterInterface("IScriptable");
-			engine->RegisterInterfaceMethod("IScriptable", "void update(float)");
-
 			// Bind functions for script reloading
 			engine->SetDefaultNamespace("ScriptEngine");
 			int rc = engine->RegisterGlobalFunction("bool reloadScript(const string &in)",
@@ -115,6 +112,16 @@ namespace ScriptEngine
 			engine->SetDefaultNamespace("");
 		}
 		return success;
+	}
+
+	void registerScriptInterface()
+	{
+		// This function is called later because at initialization of scriptengine CollisionData
+		// isn't registered yet so this function is called after all other types have been registered
+		int rc = engine->RegisterInterface("IScriptable"); PA_ASSERT(rc >= 0);
+		engine->RegisterInterfaceMethod("IScriptable", "void update(float)"); PA_ASSERT(rc >= 0);
+		engine->RegisterInterfaceMethod("IScriptable", "void onCollision(const CollisionData@)");
+		PA_ASSERT(rc >= 0);
 	}
 
 	void cleanup()
@@ -261,8 +268,10 @@ namespace ScriptEngine
 		std::string typeName = std::string(type->GetName());
 		std::string initFuncDecl = typeName + "@ " + typeName + "(int32)";
 		std::string updateFuncDecl = "void update(float)";
+		std::string onCollFuncDecl = "void onCollision(const CollisionData@)";
 		newScript.initFunc = type->GetFactoryByDecl(initFuncDecl.c_str());
 		newScript.updateFunc = type->GetMethodByDecl(updateFuncDecl.c_str());
+		newScript.collisionFunc = type->GetMethodByDecl(onCollFuncDecl.c_str());
 
 		// Create the script object
 		context->Prepare(newScript.initFunc);
@@ -297,6 +306,21 @@ namespace ScriptEngine
 					execute();
 				}
 			}
+		}
+	}
+
+	void callCollisionCallcallbacks(GameObject* gameObject, const CollisionData* collisionData)
+	{
+		PA_ASSERT(gameObject);
+		ScriptContainer* container = &scriptContainerList[gameObject->scriptIndex];
+		for(Script& script : container->scripts)
+		{
+			context->PushState();
+			context->Prepare(script.collisionFunc);
+			context->SetObject(script.scriptObj);
+			context->SetArgObject(0, (void *)collisionData);
+			execute();
+			context->PopState();
 		}
 	}
 
@@ -400,10 +424,12 @@ namespace ScriptEngine
 				std::string typeName = std::string(type->GetName());
 				std::string initFuncDecl = typeName + "@ " + typeName + "(int32)";
 				std::string updateFuncDecl = "void update(float)";
+				std::string onCollFuncDecl = "void onCollision(const CollisionData@)";
 				asIScriptFunction* initFunc   = type->GetFactoryByDecl(initFuncDecl.c_str());
 				asIScriptFunction* updateFunc = type->GetMethodByDecl(updateFuncDecl.c_str());
+				asIScriptFunction* onCollFunc = type->GetMethodByDecl(onCollFuncDecl.c_str());
 				// Create new objects of script type and replace previous ones
-				if(initFunc && updateFunc)
+				if(initFunc && updateFunc && onCollFunc)
 				{
 					// If any script was reloaded, match found will be true so that previous module is
 					// discarded and new temp module is renamed otherwise temp module will be discarded
@@ -425,6 +451,8 @@ namespace ScriptEngine
 									// Get the newly created scriptobject and increase it's reference count
 									script.scriptObj = *((asIScriptObject**)context->GetAddressOfReturnValue());
 									script.scriptObj->AddRef();
+									script.updateFunc = updateFunc;
+									script.collisionFunc = onCollFunc;
 									Log::message("Script '" + scriptName + "' reloaded for " + gameObject->name);
 								}
 								else if(rc == asEXECUTION_EXCEPTION)

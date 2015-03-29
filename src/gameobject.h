@@ -1,5 +1,5 @@
-#ifndef _gameobject_H_
-#define _gameobject_H_
+#ifndef _gameobject_H
+#define _gameobject_H
 
 #include <vector>
 #include <iostream>
@@ -13,6 +13,7 @@ struct CTransform;
 struct CModel;
 struct CCamera;
 struct CLight;
+class  CollisionShape;
 
 const static int EMPTY_INDEX = -1;
 
@@ -24,19 +25,24 @@ struct GameObject
 	bool        remove = false;
 	int         scriptIndex = -1;
 	int compIndices[6] = {-1, -1, -1, -1, -1, -1};
+	void (*collisionCallback)(GameObject*, const CollisionData*) = NULL; // Function called at collision
 };
 
 namespace GO
 {
     bool hasComponent(GameObject* gameOjbject, Component type);
 	void generateBindings();
-	void processCollision(GameObject* gameObject, const CollisionData& collisionData);
+	void processCollision(GameObject* gameObject, const CollisionData* collisionData);
 	void removeComponent(GameObject* gameObject, Component type);
 
 	CTransform* addTransform(GameObject* gameObject);
 	CCamera*    addCamera(GameObject* gameObject);
 	CModel*     addModel(GameObject* gameObject, const char* filename);
 	CLight*     addLight(GameObject* gameObject, Vec4 color = Vec4(1.f));
+	CRigidBody  addRigidbody(GameObject*     gameObject,
+							 CollisionShape* shape,
+							 float           mass = 1.f,
+							 float           restitution = 1.f);
 	
 	CTransform* getTransform(GameObject* gameObject);
 	CCamera*    getCamera(GameObject* gameObject);

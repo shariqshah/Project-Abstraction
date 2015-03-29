@@ -16,10 +16,12 @@ namespace ScriptEngine
 	void updateAllScripts(float deltaTime);
 	void addScript(GameObject* gameObject, const std::string& scriptName);
     void unRegisterGameObject(GameObject* gameObject);
+	void callCollisionCallcallbacks(GameObject* gameObject, const CollisionData* collisionData);
     void registerGameObject(GameObject* gameObject);
 	bool removeScript(GameObject* gameobject, const std::string& scriptName);
 	bool reloadScript(const std::string& scriptName);
 	asIScriptEngine* getEngine();
+	void registerScriptInterface();
 }
 
 #endif

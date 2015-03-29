@@ -19,6 +19,7 @@
 #include "gui.h"
 #include "scriptengine.h"
 #include "passert.h"
+#include "collisionshapes.h"
 
 Game::Game(const char* path)
 {
@@ -82,7 +83,8 @@ Game::Game(const char* path)
 			cubeModel->materialUniforms.diffuseColor = Vec4(1);
 		}
 		CTransform* cube2Tran = GO::getTransform(cube2);
-		Transform::setPosition(cube2Tran, Vec3(i, i + 2, -i), true);
+		Transform::setPosition(cube2Tran, Vec3(i, i + 5, -i), true);
+		GO::addRigidbody(cube2, new Box(Vec3(0.5f)));
 	}
 	
 	GameObject* playerPtr = SceneManager::create("Player");
@@ -98,6 +100,8 @@ Game::Game(const char* path)
 	CModel* planeModel = GO::addModel(plane, "plane.pamesh");
     Renderer::Model::setMaterialType(planeModel, MAT_PHONG);
 	planeModel->materialUniforms.texture = Texture::create("test2.png");
+	GO::addRigidbody(plane, new Plane(Vec3(0, 1, 0), 1.f), 0.f, 1.f);
+	ScriptEngine::addScript(plane, "test");
 
 	GameObject* tea = SceneManager::create("Teapot");
 	CModel* teapot = GO::addModel(tea, "teapot.pamesh");

@@ -4,5 +4,6 @@
 #include <cinttypes>
 
 typedef int32_t Node;
+typedef int32_t CRigidBody;
 
 #endif

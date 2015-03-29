@@ -3,6 +3,12 @@
 #include "transform.h"
 #include "scriptengine.h"
 #include "gameobject.h"
+#include "utilities.h"
+#include "collisionshapes.h"
+#include "scenemanager.h"
+#include "passert.h"
+
+#include "../include/bullet/btBulletDynamicsCommon.h"
 
 namespace Physics
 {
@@ -69,18 +75,22 @@ namespace Physics
 					const btVector3& ptB       = pt.getPositionWorldOnB();
 					const btVector3& normalOnB = pt.m_normalWorldOnB;
 
-					GameObject* gameObjectA = (GameObject*)obA->getUserPointer();
-					GameObject* gameObjectB = (GameObject*)obB->getUserPointer();
-					
+					intptr_t tempA = (intptr_t)obA->getUserPointer();
+					intptr_t tempB = (intptr_t)obB->getUserPointer();
+					Node nodeA = (Node)tempA;
+					Node nodeB = (Node)tempB;
+				    
 					CollisionData collisionData;
-					collisionData.collidingObj = gameObjectB;
-					collisionData.normal       = Utils::toGlm(normalOnB);
-					collisionData.worldPosA    = Utils::toGlm(ptA);
-					collisionData.worldPosB    = Utils::toGlm(ptB);
- 
-					// GO::processCollision(gameObjectA, collisionData);
-					collisionData.collidingObj = gameObjectA;
-					// GO::processCollision(gameObjectB, collisionData);
+					collisionData.collidingObjNode = nodeB;
+					collisionData.normal           = Utils::toGlm(normalOnB);
+					collisionData.worldPosA        = Utils::toGlm(ptA);
+					collisionData.worldPosB        = Utils::toGlm(ptB);
+
+					GameObject* gameObjectA = SceneManager::find(nodeA);
+					GO::processCollision(gameObjectA, &collisionData);
+					GameObject* gameObjectB = SceneManager::find(nodeB);
+					collisionData.collidingObjNode = nodeA;
+					GO::processCollision(gameObjectB, &collisionData);
 				}
 			}
 		}
@@ -261,7 +271,27 @@ namespace Physics
 
 	void generateBindings()
 	{
-		
+		asIScriptEngine* engine = ScriptEngine::getEngine();
+		int rc = engine->RegisterObjectType("CollisionData",
+											sizeof(CollisionData),
+											asOBJ_REF | asOBJ_NOCOUNT);
+		PA_ASSERT(rc >= 0);
+		rc = engine->RegisterObjectProperty("CollisionData",
+											"int32 collidingObjNode",
+											asOFFSET(CollisionData, collidingObjNode));
+		PA_ASSERT(rc >= 0);
+		rc = engine->RegisterObjectProperty("CollisionData",
+											"Vec3 worldPosA",
+											asOFFSET(CollisionData, worldPosA));
+		PA_ASSERT(rc >= 0);
+		rc = engine->RegisterObjectProperty("CollisionData",
+											"Vec3 worldPosB",
+											asOFFSET(CollisionData, worldPosB));
+		PA_ASSERT(rc >= 0);
+		rc = engine->RegisterObjectProperty("CollisionData",
+											"Vec3 normal",
+											asOFFSET(CollisionData, normal));
+		PA_ASSERT(rc >= 0);
 	}
 
 	namespace RigidBody
@@ -283,9 +313,9 @@ namespace Physics
 															  inertia);
 			btRigidBody* body = new btRigidBody(consInfo);
 			body->setRestitution(restitution);
-			body->setUserPointer(gameObject);
+			intptr_t temp = (intptr_t)gameObject->node;
+			body->setUserPointer((void*)temp);
 			sWorld->addRigidBody(body);
-			
 			CRigidBody rbHandle = -1;
 			
 			if(!sFreeList.empty())
@@ -302,8 +332,7 @@ namespace Physics
 			{
 				sRigidBodies.push_back(body);
 				rbHandle = (int32_t) (sRigidBodies.size() - 1);
-			}
-			
+			}		
 			return rbHandle;
 		}
 	

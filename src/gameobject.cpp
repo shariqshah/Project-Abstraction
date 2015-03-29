@@ -6,6 +6,7 @@
 #include "camera.h"
 #include "light.h"
 #include "passert.h"
+#include "motionstate.h"
 
 namespace GO
 {
@@ -95,17 +96,16 @@ namespace GO
 		
 	}
 
-	// void processCollision(GameObject* gameObject, const CollisionData& collisionData)
-	// {
-	// 	ScriptEngine::executeFunction("processCollision", gameObject, collisionData);
-	// }
+	void processCollision(GameObject* gameObject, const CollisionData* collisionData)
+	{
+		if(gameObject->collisionCallback) gameObject->collisionCallback(gameObject, collisionData);
+		ScriptEngine::callCollisionCallcallbacks(gameObject, collisionData);
+	}
 
 	CTransform* addTransform(GameObject* gameObject)
 	{
 		PA_ASSERT(gameObject);
-
 		CTransform* newTransform = NULL;
-		
 		if(!hasComponent(gameObject, Component::TRANSFORM))
 		{
 			int index = Transform::create(gameObject->node);
@@ -118,7 +118,6 @@ namespace GO
 		{
 			Log::warning("Transform not be added to " + gameObject->name +" because it already has one");
 		}
-
 		return newTransform;
 	}
 
@@ -161,27 +160,6 @@ namespace GO
 		return newCamera;
 	}
 
-	// CModel* addModel(GameObject* gameObject, CModel* model)
-	// {
-	// 	PA_ASSERT(gameObject);
-	// 	CModel* newModel = NULL;
-	// 	if(!hasComponent(gameObject, Component::MODEL))
-	// 	{
-	// 		int index = Renderer::Model::create(model);
-	// 		gameObject->compIndices[(int)Component::MODEL] = index;
-	// 		Log::message("Model added to " + gameObject->name);
-	// 		newModel = Renderer::Model::getModelAtIndex(index);
-	// 		newModel->node = gameObject->node;
-	// 	}
-	// 	else
-	// 	{
-	// 		Log::warning("Removing existing Model from " + gameObject->name);			
-	// 		removeComponent(gameObject, Component::MODEL);
-	// 		newModel = addModel(gameObject, model);
-	// 	}
-	// 	return newModel;		
-	// }
-
 	CModel* addModel(GameObject* gameObject, const char* filename)
 	{
 		PA_ASSERT(gameObject);
@@ -208,6 +186,35 @@ namespace GO
 			newModel = addModel(gameObject, filename);
 		}
 		return newModel;
+	}
+
+	CRigidBody addRigidbody(GameObject* gameObject, CollisionShape* shape, float mass, float restitution)
+	{
+		PA_ASSERT(gameObject);
+		CRigidBody rigidbody = -1;
+		if(shape)
+		{
+			if(!GO::hasComponent(gameObject, Component::RIGIDBODY))
+			{
+				MotionState* motionState = new MotionState(gameObject);
+				rigidbody = Physics::RigidBody::create(gameObject,
+													   shape,
+													   motionState,
+													   mass,
+													   restitution);
+				gameObject->compIndices[Component::RIGIDBODY] = rigidbody;
+				Log::message("Rigidbody added to " + gameObject->name);
+			}
+			else
+			{
+				Log::message("Rigidbody already attached to " + gameObject->name);
+			}
+		}
+		else
+		{
+			Log::error("GO::addRigidbody", "No collisionShape provided!");
+		}
+		return rigidbody;
 	}
 
 	CModel* getModel(GameObject* gameObject)
@@ -264,7 +271,7 @@ namespace GO
 	    PA_ASSERT(gameObject);
 		if(hasComponent(gameObject, type))
 		{
-			int index = gameObject->compIndices[(int)type];
+			int index = gameObject->compIndices[type];
 			gameObject->compIndices[(int)type] = EMPTY_INDEX;
 			
 			switch(type)
@@ -282,9 +289,7 @@ namespace GO
 				Renderer::Light::remove(index);
 				break;
 			case Component::RIGIDBODY:
-				// Physics::RigidBody::remove(sRigidBodyList[index]);
-				// sRigidBodyList[index] = -1;
-				// sRigidBodyEmptyList.push_back(index);
+				Physics::RigidBody::remove(index);
 				break;
 			case Component::NUM_COMPONENTS:
 				Log::error("GO::removeComponent", "Cannot remove invalid component type");

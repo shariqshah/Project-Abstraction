@@ -15,12 +15,13 @@
 #include "cpu.h"
 #include "gui.h"
 #include "editor.h"
+#include "collisionshapes.h"
 
 namespace System
 {
 	namespace
 	{
-		bool    sPhysicsEnabled      = true;
+		bool    physicsEnabled      = true;
 		Sphere* tmpShape             = NULL;
 		CModel* suzanneModel         = NULL;
 		CollisionShape* statCollMesh = NULL;
@@ -29,8 +30,8 @@ namespace System
 	
 	void initialize()
 	{
-		// sPhysicsEnabled = true;
-		// Physics::initialize(Vec3(0.f, -9.8f, 0.f));
+		physicsEnabled = true;
+		Physics::initialize(Vec3(0.f, -9.8f, 0.f));
 		// CompManager::initialize();
 		// Cpu::initialize();
 		// statCollMesh = new CollisionMesh(suzanneModel, true);
@@ -52,6 +53,7 @@ namespace System
 		Physics::RigidBody::generateBindings();
 		SceneManager::generateBindings();
 		Gui::generateBindings();
+		ScriptEngine::registerScriptInterface();
 
 		Editor::initialize();
 	}
@@ -127,11 +129,12 @@ namespace System
 		// 	update(deltaTime, it->second);
 		// }
 
-		// if(Input::isReleased(Input::Key::C))
-		// 	sPhysicsEnabled ? sPhysicsEnabled = false : sPhysicsEnabled = true;
+		if(Input::isReleased(Input::Key::C))
+			physicsEnabled ? physicsEnabled = false : physicsEnabled = true;
 
-		// if(sPhysicsEnabled)
-		// 	Physics::update(deltaTime);
+		if(physicsEnabled)
+			Physics::update(deltaTime);
+		
 		Renderer::Camera::updateAllCameraViews();
 		Transform::resetAllTransformFlags();
 		SceneManager::update(); 

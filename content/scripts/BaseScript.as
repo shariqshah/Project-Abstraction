@@ -52,4 +52,10 @@ class BaseScript : IScriptable
 	{
 		// For child scripts to fill in
 	}
+
+	protected void onCollision(const CollisionData@ collisionData)
+	{
+		// For child script to fill in
+		Log::message("BASE");
+	}
 }

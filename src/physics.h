@@ -1,33 +1,26 @@
 #ifndef PHYSICS_H
 #define PHYSICS_H
 
-#define GLM_FORCE_RADIANS
-#include "../include/glm/gtc/type_ptr.hpp"
-#include "../include/bullet/BulletCollision/CollisionShapes/btShapeHull.h"
-// #include "../include/bullet/btGImpactConvexDecompositionShape.h"
-#include "../include/bullet/btBulletDynamicsCommon.h"
-
 #include "physicsdebugdrawer.h"
-#include "utilities.h"
-#include "model.h"
-#include "log.h"
+#include "mathdefs.h"
+#include "datatypes.h"
 
 class  btDiscreteDynamicsWorld;
 class  btMotionState;
 class  CollisionShape;
 struct CCamera;
 struct CTransform;
+struct CModel;
 struct GameObject;
 
 typedef btDiscreteDynamicsWorld PhysicsWorld;
-typedef int32_t                 CRigidBody;
 
 struct CollisionData
 {
-	GameObject* collidingObj;
-	Vec3        worldPosA;
-	Vec3        worldPosB;
-	Vec3        normal;
+	Node collidingObjNode;
+	Vec3 worldPosA;
+	Vec3 worldPosB;
+	Vec3 normal;
 };
 
 namespace Physics
@@ -65,7 +58,6 @@ namespace Physics
 	
 	const Vec3 getGravity();
 
-
 	namespace RigidBody
 	{
 		CRigidBody create(GameObject*     gameObject,
@@ -84,211 +76,5 @@ namespace Physics
 		void generateBindings();
 	}
 }
-
-
-class CollisionShape
-{
-protected:
-	btCollisionShape* mShape;
-	
-public:
-	btCollisionShape* getCollisionShape()
-	{
-		return mShape;
-	}
-
-	CollisionShape() : mShape(NULL) {}
-	
-	virtual void initialize() {}
-	
-	virtual ~CollisionShape()
-	{
-		if(mShape)
-			delete mShape;
-	}
-};
-
-class Sphere : public CollisionShape
-{
-	float mRadius;
-public:
-	Sphere(float radius)
-	{
-		mRadius = radius;
-		initialize();
-	}
-
-	void initialize()
-	{
-		mShape = new btSphereShape(mRadius);
-		Physics::addCollisionShape(this);
-	}
-};
-
-class Box : public CollisionShape
-{
-	Vec3 mHalfExtent;
-public:
-	
-	Box(Vec3 halfExtent)
-	{
-		mHalfExtent = halfExtent;
-		initialize();
-	}
-
-	void initialize()
-	{
-		mShape = new btBoxShape(Utils::toBullet(mHalfExtent));
-		Physics::addCollisionShape(this);
-	}
-	
-};
-
-class Capsule : public CollisionShape
-{
-	float mRadius;
-	float mHeight;
-public:
-
-	Capsule(float radius, float height)
-	{
-		mRadius = radius;
-		mHeight = height;
-		initialize();
-	}
-
-	void initialize()
-	{
-		mShape = new btCapsuleShape(btScalar(mRadius), btScalar(mHeight));
-		Physics::addCollisionShape(this);
-	}
-};
-
-class Plane : public CollisionShape
-{
-	float mMargin;
-	Vec3  mNormal;
-
-public:
-
-	Plane(Vec3 normal, float margin)
-	{
-		mNormal = normal;
-		mMargin = margin;
-		initialize();
-	}
-
-	void initialize()
-	{
-		mShape = new btStaticPlaneShape(Utils::toBullet(mNormal), btScalar(mMargin));
-		Physics::addCollisionShape(this);
-	}
-};
-
-class Cone : public CollisionShape
-{
-	float mRadius;
-	float mHeight;
-public:
-
-	Cone(float radius, float height)
-	{
-		mRadius = radius;
-		mHeight = height;
-		initialize();
-	}
-
-	void initialize()
-	{
-		mShape = new btConeShape(btScalar(mRadius), btScalar(mHeight));
-		Physics::addCollisionShape(this);
-	}
-};
-
-class Cylinder : public CollisionShape
-{
-	Vec3 mHalfExtent;
-	Vec3 mAxis;
-public:
-
-	Cylinder(Vec3 halfExtent, Vec3 axis)
-	{
-		mHalfExtent = halfExtent;
-		mAxis       = axis;
-		initialize();
-	}
-
-	void initialize()
-	{
-		if(mAxis == Vec3(0, 1, 0))
-			mShape = new btCylinderShape(Utils::toBullet(mHalfExtent));
-		else if(mAxis == Vec3(1, 0, 0))
-			mShape = new btCylinderShapeX(Utils::toBullet(mHalfExtent));
-		else if(mAxis == Vec3(0, 0, 1))
-			mShape = new btCylinderShapeZ(Utils::toBullet(mHalfExtent));
-
-		Physics::addCollisionShape(this);
-	}
-};
-
-class CollisionMesh : public CollisionShape
-{
-	CModel* mModel;
-	bool    mTriMesh;
-public:
-
-	CollisionMesh(CModel* model, bool isTriMesh)
-	{
-		mModel   = model;
-		mTriMesh = isTriMesh;
-		initialize();
-	}
-
-	void initialize()
-	{
-		if(mModel)
-		{
-			// float* vertices = Renderer::Model::getVertices(mModel);
-			// int vertexCount = Renderer::Model::getVertexCount(mModel);
-			float* vertices = NULL;
-			int vertexCount = 0;
-
-			// TODO: Fix by adding check if mesh has indices and modifying the loop below accordingly
-			// PA_ASSERT(vertices);
-			// PA_ASSERT(vertexCount > 0);
-			
-			btTriangleMesh *triMesh = new btTriangleMesh();
-
-			for(int i = 0; i < vertexCount; i += 9)
-			{
-				btVector3 v1(vertices[i],     vertices[i + 1], vertices[i + 2]);
-				btVector3 v2(vertices[i + 3], vertices[i + 4], vertices[i + 5]);
-				btVector3 v3(vertices[i + 6], vertices[i + 7], vertices[i + 8]);
-
-				triMesh->addTriangle(v1, v2, v3);
-			}
-
-			if(mTriMesh)
-			{
-				mShape = new btBvhTriangleMeshShape(triMesh, false);
-			}
-			else
-			{
-				btConvexShape *tempConShape = new btConvexTriangleMeshShape(triMesh);
-				btShapeHull *hull = new btShapeHull(tempConShape);
-				btScalar margin = tempConShape->getMargin();
-				hull->buildHull(margin);
-				tempConShape->setUserPointer(hull);
-				mShape = new btConvexHullShape(&(hull->getVertexPointer()->getX()),
-											   hull->numVertices());
-				delete tempConShape;
-			}
-
-			Physics::addCollisionShape(this);
-		}
-		else
-			Log::warning("Model provided for collision mesh is Invalid");
-	}
-};
 
 #endif
