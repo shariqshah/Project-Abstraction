@@ -28,6 +28,8 @@ struct ScriptContainer
 
 namespace ScriptEngine
 {
+	bool reloadQueuedScript(const std::string& scriptName);
+	
 	namespace
 	{
 		asIScriptEngine*  engine = NULL;
@@ -36,7 +38,8 @@ namespace ScriptEngine
 		std::vector<int> scriptContainerEmptyIndices;
 		std::vector<int> activeScriptContainers;
 		std::string scriptDir = "../content/scripts/"; // TODO: Find a better way to do this
-
+		std::vector<std::string> scriptReloadQueue;
+		
 		int execute()
 		{
 			int rc = context->Execute();
@@ -105,7 +108,7 @@ namespace ScriptEngine
 			RegisterStdString(engine); // Register string type
 			// Bind functions for script reloading
 			engine->SetDefaultNamespace("ScriptEngine");
-			int rc = engine->RegisterGlobalFunction("bool reloadScript(const string &in)",
+			int rc = engine->RegisterGlobalFunction("void reloadScript(const string &in)",
 													asFUNCTION(reloadScript),
 													asCALL_CDECL);
 			PA_ASSERT(rc >= 0);
@@ -307,6 +310,10 @@ namespace ScriptEngine
 				}
 			}
 		}
+		// Check if scripts queued to be reloaded, reload them if any found
+		for(const std::string& queuedScript : scriptReloadQueue)
+			reloadQueuedScript(queuedScript);
+		scriptReloadQueue.clear();
 	}
 
 	void callCollisionCallcallbacks(GameObject* gameObject, const CollisionData* collisionData)
@@ -384,7 +391,22 @@ namespace ScriptEngine
 		}
 	}
 
-	bool reloadScript(const std::string& scriptName)
+	void reloadScript(const std::string& scriptName)
+	{
+		bool alreadyQueued = false;
+		// Check if script is already queued
+		for(const std::string& queuedScript : scriptReloadQueue)
+		{
+			if(scriptName == queuedScript)
+			{
+				alreadyQueued = true;
+				break;
+			}
+		}
+		if(!alreadyQueued) scriptReloadQueue.push_back(scriptName);
+	}
+	
+	bool reloadQueuedScript(const std::string& scriptName)
 	{
 		// - Create temp module, compile the script, test if it has Interface implemented
 		// - If it passes all checks, discard the temp module and the existing module and create new one

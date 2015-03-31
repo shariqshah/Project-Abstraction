@@ -19,7 +19,7 @@ namespace ScriptEngine
 	void callCollisionCallcallbacks(GameObject* gameObject, const CollisionData* collisionData);
     void registerGameObject(GameObject* gameObject);
 	bool removeScript(GameObject* gameobject, const std::string& scriptName);
-	bool reloadScript(const std::string& scriptName);
+	void reloadScript(const std::string& scriptName);
 	asIScriptEngine* getEngine();
 	void registerScriptInterface();
 }
