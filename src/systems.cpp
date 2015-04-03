@@ -48,9 +48,9 @@ namespace System
 		Renderer::Model::generateBindings();
 		Renderer::Light::generateBindings();
 		Renderer::Camera::generateBindings();
-		GO::generateBindings();
 		Physics::generateBindings();
 		Physics::RigidBody::generateBindings();
+		GO::generateBindings();
 		SceneManager::generateBindings();
 		Gui::generateBindings();
 		ScriptEngine::registerScriptInterface();
@@ -104,12 +104,12 @@ namespace System
 		// 	Renderer::toggleWireframe();
 		// if(Input::isReleased(Input::Key::F5))
 		// 	Renderer::toggleDebugView();
-		// if(Input::isReleased(Input::Key::F6))
-		// 	Physics::enableDebugDraw(true);
-		// if(Input::isReleased(Input::Key::F7))
-		// 	Physics::enableDebugDraw(false);
-		// if(Input::isReleased(Input::Key::F8))
-		// 	Physics::nextDebugMode();
+		if(Input::isReleased(Input::Key::F6))
+			Physics::enableDebugDraw(true);
+		if(Input::isReleased(Input::Key::F7))
+			Physics::enableDebugDraw(false);
+		if(Input::isReleased(Input::Key::F8))
+			Physics::nextDebugMode();
 		if(Input::isReleased(Input::Key::F9))
 			Log::setEnabled(true);
 		if(Input::isReleased(Input::Key::F10))
@@ -136,6 +136,7 @@ namespace System
 			Physics::update(deltaTime);
 		
 		Renderer::Camera::updateAllCameraViews();
+		Physics::syncWithRenderer();
 		Transform::resetAllTransformFlags();
 		SceneManager::update(); 
 	}

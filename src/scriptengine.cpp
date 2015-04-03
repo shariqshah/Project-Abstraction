@@ -296,9 +296,10 @@ namespace ScriptEngine
 
 	void updateAllScripts(float deltaTime)
 	{
-		for(int activeContainer : activeScriptContainers)
+		//for(int activeContainer : activeScriptContainers)
+		for(int i = 0; i < (int)activeScriptContainers.size(); i++)
 		{
-			ScriptContainer* container = &scriptContainerList[activeContainer];
+			ScriptContainer* container = &scriptContainerList[i];
 			for(Script& script : container->scripts)
 			{
 				if(script.enabled)
@@ -311,8 +312,7 @@ namespace ScriptEngine
 			}
 		}
 		// Check if scripts queued to be reloaded, reload them if any found
-		for(const std::string& queuedScript : scriptReloadQueue)
-			reloadQueuedScript(queuedScript);
+		for(const std::string& queuedScript : scriptReloadQueue) reloadQueuedScript(queuedScript);
 		scriptReloadQueue.clear();
 	}
 

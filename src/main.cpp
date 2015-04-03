@@ -16,8 +16,7 @@
 #include "input.h"
 #include "renderer.h"
 #include "log.h"
-
-// #define NDEBUG
+#include "editor.h"
 
 //========================================================> Globals
 SDL_Window*   window = NULL;
@@ -71,8 +70,8 @@ int main(int argc, char** args)
 			Input::updateReleasedKeys();
 			Input::resetMouseRel();
 
-			Renderer::addText("Update Time : " + std::to_string(updateTime));
-			Renderer::addText("Draw Time : " + std::to_string(drawTime));
+			Editor::setUpdateTime(updateTime);
+			Editor::setDrawTime(drawTime);
 			
             //Swap Buffers and update screen
             SDL_GL_SwapWindow(window);

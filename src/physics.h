@@ -47,7 +47,7 @@ namespace Physics
 	
 	void initialize(Vec3 gravity);
 	void update(float deltaTime);
-    void draw(CTransform* viewerTransform, CCamera* viewerCamera);
+    void draw();
 	void cleanup();
 	void setGravity(Vec3 gravity);
     void enableDebugDraw(bool enable);
@@ -55,6 +55,7 @@ namespace Physics
 	void setDebugMode(DBG_Mode debugMode);
 	void addCollisionShape(CollisionShape* shape);
 	void generateBindings();
+	void syncWithRenderer();
 	
 	const Vec3 getGravity();
 

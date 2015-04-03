@@ -190,7 +190,8 @@ namespace Transform
 		int rc = engine->RegisterEnumValue("Space", "LOCAL", (int)TS_LOCAL);
 		rc = engine->RegisterEnumValue("Space", "WORLD", (int)TS_WORLD);
 		
-		engine->RegisterObjectType("Transform", sizeof(CTransform), asOBJ_REF | asOBJ_NOCOUNT); PA_ASSERT(rc >= 0);
+		engine->RegisterObjectType("Transform", sizeof(CTransform), asOBJ_REF | asOBJ_NOCOUNT);
+		PA_ASSERT(rc >= 0);
 		rc = engine->RegisterObjectProperty("Transform", "Vec3 position", asOFFSET(CTransform, position));
 		PA_ASSERT(rc >= 0);
 		rc = engine->RegisterObjectProperty("Transform", "Vec3 forward", asOFFSET(CTransform, forward));

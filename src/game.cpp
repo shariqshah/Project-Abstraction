@@ -65,7 +65,9 @@ Game::Game(const char* path)
 		Transform::setPosition(cubeTran, Vec3(5, 0, -5), true);
 		ScriptEngine::addScript(cube, "test");
 	}
-	
+
+	Box* t1 = new Box(Vec3(0.5f));
+	Box* t2 = new Box(Vec3(0.5f));
 	for(int i = 0; i < 10; i++)
 	{
 		GameObject* cube2 = SceneManager::create("Cube" + std::to_string(i));
@@ -84,7 +86,8 @@ Game::Game(const char* path)
 		}
 		CTransform* cube2Tran = GO::getTransform(cube2);
 		Transform::setPosition(cube2Tran, Vec3(i, i + 5, -i), true);
-		GO::addRigidbody(cube2, new Box(Vec3(0.5f)));
+		//GO::addRigidbody(cube2, new Box(Vec3(0.5f)));
+		GO::addRigidbody(cube2, t1);
 	}
 	
 	GameObject* playerPtr = SceneManager::create("Player");
@@ -101,7 +104,7 @@ Game::Game(const char* path)
     Renderer::Model::setMaterialType(planeModel, MAT_PHONG);
 	planeModel->materialUniforms.texture = Texture::create("test2.png");
 	GO::addRigidbody(plane, new Plane(Vec3(0, 1, 0), 1.f), 0.f, 1.f);
-	ScriptEngine::addScript(plane, "test");
+	// ScriptEngine::addScript(plane, "test");
 
 	GameObject* tea = SceneManager::create("Teapot");
 	CModel* teapot = GO::addModel(tea, "teapot.pamesh");
@@ -129,7 +132,7 @@ void Game::draw()
 {
 	Renderer::renderFrame();
 	Gui::render();
-	// Physics::draw(activeTrans, activeCamera);
+	Physics::draw();
 }
 
 void Game::resize(int width, int height)

@@ -96,36 +96,36 @@ namespace Physics
 		}
 	}
 
-	void draw(CTransform* viewerTransform, CCamera* viewerCamera)
+	void draw()
 	{
-		// if(sEnableDebugDraw && viewerTransform != NULL && viewerCamera != NULL)
-		// {
-		// 	Mat4 camTranMat = viewerTransform->transMat;
-		// 	Mat4 camProjMat;
+		CCamera* camera = Renderer::Camera::getActiveCamera();
+		if(sEnableDebugDraw && camera != NULL)
+		{
+			GameObject* gameObject = SceneManager::find(camera->node);
+			CTransform* transform  = GO::getTransform(gameObject);
+			Mat4 camTranMat = transform->transMat;
+			Mat4 camProjMat = camera->projMat;
+
+			glPushAttrib(GL_ALL_ATTRIB_BITS);
+			glMatrixMode(GL_MODELVIEW);
+			glPushMatrix();
+			glLoadMatrixf(glm::value_ptr(glm::inverse(camTranMat)));
 		
-		// 	h3dGetCameraProjMat(viewerCamera->node,
-		// 						glm::value_ptr(camProjMat));
+			glMatrixMode(GL_PROJECTION);
+			glPushMatrix();
+			glLoadMatrixf(glm::value_ptr(camProjMat));
 
-		// 	glPushAttrib(GL_ALL_ATTRIB_BITS);
-		// 	glMatrixMode(GL_MODELVIEW);
-		// 	glPushMatrix();
-		// 	glLoadMatrixf(glm::value_ptr(glm::inverse(camTranMat)));
+			glMatrixMode(GL_MODELVIEW);
 		
-		// 	glMatrixMode(GL_PROJECTION);
-		// 	glPushMatrix();
-		// 	glLoadMatrixf(glm::value_ptr(camProjMat));
+			sWorld->debugDrawWorld();
 
-		// 	glMatrixMode(GL_MODELVIEW);
-		
-		// 	sWorld->debugDrawWorld();
+			glMatrixMode(GL_PROJECTION);
+			glPopMatrix();
 
-		// 	glMatrixMode(GL_PROJECTION);
-		// 	glPopMatrix();
-
-		// 	glMatrixMode(GL_MODELVIEW);
-		// 	glPopMatrix();
-		// 	glPopAttrib();
-		// }
+			glMatrixMode(GL_MODELVIEW);
+			glPopMatrix();
+			glPopAttrib();
+		}
 	}
 
 	void enableDebugDraw(bool enable)
@@ -236,34 +236,52 @@ namespace Physics
 		sShapes.push_back(shape);
 	}
 
+	void syncWithRenderer()
+	{
+		for(int i = 0; i < (int)sRigidBodies.size(); i++)
+		{
+			btRigidBody* body = sRigidBodies[i];
+			intptr_t tempNode = (intptr_t)body->getUserPointer();
+			Node node = (Node)tempNode;
+			GameObject* gameObject = SceneManager::find(node);
+			CTransform* transform = GO::getTransform(gameObject);
+			if(transform->isModified)
+			{
+				Mat4 transformMat = transform->transMat;
+				RigidBody::setTransform(i, transformMat);
+				RigidBody::setActivation(i, true);
+			}
+		}
+	}
+
 	namespace CollisionShapes
 	{
-		Sphere* createSphere(float radius)
+		CollisionShape* createSphere(float radius)
 		{
 			return new Sphere(radius);
 		}
 
-		Box* createBox(Vec3 halfExtent)
+		CollisionShape* createBox(Vec3 halfExtent)
 		{
 			return new Box(halfExtent);
 		}
 
-		Capsule* createCapsule(float radius, float height)
+		CollisionShape* createCapsule(float radius, float height)
 		{
 			return new Capsule(radius, height);
 		}
 
-		Plane* createPlane(Vec3 normal, float margin)
+		CollisionShape* createPlane(Vec3 normal, float margin)
 		{
 			return new Plane(normal, margin);
 		}
 
-		Cylinder* createCylinder(Vec3 halfExtent, Vec3 axis)
+		CollisionShape* createCylinder(Vec3 halfExtent, Vec3 axis)
 		{
 			return new Cylinder(halfExtent, axis);
 		}
 
-		CollisionMesh* createCollisionMesh(CModel* model, bool isTriMesh)
+		CollisionShape* createCollisionMesh(CModel* model, bool isTriMesh)
 		{
 			return new CollisionMesh(model, isTriMesh);
 		}
@@ -292,6 +310,68 @@ namespace Physics
 											"Vec3 normal",
 											asOFFSET(CollisionData, normal));
 		PA_ASSERT(rc >= 0);
+
+		// CollisionShapes
+		rc = engine->RegisterObjectType("CollisionShape",
+										sizeof(CollisionShape),
+										asOBJ_REF | asOBJ_NOCOUNT);
+		PA_ASSERT(rc >= 0);
+		rc = engine->RegisterObjectType("Sphere",
+										sizeof(Sphere),
+										asOBJ_REF | asOBJ_NOCOUNT);
+		PA_ASSERT(rc >= 0);
+		rc = engine->RegisterObjectType("Box",
+										sizeof(Box),
+										asOBJ_REF | asOBJ_NOCOUNT);
+		PA_ASSERT(rc >= 0);
+		rc = engine->RegisterObjectType("Capsule",
+										sizeof(Capsule),
+										asOBJ_REF | asOBJ_NOCOUNT);
+		PA_ASSERT(rc >= 0);
+		rc = engine->RegisterObjectType("Plane",
+										sizeof(Plane),
+										asOBJ_REF | asOBJ_NOCOUNT);
+		PA_ASSERT(rc >= 0);
+		rc = engine->RegisterObjectType("Cone",
+										sizeof(Cone),
+										asOBJ_REF | asOBJ_NOCOUNT);
+		PA_ASSERT(rc >= 0);
+		rc = engine->RegisterObjectType("Cylinder",
+										sizeof(Cylinder),
+										asOBJ_REF | asOBJ_NOCOUNT);
+		PA_ASSERT(rc >= 0);
+		rc = engine->RegisterObjectType("CollisionMesh",
+										sizeof(CollisionMesh),
+										asOBJ_REF | asOBJ_NOCOUNT);
+		PA_ASSERT(rc >= 0);
+
+		// Functions for collision shape creation from scripts
+		engine->SetDefaultNamespace("CollisionShapes");
+		rc = engine->RegisterGlobalFunction("CollisionShape@ createSphere(float = 1.f)",
+											asFUNCTION(CollisionShapes::createSphere),
+											asCALL_CDECL);
+		PA_ASSERT(rc >= 0);
+		rc = engine->RegisterGlobalFunction("CollisionShape@ createBox(Vec3)",
+											asFUNCTION(CollisionShapes::createSphere),
+											asCALL_CDECL);
+		PA_ASSERT(rc >= 0);
+		rc = engine->RegisterGlobalFunction("CollisionShape@ createCapsule(float, float)",
+											asFUNCTION(CollisionShapes::createSphere),
+											asCALL_CDECL);
+		PA_ASSERT(rc >= 0);
+		rc = engine->RegisterGlobalFunction("CollisionShape@ createPlane(Vec3, Vec3)",
+											asFUNCTION(CollisionShapes::createSphere),
+											asCALL_CDECL);
+		PA_ASSERT(rc >= 0);
+		rc = engine->RegisterGlobalFunction("CollisionShape@ createCylinder(Vec3, Vec3)",
+											asFUNCTION(CollisionShapes::createSphere),
+											asCALL_CDECL);
+		PA_ASSERT(rc >= 0);
+		rc = engine->RegisterGlobalFunction("CollisionShape@ createCollisionMesh(Model@ &in, bool = true)",
+											asFUNCTION(CollisionShapes::createSphere),
+											asCALL_CDECL);
+		PA_ASSERT(rc >= 0);
+		engine->SetDefaultNamespace("");
 	}
 
 	namespace RigidBody
@@ -332,7 +412,9 @@ namespace Physics
 			{
 				sRigidBodies.push_back(body);
 				rbHandle = (int32_t) (sRigidBodies.size() - 1);
-			}		
+			}
+			CTransform* transform = GO::getTransform(gameObject);
+			setTransform(rbHandle, transform->transMat);
 			return rbHandle;
 		}
 	

@@ -68,8 +68,18 @@ namespace GO
 										  asCALL_CDECL_OBJFIRST);
 		PA_ASSERT(rc >= 0);
 		rc = engine->RegisterObjectMethod("GameObject",
-										  "Model@ addModel(string)",
+										  "Model@ addModel(const string)",
 										  asFUNCTION(addModel),
+										  asCALL_CDECL_OBJFIRST);
+		PA_ASSERT(rc >= 0);
+		rc = engine->RegisterObjectMethod("GameObject",
+										  "int32 getRigidbody()",
+										  asFUNCTION(getRigidBody),
+										  asCALL_CDECL_OBJFIRST);
+		PA_ASSERT(rc >= 0);
+		rc = engine->RegisterObjectMethod("GameObject",
+										  "int32 addRigidbody(CollisionShape@, float = 1.0f, float = 1.0f)",
+										  asFUNCTION(addRigidbody),
 										  asCALL_CDECL_OBJFIRST);
 		PA_ASSERT(rc >= 0);
 		rc = engine->RegisterObjectMethod("GameObject",
@@ -160,13 +170,13 @@ namespace GO
 		return newCamera;
 	}
 
-	CModel* addModel(GameObject* gameObject, const char* filename)
+	CModel* addModel(GameObject* gameObject, const std::string& filename)
 	{
 		PA_ASSERT(gameObject);
 		CModel* newModel = NULL;
 		if(!hasComponent(gameObject, Component::MODEL))
 		{
-			int index = Renderer::Model::create(filename);
+			int index = Renderer::Model::create(filename.c_str());
 			if(index != -1)
 			{
 				gameObject->compIndices[Component::MODEL] = index;
@@ -191,6 +201,7 @@ namespace GO
 	CRigidBody addRigidbody(GameObject* gameObject, CollisionShape* shape, float mass, float restitution)
 	{
 		PA_ASSERT(gameObject);
+		PA_ASSERT(shape);
 		CRigidBody rigidbody = -1;
 		if(shape)
 		{
@@ -215,6 +226,12 @@ namespace GO
 			Log::error("GO::addRigidbody", "No collisionShape provided!");
 		}
 		return rigidbody;
+	}
+
+	CRigidBody getRigidBody(GameObject* gameObject)
+	{
+		PA_ASSERT(gameObject);
+		return gameObject->compIndices[Component::RIGIDBODY];
 	}
 
 	CModel* getModel(GameObject* gameObject)

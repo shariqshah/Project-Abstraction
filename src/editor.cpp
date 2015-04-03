@@ -35,10 +35,23 @@ namespace Editor
 		char inputModelName[BUF_SIZE]  = "";
 		char inputModelTex[BUF_SIZE]   = "";
 		Node selectedGONode = -1;
+
+		float updateTime = 0.f;
+		float drawTime   = 0.f;
 	}
 	
 	void initialize()
 	{		
+	}
+
+	void setUpdateTime(const float time)
+	{
+		updateTime = time;
+	}
+
+	void setDrawTime(const float time)
+	{
+		drawTime = time;
 	}
 
 	void updateComponentViewers()
@@ -489,8 +502,9 @@ namespace Editor
 	void displayStatsWindow()
 	{
 		ImGui::Begin("Stats", &showStatsWindow, Vec2(10, 20), OPACITY, (WF_NoTitleBar | WF_NoCollapse));
-		ImGuiIO& io = ImGui::GetIO();
-		ImGui::Text("Fps : %d", io.Framerate);
+		ImGui::Text("Fps    : %.1f", ImGui::GetIO().Framerate);
+		ImGui::Text("Update : %.2f", updateTime);
+		ImGui::Text("Draw   : %.2f", drawTime);
 		ImGui::End();
 	}
 	

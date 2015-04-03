@@ -155,6 +155,7 @@ namespace Renderer
 
 		void updateAllCamerasAspectRatio(float aspectRatio)
 		{
+			if(aspectRatio <= 0.f) aspectRatio = 4.f / 3.f;
 			for(CCamera& camera : cameraList)
 				setAspectRatio(&camera, aspectRatio);
 		}

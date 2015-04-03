@@ -6,6 +6,8 @@ namespace Editor
 	void initialize();
 	void update(float deltaTime, bool* quit);
 	void cleanup();
+	void setUpdateTime(const float time);
+	void setDrawTime(const float time);
 }
 
 #endif

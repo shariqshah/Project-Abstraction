@@ -37,7 +37,7 @@ namespace GO
 
 	CTransform* addTransform(GameObject* gameObject);
 	CCamera*    addCamera(GameObject* gameObject);
-	CModel*     addModel(GameObject* gameObject, const char* filename);
+	CModel*     addModel(GameObject* gameObject, const std::string& filename);
 	CLight*     addLight(GameObject* gameObject, Vec4 color = Vec4(1.f));
 	CRigidBody  addRigidbody(GameObject*     gameObject,
 							 CollisionShape* shape,
@@ -48,6 +48,7 @@ namespace GO
 	CCamera*    getCamera(GameObject* gameObject);
 	CModel*     getModel(GameObject* gameObject);
 	CLight*     getLight(GameObject* gameObject);
+	CRigidBody  getRigidBody(GameObject* gameObject);
 }
 
 #endif
