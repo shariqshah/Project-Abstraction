@@ -71,10 +71,10 @@ public:
 
 class CollisionMesh : public CollisionShape
 {
-	CModel* mModel;
-	bool    mTriMesh;
+	const CModel* mModel;
+	bool           mTriMesh;
 public:
-	CollisionMesh(CModel* model, bool isTriMesh);
+	CollisionMesh(const CModel* model, bool isTriMesh);
 	void initialize();
 };
 

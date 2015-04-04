@@ -131,8 +131,8 @@ void Game::update(float deltaTime, bool* quit)
 void Game::draw()
 {
 	Renderer::renderFrame();
-	Gui::render();
 	Physics::draw();
+	Gui::render();
 }
 
 void Game::resize(int width, int height)

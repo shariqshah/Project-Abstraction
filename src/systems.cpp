@@ -146,9 +146,7 @@ namespace System
 		SceneManager::cleanup();
 		Transform::cleanup();
 		Editor::cleanup();
-		//CompManager::cleanup();
-		// Physics::cleanup();
-		// Renderer::Model::cleanup();
-		// ScriptEngine::cleanup();
+		Physics::cleanup();
+		ScriptEngine::cleanup();
 	}
 }

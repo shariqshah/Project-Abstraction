@@ -105,7 +105,7 @@ void Cylinder::initialize()
 	Physics::addCollisionShape(this);
 }
 
-CollisionMesh::CollisionMesh(CModel* model, bool isTriMesh)
+CollisionMesh::CollisionMesh(const CModel* model, bool isTriMesh)
 {
 	mModel   = model;
 	mTriMesh = isTriMesh;
@@ -114,18 +114,17 @@ CollisionMesh::CollisionMesh(CModel* model, bool isTriMesh)
 
 void CollisionMesh::initialize()
 {
-	if(mModel && mModel->vertices.size() > 0)
+	if(mModel && mModel->vertices.size() > 3)
 	{
-		std::vector<Vec3>* vertices = &mModel->vertices;		
 		btTriangleMesh *triMesh = new btTriangleMesh();
 		// If model doesn't have indices, only vertices
 		if(mModel->indices.size() == 0)
 		{
-			for(int i = 0; i < (int)vertices->size(); i += 3)
+			for(int i = 0; i < (int)mModel->vertices.size(); i += 3)
 			{
-				Vec3 vert1 = vertices->at(i);
-				Vec3 vert2 = vertices->at(i + 1);
-				Vec3 vert3 = vertices->at(i + 2);
+				Vec3 vert1 = mModel->vertices[i];
+				Vec3 vert2 = mModel->vertices[i + 1];
+				Vec3 vert3 = mModel->vertices[i + 2];
 				btVector3 v1(Utils::toBullet(vert1));
 				btVector3 v2(Utils::toBullet(vert2));
 				btVector3 v3(Utils::toBullet(vert3));
@@ -134,13 +133,12 @@ void CollisionMesh::initialize()
 		}
 		else
 		{
-			std::vector<unsigned int>* indices = &mModel->indices;
-			for(int i = 0; i < (int)indices->size(); i += 3)
+			for(int i = 0; i < (int)mModel->indices.size(); i += 3)
 			{
-				unsigned int index = indices->at(i);
-				Vec3 vert1 = vertices->at(index);
-				Vec3 vert2 = vertices->at(index + 1);
-				Vec3 vert3 = vertices->at(index + 2);
+				unsigned int index = mModel->indices[i];
+				Vec3 vert1 = mModel->vertices[index];
+				Vec3 vert2 = mModel->vertices[index + 1];
+				Vec3 vert3 = mModel->vertices[index + 2];
 				btVector3 v1(Utils::toBullet(vert1));
 				btVector3 v2(Utils::toBullet(vert2));
 				btVector3 v3(Utils::toBullet(vert3));

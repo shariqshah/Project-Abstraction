@@ -352,23 +352,23 @@ namespace Physics
 											asCALL_CDECL);
 		PA_ASSERT(rc >= 0);
 		rc = engine->RegisterGlobalFunction("CollisionShape@ createBox(Vec3)",
-											asFUNCTION(CollisionShapes::createSphere),
+											asFUNCTION(CollisionShapes::createBox),
 											asCALL_CDECL);
 		PA_ASSERT(rc >= 0);
 		rc = engine->RegisterGlobalFunction("CollisionShape@ createCapsule(float, float)",
-											asFUNCTION(CollisionShapes::createSphere),
+											asFUNCTION(CollisionShapes::createCapsule),
 											asCALL_CDECL);
 		PA_ASSERT(rc >= 0);
 		rc = engine->RegisterGlobalFunction("CollisionShape@ createPlane(Vec3, Vec3)",
-											asFUNCTION(CollisionShapes::createSphere),
+											asFUNCTION(CollisionShapes::createPlane),
 											asCALL_CDECL);
 		PA_ASSERT(rc >= 0);
 		rc = engine->RegisterGlobalFunction("CollisionShape@ createCylinder(Vec3, Vec3)",
-											asFUNCTION(CollisionShapes::createSphere),
+											asFUNCTION(CollisionShapes::createCylinder),
 											asCALL_CDECL);
 		PA_ASSERT(rc >= 0);
-		rc = engine->RegisterGlobalFunction("CollisionShape@ createCollisionMesh(Model@ &in, bool = true)",
-											asFUNCTION(CollisionShapes::createSphere),
+		rc = engine->RegisterGlobalFunction("CollisionShape@ createCollisionMesh(const Model@, bool = true)",
+											asFUNCTION(CollisionShapes::createCollisionMesh),
 											asCALL_CDECL);
 		PA_ASSERT(rc >= 0);
 		engine->SetDefaultNamespace("");

@@ -42,7 +42,7 @@ namespace GO
 	CRigidBody  addRigidbody(GameObject*     gameObject,
 							 CollisionShape* shape,
 							 float           mass = 1.f,
-							 float           restitution = 1.f);
+							 float           restitution = 0.3f);
 	
 	CTransform* getTransform(GameObject* gameObject);
 	CCamera*    getCamera(GameObject* gameObject);
