@@ -21,22 +21,14 @@ namespace System
 {
 	namespace
 	{
-		bool    physicsEnabled      = true;
-		Sphere* tmpShape             = NULL;
-		CModel* suzanneModel         = NULL;
-		CollisionShape* statCollMesh = NULL;
-		CollisionShape* hullCollMesh = NULL;
+		bool physicsEnabled      = true;
 	}
 	
 	void initialize()
 	{
 		physicsEnabled = true;
 		Physics::initialize(Vec3(0.f, -9.8f, 0.f));
-		// CompManager::initialize();
 		// Cpu::initialize();
-		// statCollMesh = new CollisionMesh(suzanneModel, true);
-		// hullCollMesh = new CollisionMesh(suzanneModel, false);
-		// tmpShape = new Sphere(1.f);
 		ScriptEngine::initialize();
 
 		Log::generateBindings();
@@ -56,40 +48,6 @@ namespace System
 		ScriptEngine::registerScriptInterface();
 
 		Editor::initialize();
-	}
-	
-	Vec3 generateRandom()
-	{
-		float r = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
-		float g = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
-		float b = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
-		return Vec3 (r, g, b);
-	}
-
-	void syncPhysicsTransform(GameObject* gameObject)
-	{
-		// check if the gameobject's transform has been modified by
-		// someone other than bullet. if so, then update rigidbody's
-		// transform and force it to activate.
-		// if(GO::hasComponent(gameObject, Component::RIGIDBODY))
-		// {
-		// 	// auto transform  = CompManager::getTransform(gameObject);
-		// 	auto rBody      = CompManager::getRigidBody(gameObject);
-
-		// 	if(Renderer::isTransformed(gameObject->node))
-		// 	{
-		// 		Mat4 transformMat = transform->transMat;
-		// 		Physics::RigidBody::setTransform(rBody, transformMat);
-		// 		Physics::RigidBody::setActivation(rBody, true);
-		// 	}
-		// }
-	}
-	
-	void update(float deltaTime, GameObject* gameObject)
-	{
-		syncPhysicsTransform(gameObject); // Should be the last thing so as to
-		                                  // do to let other systems modify the
-		                                  // transform then sync Physics.
 	}
 
 	void update(float deltaTime, bool* quit)
@@ -121,19 +79,8 @@ namespace System
 		ScriptEngine::updateAllScripts(deltaTime);
 		Editor::update(deltaTime, quit);
 		
-		// GOMap* sceneObjects = SceneManager::getSceneObjects();
-		// for(GOMap::iterator it = sceneObjects->begin();
-		// 	it != sceneObjects->end();
-		// 	it++)
-		// {
-		// 	update(deltaTime, it->second);
-		// }
-
-		if(Input::isReleased(Input::Key::C))
-			physicsEnabled ? physicsEnabled = false : physicsEnabled = true;
-
-		if(physicsEnabled)
-			Physics::update(deltaTime);
+		if(Input::isReleased(Input::Key::C)) physicsEnabled ? physicsEnabled = false : physicsEnabled = true;
+		if(physicsEnabled) Physics::update(deltaTime);
 		
 		Renderer::Camera::updateAllCameraViews();
 		Physics::syncWithRenderer();

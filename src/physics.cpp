@@ -372,6 +372,11 @@ namespace Physics
 											asCALL_CDECL);
 		PA_ASSERT(rc >= 0);
 		engine->SetDefaultNamespace("");
+
+		engine->SetDefaultNamespace("Physics");
+		rc = engine->RegisterGlobalFunction("void setGravity(const Vec3)", asFUNCTION(setGravity), asCALL_CDECL);
+		PA_ASSERT(rc >= 0);
+		engine->SetDefaultNamespace("");
 	}
 
 	namespace RigidBody
@@ -383,10 +388,7 @@ namespace Physics
 						  float           restitution)
 		{
 			btVector3 inertia(0, 0, 0);
-			if(mass != 0)
-				shape->getCollisionShape()->calculateLocalInertia(mass, inertia);
-
-			//MotionState* motionState = new MotionState(transform);
+			if(mass != 0) shape->getCollisionShape()->calculateLocalInertia(mass, inertia);
 			btRigidBody::btRigidBodyConstructionInfo consInfo(mass,
 															  motionState,
 															  shape->getCollisionShape(),
@@ -505,9 +507,7 @@ namespace Physics
 		{
 			auto shape = sRigidBodies[body]->getCollisionShape();
 			btVector3 inertia(0, 0, 0);
-			if(mass != 0)
-				shape->calculateLocalInertia(mass, inertia);
-
+			if(mass != 0) shape->calculateLocalInertia(mass, inertia);
 			sRigidBodies[body]->setMassProps(mass, inertia);
 		}
 
@@ -519,6 +519,21 @@ namespace Physics
 
 		void generateBindings()
 		{
+			asIScriptEngine* engine = ScriptEngine::getEngine();
+			engine->SetDefaultNamespace("Rigidbody");
+			int rc = engine->RegisterGlobalFunction("void setKinematic(int, bool)",
+													asFUNCTION(setKinematic),
+													asCALL_CDECL);
+			PA_ASSERT(rc >= 0);
+			rc = engine->RegisterGlobalFunction("void setMass(int, const float)",
+													asFUNCTION(setMass),
+													asCALL_CDECL);
+			PA_ASSERT(rc >= 0);
+			rc = engine->RegisterGlobalFunction("void applyForce(int, const Vec3, const Vec3 = Vec3(0.f))",
+													asFUNCTION(applyForce),
+													asCALL_CDECL);
+			PA_ASSERT(rc >= 0);
+			engine->SetDefaultNamespace("");
 		}
 	}
 }
