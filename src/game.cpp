@@ -91,7 +91,8 @@ Game::Game(const char* path)
 	Transform::translate(transform, Vec3(0, 3, 5));
 	CCamera* camera = GO::addCamera(playerPtr);
 	Renderer::Camera::setActiveCamera(camera);
-	System::CameraSystem::setActiveObject(playerPtr);
+	//System::CameraSystem::setActiveObject(playerPtr);
+	ScriptEngine::addScript(playerPtr, "freecamera");
 
 	GameObject* plane = SceneManager::create("Ground");
 	CModel* planeModel = GO::addModel(plane, "plane.pamesh");
