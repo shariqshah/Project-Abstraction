@@ -450,10 +450,10 @@ namespace Editor
 				Component componentToRemove = Component::EMPTY;
 				switch(selected)
 				{
-				case 1:	componentToRemove = Component::CAMERA; break;
-				case 2: componentToRemove = Component::MODEL;  break;
-				case 3:	componentToRemove = Component::LIGHT;  break;
-				case 4:	Log::warning("Not implemented!");      break;
+				case 1:	componentToRemove = Component::CAMERA;    break;
+				case 2: componentToRemove = Component::MODEL;     break;
+				case 3:	componentToRemove = Component::LIGHT;     break;
+				case 4:	componentToRemove = Component::RIGIDBODY; break;
 				default: break;
 				}
 				GO::removeComponent(selectedGO, componentToRemove);

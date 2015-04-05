@@ -73,24 +73,14 @@ namespace Renderer
 		{
 			camera->aspectRatio = aspectRatio;
 			updateProjection(camera);
-		}
-
-		void updateAllCameraViews()
-		{
-			for(CCamera& camera : cameraList)
-			{
-				GameObject* gameObject = SceneManager::find(camera.node);
-				CTransform* transform = GO::getTransform(gameObject);
-				if(transform->isModified) updateView(&camera, transform);
-			}
-		}
-		
+		}		
 
 		void generateBindings()
 		{
 			asIScriptEngine* engine = ScriptEngine::getEngine();
 			int rc = -1;
-			rc = engine->RegisterObjectType("Camera", sizeof(CCamera), asOBJ_REF | asOBJ_NOCOUNT); PA_ASSERT(rc >= 0);
+			rc = engine->RegisterObjectType("Camera", sizeof(CCamera), asOBJ_REF | asOBJ_NOCOUNT);
+			PA_ASSERT(rc >= 0);
 			rc = engine->RegisterObjectProperty("Camera", "int32 node", asOFFSET(CCamera, node));
 			PA_ASSERT(rc >= 0);
 			rc = engine->RegisterObjectProperty("Camera", "float nearZ", asOFFSET(CCamera, nearZ));
@@ -122,7 +112,7 @@ namespace Renderer
 											  asCALL_CDECL_OBJFIRST);
 			PA_ASSERT(rc >= 0);
 			rc = engine->RegisterObjectMethod("Camera",
-											  "void updateView(Transform &in)",
+											  "void updateView()",
 											  asFUNCTION(updateView),
 											  asCALL_CDECL_OBJFIRST);
 			PA_ASSERT(rc >= 0);
@@ -170,10 +160,11 @@ namespace Renderer
 			updateViewProjection(camera);
 		}
 
-		void updateView(CCamera* camera, CTransform* transform)
+		void updateView(CCamera* camera)
 		{
 			PA_ASSERT(camera);
-			PA_ASSERT(transform);
+			GameObject* gameObject = SceneManager::find(camera->node);
+			CTransform* transform  = GO::getTransform(gameObject);
 			camera->viewMat = glm::lookAt(transform->position,
 										  transform->lookAt,
 										  transform->up);
@@ -185,8 +176,7 @@ namespace Renderer
 			PA_ASSERT(gameObject);
 			CCamera newCamera;
 			newCamera.node = gameObject->node;
-			CTransform* transform = GO::getTransform(gameObject);
-			updateView(&newCamera, transform);
+			updateView(&newCamera);
 			updateProjection(&newCamera);			
 			int index = -1;
 			if(emptyIndices.empty())

@@ -317,4 +317,23 @@ namespace GO
 			}
 		}
 	}
+
+	void syncComponents(GameObject* gameObject)
+	{
+		PA_ASSERT(gameObject);
+		
+		// Update the camera component's view matrix
+		if(hasComponent(gameObject, Component::CAMERA))
+		{
+			CCamera* camera = getCamera(gameObject);
+			Renderer::Camera::updateView(camera);
+		}
+		// Update the rigidbody's transform
+		// if(hasComponent(gameObject, Component::RIGIDBODY))
+		// {
+		// 	CRigidBody  rigidbody  = getRigidBody(gameObject);
+		// 	CTransform* transform  = getTransform(gameObject);
+		// 	Physics::RigidBody::setTransform(rigidbody, transform->transMat);
+		// }
+	}
 }

@@ -33,13 +33,12 @@ namespace Renderer
 		void     setFarZ(CCamera* camera, float farZ);
 		void     generateBindings();
 		void     updateProjection(CCamera* camera);
-		void     updateView(CCamera* camera, CTransform* transform);
+		void     updateView(CCamera* camera);
 		bool     remove(int cameraIndex);
 		void     cleanup();
 		void     updateAllCamerasAspectRatio(float aspectRatio);		
 		CCamera* getCameraAtIndex(int cameraIndex);
 		int      create(GameObject* gameObject);
-		void     updateAllCameraViews();
 		CCamera* getActiveCamera();
 		void     setActiveCamera(CCamera* camera); // Pass camera as NULL to reset active camera to none
 	}

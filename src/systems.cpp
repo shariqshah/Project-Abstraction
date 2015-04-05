@@ -82,16 +82,15 @@ namespace System
 		if(Input::isReleased(Input::Key::C)) physicsEnabled ? physicsEnabled = false : physicsEnabled = true;
 		if(physicsEnabled) Physics::update(deltaTime);
 		
-		Renderer::Camera::updateAllCameraViews();
-		Physics::syncWithRenderer();
-		Transform::resetAllTransformFlags();
+		//Renderer::Camera::updateAllCameraViews();
+		//Physics::syncWithRenderer();
+		//Transform::resetAllTransformFlags();
 		SceneManager::update(); 
 	}
 
 	void cleanup()
 	{
 		SceneManager::cleanup();
-		Transform::cleanup();
 		Editor::cleanup();
 		Physics::cleanup();
 		ScriptEngine::cleanup();

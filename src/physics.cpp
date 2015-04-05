@@ -14,54 +14,51 @@ namespace Physics
 {
 	namespace
 	{
-		PhysicsWorld* sWorld;
-		btVector3     sGravity;
+		PhysicsWorld* world;
+		btVector3     gravity;
+		const float   fixedStep = 1.f / 60.f;
+		
+		btBroadphaseInterface*               broadphase;
+		btDefaultCollisionConfiguration*     collisionConfiguration;
+		btCollisionDispatcher*               dispatcher;
+		btSequentialImpulseConstraintSolver* solver;
 
-		btBroadphaseInterface*               sBroadphase;
-		btDefaultCollisionConfiguration*     sCollisionConfiguration;
-		btCollisionDispatcher*               sDispatcher;
-		btSequentialImpulseConstraintSolver* sSolver;
+		std::vector<CRigidBody>          freeList;
+		std::vector<btRigidBody*>        rigidBodies;
+		std::vector<CollisionShape*>     collisionShapes;
 
-		std::vector<CRigidBody>          sFreeList;
-		std::vector<btRigidBody*>        sRigidBodies;
-		std::vector<CollisionShape*>     sShapes;
-
-		DebugDrawer* sDebugDrawer;
-		bool         sEnableDebugDraw;
-		DBG_Mode     sCurrentDebugMode;
+		DebugDrawer* debugDrawer;
+		bool         debugDraw;
+		DBG_Mode     currentDebugMode;
 	}
 
-	void initialize(glm::vec3 gravity)
+	void initialize(Vec3 worldGravity)
 	{
-		sGravity = Utils::toBullet(gravity);
-
-	    sBroadphase             = new btDbvtBroadphase();
-		sCollisionConfiguration = new btDefaultCollisionConfiguration();
-		sDispatcher             = new btCollisionDispatcher(sCollisionConfiguration);
-		sSolver                 = new btSequentialImpulseConstraintSolver;
-
-		sWorld                  = new btDiscreteDynamicsWorld(sDispatcher,
-															  sBroadphase,
-															  sSolver,
-															  sCollisionConfiguration);
-		sWorld->setGravity(sGravity);
-
-		sCurrentDebugMode = DBG_Mode::AABB;
-		sDebugDrawer = new Physics::DebugDrawer();
-		sDebugDrawer->setDebugMode((int)sCurrentDebugMode);
-		sWorld->setDebugDrawer(sDebugDrawer);
-		sEnableDebugDraw = false;
+		gravity = Utils::toBullet(worldGravity);
+	    broadphase             = new btDbvtBroadphase();
+		collisionConfiguration = new btDefaultCollisionConfiguration();
+		dispatcher             = new btCollisionDispatcher(collisionConfiguration);
+		solver                 = new btSequentialImpulseConstraintSolver;
+		world                  = new btDiscreteDynamicsWorld(dispatcher,
+															  broadphase,
+															  solver,
+															  collisionConfiguration);
+		world->setGravity(gravity);
+		currentDebugMode = DBG_Mode::AABB;
+		debugDrawer = new Physics::DebugDrawer();
+		debugDrawer->setDebugMode((int)currentDebugMode);
+		world->setDebugDrawer(debugDrawer);
+		debugDraw = false;
 	}
 
 	void update(float deltaTime)
 	{
-		sWorld->stepSimulation(deltaTime);
-
+		world->stepSimulation(deltaTime, 1, fixedStep);
 		// Process collisions
-		int numManifolds = sWorld->getDispatcher()->getNumManifolds();
+		int numManifolds = world->getDispatcher()->getNumManifolds();
 		for (int i=0;i<numManifolds;i++)
 		{
-			btPersistentManifold* contactManifold =  sWorld->getDispatcher()->getManifoldByIndexInternal(i);
+			btPersistentManifold* contactManifold = world->getDispatcher()->getManifoldByIndexInternal(i);
 			const btCollisionObject* obA = contactManifold->getBody0();
 			const btCollisionObject* obB = contactManifold->getBody1();
 
@@ -99,7 +96,7 @@ namespace Physics
 	void draw()
 	{
 		CCamera* camera = Renderer::Camera::getActiveCamera();
-		if(sEnableDebugDraw && camera != NULL)
+		if(debugDraw && camera != NULL)
 		{
 			GameObject* gameObject = SceneManager::find(camera->node);
 			CTransform* transform  = GO::getTransform(gameObject);
@@ -117,7 +114,7 @@ namespace Physics
 
 			glMatrixMode(GL_MODELVIEW);
 		
-			sWorld->debugDrawWorld();
+			world->debugDrawWorld();
 
 			glMatrixMode(GL_PROJECTION);
 			glPopMatrix();
@@ -130,20 +127,20 @@ namespace Physics
 
 	void enableDebugDraw(bool enable)
 	{
-		sEnableDebugDraw = enable;
+		debugDraw = enable;
 	}
 
 	void setDebugMode(DBG_Mode debugMode)
 	{
-		sCurrentDebugMode = debugMode;
-		sWorld->getDebugDrawer()->setDebugMode((int)sCurrentDebugMode);
+		currentDebugMode = debugMode;
+		world->getDebugDrawer()->setDebugMode((int)currentDebugMode);
 	}
 
 	void nextDebugMode()
 	{
 		DBG_Mode tempMode;
 		
-		switch(sCurrentDebugMode)
+		switch(currentDebugMode)
 		{
 		case DBG_Mode::NONE:
 			tempMode = DBG_Mode::AABB;
@@ -172,88 +169,52 @@ namespace Physics
 		default:
 			Log::error("Physics::NextDebugmode", "Unimplemented or Invalid Mode");
 		};
-
 		setDebugMode(tempMode);
 	}
 
 	void removeCollisionObject(btRigidBody *body)
     {
-		//btRigidBody *body = btRigidBody::upcast(obj);
-		sWorld->removeRigidBody(body);
-
-		if(body && body->getMotionState())
-			delete body->getMotionState();
-
-		
-
+		world->removeRigidBody(body);
+		if(body && body->getMotionState()) delete body->getMotionState();
 		body == NULL ? Log::message("RB is NULL") : delete body;
-		//sWorld->removeCollisionObject(obj);
-		// if(obj)
-		// 	delete obj;
     }
 
 	void cleanup()
 	{
 		//Remove collision objects
-		for(int i = sWorld->getNumCollisionObjects() - 1; i >= 0; i--)
+		for(int i = world->getNumCollisionObjects() - 1; i >= 0; i--)
 		{
-			btCollisionObject *obj = sWorld->getCollisionObjectArray()[i];
+			btCollisionObject *obj = world->getCollisionObjectArray()[i];
 			removeCollisionObject(btRigidBody::upcast(obj));
 		}
-
-		for(CollisionShape* shape : sShapes)
-		{
-			if(shape)
-			{
-				//shape->cleanup();
-				delete shape;
-			}
-		}
+		for(CollisionShape* shape : collisionShapes) if(shape) delete shape;
 		
-		delete sWorld;
-		delete sSolver;
-		delete sDispatcher;
-		delete sCollisionConfiguration;
-		delete sBroadphase;
-		delete sDebugDrawer;
-		
-		sRigidBodies.clear();
+		delete world;
+		delete solver;
+		delete dispatcher;
+		delete collisionConfiguration;
+		delete broadphase;
+		delete debugDrawer;
+		rigidBodies.clear();
 	}
 
-	void setGravity(glm::vec3 gravity)
+	void setGravity(Vec3 newGravity)
 	{
-		sGravity = Utils::toBullet(gravity);
-		sWorld->setGravity(sGravity);
+		gravity = Utils::toBullet(newGravity);
+		world->setGravity(gravity);
 	}
 
-	const glm::vec3 getGravity()
+	const Vec3 getGravity()
 	{
-		return Utils::toGlm(sGravity);
+		return Utils::toGlm(gravity);
 	}
 
 	void addCollisionShape(CollisionShape* shape)
 	{
-		sShapes.push_back(shape);
+		collisionShapes.push_back(shape);
 	}
 
-	void syncWithRenderer()
-	{
-		for(int i = 0; i < (int)sRigidBodies.size(); i++)
-		{
-			btRigidBody* body = sRigidBodies[i];
-			intptr_t tempNode = (intptr_t)body->getUserPointer();
-			Node node = (Node)tempNode;
-			GameObject* gameObject = SceneManager::find(node);
-			CTransform* transform = GO::getTransform(gameObject);
-			if(transform->isModified)
-			{
-				Mat4 transformMat = transform->transMat;
-				RigidBody::setTransform(i, transformMat);
-				RigidBody::setActivation(i, true);
-			}
-		}
-	}
-
+	// For scripts only
 	namespace CollisionShapes
 	{
 		CollisionShape* createSphere(float radius)
@@ -397,53 +358,52 @@ namespace Physics
 			body->setRestitution(restitution);
 			intptr_t temp = (intptr_t)gameObject->node;
 			body->setUserPointer((void*)temp);
-			sWorld->addRigidBody(body);
+			world->addRigidBody(body);
 			CRigidBody rbHandle = -1;
 			
-			if(!sFreeList.empty())
+			if(!freeList.empty())
 			{
-				rbHandle = sFreeList.back();
-				sFreeList.pop_back();
+				rbHandle = freeList.back();
+				freeList.pop_back();
 
-				if(sRigidBodies[rbHandle] != NULL)
+				if(rigidBodies[rbHandle] != NULL)
 					Log::warning("Overwriting Rigidbody!");
 			
-				sRigidBodies[rbHandle] = body;
+				rigidBodies[rbHandle] = body;
 			}
 			else
 			{
-				sRigidBodies.push_back(body);
-				rbHandle = (int32_t) (sRigidBodies.size() - 1);
+				rigidBodies.push_back(body);
+				rbHandle = (int32_t) (rigidBodies.size() - 1);
 			}
 			CTransform* transform = GO::getTransform(gameObject);
 			setTransform(rbHandle, transform->transMat);
 			return rbHandle;
 		}
 	
-		void setTransform(CRigidBody body, glm::mat4 transformMat)
+		void setTransform(CRigidBody body, Mat4 transformMat)
 		{
 			btTransform transform;
 			transform.setFromOpenGLMatrix(glm::value_ptr(transformMat));
-			sRigidBodies[body]->setWorldTransform(transform);
+			rigidBodies[body]->setWorldTransform(transform);
 		}
 
 		void setActivation(CRigidBody body, bool activation)
 		{
-			sRigidBodies[body]->activate(activation);
+			rigidBodies[body]->activate(activation);
 		}
 
-		void setTransform(CRigidBody body, glm::vec3 position, glm::quat rotation)
+		void setTransform(CRigidBody body, Vec3 position, Quat rotation)
 		{
 			btTransform transform;
 			transform.setOrigin(Utils::toBullet(position));
 			transform.setRotation(Utils::toBullet(rotation));
-			sRigidBodies[body]->setWorldTransform(transform);
+			rigidBodies[body]->setWorldTransform(transform);
 		}
 
 		void getTransform(CRigidBody body, glm::vec3* position, glm::quat* rotation)
 		{
-			btTransform transform = sRigidBodies[body]->getWorldTransform();
-
+			btTransform transform = rigidBodies[body]->getWorldTransform();
 			if(position)
 				*position = Utils::toGlm(transform.getOrigin());
 			if(rotation)
@@ -452,68 +412,70 @@ namespace Physics
 
 		void remove(CRigidBody body)
 		{
-			if(sRigidBodies[body])
+			if(rigidBodies[body])
 			{
-				removeCollisionObject(sRigidBodies[body]);
-				sRigidBodies[body] = NULL;
-				sFreeList.push_back(body);
+				removeCollisionObject(rigidBodies[body]);
+				rigidBodies[body] = NULL;
+				freeList.push_back(body);
 			}
 			else
+			{
 				Log::warning("RigidBody " + std::to_string(body) + "does not exist so not removed");
+			}
 		}
 
 		void setKinematic(CRigidBody body, bool kinematic)
 		{
-			btRigidBody* temp = sRigidBodies[body];
-			sWorld->removeRigidBody(temp);
+			btRigidBody* temp = rigidBodies[body];
+			world->removeRigidBody(temp);
 
 			if(kinematic)
 			{
-				temp->setFlags(sRigidBodies[body]->getFlags() |
+				temp->setFlags(rigidBodies[body]->getFlags() |
 							   btCollisionObject::CF_KINEMATIC_OBJECT |
 							   btCollisionObject::CF_NO_CONTACT_RESPONSE);
 				temp->setActivationState(DISABLE_DEACTIVATION);
 			}
 			else
 			{
-				//sRigidBodies[body]->setFlags(~btCollisionObject::CF_KINEMATIC_OBJECT);
-				temp->setFlags(sRigidBodies[body]->getFlags() |
+				//rigidBodies[body]->setFlags(~btCollisionObject::CF_KINEMATIC_OBJECT);
+				temp->setFlags(rigidBodies[body]->getFlags() |
 							   btCollisionObject::CF_STATIC_OBJECT);
 				temp->setActivationState(WANTS_DEACTIVATION);
-				//sRigidBodies[body]->activate(true);
+				//rigidBodies[body]->activate(true);
 			}
 
-			sWorld->addRigidBody(temp);
+			world->addRigidBody(temp);
 			// if(kinematic)
 			// {
-			// 	sRigidBodies[body]->setFlags(sRigidBodies[body]->getFlags() |
+			// 	rigidBodies[body]->setFlags(rigidBodies[body]->getFlags() |
 			// 								 btCollisionObject::CF_KINEMATIC_OBJECT |
 			// 								 btCollisionObject::CF_NO_CONTACT_RESPONSE);
-			// 	sRigidBodies[body]->setActivationState(DISABLE_DEACTIVATION);
+			// 	rigidBodies[body]->setActivationState(DISABLE_DEACTIVATION);
 			// }
 			// else
 			// {
-			// 	//sRigidBodies[body]->setFlags(~btCollisionObject::CF_KINEMATIC_OBJECT);
-			// 	sRigidBodies[body]->setFlags(sRigidBodies[body]->getFlags() |
+			// 	//rigidBodies[body]->setFlags(~btCollisionObject::CF_KINEMATIC_OBJECT);
+			// 	rigidBodies[body]->setFlags(rigidBodies[body]->getFlags() |
 			// 								 ~(btCollisionObject::CF_KINEMATIC_OBJECT) |
 			// 								 btCollisionObject::CF_STATIC_OBJECT);
-			// 	sRigidBodies[body]->setActivationState(WANTS_DEACTIVATION);
-			// 	//sRigidBodies[body]->activate(true);
+			// 	rigidBodies[body]->setActivationState(WANTS_DEACTIVATION);
+			// 	//rigidBodies[body]->activate(true);
 			// }
 		
 		}
 
 		void setMass(CRigidBody body, const float mass)
 		{
-			auto shape = sRigidBodies[body]->getCollisionShape();
+			auto shape = rigidBodies[body]->getCollisionShape();
 			btVector3 inertia(0, 0, 0);
 			if(mass != 0) shape->calculateLocalInertia(mass, inertia);
-			sRigidBodies[body]->setMassProps(mass, inertia);
+			rigidBodies[body]->setMassProps(mass, inertia);
 		}
 
 		void applyForce(CRigidBody body, Vec3 force, Vec3 relPos)
 		{
-			sRigidBodies[body]->applyForce(Utils::toBullet(force),
+			rigidBodies[body]->applyForce(Utils::toBullet(force),
 										   Utils::toBullet(relPos));
 		}
 

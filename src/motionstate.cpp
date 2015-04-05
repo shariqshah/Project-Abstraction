@@ -27,5 +27,5 @@ void MotionState::setWorldTransform(const btTransform& worldTrans)
 	CTransform* transform  = GO::getTransform(gameobject);
 	Transform::setPosition(transform, Utils::toGlm(worldTrans.getOrigin()));
 	Transform::setRotation(transform, Utils::toGlm(worldTrans.getRotation()));
-	transform->isModified = true;
+	//transform->isModified = true;
 }

@@ -3,6 +3,7 @@
 #include "transform.h"
 #include "scriptengine.h"
 #include "gameobject.h"
+#include "scenemanager.h"
 #include "passert.h"
 
 namespace Transform
@@ -68,11 +69,12 @@ namespace Transform
 
 	void updateTransformMatrix(CTransform* transform)
 	{
-		Mat4 translationMat   = glm::translate(Mat4(1.0f), transform->position);
-		Mat4 scaleMat         = glm::scale(Mat4(1.0f), transform->scale);
-		Mat4 rotationMat      = glm::toMat4(glm::normalize(transform->rotation));
-		transform->transMat   = translationMat * rotationMat * scaleMat;
-		transform->isModified = true;
+		Mat4 translationMat    = glm::translate(Mat4(1.0f), transform->position);
+		Mat4 scaleMat          = glm::scale(Mat4(1.0f), transform->scale);
+		Mat4 rotationMat       = glm::toMat4(glm::normalize(transform->rotation));
+		transform->transMat    = translationMat * rotationMat * scaleMat;
+		GameObject* gameObject = SceneManager::find(transform->node);
+		GO::syncComponents(gameObject);
 	}
 
 	void updateLookAt(CTransform* transform)
@@ -175,12 +177,6 @@ namespace Transform
 		updateLookAt(transform);
 		updateForward(transform);
 		if(updateTransMat) updateTransformMatrix(transform);
-	}
-
-	void resetAllTransformFlags()
-	{
-		for(CTransform& transform : transformList)
-			transform.isModified = false;
 	}
 
 	void generateBindings()

@@ -17,7 +17,6 @@ struct CTransform
 	Node node       = 0;
 	Mat4 transMat   = Mat4();
 	bool valid      = true;
-	bool isModified = false;
 };
 
 namespace Transform
@@ -38,7 +37,6 @@ namespace Transform
     void setLookAt(CTransform* transform, Vec3 lookAt);
 	void setUpVector(CTransform* transform, Vec3 up);
     void setForward(CTransform* transform, Vec3 direction);
-	void resetAllTransformFlags();
 	void updateTransformMatrix(CTransform* transform);
 	void generateBindings();
 	void cleanup();

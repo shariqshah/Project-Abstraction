@@ -34,6 +34,7 @@ namespace GO
 	void generateBindings();
 	void processCollision(GameObject* gameObject, const CollisionData* collisionData);
 	void removeComponent(GameObject* gameObject, Component type);
+	void syncComponents(GameObject* gameObject);
 
 	CTransform* addTransform(GameObject* gameObject);
 	CCamera*    addCamera(GameObject* gameObject);

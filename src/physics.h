@@ -55,8 +55,6 @@ namespace Physics
 	void setDebugMode(DBG_Mode debugMode);
 	void addCollisionShape(CollisionShape* shape);
 	void generateBindings();
-	void syncWithRenderer();
-	
 	const Vec3 getGravity();
 
 	namespace RigidBody

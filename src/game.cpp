@@ -50,11 +50,7 @@ Game::Game(const char* path)
 		CTransform* modelTransform = GO::getTransform(sphere);
 		Transform::setPosition(modelTransform, Vec3(15 , 10, -5), true);
 	}
-	// CModel cubeModel;
-	// cubeModel.material = MAT_PHONG;
-	// cubeModel.materialUniforms.diffuseColor = Vec4(0, 1, 0, 1);
-	// cubeModel.materialUniforms.texture = Texture::create("layingrock.png");
-	// Renderer::Model::loadFromFile("suzanne.pamesh", &cubeModel);
+
 	{
 		GameObject* cube = SceneManager::create("Cube");
 		CModel* cubeModel = GO::addModel(cube, "suzanne.pamesh");
@@ -67,7 +63,6 @@ Game::Game(const char* path)
 	}
 
 	Box* t1 = new Box(Vec3(0.5f));
-	Box* t2 = new Box(Vec3(0.5f));
 	for(int i = 0; i < 10; i++)
 	{
 		GameObject* cube2 = SceneManager::create("Cube" + std::to_string(i));
@@ -86,7 +81,6 @@ Game::Game(const char* path)
 		}
 		CTransform* cube2Tran = GO::getTransform(cube2);
 		Transform::setPosition(cube2Tran, Vec3(i, i + 5, -i), true);
-		//GO::addRigidbody(cube2, new Box(Vec3(0.5f)));
 		GO::addRigidbody(cube2, t1);
 	}
 	
@@ -113,6 +107,7 @@ Game::Game(const char* path)
 	teapot->materialUniforms.texture = Texture::create("chessboard.png");
 	CTransform* tTran = GO::getTransform(tea);
 	Transform::setPosition(tTran, Vec3(0, 10, -5), true);
+	GO::addRigidbody(tea, new CollisionMesh(teapot, true), 0, 0.2f);
 }
 
 Game::~Game()
