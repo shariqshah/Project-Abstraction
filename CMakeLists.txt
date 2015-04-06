@@ -57,8 +57,8 @@ else()
   set(CMAKE_CXX_FLAGS	"-Wall -std=c++11 -g")
   target_link_libraries(${PROJECT_NAME} ${PROJECT_SOURCE_DIR}/lib/sdl2/debug/libSDL2-2.0.so
                                         ${PROJECT_SOURCE_DIR}/lib/sdl2/release/libSDL2_image.so
-	                                    ${PROJECT_SOURCE_DIR}/lib/bullet/release/libBulletCollision.so
-										${PROJECT_SOURCE_DIR}/lib/bullet/release/libBulletDynamics.so
-										${PROJECT_SOURCE_DIR}/lib/bullet/release/libLinearMath.so
+	                                    ${PROJECT_SOURCE_DIR}/lib/bullet/debug/libBulletCollision.so
+										${PROJECT_SOURCE_DIR}/lib/bullet/debug/libBulletDynamics.so
+										${PROJECT_SOURCE_DIR}/lib/bullet/debug/libLinearMath.so
 										${PROJECT_SOURCE_DIR}/lib/angelscript/debug/libangelscript.a)
 endif()

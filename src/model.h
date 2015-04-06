@@ -32,6 +32,7 @@ namespace Renderer
 		void    initialize(const char* path);
 		void    renderAllModels(CCamera* camera, RenderParams* renderParams);
 		CModel* getModelAtIndex(int modelIndex);
+		CModel* findModel(const char* filename);
 		int     create(const char* filename);
 		void    remove(unsigned int modelIndex);
 		void    generateBindings();

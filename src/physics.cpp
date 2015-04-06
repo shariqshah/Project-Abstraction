@@ -497,5 +497,16 @@ namespace Physics
 			PA_ASSERT(rc >= 0);
 			engine->SetDefaultNamespace("");
 		}
+
+		void setCollisionShape(CRigidBody body, CollisionShape* shape)
+		{
+			PA_ASSERT(shape);
+			rigidBodies[body]->setCollisionShape(shape->getCollisionShape());
+		}
+
+		const char* getCollisionShapeName(CRigidBody body)
+		{
+			return rigidBodies[body]->getCollisionShape()->getName();
+		}
 	}
 }

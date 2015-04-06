@@ -170,15 +170,15 @@ namespace Renderer
 		
 		void renderAllModels(CCamera* camera, RenderParams* renderParams)
 		{
+			GameObject* viewer = SceneManager::find(camera->node);
+			CTransform* viewerTransform = GO::getTransform(viewer);
+			
 			for(Mat_Type material : Material::MATERIAL_LIST)
 			{
 				// TODO: Add error checking for returned material params
 				std::vector<int>* registeredMeshes = Material::getRegisteredModels(material);
 				int shaderIndex = Material::getShaderIndex(material);
-
 				Shader::bindShader(shaderIndex);
-				GameObject* viewer = SceneManager::find(camera->node);
-				CTransform* viewerTransform = GO::getTransform(viewer);
 				
 				if((material == MAT_PHONG || material == MAT_PHONG_TEXTURED)
 				   && registeredMeshes->size() > 0)
@@ -201,6 +201,11 @@ namespace Renderer
 					GameObject*   gameObject = SceneManager::find(model->node);
 					CTransform*   transform  = GO::getTransform(gameObject);
 
+					// Very Simple culling
+					// int distance = glm::distance(transform->position, viewerTransform->position);
+					// if(distance > 100)
+					// 	continue;
+					
 					Mat4 mvp = camera->viewProjMat * transform->transMat;
 					Shader::setUniformMat4(shaderIndex, "mvp", mvp);
 					Shader::setUniformMat4(shaderIndex, "modelMat", transform->transMat);
@@ -548,6 +553,15 @@ namespace Renderer
 			{
 				Log::error("Model::setMaterialtype", "Model not found");
 			}
+		}
+
+		CModel* findModel(const char* filename)
+		{
+			PA_ASSERT(filename);
+			CModel* model = NULL;
+			int index = findModelIndex(filename);
+			if(index) model = &modelList[index];
+			return model;
 		}
 	}
 }

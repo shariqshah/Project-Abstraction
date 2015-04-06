@@ -62,8 +62,6 @@ class FreeCamera : BaseScript
 		if(leftRightRot != 0.f)	transform.rotate(UNIT_Y, -leftRightRot, Space::WORLD);
 
 		if(translation.x != 0 || translation.y != 0 || translation.z != 0)
-		{
 			transform.translate(translation, Space::LOCAL);
-		}
 	}
 }

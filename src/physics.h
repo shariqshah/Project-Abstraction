@@ -73,6 +73,8 @@ namespace Physics
 		void setMass(CRigidBody body, const float mass);
 		void setKinematic(CRigidBody body, bool kinematic);
 		void generateBindings();
+		void setCollisionShape(CRigidBody body, CollisionShape* shape);
+		const char* getCollisionShapeName(CRigidBody body);
 	}
 }
 

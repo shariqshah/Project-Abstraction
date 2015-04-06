@@ -57,11 +57,18 @@ namespace System
 		if(Input::isReleased(Input::Key::F9))  Log::setEnabled(true);
 		if(Input::isReleased(Input::Key::F10)) Log::setEnabled(false);
 		if(Input::isReleased(Input::Key::Q) && Input::isPressed(Input::Key::LSUPER)) *quit = true;
+
+		auto tea = SceneManager::find("Teapot");
+		auto rb  = GO::getRigidBody(tea);
+		if(Input::isReleased(Input::Key::V))
+		{
+			Physics::RigidBody::setCollisionShape(rb, new Sphere(1.f));
+		}
 		
 		ScriptEngine::updateAllScripts(deltaTime);
 		Editor::update(deltaTime, quit);
 		
-		if(Input::isReleased(Input::Key::C)) physicsEnabled ? physicsEnabled = false : physicsEnabled = true;
+		if(Input::isReleased(Input::Key::C)) physicsEnabled = !physicsEnabled;
 		if(physicsEnabled) Physics::update(deltaTime);
 		SceneManager::update(); 
 	}

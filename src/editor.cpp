@@ -11,6 +11,8 @@
 #include "texture.h"
 #include "renderer.h"
 #include "passert.h"
+#include "physics.h"
+#include "collisionshapes.h"
 
 namespace Editor
 {
@@ -38,10 +40,21 @@ namespace Editor
 
 		float updateTime = 0.f;
 		float drawTime   = 0.f;
+
+		int   collisionShapeCombo = 0;
+		bool  showChangeCollisionShapeMenu = false;
+		float csRadius;
+		float csHeight;
+		float csMargin;
+		Vec3  csHalfExt;
+		Vec3  csNormal;
+		Vec3  csAxis;
+		bool  csIsTriMesh;
+		char  csInputMeshName[BUF_SIZE];
 	}
 	
 	void initialize()
-	{		
+	{	
 	}
 
 	void setUpdateTime(const float time)
@@ -53,16 +66,23 @@ namespace Editor
 	{
 		drawTime = time;
 	}
+	
+	void resetCollisionShapeParams()
+	{
+		// showChangeCollisionShapeMenu = false;
+		csRadius    = 0.f;
+		csHeight    = 0.f;
+		csMargin    = 0.f;
+		csHalfExt   = Vec3(0.f);
+		csNormal    = Vec3(0, 1, 0);
+		csAxis      = Vec3(0, 1, 0);
+		csIsTriMesh = false;
+		memset(&csInputMeshName[0], '\0', BUF_SIZE);
+	}
 
 	void updateComponentViewers()
 	{
 		GameObject* selectedGO = SceneManager::find(selectedGONode);
-		// transformIndex = selectedGO->compIndices[Component::TRANSFORM];
-		// Check light
-		// if(GO::hasComponent(selectedGO, Component::LIGHT))
-		// 	lightIndex = selectedGO->compIndices[Component::LIGHT];
-		// else
-		// 	lightIndex = -1;
 		// Check Model
 		if(GO::hasComponent(selectedGO, Component::MODEL))
 		{
@@ -86,10 +106,9 @@ namespace Editor
 				}
 			}
 		}
-		else
-		{
-			// model = NULL;
-		}
+		resetCollisionShapeParams();
+		showChangeCollisionShapeMenu = false;
+		collisionShapeCombo = 0;
 	}
 
 	bool selectGameObject(void* gameObjectNodes, int index, const char** name)
@@ -108,6 +127,87 @@ namespace Editor
 		}
 	}
 
+	void displayRigidBody()
+	{
+		GameObject* selectedGO = SceneManager::find(selectedGONode);
+		CRigidBody  body       = GO::getRigidBody(selectedGO);
+		if(ImGui::CollapsingHeader("RigidBody", "RigidBodyComponent", true, true))
+		{
+			ImGui::Text("Collision Shape : %s ", Physics::RigidBody::getCollisionShapeName(body));
+
+			if(ImGui::Combo("Set collision shape",
+							&collisionShapeCombo,
+							"None\0Box\0Sphere\0Capsule\0Cylinder\0Plane\0Mesh\0\0"))
+			{
+				if(collisionShapeCombo > 0)
+				{
+					showChangeCollisionShapeMenu = true;
+					resetCollisionShapeParams();
+				}
+				else
+				{
+					showChangeCollisionShapeMenu = false;
+				}
+			}
+
+			if(showChangeCollisionShapeMenu)
+			{
+				CModel* model = NULL;
+				switch(collisionShapeCombo)
+				{
+				case 1:
+					ImGui::InputFloat3("Half Extents", &csHalfExt[0]);
+					break;
+				case 2:
+					ImGui::InputFloat("Radius", &csRadius, 1.f, 5.f);
+					break;
+				case 3:
+					ImGui::InputFloat("Radius", &csRadius, 1.f, 5.f);
+					ImGui::InputFloat("Height", &csHeight, 1.f, 5.f);
+					break;
+				case 4:
+					ImGui::InputFloat3("Half Extents", &csHalfExt[0]);
+					ImGui::InputFloat3("Axis", &csAxis[0]);
+					break;
+				case 5:
+					ImGui::InputFloat3("Normal", &csNormal[0]);
+					ImGui::InputFloat("Margin", &csMargin, 0.01f, 0.1f);
+					break;
+				case 6:
+					ImGui::InputText("CollisionMesh Name", &csInputMeshName[0], BUF_SIZE);
+					ImGui::Checkbox("Is TriMesh", &csIsTriMesh);
+					break;
+				}
+
+				if(ImGui::Button("Change"))
+				{
+					switch(collisionShapeCombo)
+					{
+					case 1: Physics::RigidBody::setCollisionShape(body, new Box(csHalfExt));   break;
+					case 2:	Physics::RigidBody::setCollisionShape(body, new Sphere(csRadius)); break;
+					case 3: Physics::RigidBody::setCollisionShape(body, new Capsule(csRadius, csHeight)); break;
+					case 4: Physics::RigidBody::setCollisionShape(body, new Cylinder(csHalfExt, csAxis)); break;
+					case 5: Physics::RigidBody::setCollisionShape(body, new Plane(csNormal, csMargin)); break;
+					case 6:
+						model = Renderer::Model::findModel(&csInputMeshName[0]);
+						if(model)
+						{
+							Physics::RigidBody::setCollisionShape(body, new CollisionMesh(model, csIsTriMesh));
+						}
+						else
+						{
+							Log::error("Editor::displayRigidbody",
+									   "Model " + std::string(csInputMeshName) + " not found!");
+						}
+					}
+					resetCollisionShapeParams();
+					showChangeCollisionShapeMenu = false;
+					collisionShapeCombo = 0;
+				}
+			}
+		}
+	}
+	
 	void displayTransform()
 	{
 		GameObject* selectedGO = SceneManager::find(selectedGONode);
@@ -464,9 +564,10 @@ namespace Editor
 
 			// Display Components
 			displayTransform();
-			if(GO::hasComponent(selectedGO, Component::LIGHT))	displayLight();
-			if(GO::hasComponent(selectedGO, Component::MODEL))  displayModel();
-			if(GO::hasComponent(selectedGO, Component::CAMERA))	displayCamera();				
+			if(GO::hasComponent(selectedGO, Component::LIGHT))	   displayLight();
+			if(GO::hasComponent(selectedGO, Component::MODEL))     displayModel();
+			if(GO::hasComponent(selectedGO, Component::CAMERA))	   displayCamera();				
+			if(GO::hasComponent(selectedGO, Component::RIGIDBODY)) displayRigidBody();				
 			ImGui::End();
 		}
 	}
