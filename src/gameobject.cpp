@@ -318,7 +318,7 @@ namespace GO
 		}
 	}
 
-	void syncComponents(GameObject* gameObject)
+	void syncComponents(GameObject* gameObject, bool syncPhysics)
 	{
 		PA_ASSERT(gameObject);
 		
@@ -328,12 +328,13 @@ namespace GO
 			CCamera* camera = getCamera(gameObject);
 			Renderer::Camera::updateView(camera);
 		}
-		// Update the rigidbody's transform
-		// if(hasComponent(gameObject, Component::RIGIDBODY))
-		// {
-		// 	CRigidBody  rigidbody  = getRigidBody(gameObject);
-		// 	CTransform* transform  = getTransform(gameObject);
-		// 	Physics::RigidBody::setTransform(rigidbody, transform->transMat);
-		// }
+		//Update the rigidbody's transform
+		if(hasComponent(gameObject, Component::RIGIDBODY) && syncPhysics)
+		{
+			CRigidBody  rigidbody  = getRigidBody(gameObject);
+			CTransform* transform  = getTransform(gameObject);
+			Physics::RigidBody::setTransform(rigidbody, transform->transMat);
+			Physics::RigidBody::setActivation(rigidbody, true);
+		}
 	}
 }

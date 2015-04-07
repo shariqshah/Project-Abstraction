@@ -21,11 +21,8 @@ void MotionState::getWorldTransform(btTransform& worldTrans) const
 
 void MotionState::setWorldTransform(const btTransform& worldTrans)
 {
-	// update transform and reset renderer's transformation
-	// flag, indicating that transform has been updated by bullet
 	GameObject* gameobject = SceneManager::find(node);
 	CTransform* transform  = GO::getTransform(gameobject);
-	Transform::setPosition(transform, Utils::toGlm(worldTrans.getOrigin()));
-	Transform::setRotation(transform, Utils::toGlm(worldTrans.getRotation()));
-	//transform->isModified = true;
+	Transform::setPosition(transform, Utils::toGlm(worldTrans.getOrigin()), false);
+	Transform::setRotation(transform, Utils::toGlm(worldTrans.getRotation()), false);
 }

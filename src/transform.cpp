@@ -67,14 +67,14 @@ namespace Transform
 		return alreadyRemoved ? false : true;
 	}
 
-	void updateTransformMatrix(CTransform* transform)
+	void updateTransformMatrix(CTransform* transform, bool syncPhysics)
 	{
 		Mat4 translationMat    = glm::translate(Mat4(1.0f), transform->position);
 		Mat4 scaleMat          = glm::scale(Mat4(1.0f), transform->scale);
 		Mat4 rotationMat       = glm::toMat4(glm::normalize(transform->rotation));
 		transform->transMat    = translationMat * rotationMat * scaleMat;
 		GameObject* gameObject = SceneManager::find(transform->node);
-		GO::syncComponents(gameObject);
+		GO::syncComponents(gameObject, syncPhysics);
 	}
 
 	void updateLookAt(CTransform* transform)
@@ -93,11 +93,11 @@ namespace Transform
 		transform->forward = glm::normalize(transform->rotation * -UNIT_Z);
 	}
 
-	void setPosition(CTransform* transform, Vec3 position, bool updateTransMat)
+	void setPosition(CTransform* transform, Vec3 position, bool syncPhysics)
 	{
 		PA_ASSERT(transform);
 		transform->position = position;
-		if(updateTransMat) updateTransformMatrix(transform);
+		updateTransformMatrix(transform, syncPhysics);
 	}
 
 	void translate(CTransform* transform, Vec3 offset, Space transformSpace)
@@ -140,11 +140,11 @@ namespace Transform
 		updateTransformMatrix(transform);
 	}
 
-	void setScale(CTransform* transform, Vec3 newScale, bool updateTransMat)
+	void setScale(CTransform* transform, Vec3 newScale, bool syncPhysics)
 	{
 		PA_ASSERT(transform);
 		transform->scale = newScale;
-		if(updateTransMat) updateTransformMatrix(transform);
+		updateTransformMatrix(transform, syncPhysics);
 	}
 
 	void setLookAt(CTransform* transform, Vec3 lookAt)
@@ -169,14 +169,14 @@ namespace Transform
 		}
 	}
 
-	void setRotation(CTransform* transform, Quat newRotation, bool updateTransMat)
+	void setRotation(CTransform* transform, Quat newRotation, bool syncPhysics)
 	{
 		PA_ASSERT(transform);
 		transform->rotation = newRotation;
 		updateUpVector(transform);
 		updateLookAt(transform);
 		updateForward(transform);
-		if(updateTransMat) updateTransformMatrix(transform);
+		updateTransformMatrix(transform, syncPhysics);
 	}
 
 	void generateBindings()
@@ -211,17 +211,17 @@ namespace Transform
 										  asCALL_CDECL_OBJFIRST);
 		PA_ASSERT(rc >= 0);
 		rc = engine->RegisterObjectMethod("Transform",
-										  "void setScale(Vec3, bool = true)",
+										  "void setScale(Vec3)",
 										  asFUNCTION(setScale),
 										  asCALL_CDECL_OBJFIRST);
 		PA_ASSERT(rc >= 0);
 		rc = engine->RegisterObjectMethod("Transform",
-										  "void setRotation(Quat, bool = true)",
+										  "void setRotation(Quat)",
 										  asFUNCTION(setRotation),
 										  asCALL_CDECL_OBJFIRST);
 		PA_ASSERT(rc >= 0);
 		rc = engine->RegisterObjectMethod("Transform",
-										  "void setPosition(Vec3, bool = true)",
+										  "void setPosition(Vec3)",
 										  asFUNCTION(setPosition),
 										  asCALL_CDECL_OBJFIRST);
 		PA_ASSERT(rc >= 0);
