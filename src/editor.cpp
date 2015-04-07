@@ -133,8 +133,19 @@ namespace Editor
 		CRigidBody  body       = GO::getRigidBody(selectedGO);
 		if(ImGui::CollapsingHeader("RigidBody", "RigidBodyComponent", true, true))
 		{
-			ImGui::Text("Collision Shape : %s ", Physics::RigidBody::getCollisionShapeName(body));
+			float mass = Physics::RigidBody::getMass(body);
+			if(ImGui::InputFloat("Mass", &mass, 1.f, 5.f))
+				Physics::RigidBody::setMass(body, mass);
 
+			float restitution = Physics::RigidBody::getRestitution(body);
+			if(ImGui::InputFloat("Restitution", &restitution, 0.01f, 0.1f))
+				Physics::RigidBody::setRestitution(body, restitution);
+
+			float friction = Physics::RigidBody::getFriction(body);
+			if(ImGui::InputFloat("Friction", &friction, 0.1f, 0.5f))
+				Physics::RigidBody::setFriction(body, friction);
+			
+			ImGui::Text("Collision Shape : %s ", Physics::RigidBody::getCollisionShapeName(body));
 			if(ImGui::Combo("Set collision shape",
 							&collisionShapeCombo,
 							"None\0Box\0Sphere\0Capsule\0Cylinder\0Plane\0Mesh\0\0"))
@@ -179,7 +190,7 @@ namespace Editor
 					break;
 				}
 
-				if(ImGui::Button("Change"))
+				if(ImGui::Button("Change Collision Shape"))
 				{
 					switch(collisionShapeCombo)
 					{
@@ -200,6 +211,13 @@ namespace Editor
 									   "Model " + std::string(csInputMeshName) + " not found!");
 						}
 					}
+					resetCollisionShapeParams();
+					showChangeCollisionShapeMenu = false;
+					collisionShapeCombo = 0;
+				}
+				ImGui::SameLine();
+				if(ImGui::Button("Cancel"))
+				{
 					resetCollisionShapeParams();
 					showChangeCollisionShapeMenu = false;
 					collisionShapeCombo = 0;
@@ -533,7 +551,7 @@ namespace Editor
 					GO::addLight(selectedGO);
 					break;
 				case 4:
-					Log::warning("Not implemented!");
+					GO::addRigidbody(selectedGO, new Box(Vec3(0.5f)));
 					break;
 				default:
 					break;

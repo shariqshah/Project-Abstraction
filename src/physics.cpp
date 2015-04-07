@@ -465,12 +465,42 @@ namespace Physics
 		
 		}
 
-		void setMass(CRigidBody body, const float mass)
+		void setMass(CRigidBody body, float mass)
 		{
-			auto shape = rigidBodies[body]->getCollisionShape();
+			btCollisionShape* shape = rigidBodies[body]->getCollisionShape();
 			btVector3 inertia(0, 0, 0);
-			if(mass != 0) shape->calculateLocalInertia(mass, inertia);
+			if(mass <  0.f) mass = 0.f;
+			if(mass != 0.f) shape->calculateLocalInertia(mass, inertia);
 			rigidBodies[body]->setMassProps(mass, inertia);
+		}
+
+		float getMass(CRigidBody body)
+		{
+			float mass = rigidBodies[body]->getInvMass();
+			if(mass != 0.f) mass = 1.f / mass;
+			return mass;
+		}
+
+		float getRestitution(CRigidBody body)
+		{
+			return rigidBodies[body]->getRestitution();
+		}
+		
+		void setRestitution(CRigidBody body, float restitution)
+		{
+			if(restitution < 0.f) restitution *= -1.f;
+			rigidBodies[body]->setRestitution(restitution);
+		}
+		
+		float getFriction(CRigidBody body)
+		{
+			return rigidBodies[body]->getFriction();
+		}
+		
+		void setFriction(CRigidBody body, float friction)
+		{
+			if(friction < 0.f) friction *= -1.f;
+			rigidBodies[body]->setFriction(friction);
 		}
 
 		void applyForce(CRigidBody body, Vec3 force, Vec3 relPos)
@@ -487,13 +517,33 @@ namespace Physics
 													asFUNCTION(setKinematic),
 													asCALL_CDECL);
 			PA_ASSERT(rc >= 0);
-			rc = engine->RegisterGlobalFunction("void setMass(int, const float)",
-													asFUNCTION(setMass),
-													asCALL_CDECL);
+			rc = engine->RegisterGlobalFunction("float getMass(int)",
+												asFUNCTION(getMass),
+												asCALL_CDECL);
+			PA_ASSERT(rc >= 0);
+			rc = engine->RegisterGlobalFunction("void setMass(int, float)",
+												asFUNCTION(setMass),
+												asCALL_CDECL);
+			PA_ASSERT(rc >= 0);
+			rc = engine->RegisterGlobalFunction("float getRestitution(int)",
+												asFUNCTION(getRestitution),
+												asCALL_CDECL);
+			PA_ASSERT(rc >= 0);
+			rc = engine->RegisterGlobalFunction("void setRestitution(int, float)",
+												asFUNCTION(setRestitution),
+												asCALL_CDECL);
+			PA_ASSERT(rc >= 0);
+			rc = engine->RegisterGlobalFunction("float getFriction(int)",
+												asFUNCTION(getFriction),
+												asCALL_CDECL);
+			PA_ASSERT(rc >= 0);
+			rc = engine->RegisterGlobalFunction("void setFriction(int, float)",
+												asFUNCTION(setFriction),
+												asCALL_CDECL);
 			PA_ASSERT(rc >= 0);
 			rc = engine->RegisterGlobalFunction("void applyForce(int, const Vec3, const Vec3 = Vec3(0.f))",
-													asFUNCTION(applyForce),
-													asCALL_CDECL);
+												asFUNCTION(applyForce),
+												asCALL_CDECL);
 			PA_ASSERT(rc >= 0);
 			engine->SetDefaultNamespace("");
 		}
