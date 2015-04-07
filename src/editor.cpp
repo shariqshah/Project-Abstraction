@@ -25,6 +25,7 @@ namespace Editor
 		bool showRendererSettings = false;
 		bool showScriptingWindow  = false;
 		bool showStatsWindow      = true;
+		bool showPhysicsWindow    = false;
 
 		int  currentItem = 1;
 		
@@ -626,14 +627,29 @@ namespace Editor
 		ImGui::Text("Draw   : %.2f", drawTime);
 		ImGui::End();
 	}
+
+	void displayPhysicsWindow()
+	{
+		ImGui::Begin("Physics", &showPhysicsWindow, Vec2(80, 20), OPACITY, WF_NoCollapse);
+		bool physicsEnabled = Physics::isEnabled();
+		bool debugEnabled   = Physics::isDebugDrawerEnabled();
+		Vec3 gravity        = Physics::getGravity();
+		
+		if(ImGui::Checkbox("Physics Enabled", &physicsEnabled))	Physics::enable(physicsEnabled);
+		if(ImGui::Checkbox("Debug Drawer", &debugEnabled))      Physics::enableDebugDraw(debugEnabled);
+		if(ImGui::InputFloat3("Gravity", &gravity[0]))			Physics::setGravity(gravity);
+
+		ImGui::End();
+	}
 	
 	void update(float deltaTime, bool* quit)
 	{
-		ImGui::Begin("Tools", &showMainToolBar, Vec2(100, 20), OPACITY, (WF_NoTitleBar | WF_NoCollapse));
-		if(ImGui::Button("Log"))       showLog = !showLog;                           ImGui::SameLine();		
-		if(ImGui::Button("Scene"))     showSceneObjects = !showSceneObjects;	     ImGui::SameLine();
+		ImGui::Begin("Tools", &showMainToolBar, Vec2(80, 20), OPACITY, (WF_NoTitleBar | WF_NoCollapse));
+		if(ImGui::Button("Log"))       showLog              = !showLog;              ImGui::SameLine();		
+		if(ImGui::Button("Scene"))     showSceneObjects     = !showSceneObjects;     ImGui::SameLine();
 		if(ImGui::Button("Renderer"))  showRendererSettings = !showRendererSettings; ImGui::SameLine();
-		if(ImGui::Button("Scripting")) showScriptingWindow = !showScriptingWindow; 	 ImGui::SameLine();
+		if(ImGui::Button("Physics"))   showPhysicsWindow    = !showPhysicsWindow;    ImGui::SameLine();
+		if(ImGui::Button("Scripting")) showScriptingWindow  = !showScriptingWindow;  ImGui::SameLine();
 		
 		ImGui::PushID("Exit_Button");
 		Vec4 exitColor(0.89f, 0.05f, 0.17f, 1.f);
@@ -649,6 +665,7 @@ namespace Editor
 		if(showSceneObjects)     displaySceneObjects();
 		if(showRendererSettings) displayRendererSettings();
 		if(showStatsWindow)      displayStatsWindow();
+		if(showPhysicsWindow)    displayPhysicsWindow();
 	}
 	
 	void cleanup()

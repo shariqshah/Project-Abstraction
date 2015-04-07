@@ -44,7 +44,6 @@ namespace Physics
         NORMALS          = btIDebugDraw::DBG_DrawNormals,
 		MAX              = btIDebugDraw::DBG_MAX_DEBUG_DRAW_MODE
 	};
-	
 	void initialize(Vec3 gravity);
 	void update(float deltaTime);
     void draw();
@@ -56,7 +55,11 @@ namespace Physics
 	void addCollisionShape(CollisionShape* shape);
 	void generateBindings();
 	const Vec3 getGravity();
-
+	bool isEnabled();
+	bool isDebugDrawerEnabled();
+	void enable(bool enable);
+	void enableDebugDraw(bool enable);
+	
 	namespace RigidBody
 	{
 		CRigidBody create(GameObject*     gameObject,

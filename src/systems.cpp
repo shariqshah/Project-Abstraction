@@ -19,14 +19,8 @@
 
 namespace System
 {
-	namespace
-	{
-		bool physicsEnabled      = true;
-	}
-	
 	void initialize()
 	{
-		physicsEnabled = true;
 		Physics::initialize(Vec3(0.f, -9.8f, 0.f));
 		ScriptEngine::initialize();
 
@@ -51,25 +45,14 @@ namespace System
 
 	void update(float deltaTime, bool* quit)
 	{
-		if(Input::isReleased(Input::Key::F6))  Physics::enableDebugDraw(true);
-		if(Input::isReleased(Input::Key::F7))  Physics::enableDebugDraw(false);
 		if(Input::isReleased(Input::Key::F8))  Physics::nextDebugMode();
 		if(Input::isReleased(Input::Key::F9))  Log::setEnabled(true);
 		if(Input::isReleased(Input::Key::F10)) Log::setEnabled(false);
 		if(Input::isReleased(Input::Key::Q) && Input::isPressed(Input::Key::LSUPER)) *quit = true;
-
-		auto tea = SceneManager::find("Teapot");
-		auto rb  = GO::getRigidBody(tea);
-		if(Input::isReleased(Input::Key::V))
-		{
-			Physics::RigidBody::setCollisionShape(rb, new Sphere(1.f));
-		}
 		
 		ScriptEngine::updateAllScripts(deltaTime);
 		Editor::update(deltaTime, quit);
-		
-		if(Input::isReleased(Input::Key::C)) physicsEnabled = !physicsEnabled;
-		if(physicsEnabled) Physics::update(deltaTime);
+		Physics::update(deltaTime);
 		SceneManager::update(); 
 	}
 

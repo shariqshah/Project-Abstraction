@@ -14,22 +14,22 @@ namespace Physics
 {
 	namespace
 	{
-		PhysicsWorld* world;
-		btVector3     gravity;
-		const float   fixedStep = 1.f / 60.f;
-		
+		PhysicsWorld*                        world;
 		btBroadphaseInterface*               broadphase;
 		btDefaultCollisionConfiguration*     collisionConfiguration;
 		btCollisionDispatcher*               dispatcher;
 		btSequentialImpulseConstraintSolver* solver;
 
-		std::vector<CRigidBody>          freeList;
-		std::vector<btRigidBody*>        rigidBodies;
-		std::vector<CollisionShape*>     collisionShapes;
+		std::vector<CRigidBody>      freeList;
+		std::vector<btRigidBody*>    rigidBodies;
+		std::vector<CollisionShape*> collisionShapes;
 
-		DebugDrawer* debugDrawer;
-		bool         debugDraw;
-		DBG_Mode     currentDebugMode;
+		bool          physicsEnabled;
+		bool          debugDrawEnabled;
+		btVector3     gravity;
+		const float   fixedStep = 1.f / 60.f;
+		DebugDrawer*  debugDrawer;
+		DBG_Mode      currentDebugMode;
 	}
 
 	void initialize(Vec3 worldGravity)
@@ -48,46 +48,70 @@ namespace Physics
 		debugDrawer = new Physics::DebugDrawer();
 		debugDrawer->setDebugMode((int)currentDebugMode);
 		world->setDebugDrawer(debugDrawer);
-		debugDraw = false;
+		physicsEnabled   = true;
+		debugDrawEnabled = false;
 	}
 
+	bool isEnabled()
+	{
+		return physicsEnabled;
+	}
+	
+	bool isDebugDrawerEnabled()
+	{
+		return debugDrawEnabled;
+	}
+	
+	void enable(bool enable)
+	{
+		physicsEnabled = enable;
+	}
+	
+	void enableDebugDraw(bool enable)
+	{
+		debugDrawEnabled = enable;
+	}
+	
 	void update(float deltaTime)
 	{
-		world->stepSimulation(deltaTime, 1, fixedStep);
-		// Process collisions
-		int numManifolds = world->getDispatcher()->getNumManifolds();
-		for (int i=0;i<numManifolds;i++)
+		if(physicsEnabled)
 		{
-			btPersistentManifold* contactManifold = world->getDispatcher()->getManifoldByIndexInternal(i);
-			const btCollisionObject* obA = contactManifold->getBody0();
-			const btCollisionObject* obB = contactManifold->getBody1();
-
-			int numContacts = contactManifold->getNumContacts();
-			for (int j = 0; j < numContacts; j++)
+			world->stepSimulation(deltaTime, 1, fixedStep);
+			// Process collisions
+			int numManifolds = world->getDispatcher()->getNumManifolds();
+			for (int i=0;i<numManifolds;i++)
 			{
-				btManifoldPoint& pt = contactManifold->getContactPoint(j);
-				if (pt.getDistance()<0.f)
+				btPersistentManifold* contactManifold = world->getDispatcher()->getManifoldByIndexInternal(i);
+				const btCollisionObject* obA = contactManifold->getBody0();
+				const btCollisionObject* obB = contactManifold->getBody1();
+
+				int numContacts = contactManifold->getNumContacts();
+				for (int j = 0; j < numContacts; j++)
 				{
-					const btVector3& ptA       = pt.getPositionWorldOnA();
-					const btVector3& ptB       = pt.getPositionWorldOnB();
-					const btVector3& normalOnB = pt.m_normalWorldOnB;
+					btManifoldPoint& pt = contactManifold->getContactPoint(j);
+					if (pt.getDistance()<0.f)
+					{
+						const btVector3& ptA       = pt.getPositionWorldOnA();
+						const btVector3& ptB       = pt.getPositionWorldOnB();
+						const btVector3& normalOnB = pt.m_normalWorldOnB;
 
-					intptr_t tempA = (intptr_t)obA->getUserPointer();
-					intptr_t tempB = (intptr_t)obB->getUserPointer();
-					Node nodeA = (Node)tempA;
-					Node nodeB = (Node)tempB;
+						intptr_t tempA = (intptr_t)obA->getUserPointer();
+						intptr_t tempB = (intptr_t)obB->getUserPointer();
+						Node nodeA = (Node)tempA;
+						Node nodeB = (Node)tempB;
 				    
-					CollisionData collisionData;
-					collisionData.collidingObjNode = nodeB;
-					collisionData.normal           = Utils::toGlm(normalOnB);
-					collisionData.worldPosA        = Utils::toGlm(ptA);
-					collisionData.worldPosB        = Utils::toGlm(ptB);
+						CollisionData collisionData;
+						collisionData.collidingObjNode = nodeB;
+						collisionData.normal           = Utils::toGlm(normalOnB);
+						collisionData.worldPosA        = Utils::toGlm(ptA);
+						collisionData.worldPosB        = Utils::toGlm(ptB);
 
-					GameObject* gameObjectA = SceneManager::find(nodeA);
-					GO::processCollision(gameObjectA, &collisionData);
-					GameObject* gameObjectB = SceneManager::find(nodeB);
-					collisionData.collidingObjNode = nodeA;
-					GO::processCollision(gameObjectB, &collisionData);
+						GameObject* gameObjectA = SceneManager::find(nodeA);
+						GO::processCollision(gameObjectA, &collisionData);
+						GameObject* gameObjectB = SceneManager::find(nodeB);
+						collisionData.collidingObjNode = nodeA;
+						GO::processCollision(gameObjectB, &collisionData);
+					}
 				}
 			}
 		}
@@ -96,7 +120,7 @@ namespace Physics
 	void draw()
 	{
 		CCamera* camera = Renderer::Camera::getActiveCamera();
-		if(debugDraw && camera != NULL)
+		if(debugDrawEnabled && camera != NULL)
 		{
 			GameObject* gameObject = SceneManager::find(camera->node);
 			CTransform* transform  = GO::getTransform(gameObject);
@@ -123,11 +147,6 @@ namespace Physics
 			glPopMatrix();
 			glPopAttrib();
 		}
-	}
-
-	void enableDebugDraw(bool enable)
-	{
-		debugDraw = enable;
 	}
 
 	void setDebugMode(DBG_Mode debugMode)
