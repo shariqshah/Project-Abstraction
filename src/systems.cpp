@@ -16,6 +16,7 @@
 #include "gui.h"
 #include "editor.h"
 #include "collisionshapes.h"
+#include "console.h"
 
 namespace System
 {
@@ -52,6 +53,7 @@ namespace System
 		
 		ScriptEngine::updateAllScripts(deltaTime);
 		Editor::update(deltaTime, quit);
+		Console::update();
 		Physics::update(deltaTime);
 		SceneManager::update(); 
 	}

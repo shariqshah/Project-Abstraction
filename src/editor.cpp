@@ -12,6 +12,7 @@
 #include "renderer.h"
 #include "passert.h"
 #include "physics.h"
+#include "console.h"
 #include "collisionshapes.h"
 
 namespace Editor
@@ -26,6 +27,7 @@ namespace Editor
 		bool showScriptingWindow  = false;
 		bool showStatsWindow      = true;
 		bool showPhysicsWindow    = false;
+		bool showSample           = false;
 
 		int  currentItem = 1;
 		
@@ -52,6 +54,8 @@ namespace Editor
 		Vec3  csAxis;
 		bool  csIsTriMesh;
 		char  csInputMeshName[BUF_SIZE];
+
+		ImGuiTextFilter gameObjectFilter;
 	}
 	
 	void initialize()
@@ -110,22 +114,6 @@ namespace Editor
 		resetCollisionShapeParams();
 		showChangeCollisionShapeMenu = false;
 		collisionShapeCombo = 0;
-	}
-
-	bool selectGameObject(void* gameObjectNodes, int index, const char** name)
-	{
-		std::vector<Node>* nodeList = (std::vector<Node>*)gameObjectNodes;
-		Node node = nodeList->at(index);
-		GameObject* gameObject = SceneManager::find(node);
-		if(gameObject)
-		{
-			*name = gameObject->name.c_str();
-			return true;
-		}
-		else
-		{
-			return false;
-		}
 	}
 
 	void displayRigidBody()
@@ -461,21 +449,35 @@ namespace Editor
 	void displaySceneObjects()
     {
 		ImGui::Begin("SceneObjects", &showSceneObjects, Vec2(400, 350), OPACITY);
+		
 		std::vector<Node>* gameObjectNodes = SceneManager::getSceneObjects();
 		ImGui::Text("Total : %d", gameObjectNodes->size());
-		if(ImGui::ListBox("GameObjects", &currentItem, &selectGameObject, gameObjectNodes, gameObjectNodes->size(), 10))
+		gameObjectFilter.Draw("Filter by name");
+
+		if(ImGui::ListBoxHeader("GameObjects"))
 		{
-			// Selected gameobject changed so update all pointers
-			showSelectedGO = true;
-			selectedGONode = gameObjectNodes->at(currentItem);
-			GameObject* selectedGO = SceneManager::find(selectedGONode);
-			memset(&inputName[0], '\0', BUF_SIZE);
-			int copySize = selectedGO->name.size() > BUF_SIZE ? BUF_SIZE : selectedGO->name.size();
-			memcpy(&inputName[0], &selectedGO->name[0], copySize);
-			copySize = selectedGO->tag.size() > BUF_SIZE ? BUF_SIZE : selectedGO->tag.size();
-			memcpy(&inputTag[0], &selectedGO->tag[0], copySize);
-			updateComponentViewers();
+			for(uint32_t i = 0; i < gameObjectNodes->size(); i++)
+			{
+				GameObject* gameObject = SceneManager::find(gameObjectNodes->at(i));
+				if(gameObject && gameObjectFilter.PassFilter(gameObject->name.c_str()))
+				{
+					bool selected = selectedGONode == gameObject->node ? true : false;
+					if(ImGui::Selectable(gameObject->name.c_str(), selected))
+					{
+						// Selected gameobject changed so update all pointers
+						showSelectedGO = true;
+						selectedGONode = gameObject->node;
+						memset(&inputName[0], '\0', BUF_SIZE);
+						int copySize = gameObject->name.size() > BUF_SIZE ? BUF_SIZE : gameObject->name.size();
+						memcpy(&inputName[0], &gameObject->name[0], copySize);
+						copySize = gameObject->tag.size() > BUF_SIZE ? BUF_SIZE : gameObject->tag.size();
+						memcpy(&inputTag[0], &gameObject->tag[0], copySize);
+						updateComponentViewers();
+					}
+				}
+			}
 		}
+		ImGui::ListBoxFooter();
 			
 		if(ImGui::Button("Remove"))
 		{
@@ -650,12 +652,17 @@ namespace Editor
 	void update(float deltaTime, bool* quit)
 	{
 		ImGui::Begin("Tools", &showMainToolBar, Vec2(80, 20), OPACITY, (WF_NoTitleBar | WF_NoCollapse));
-		if(ImGui::Button("Log"))       showLog              = !showLog;              ImGui::SameLine();		
 		if(ImGui::Button("Scene"))     showSceneObjects     = !showSceneObjects;     ImGui::SameLine();
 		if(ImGui::Button("Renderer"))  showRendererSettings = !showRendererSettings; ImGui::SameLine();
 		if(ImGui::Button("Physics"))   showPhysicsWindow    = !showPhysicsWindow;    ImGui::SameLine();
 		if(ImGui::Button("Scripting")) showScriptingWindow  = !showScriptingWindow;  ImGui::SameLine();
-		
+		if(ImGui::Button("Sample"))    showSample           = !showSample;  ImGui::SameLine();
+		if(ImGui::Button("Log"))
+		{
+			showLog = !showLog;
+			Console::showWindow(showLog);
+		}
+		ImGui::SameLine();
 		ImGui::PushID("Exit_Button");
 		Vec4 exitColor(0.89f, 0.05f, 0.17f, 1.f);
 		ImGui::PushStyleColor(ImGuiCol_Button, exitColor);
@@ -671,6 +678,7 @@ namespace Editor
 		if(showRendererSettings) displayRendererSettings();
 		if(showStatsWindow)      displayStatsWindow();
 		if(showPhysicsWindow)    displayPhysicsWindow();
+		if(showSample)           ImGui::ShowTestWindow(&showSample);
 	}
 	
 	void cleanup()

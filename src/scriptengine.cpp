@@ -71,23 +71,28 @@ namespace ScriptEngine
 
 	void MessageCallback(const asSMessageInfo *msg, void *param)
 	{
-		const char *type = "ERROR";
+		std::string type = "ERROR";
 		if( msg->type == asMSGTYPE_WARNING ) 
 			type = "WARNING";
 		else if( msg->type == asMSGTYPE_INFORMATION ) 
 			type = "INFO";
 
-		std::string error = "";
-		error += msg->section;
-		error += "(";
-		error += std::to_string(msg->row);
-		error += ", ";
-		error += std::to_string(msg->col);
-		error += ") : ";
-		error += type;
-		error += " : ";
-		error += msg->message;
-		Log::message("AngelScript " +  error);
+		std::string message = "";
+		message += msg->section;
+		message += "(";
+		message += std::to_string(msg->row);
+		message += ", ";
+		message += std::to_string(msg->col);
+		message += ") : ";
+		message += type;
+		message += " : ";
+		message += msg->message;
+		if(type == "INFO")
+			Log::message("AngelScript : " +  message);
+		else if(type == "WARNING")
+			Log::warning("AngelScript : " + message);
+		else
+			Log::error("Angelscript", message);
 	}
 
 	

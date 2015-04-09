@@ -1,6 +1,7 @@
 #include "log.h"
 #include "scriptengine.h"
 #include "passert.h"
+#include "console.h"
 #include <stdio.h>
 
 namespace Log
@@ -13,18 +14,21 @@ namespace Log
     void message(const std::string& message)
     {
 		if(isEnabled) printf("MESSAGE : %s\n", message.c_str());
+		Console::addMessage(Console::MSG_NORM, message);
 		fflush(stdout);
     }
 
     void error(const std::string& context, const std::string& error)
     {
 		if(isEnabled) fprintf(stderr, "ERROR %s : %s\n", context.c_str(), error.c_str());
+		Console::addMessage(Console::MSG_ERROR, context + " : " + error);
 		fflush(stdout);
     }
 
 	void warning(const std::string& warningMessage)
 	{
 		if(isEnabled) printf("WARNING : %s\n", warningMessage.c_str());
+		Console::addMessage(Console::MSG_WARNING, warningMessage);
 		fflush(stdout);
 	}
 
