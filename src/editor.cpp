@@ -29,7 +29,7 @@ namespace Editor
 
 		int  currentItem = 1;
 		
-		const float OPACITY  = 0.75f;
+		const float OPACITY  = 1.f;
 		const int   BUF_SIZE = 128;
 
 		char inputName[BUF_SIZE]       = "";
@@ -552,6 +552,11 @@ namespace Editor
 					GO::addLight(selectedGO);
 					break;
 				case 4:
+					if(GO::hasComponent(selectedGO, Component::RIGIDBODY))
+					{
+						Log::warning("Removing existing rigidbody from " + selectedGO->name);
+						GO::removeComponent(selectedGO, Component::RIGIDBODY);
+					}
 					GO::addRigidbody(selectedGO, new Box(Vec3(0.5f)));
 					break;
 				default:

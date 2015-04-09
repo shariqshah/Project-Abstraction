@@ -27,6 +27,56 @@ namespace Gui
 		io.DisplaySize = ImVec2(winW, winH);
 		projMat = glm::ortho(0.f, winW, winH, 0.f);
 	}
+
+	void setStyle()
+	{
+		ImGuiStyle& style = ImGui::GetStyle();
+		// Colors
+		style.Colors[ImGuiCol_Text]                  = ImVec4(0.97f, 1.00f, 1.00f, 1.00f);
+		style.Colors[ImGuiCol_WindowBg]              = ImVec4(0.21f, 0.21f, 0.21f, 1.00f);
+		style.Colors[ImGuiCol_ChildWindowBg]         = ImVec4(0.15f, 0.15f, 0.15f, 1.00f);
+		style.Colors[ImGuiCol_Border]                = ImVec4(0.32f, 0.50f, 0.58f, 1.00f);
+		style.Colors[ImGuiCol_BorderShadow]          = ImVec4(0.00f, 0.00f, 0.00f, 0.35f);
+		style.Colors[ImGuiCol_FrameBg]               = ImVec4(0.32f, 0.32f, 0.32f, 0.36f);
+		style.Colors[ImGuiCol_TitleBg]               = ImVec4(0.27f, 0.41f, 0.48f, 1.00f);
+		style.Colors[ImGuiCol_TitleBgCollapsed]      = ImVec4(0.33f, 0.51f, 0.60f, 1.00f);
+		style.Colors[ImGuiCol_ScrollbarBg]           = ImVec4(0.24f, 0.38f, 0.44f, 1.00f);
+		style.Colors[ImGuiCol_ScrollbarGrab]         = ImVec4(0.32f, 0.50f, 0.58f, 1.00f);
+		style.Colors[ImGuiCol_ScrollbarGrabHovered]  = ImVec4(0.39f, 0.61f, 0.71f, 1.00f);
+		style.Colors[ImGuiCol_ScrollbarGrabActive]   = ImVec4(0.35f, 0.65f, 0.71f, 1.00f);
+		style.Colors[ImGuiCol_ComboBg]               = ImVec4(0.20f, 0.20f, 0.20f, 0.99f);
+		style.Colors[ImGuiCol_CheckHovered]          = ImVec4(0.22f, 0.41f, 0.45f, 1.00f);
+		style.Colors[ImGuiCol_CheckActive]           = ImVec4(0.24f, 0.38f, 0.44f, 1.00f);
+		style.Colors[ImGuiCol_CheckMark]             = ImVec4(0.92f, 0.92f, 0.92f, 0.50f);
+		style.Colors[ImGuiCol_SliderGrab]            = ImVec4(0.24f, 0.38f, 0.44f, 1.00f);
+		style.Colors[ImGuiCol_SliderGrabActive]      = ImVec4(0.25f, 0.47f, 0.52f, 1.00f);
+		style.Colors[ImGuiCol_Button]                = ImVec4(0.24f, 0.38f, 0.44f, 1.00f);
+		style.Colors[ImGuiCol_ButtonHovered]         = ImVec4(0.19f, 0.29f, 0.34f, 1.00f);
+		style.Colors[ImGuiCol_ButtonActive]          = ImVec4(0.31f, 0.47f, 0.55f, 1.00f);
+		style.Colors[ImGuiCol_Header]                = ImVec4(0.24f, 0.38f, 0.44f, 1.00f);
+		style.Colors[ImGuiCol_HeaderHovered]         = ImVec4(0.27f, 0.50f, 0.55f, 1.00f);
+		style.Colors[ImGuiCol_HeaderActive]          = ImVec4(0.33f, 0.60f, 0.66f, 1.00f);
+		style.Colors[ImGuiCol_Column]                = ImVec4(0.24f, 0.38f, 0.44f, 1.00f);
+		style.Colors[ImGuiCol_ColumnHovered]         = ImVec4(0.39f, 0.61f, 0.71f, 1.00f);
+		style.Colors[ImGuiCol_ColumnActive]          = ImVec4(0.35f, 0.65f, 0.71f, 1.00f);
+		style.Colors[ImGuiCol_ResizeGrip]            = ImVec4(1.00f, 1.00f, 1.00f, 0.30f);
+		style.Colors[ImGuiCol_ResizeGripHovered]     = ImVec4(1.00f, 1.00f, 1.00f, 0.60f);
+		style.Colors[ImGuiCol_ResizeGripActive]      = ImVec4(1.00f, 1.00f, 1.00f, 0.90f);
+		style.Colors[ImGuiCol_CloseButton]           = ImVec4(0.24f, 0.38f, 0.44f, 1.00f);
+		style.Colors[ImGuiCol_CloseButtonHovered]    = ImVec4(0.27f, 0.50f, 0.55f, 1.00f);
+		style.Colors[ImGuiCol_CloseButtonActive]     = ImVec4(0.33f, 0.60f, 0.66f, 1.00f);
+		style.Colors[ImGuiCol_PlotLines]             = ImVec4(0.24f, 0.38f, 0.44f, 1.00f);
+		style.Colors[ImGuiCol_PlotLinesHovered]      = ImVec4(0.39f, 0.61f, 0.71f, 1.00f);
+		style.Colors[ImGuiCol_PlotHistogram]         = ImVec4(0.24f, 0.38f, 0.44f, 1.00f);
+		style.Colors[ImGuiCol_PlotHistogramHovered]  = ImVec4(0.39f, 0.61f, 0.71f, 1.00f);
+		style.Colors[ImGuiCol_TextSelectedBg]        = ImVec4(0.24f, 0.38f, 0.44f, 1.00f);
+		style.Colors[ImGuiCol_TooltipBg]             = ImVec4(0.13f, 0.13f, 0.13f, 0.90f);
+
+		// Sizes
+		style.ScrollBarWidth = 13.f;
+		style.Alpha          = 1.f;
+		style.WindowRounding = 0.f;
+	}
 	
 	static void renderImguiDisplayLists(ImDrawList** const cmd_lists, int cmd_lists_count)
 	{
@@ -222,6 +272,7 @@ namespace Gui
 
 		resize();
 		loadFontsTexture();
+		setStyle();
 	}
 
 	void cleanup()
