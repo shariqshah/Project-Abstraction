@@ -13,6 +13,7 @@ namespace ScriptEngine
 {	
 	bool initialize();
 	void cleanup();
+	void executeString(const char* filename);
 	void updateAllScripts(float deltaTime);
 	void addScript(GameObject* gameObject, const std::string& scriptName);
     void unRegisterGameObject(GameObject* gameObject);
@@ -22,6 +23,7 @@ namespace ScriptEngine
 	void reloadScript(const std::string& scriptName);
 	asIScriptEngine* getEngine();
 	void registerScriptInterface();
+	void saveConfigToFile();
 }
 
 #endif

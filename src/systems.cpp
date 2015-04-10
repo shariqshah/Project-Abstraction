@@ -42,6 +42,7 @@ namespace System
 		ScriptEngine::registerScriptInterface();
 
 		Editor::initialize();
+		Console::initialize();
 	}
 
 	void update(float deltaTime, bool* quit)
@@ -62,6 +63,7 @@ namespace System
 	{
 		SceneManager::cleanup();
 		Editor::cleanup();
+		Console::cleanup();
 		Physics::cleanup();
 		ScriptEngine::cleanup();
 	}

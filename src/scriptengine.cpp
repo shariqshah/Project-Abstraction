@@ -7,6 +7,7 @@
 #include "datatypes.h"
 #include "../include/angelscript/add_on/scriptstdstring/scriptstdstring.h"
 #include "../include/angelscript/add_on/scriptbuilder/scriptbuilder.h"
+#include "../include/angelscript/add_on/scripthelper/scripthelper.h"
 #include "passert.h"
 
 struct Script
@@ -184,12 +185,12 @@ namespace ScriptEngine
 		Log::message(gameObject->name + " registered with scripting engine");
 	}
 
-	bool createModule(const std::string& scriptName, bool isReloading = false)
+	bool createModule(const std::string& scriptName, bool appendTemp = false)
 	{
 		bool success = true;
 		CScriptBuilder builder;
-		// If isReloading is true then append TEMP to name to avoid collision with existing module
-		std::string moduleName = isReloading ? scriptName + "TEMP" : scriptName;
+		// If appendTemp is true then append TEMP to name to avoid collision with existing module
+		std::string moduleName = appendTemp ? scriptName + "TEMP" : scriptName;
 		int rc = builder.StartNewModule(engine, moduleName.c_str());
 		std::string scriptPath(scriptDir + scriptName + ".as");
 		if(Utils::fileExists(scriptPath.c_str()))
@@ -517,5 +518,15 @@ namespace ScriptEngine
 		}
 		if(!success) Log::error("ScriptEngine::reloadScript", "Reloading '" + scriptName + "' failed");
 		return success;
+	}
+
+	void executeString(const char* string)
+	{
+		ExecuteString(engine, string);
+	}
+
+	void saveConfigToFile()
+	{
+		WriteConfigToFile(engine, "angelConfig");
 	}
 }

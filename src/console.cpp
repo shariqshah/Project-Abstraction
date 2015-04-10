@@ -1,7 +1,10 @@
 #include "console.h"
+#include "scenemanager.h"
+#include "scriptengine.h"
 #include "gui.h"
 
 #include <vector>
+#include <string.h>
 
 namespace Console
 {
@@ -14,16 +17,23 @@ namespace Console
 	
 	namespace
 	{
-		int windowFlags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_ShowBorders;
+		//int windowFlags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_ShowBorders;
+		int windowFlags = ImGuiWindowFlags_NoCollapse;
 		std::vector<ConsoleMessage> messages;
-		bool windowShown   = false;
+		bool windowShown   = true;
 		bool dropDownShown = false;
 		Vec4 colNormal     = Vec4(1.f);
 		Vec4 colWarning    = Vec4(1.f, 1.f, 0.f, 1.f);
 		Vec4 colError      = Vec4(1.f, 0.f, 0.f, 1.f);
-		Vec4 colCommand    = Vec4(0.f, 1.f, 0.f, 1.f);
+		Vec4 colCommand    = Vec4(0.f, 0.63f, 1.f, 1.f);
 		const int BUF_SIZE = 256;
 		char commandBuf[BUF_SIZE] = "";
+		std::vector<std::string> commandHistory;
+		uint32_t historyPos = -1;
+	}
+
+	void initialize()
+	{
 	}
 	
 	void addMessage(MessageType type, const std::string& message)
@@ -57,6 +67,49 @@ namespace Console
 	void executeCommand()
 	{
 		addMessage(MSG_COMMAND, std::string(&commandBuf[0]));
+		commandHistory.push_back(std::string(&commandBuf[0]));
+		// get the command
+		char* commandLine = &commandBuf[0];
+		char* command = strtok(commandLine, " ");
+		//command = strtok(NULL, " ");
+		// check if command is valid
+		if(command)
+		{
+			if(strcmp(command, "attach") == 0) // Attach script to gameObject
+			{
+				// get the name of each file and compile them
+				const char* gameobjectName = strtok(NULL, " ");
+				const char* filename       = strtok(NULL, " ");
+				if(!filename)
+				{
+					addMessage(MSG_ERROR, "No script specified");
+				}
+				else
+				{
+					if(!gameobjectName)
+					{
+						addMessage(MSG_ERROR, "No gameobject specified");
+					}
+					else
+					{
+						GameObject* gameobject = SceneManager::find(gameobjectName);
+						if(gameobject)
+						{
+							ScriptEngine::addScript(gameobject, filename);
+						}
+						else
+						{
+							addMessage(MSG_ERROR, "'" + std::string(gameobjectName) + "' not found");
+						}
+					}
+				}		
+			}
+			else if(strcmp(command, "reload") == 0) // Reload script
+			{
+				const char* scriptName = strtok(NULL, " ");
+				ScriptEngine::reloadScript(scriptName);
+			}
+		}
 		memset(&commandBuf[0], '\0', BUF_SIZE);
 	}
 	
@@ -92,12 +145,14 @@ namespace Console
 			}
 			ImGui::EndChild();
 
-			ImGui::Separator();
 			if(ImGui::InputText("Command", &commandBuf[0], BUF_SIZE, ImGuiInputTextFlags_EnterReturnsTrue))
 			{
-				executeCommand();
+				if(commandBuf[0])
+					executeCommand();
 				scrollToEnd = true;
+				ImGui::SetKeyboardFocusHere(-1);
 			}
+			if(ImGui::IsItemHovered()) ImGui::SetKeyboardFocusHere(-1);
 			
 			ImGui::End();
 		}

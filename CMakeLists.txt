@@ -12,7 +12,8 @@ aux_source_directory(${PROJECT_SOURCE_DIR}/include/imgui SRC_LIST)
 aux_source_directory(${PROJECT_SOURCE_DIR}/include/angelscript/add_on/scriptstdstring SRC_LIST)
 aux_source_directory(${PROJECT_SOURCE_DIR}/include/angelscript/add_on/scriptarray SRC_LIST)
 aux_source_directory(${PROJECT_SOURCE_DIR}/include/angelscript/add_on/scriptbuilder SRC_LIST)
-aux_source_directory(${PROJECT_SOURCE_DIR}/include/angelscript/add_on/scripthandle SRC_LIST)
+#aux_source_directory(${PROJECT_SOURCE_DIR}/include/angelscript/add_on/scripthandle SRC_LIST)
+aux_source_directory(${PROJECT_SOURCE_DIR}/include/angelscript/add_on/scripthelper SRC_LIST)
 add_executable(${PROJECT_NAME} ${SRC_LIST})
 
 #include directories

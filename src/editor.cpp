@@ -20,7 +20,7 @@ namespace Editor
 	namespace
 	{
 		bool showMainToolBar      = true;
-		bool showLog              = false;
+		bool showLog              = true;
 		bool showSceneObjects     = false;
 		bool showSelectedGO       = false;
 		bool showRendererSettings = false;
