@@ -28,8 +28,9 @@ namespace Console
 		Vec4 colCommand    = Vec4(0.f, 0.63f, 1.f, 1.f);
 		const int BUF_SIZE = 256;
 		char commandBuf[BUF_SIZE] = "";
+		char preservedCommand[BUF_SIZE] = "";
 		std::vector<std::string> commandHistory;
-		uint32_t historyPos = -1;
+		int historyPos = -1;
 	}
 
 	void initialize()
@@ -68,6 +69,7 @@ namespace Console
 	{
 		addMessage(MSG_COMMAND, std::string(&commandBuf[0]));
 		commandHistory.push_back(std::string(&commandBuf[0]));
+		// historyPos = (int)commandHistory.size() - 1;
 		// get the command
 		char* commandLine = &commandBuf[0];
 		char* command = strtok(commandLine, " ");
@@ -156,6 +158,51 @@ namespace Console
 		}
 		memset(&commandBuf[0], '\0', BUF_SIZE);
 	}
+
+	int textEditCallback(ImGuiTextEditCallbackData* data)
+	{
+	    if(data->EventFlag == ImGuiInputTextFlags_CallbackHistory)
+		{
+			const int prevHistoryPos = historyPos;
+			if(data->EventKey == ImGuiKey_UpArrow)
+			{
+				if(historyPos == -1)
+				{
+					historyPos = (int)(commandHistory.size() - 1);
+					strncpy(&preservedCommand[0], data->Buf, data->BufSize);
+				}
+				else if(historyPos > 0)
+				{
+					historyPos--;
+				}
+			}
+			else if(data->EventKey == ImGuiKey_DownArrow)
+			{
+				if(historyPos != -1)
+					if(++historyPos >= (int)commandHistory.size())
+						historyPos = -1;
+			}
+
+			if(prevHistoryPos != historyPos)
+			{
+				if(historyPos >= 0)
+				{
+					strncpy(data->Buf, commandHistory[historyPos].c_str(), data->BufSize);
+				}
+				else
+				{
+					size_t prevCommandLen = strlen(&preservedCommand[0]);
+					if(prevCommandLen > 0)
+						strncpy(data->Buf, &preservedCommand[0], prevCommandLen);
+					else
+						memset(data->Buf, '\0', data->BufSize);
+				}
+				data->BufDirty = true;
+				data->CursorPos = data->SelectionStart = data->SelectionEnd = (int)strlen(data->Buf);
+			}
+		}
+		return 0;
+	}
 	
 	void update()
 	{
@@ -189,12 +236,14 @@ namespace Console
 			}
 			ImGui::EndChild();
 
-			if(ImGui::InputText("Command", &commandBuf[0], BUF_SIZE, ImGuiInputTextFlags_EnterReturnsTrue))
+			int flags = ImGuiInputTextFlags_CallbackHistory | ImGuiInputTextFlags_EnterReturnsTrue;
+			if(ImGui::InputText("Command", &commandBuf[0], BUF_SIZE, flags, &textEditCallback))
 			{
 				if(commandBuf[0])
 					executeCommand();
 				scrollToEnd = true;
 				ImGui::SetKeyboardFocusHere(-1);
+				historyPos = -1;
 			}
 			if(ImGui::IsItemHovered()) ImGui::SetKeyboardFocusHere(-1);
 			
