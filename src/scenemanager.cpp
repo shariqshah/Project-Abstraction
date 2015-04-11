@@ -93,20 +93,16 @@ namespace SceneManager
 	GameObject* find(const std::string& name)
 	{
 		GameObject* gameObject = NULL;
-		bool  found      = false;
-
 		for(Node node : validNodes)
 		{
-			gameObject = &sceneObjects[node];
-			if(name == gameObject->name)
+			GameObject* temp = &sceneObjects[node];
+			if(name == temp->name)
 			{
-				found = true;
+				gameObject = temp;
 				break;
 			}
 		}
-		if(!found)
-			Log::warning(name + " not found in scene");
-		
+		if(!gameObject) Log::warning("Gameobject '" + name + "' not found in scene");
 		return gameObject;
 	}
 
@@ -121,9 +117,7 @@ namespace SceneManager
 				break;
 			}
 		}
-		if(!gameObject)
-			Log::warning("GO " + std::to_string(nodeToFind) + " not found in scene");
-		
+		if(!gameObject) Log::warning("GO " + std::to_string(nodeToFind) + " not found in scene");
 		return gameObject;
 	}
 

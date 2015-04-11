@@ -13,7 +13,7 @@ namespace ScriptEngine
 {	
 	bool initialize();
 	void cleanup();
-	void executeString(const char* filename);
+	void executeString(const char* code);
 	void updateAllScripts(float deltaTime);
 	void addScript(GameObject* gameObject, const std::string& scriptName);
     void unRegisterGameObject(GameObject* gameObject);

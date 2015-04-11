@@ -520,9 +520,9 @@ namespace ScriptEngine
 		return success;
 	}
 
-	void executeString(const char* string)
+	void executeString(const char* code)
 	{
-		ExecuteString(engine, string);
+		ExecuteString(engine, code);
 	}
 
 	void saveConfigToFile()

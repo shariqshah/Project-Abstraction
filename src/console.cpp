@@ -75,39 +75,83 @@ namespace Console
 		// check if command is valid
 		if(command)
 		{
+			const char* usageMessage = "";
 			if(strcmp(command, "attach") == 0) // Attach script to gameObject
 			{
+				usageMessage = "usage : attach [gameobject name] [script name]";
 				// get the name of each file and compile them
 				const char* gameobjectName = strtok(NULL, " ");
-				const char* filename       = strtok(NULL, " ");
-				if(!filename)
+				const char* scriptName       = strtok(NULL, " ");
+				if(!scriptName)
 				{
 					addMessage(MSG_ERROR, "No script specified");
+					addMessage(MSG_NORM, usageMessage);
 				}
 				else
 				{
 					if(!gameobjectName)
 					{
 						addMessage(MSG_ERROR, "No gameobject specified");
+						addMessage(MSG_NORM, usageMessage);
 					}
 					else
 					{
 						GameObject* gameobject = SceneManager::find(gameobjectName);
 						if(gameobject)
-						{
-							ScriptEngine::addScript(gameobject, filename);
-						}
+							ScriptEngine::addScript(gameobject, scriptName);
 						else
-						{
 							addMessage(MSG_ERROR, "'" + std::string(gameobjectName) + "' not found");
-						}
 					}
 				}		
 			}
 			else if(strcmp(command, "reload") == 0) // Reload script
 			{
+				usageMessage = "usage : reload [script name]";
 				const char* scriptName = strtok(NULL, " ");
-				ScriptEngine::reloadScript(scriptName);
+				if(scriptName)
+				{
+					ScriptEngine::reloadScript(scriptName);
+				}
+				else
+				{
+					addMessage(MSG_ERROR, "No script specified");
+					addMessage(MSG_NORM, usageMessage);
+				}	
+			}
+			else if(strcmp(command, "detach") == 0)
+			{
+				usageMessage = "detach [gameobject name] [script name]";
+				const char* gameobjectName = strtok(NULL, " ");
+				const char* scriptName     = strtok(NULL, " ");
+				if(!scriptName)
+				{
+					addMessage(MSG_ERROR, "No script specified");
+					addMessage(MSG_NORM, usageMessage);
+				}
+				else
+				{
+					if(!gameobjectName)
+					{
+						addMessage(MSG_ERROR, "No gameobject specified");
+						addMessage(MSG_NORM, usageMessage);
+					}
+					else
+					{
+						GameObject* gameobject = SceneManager::find(gameobjectName);
+						if(gameobject)
+							ScriptEngine::removeScript(gameobject, scriptName);
+						else
+							addMessage(MSG_ERROR, "'" + std::string(gameobjectName) + "' not found");
+					}
+				}
+			}
+			else if(strcmp(command, "saveconf") == 0)
+			{
+				ScriptEngine::saveConfigToFile();
+			}
+			else
+			{
+				addMessage(MSG_ERROR, "Unrecognized command");
 			}
 		}
 		memset(&commandBuf[0], '\0', BUF_SIZE);
