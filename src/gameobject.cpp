@@ -7,6 +7,7 @@
 #include "light.h"
 #include "passert.h"
 #include "motionstate.h"
+#include "rigidbody.h"
 
 namespace GO
 {
@@ -137,11 +138,11 @@ namespace GO
 		CLight* newLight = NULL;
 		if(!hasComponent(gameObject, Component::LIGHT))
 		{
-			int index = Renderer::Light::create(gameObject->node);
+			int index = Light::create(gameObject->node);
 			
 			gameObject->compIndices[(int)Component::LIGHT] = index;
 			Log::message("Light added to " + gameObject->name);
-			newLight = Renderer::Light::getLightAtIndex(index);
+			newLight = Light::getLightAtIndex(index);
 			newLight->color = color;
 		}
 		else
@@ -157,10 +158,10 @@ namespace GO
 		CCamera* newCamera = NULL;
 		if(!hasComponent(gameObject, Component::CAMERA))
 		{
-			int index = Renderer::Camera::create(gameObject);
+			int index = Camera::create(gameObject);
 			gameObject->compIndices[(int)Component::CAMERA] = index;
 			Log::message("Camera added to " + gameObject->name);
-			newCamera = Renderer::Camera::getCameraAtIndex(index);
+			newCamera = Camera::getCameraAtIndex(index);
 		}
 		else
 		{
@@ -176,12 +177,12 @@ namespace GO
 		CModel* newModel = NULL;
 		if(!hasComponent(gameObject, Component::MODEL))
 		{
-			int index = Renderer::Model::create(filename.c_str());
+			int index = Model::create(filename.c_str());
 			if(index != -1)
 			{
 				gameObject->compIndices[Component::MODEL] = index;
 				Log::message("Model added to " + gameObject->name);
-				newModel = Renderer::Model::getModelAtIndex(index);
+				newModel = Model::getModelAtIndex(index);
 				newModel->node = gameObject->node;
 			}
 			else
@@ -208,7 +209,7 @@ namespace GO
 			if(!GO::hasComponent(gameObject, Component::RIGIDBODY))
 			{
 				MotionState* motionState = new MotionState(gameObject);
-				rigidbody = Physics::RigidBody::create(gameObject,
+				rigidbody = RigidBody::create(gameObject,
 													   shape,
 													   motionState,
 													   mass,
@@ -239,7 +240,7 @@ namespace GO
 		PA_ASSERT(gameObject);
 		CModel* model = NULL;
 		if(hasComponent(gameObject, Component::MODEL))
-			model = Renderer::Model::getModelAtIndex(gameObject->compIndices[(Component::MODEL)]);
+			model = Model::getModelAtIndex(gameObject->compIndices[(Component::MODEL)]);
 		else
 			Log::error("GO::getModel", gameObject->name + " does not have model component");
 
@@ -251,7 +252,7 @@ namespace GO
 		PA_ASSERT(gameObject);
 		CCamera* camera = NULL;
 		if(hasComponent(gameObject, Component::CAMERA))
-			camera = Renderer::Camera::getCameraAtIndex(gameObject->compIndices[(Component::CAMERA)]);
+			camera = Camera::getCameraAtIndex(gameObject->compIndices[(Component::CAMERA)]);
 		else
 			Log::error("GO::getCamera", gameObject->name + " does not have camera component");
 
@@ -276,7 +277,7 @@ namespace GO
 		PA_ASSERT(gameObject);
 		CLight* light = NULL;		
 		if(hasComponent(gameObject, Component::LIGHT))
-			light =Renderer::Light::getLightAtIndex(gameObject->compIndices[(Component::LIGHT)]);
+			light =Light::getLightAtIndex(gameObject->compIndices[(Component::LIGHT)]);
 		else
 			Log::error("GO::getLight", gameObject->name + " does not have light component");
 
@@ -297,16 +298,16 @@ namespace GO
 				Transform::remove(index);
 				break;					
 			case Component::CAMERA:
-				Renderer::Camera::remove(index);
+				Camera::remove(index);
 				break;
 			case Component::MODEL:
-				Renderer::Model::remove(index);
+				Model::remove(index);
 				break;
 			case Component::LIGHT:
-				Renderer::Light::remove(index);
+				Light::remove(index);
 				break;
 			case Component::RIGIDBODY:
-				Physics::RigidBody::remove(index);
+				RigidBody::remove(index);
 				break;
 			case Component::NUM_COMPONENTS:
 				Log::error("GO::removeComponent", "Cannot remove invalid component type");
@@ -326,15 +327,15 @@ namespace GO
 		if(hasComponent(gameObject, Component::CAMERA))
 		{
 			CCamera* camera = getCamera(gameObject);
-			Renderer::Camera::updateView(camera);
+			Camera::updateView(camera);
 		}
 		//Update the rigidbody's transform
 		if(hasComponent(gameObject, Component::RIGIDBODY) && syncPhysics)
 		{
 			CRigidBody  rigidbody  = getRigidBody(gameObject);
 			CTransform* transform  = getTransform(gameObject);
-			Physics::RigidBody::setTransform(rigidbody, transform->transMat);
-			Physics::RigidBody::setActivation(rigidbody, true);
+			RigidBody::setTransform(rigidbody, transform->transMat);
+			RigidBody::setActivation(rigidbody, true);
 		}
 	}
 }

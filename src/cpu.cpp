@@ -27,7 +27,7 @@ namespace Cpu
 
 		// test = SceneManager::create("CPU_Test_GO");
 		// auto camera = CompManager::addCamera(test, "CPU_Camera", Pipeline::FORWARD);
-		// // Renderer::Camera::setOutputTexture(camera, screenTexture);
+		// // Camera::setOutputTexture(camera, screenTexture);
 		// auto testTran = CompManager::getTransform(test);
 		// Transform::setPosition(testTran, Vec3(-10, 0, 0));
 	}

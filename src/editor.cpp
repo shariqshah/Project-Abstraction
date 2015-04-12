@@ -14,6 +14,7 @@
 #include "physics.h"
 #include "console.h"
 #include "collisionshapes.h"
+#include "rigidbody.h"
 
 namespace Editor
 {
@@ -122,19 +123,19 @@ namespace Editor
 		CRigidBody  body       = GO::getRigidBody(selectedGO);
 		if(ImGui::CollapsingHeader("RigidBody", "RigidBodyComponent", true, true))
 		{
-			float mass = Physics::RigidBody::getMass(body);
+			float mass = RigidBody::getMass(body);
 			if(ImGui::InputFloat("Mass", &mass, 1.f, 5.f))
-				Physics::RigidBody::setMass(body, mass);
+				RigidBody::setMass(body, mass);
 
-			float restitution = Physics::RigidBody::getRestitution(body);
+			float restitution = RigidBody::getRestitution(body);
 			if(ImGui::InputFloat("Restitution", &restitution, 0.01f, 0.1f))
-				Physics::RigidBody::setRestitution(body, restitution);
+				RigidBody::setRestitution(body, restitution);
 
-			float friction = Physics::RigidBody::getFriction(body);
+			float friction = RigidBody::getFriction(body);
 			if(ImGui::InputFloat("Friction", &friction, 0.1f, 0.5f))
-				Physics::RigidBody::setFriction(body, friction);
+				RigidBody::setFriction(body, friction);
 			
-			ImGui::Text("Collision Shape : %s ", Physics::RigidBody::getCollisionShapeName(body));
+			ImGui::Text("Collision Shape : %s ", RigidBody::getCollisionShapeName(body));
 			if(ImGui::Combo("Set collision shape",
 							&collisionShapeCombo,
 							"None\0Box\0Sphere\0Capsule\0Cylinder\0Plane\0Mesh\0\0"))
@@ -183,16 +184,16 @@ namespace Editor
 				{
 					switch(collisionShapeCombo)
 					{
-					case 1: Physics::RigidBody::setCollisionShape(body, new Box(csHalfExt));   break;
-					case 2:	Physics::RigidBody::setCollisionShape(body, new Sphere(csRadius)); break;
-					case 3: Physics::RigidBody::setCollisionShape(body, new Capsule(csRadius, csHeight)); break;
-					case 4: Physics::RigidBody::setCollisionShape(body, new Cylinder(csHalfExt, csAxis)); break;
-					case 5: Physics::RigidBody::setCollisionShape(body, new Plane(csNormal, csMargin)); break;
+					case 1: RigidBody::setCollisionShape(body, new Box(csHalfExt));   break;
+					case 2:	RigidBody::setCollisionShape(body, new Sphere(csRadius)); break;
+					case 3: RigidBody::setCollisionShape(body, new Capsule(csRadius, csHeight)); break;
+					case 4: RigidBody::setCollisionShape(body, new Cylinder(csHalfExt, csAxis)); break;
+					case 5: RigidBody::setCollisionShape(body, new Plane(csNormal, csMargin)); break;
 					case 6:
-						model = Renderer::Model::findModel(&csInputMeshName[0]);
+						model = Model::findModel(&csInputMeshName[0]);
 						if(model)
 						{
-							Physics::RigidBody::setCollisionShape(body, new CollisionMesh(model, csIsTriMesh));
+							RigidBody::setCollisionShape(body, new CollisionMesh(model, csIsTriMesh));
 						}
 						else
 						{
@@ -328,7 +329,7 @@ namespace Editor
 			if(ImGui::InputText("Mesh", &inputModelName[0], BUF_SIZE, ImGuiInputTextFlags_EnterReturnsTrue))
 			{
 				CModel testModel;
-				if(Renderer::Model::loadFromFile(&inputModelName[0], &testModel))
+				if(Model::loadFromFile(&inputModelName[0], &testModel))
 				{
 					int prevMaterial = model->material;
 					Mat_Uniforms prevUniforms = model->materialUniforms;
@@ -343,7 +344,7 @@ namespace Editor
 					}
 					else
 					{
-						Renderer::Model::setMaterialType(newModel, (Mat_Type)prevMaterial);
+						Model::setMaterialType(newModel, (Mat_Type)prevMaterial);
 						newModel->materialUniforms = prevUniforms;
 						newModel->materialUniforms.texture = texture;
 						updateComponentViewers();
@@ -367,7 +368,7 @@ namespace Editor
 							&material,
 							"Unshaded\0Unshaded Textured\0Phong\0Phong Textured\0\0"))
 			{				
-				Renderer::Model::setMaterialType(model, (Mat_Type)material);
+				Model::setMaterialType(model, (Mat_Type)material);
 				memset(&inputModelTex[0], '\0', BUF_SIZE);
 				// If model had texture before, copy its name otherwise copy NONE
 				if(model->materialUniforms.texture != -1)
@@ -431,15 +432,15 @@ namespace Editor
 			if(ImGui::InputFloat("NearZ", &camera->nearZ, 0.1f, 1.f)) updateProj = true;
 			if(ImGui::InputFloat("FarZ", &camera->farZ, 1.f, 5.f))    updateProj = true;
 			if(ImGui::InputFloat("Fov", &camera->fov, 1.f, 5.f))	  updateProj = true;
-			if(updateProj) Renderer::Camera::updateProjection(camera);
+			if(updateProj) Camera::updateProjection(camera);
 
-			CCamera* activeCamera = Renderer::Camera::getActiveCamera();
+			CCamera* activeCamera = Camera::getActiveCamera();
 			bool isActive = false;
 			if(activeCamera) isActive = camera->node == activeCamera->node ? true : false;
 			if(ImGui::Checkbox("Is Active", &isActive))
 			{
-				if(isActive) Renderer::Camera::setActiveCamera(camera);
-				else		 Renderer::Camera::setActiveCamera(NULL);
+				if(isActive) Camera::setActiveCamera(camera);
+				else		 Camera::setActiveCamera(NULL);
 			}
 			if(ImGui::IsItemHovered())
 				ImGui::SetTooltip("Check to make the camera the active viewer for the scene");
@@ -541,7 +542,7 @@ namespace Editor
 					break;
 				case 2:
 					newModel = GO::addModel(selectedGO, "default.pamesh");
-					Renderer::Model::setMaterialType(newModel, MAT_UNSHADED_TEXTURED);
+					Model::setMaterialType(newModel, MAT_UNSHADED_TEXTURED);
 					newModel->materialUniforms.texture = Texture::create("default.png");
 					newModel->materialUniforms.diffuseColor = Vec4(1.f, 0.f, 1.f, 1.f);
 					break;

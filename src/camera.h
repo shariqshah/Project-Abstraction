@@ -22,26 +22,23 @@ struct CCamera
 	Mat4  viewProjMat;
 };
 
-namespace Renderer
+namespace Camera
 {
-	namespace Camera
-	{
-		void     initialize();
-		void     setAspectRatio(CCamera* camera, float aspectRatio);
-		void     setFov(CCamera* camera, float fov);
-		void     setNearZ(CCamera* camera, float nearZ);
-		void     setFarZ(CCamera* camera, float farZ);
-		void     generateBindings();
-		void     updateProjection(CCamera* camera);
-		void     updateView(CCamera* camera);
-		bool     remove(int cameraIndex);
-		void     cleanup();
-		void     updateAllCamerasAspectRatio(float aspectRatio);		
-		CCamera* getCameraAtIndex(int cameraIndex);
-		int      create(GameObject* gameObject);
-		CCamera* getActiveCamera();
-		void     setActiveCamera(CCamera* camera); // Pass camera as NULL to reset active camera to none
-	}
+	void     initialize();
+	void     setAspectRatio(CCamera* camera, float aspectRatio);
+	void     setFov(CCamera* camera, float fov);
+	void     setNearZ(CCamera* camera, float nearZ);
+	void     setFarZ(CCamera* camera, float farZ);
+	void     generateBindings();
+	void     updateProjection(CCamera* camera);
+	void     updateView(CCamera* camera);
+	bool     remove(int cameraIndex);
+	void     cleanup();
+	void     updateAllCamerasAspectRatio(float aspectRatio);		
+	CCamera* getCameraAtIndex(int cameraIndex);
+	int      create(GameObject* gameObject);
+	CCamera* getActiveCamera();
+	void     setActiveCamera(CCamera* camera); // Pass camera as NULL to reset active camera to none
 }
 
 #endif

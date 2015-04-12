@@ -25,21 +25,18 @@ struct CModel
 	bool                      drawIndexed = false;
 };
 
-namespace Renderer
+namespace Model
 {
-	namespace Model
-	{
-		void    initialize(const char* path);
-		void    renderAllModels(CCamera* camera, RenderParams* renderParams);
-		CModel* getModelAtIndex(int modelIndex);
-		CModel* findModel(const char* filename);
-		int     create(const char* filename);
-		void    remove(unsigned int modelIndex);
-		void    generateBindings();
-		void    cleanup();
-		bool    loadFromFile(const char* filename, CModel* model);
-		void    setMaterialType(CModel* model, Mat_Type material);
-	}
+	void    initialize(const char* path);
+	void    renderAllModels(CCamera* camera, RenderParams* renderParams);
+	CModel* getModelAtIndex(int modelIndex);
+	CModel* findModel(const char* filename);
+	int     create(const char* filename);
+	void    remove(unsigned int modelIndex);
+	void    generateBindings();
+	void    cleanup();
+	bool    loadFromFile(const char* filename, CModel* model);
+	void    setMaterialType(CModel* model, Mat_Type material);
 }
 	
 #endif

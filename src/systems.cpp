@@ -17,6 +17,7 @@
 #include "editor.h"
 #include "collisionshapes.h"
 #include "console.h"
+#include "rigidbody.h"
 
 namespace System
 {
@@ -31,11 +32,11 @@ namespace System
 		Transform::generateBindings();
 		Material::generateBindings();
 		Texture::generateBindings();
-		Renderer::Model::generateBindings();
-		Renderer::Light::generateBindings();
-		Renderer::Camera::generateBindings();
+		Model::generateBindings();
+		Light::generateBindings();
+		Camera::generateBindings();
 		Physics::generateBindings();
-		Physics::RigidBody::generateBindings();
+		RigidBody::generateBindings();
 		GO::generateBindings();
 		SceneManager::generateBindings();
 		Gui::generateBindings();
@@ -64,6 +65,7 @@ namespace System
 		SceneManager::cleanup();
 		Editor::cleanup();
 		Console::cleanup();
+		RigidBody::cleanup();
 		Physics::cleanup();
 		ScriptEngine::cleanup();
 	}

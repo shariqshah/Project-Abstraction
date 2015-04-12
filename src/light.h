@@ -28,19 +28,16 @@ struct CLight
 	int         radius      = 30;
 };
 
-namespace Renderer
+namespace Light
 {
-	namespace Light
-	{
-		const int MAX_LIGHTS = 32;
-		int                    create(Node node);
-		void                   initialize();
-		void                   generateBindings();		
-		void                   cleanup();
-		void                   remove(uint32_t index);
-		CLight*                getLightAtIndex(uint32_t index);
-		std::vector<uint32_t>* getActiveLights();
-	}
+	const int MAX_LIGHTS = 32;
+	int                    create(Node node);
+	void                   initialize();
+	void                   generateBindings();		
+	void                   cleanup();
+	void                   remove(uint32_t index);
+	CLight*                getLightAtIndex(uint32_t index);
+	std::vector<uint32_t>* getActiveLights();
 }
 
 

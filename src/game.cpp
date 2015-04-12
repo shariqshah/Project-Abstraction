@@ -54,7 +54,7 @@ Game::Game(const char* path)
 	{
 		GameObject* cube = SceneManager::create("Cube");
 		CModel* cubeModel = GO::addModel(cube, "suzanne.pamesh");
-		Renderer::Model::setMaterialType(cubeModel, MAT_PHONG);
+		Model::setMaterialType(cubeModel, MAT_PHONG);
 		cubeModel->materialUniforms.diffuseColor = Vec4(0, 1, 0, 1);
 		cubeModel->materialUniforms.texture = Texture::create("layingrock.png");
 		CTransform* cubeTran = GO::getTransform(cube);
@@ -67,7 +67,7 @@ Game::Game(const char* path)
 	{
 		GameObject* cube2 = SceneManager::create("Cube" + std::to_string(i));
 		CModel* cubeModel = GO::addModel(cube2, "suzanne.pamesh");
-		Renderer::Model::setMaterialType(cubeModel, MAT_PHONG);
+		Model::setMaterialType(cubeModel, MAT_PHONG);
 		cubeModel->materialUniforms.diffuseColor = Vec4(0, 1, 0, 1);
 		cubeModel->materialUniforms.texture = Texture::create("layingrock.png");
 		if((i % 2) == 0)
@@ -90,20 +90,20 @@ Game::Game(const char* path)
 	CTransform* transform = GO::getTransform(playerPtr);
 	Transform::translate(transform, Vec3(0, 3, 5));
 	CCamera* camera = GO::addCamera(playerPtr);
-	Renderer::Camera::setActiveCamera(camera);
+	Camera::setActiveCamera(camera);
 	//System::CameraSystem::setActiveObject(playerPtr);
 	ScriptEngine::addScript(playerPtr, "freecamera");
 
 	GameObject* plane = SceneManager::create("Ground");
 	CModel* planeModel = GO::addModel(plane, "plane.pamesh");
-    Renderer::Model::setMaterialType(planeModel, MAT_PHONG);
+    Model::setMaterialType(planeModel, MAT_PHONG);
 	planeModel->materialUniforms.texture = Texture::create("test2.png");
 	GO::addRigidbody(plane, new Plane(Vec3(0, 1, 0), 1.f), 0.f, 1.f);
 	// ScriptEngine::addScript(plane, "test");
 
 	GameObject* tea = SceneManager::create("Teapot");
 	CModel* teapot = GO::addModel(tea, "teapot.pamesh");
-	Renderer::Model::setMaterialType(teapot, MAT_PHONG);
+	Model::setMaterialType(teapot, MAT_PHONG);
 	teapot->materialUniforms.specularStrength = 60.f;
 	teapot->materialUniforms.texture = Texture::create("chessboard.png");
 	CTransform* tTran = GO::getTransform(tea);
@@ -134,6 +134,6 @@ void Game::draw()
 void Game::resize(int width, int height)
 {
 	glViewport(0, 0, width, height); // TODO: Probably move viewport stuff to camera?
-	Renderer::Camera::updateAllCamerasAspectRatio((float)(width/height));
+	Camera::updateAllCamerasAspectRatio((float)(width/height));
 	Gui::resize();
 }

@@ -2,7 +2,7 @@
 #include "scriptengine.h"
 #include "passert.h"
 
-namespace Renderer
+namespace Light
 {
 	namespace
 	{
@@ -10,120 +10,117 @@ namespace Renderer
 		std::vector<uint32_t> activeLights;
 		std::vector<uint32_t> emptyIndices;
 	}
-	namespace Light
+	
+	void initialize()
 	{
-		void initialize()
-		{
 			
-		}
+	}
 		
-		void cleanup()
-		{
-			for(uint i = 0; i < activeLights.size(); i++)
-				remove(activeLights[i]);
+	void cleanup()
+	{
+		for(uint i = 0; i < activeLights.size(); i++)
+			remove(activeLights[i]);
 
-			activeLights.clear();
-			lightList.clear();
-			emptyIndices.clear();
-		}
-
-		std::vector<uint32_t>* getActiveLights()
-		{
-			return &activeLights;
-		}
-		
-		void remove(uint32_t index)
-		{
-			if(index < lightList.size())
-			{
-				bool alreadyEmpty = true;
-				uint indexToErase = 0;
-				for(uint i = 0; i < activeLights.size(); i++)
-				{
-					if(activeLights[i] == index)
-					{
-						alreadyEmpty = false;
-						indexToErase = i;
-						break;
-					}
-				}
-
-				if(!alreadyEmpty)
-				{
-					emptyIndices.push_back(index);
-					lightList[index].valid = false;
-					activeLights.erase(activeLights.begin() + indexToErase);
-				}
-				else
-				{
-					Log::warning("Light is already removed!");
-				}
-			}
-		}
-		
-		CLight* getLightAtIndex(uint32_t index)
-		{
-			if(index < lightList.size())
-			{
-				return &lightList[index];
-			}
-			else
-			{
-				Log::error("Light::getLightByIndex", "Invalid light index");
-				return NULL;
-			}
-		}
-		
-		int create(Node node)
-		{
-			int index = -1;
-			if(emptyIndices.empty())
-			{
-				lightList.push_back(CLight());
-				index = lightList.size() - 1;
-			}
-			else
-			{
-				index = emptyIndices.back();
-				lightList[index] = CLight();
-			}
-
-			lightList[index].node = node;
-			activeLights.push_back(index);
-			
-			return index;
-		}
-
-		void generateBindings()
-		{
-			asIScriptEngine* engine = ScriptEngine::getEngine();
-			int rc = engine->RegisterEnum("LightType"); PA_ASSERT(rc >= 0);
-			rc = engine->RegisterEnumValue("LightType", "SPOT", (int)LightType::LT_SPOT);
-			rc = engine->RegisterEnumValue("LightType", "DIR", (int)LightType::LT_DIR);
-			rc = engine->RegisterEnumValue("LightType", "POINT", (int)LightType::LT_POINT);
-			
-			rc = engine->RegisterObjectType("Light", sizeof(CLight), asOBJ_REF | asOBJ_NOCOUNT);
-			PA_ASSERT(rc >= 0);
-			rc = engine->RegisterObjectProperty("Light", "float intensity", asOFFSET(CLight, intensity));
-			PA_ASSERT(rc >= 0);
-			rc = engine->RegisterObjectProperty("Light", "Vec4 color", asOFFSET(CLight, color));
-			PA_ASSERT(rc >= 0);
-			rc = engine->RegisterObjectProperty("Light", "float outerAngle", asOFFSET(CLight, outerAngle));
-			PA_ASSERT(rc >= 0);
-			rc = engine->RegisterObjectProperty("Light", "float innerAngle", asOFFSET(CLight, innerAngle));
-			PA_ASSERT(rc >= 0);
-			rc = engine->RegisterObjectProperty("Light", "int32 node", asOFFSET(CLight, node));
-			PA_ASSERT(rc >= 0);
-			rc = engine->RegisterObjectProperty("Light", "bool castShadow", asOFFSET(CLight, castShadow));
-			PA_ASSERT(rc >= 0);
-			rc = engine->RegisterObjectProperty("Light", "float falloff", asOFFSET(CLight, falloff));
-			PA_ASSERT(rc >= 0);
-			rc = engine->RegisterObjectProperty("Light", "float radius", asOFFSET(CLight, radius));
-			PA_ASSERT(rc >= 0);
-			rc = engine->RegisterObjectProperty("Light", "LightType type", asOFFSET(CLight, type));
-			PA_ASSERT(rc >= 0);
-		
-		}
+		activeLights.clear();
+		lightList.clear();
+		emptyIndices.clear();
 	}
 
+	std::vector<uint32_t>* getActiveLights()
+	{
+		return &activeLights;
+	}
+		
+	void remove(uint32_t index)
+	{
+		if(index < lightList.size())
+		{
+			bool alreadyEmpty = true;
+			uint indexToErase = 0;
+			for(uint i = 0; i < activeLights.size(); i++)
+			{
+				if(activeLights[i] == index)
+				{
+					alreadyEmpty = false;
+					indexToErase = i;
+					break;
+				}
+			}
+
+			if(!alreadyEmpty)
+			{
+				emptyIndices.push_back(index);
+				lightList[index].valid = false;
+				activeLights.erase(activeLights.begin() + indexToErase);
+			}
+			else
+			{
+				Log::warning("Light is already removed!");
+			}
+		}
+	}
+		
+	CLight* getLightAtIndex(uint32_t index)
+	{
+		if(index < lightList.size())
+		{
+			return &lightList[index];
+		}
+		else
+		{
+			Log::error("Light::getLightByIndex", "Invalid light index");
+			return NULL;
+		}
+	}
+		
+	int create(Node node)
+	{
+		int index = -1;
+		if(emptyIndices.empty())
+		{
+			lightList.push_back(CLight());
+			index = lightList.size() - 1;
+		}
+		else
+		{
+			index = emptyIndices.back();
+			lightList[index] = CLight();
+		}
+
+		lightList[index].node = node;
+		activeLights.push_back(index);
+			
+		return index;
+	}
+
+	void generateBindings()
+	{
+		asIScriptEngine* engine = ScriptEngine::getEngine();
+		int rc = engine->RegisterEnum("LightType"); PA_ASSERT(rc >= 0);
+		rc = engine->RegisterEnumValue("LightType", "SPOT", (int)LightType::LT_SPOT);
+		rc = engine->RegisterEnumValue("LightType", "DIR", (int)LightType::LT_DIR);
+		rc = engine->RegisterEnumValue("LightType", "POINT", (int)LightType::LT_POINT);
+			
+		rc = engine->RegisterObjectType("Light", sizeof(CLight), asOBJ_REF | asOBJ_NOCOUNT);
+		PA_ASSERT(rc >= 0);
+		rc = engine->RegisterObjectProperty("Light", "float intensity", asOFFSET(CLight, intensity));
+		PA_ASSERT(rc >= 0);
+		rc = engine->RegisterObjectProperty("Light", "Vec4 color", asOFFSET(CLight, color));
+		PA_ASSERT(rc >= 0);
+		rc = engine->RegisterObjectProperty("Light", "float outerAngle", asOFFSET(CLight, outerAngle));
+		PA_ASSERT(rc >= 0);
+		rc = engine->RegisterObjectProperty("Light", "float innerAngle", asOFFSET(CLight, innerAngle));
+		PA_ASSERT(rc >= 0);
+		rc = engine->RegisterObjectProperty("Light", "int32 node", asOFFSET(CLight, node));
+		PA_ASSERT(rc >= 0);
+		rc = engine->RegisterObjectProperty("Light", "bool castShadow", asOFFSET(CLight, castShadow));
+		PA_ASSERT(rc >= 0);
+		rc = engine->RegisterObjectProperty("Light", "float falloff", asOFFSET(CLight, falloff));
+		PA_ASSERT(rc >= 0);
+		rc = engine->RegisterObjectProperty("Light", "float radius", asOFFSET(CLight, radius));
+		PA_ASSERT(rc >= 0);
+		rc = engine->RegisterObjectProperty("Light", "LightType type", asOFFSET(CLight, type));
+		PA_ASSERT(rc >= 0);
+		
+	}
 }
