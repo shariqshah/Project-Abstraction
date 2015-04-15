@@ -3,18 +3,19 @@
 
 #include "mathdefs.h"
 
-class  btCollisionShape;
-struct CModel;
+class btCollisionShape;
+
 class CollisionShape
 {
 protected:
 	btCollisionShape* mShape;
-	
+	bool              valid = true;
 public:
 	btCollisionShape* getCollisionShape();
 	CollisionShape();
 	~CollisionShape();
 	virtual void initialize();
+	bool isValid();
 };
 
 class Sphere : public CollisionShape
@@ -71,10 +72,10 @@ public:
 
 class CollisionMesh : public CollisionShape
 {
-	const CModel*  mModel;
-	bool           mTriMesh;
+	int  geometryIndex;
+	bool mTriMesh;
 public:
-	CollisionMesh(const CModel* model, bool isTriMesh = false);
+	CollisionMesh(const char* filename, bool isTriMesh = false);
 	void initialize();
 };
 

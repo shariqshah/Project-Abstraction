@@ -9,6 +9,7 @@
 #include "camera.h"
 #include "settings.h"
 #include "passert.h"
+#include "geometry.h"
 
 namespace Renderer
 {
@@ -367,20 +368,21 @@ namespace Renderer
         strcpy(shaderPath, contentDir);
 		strcat(shaderPath, shaderDir);
 
-		char* modelPath = (char *)malloc(sizeof(char) *
+		char* geoPath = (char *)malloc(sizeof(char) *
 										   (strlen(contentDir) + strlen(modelDir)) + 1);
-        strcpy(modelPath, contentDir);
-		strcat(modelPath, modelDir);
+        strcpy(geoPath, contentDir);
+		strcat(geoPath, modelDir);
 
 		Texture::initialize(texturePath);
 		Shader::initialize(shaderPath);
+		Geometry::initialize(geoPath);
 		Material::initialize();
-		Model::initialize(modelPath);
+		Model::initialize();
 
 		initText();	
 		free(texturePath);
 		free(shaderPath);
-		free(modelPath);
+		free(geoPath);
 	}
 
 	void cleanup()
@@ -391,6 +393,7 @@ namespace Renderer
 		Texture::cleanup();
 		Shader::cleanup();
 		Material::cleanup();
+		Geometry::cleanup();
 		Camera::cleanup();
 	}
 

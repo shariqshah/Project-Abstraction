@@ -108,7 +108,7 @@ Game::Game(const char* path)
 	teapot->materialUniforms.texture = Texture::create("chessboard.png");
 	CTransform* tTran = GO::getTransform(tea);
 	Transform::setPosition(tTran, Vec3(0, 10, -5), true);
-	GO::addRigidbody(tea, new CollisionMesh(teapot, true), 0, 0.2f);
+	GO::addRigidbody(tea, new CollisionMesh("teapot.pamesh", true), 0, 0.2f);
 }
 
 Game::~Game()

@@ -15,6 +15,8 @@
 #include "console.h"
 #include "collisionshapes.h"
 #include "rigidbody.h"
+#include "geometry.h"
+#include "utilities.h"
 
 namespace Editor
 {
@@ -38,7 +40,7 @@ namespace Editor
 		char inputName[BUF_SIZE]       = "";
 		char inputNewName[BUF_SIZE]    = "";
 		char inputTag[BUF_SIZE]        = "";
-		char inputModelName[BUF_SIZE]  = "";
+		char inputGeoName[BUF_SIZE]    = "";
 		char inputModelTex[BUF_SIZE]   = "";
 		Node selectedGONode = -1;
 
@@ -93,10 +95,11 @@ namespace Editor
 		if(GO::hasComponent(selectedGO, Component::MODEL))
 		{
 			CModel *model = GO::getModel(selectedGO);
-			memset(&inputModelName[0], '\0', BUF_SIZE);
+			memset(&inputGeoName[0], '\0', BUF_SIZE);
 			memset(&inputModelTex[0], '\0', BUF_SIZE);
-			size_t copySize = model->filename.size() > BUF_SIZE ? BUF_SIZE : model->filename.size();
-			strncpy(&inputModelName[0], model->filename.c_str(), copySize);
+			const std::string filename = Geometry::getName(model->geometryIndex);
+			size_t copySize = filename.size() > BUF_SIZE ? BUF_SIZE : filename.size();
+			strncpy(&inputGeoName[0], filename.c_str(), copySize);
 			if(model->material == MAT_UNSHADED_TEXTURED || model->material == MAT_PHONG_TEXTURED)
 			{
 				const char* textureName = Texture::getFilename(model->materialUniforms.texture);
@@ -190,16 +193,8 @@ namespace Editor
 					case 4: RigidBody::setCollisionShape(body, new Cylinder(csHalfExt, csAxis)); break;
 					case 5: RigidBody::setCollisionShape(body, new Plane(csNormal, csMargin)); break;
 					case 6:
-						model = Model::findModel(&csInputMeshName[0]);
-						if(model)
-						{
-							RigidBody::setCollisionShape(body, new CollisionMesh(model, csIsTriMesh));
-						}
-						else
-						{
-							Log::error("Editor::displayRigidbody",
-									   "Model " + std::string(csInputMeshName) + " not found!");
-						}
+						RigidBody::setCollisionShape(body, new CollisionMesh(&csInputMeshName[0], csIsTriMesh));
+						break;
 					}
 					resetCollisionShapeParams();
 					showChangeCollisionShapeMenu = false;
@@ -224,7 +219,7 @@ namespace Editor
 		{
 			float step     = 1.f;
 			float stepFast = 10.f;
-			float width = ImGui::GetWindowWidth() / 5.f;
+			float width    = ImGui::GetWindowWidth() / 5.f;
 			ImGui::PushItemWidth(width);
 			// Position
 			bool updatePosition = false;
@@ -326,21 +321,20 @@ namespace Editor
 		CModel*     model      = GO::getModel(selectedGO);
 		if(ImGui::CollapsingHeader("Model", "ModelComponent", true, true))
 		{
-			if(ImGui::InputText("Mesh", &inputModelName[0], BUF_SIZE, ImGuiInputTextFlags_EnterReturnsTrue))
+			if(ImGui::InputText("Geometry", &inputGeoName[0], BUF_SIZE, ImGuiInputTextFlags_EnterReturnsTrue))
 			{
-				CModel testModel;
-				if(Model::loadFromFile(&inputModelName[0], &testModel))
+				if(Utils::fileExists(&inputGeoName[0]))
 				{
 					int prevMaterial = model->material;
 					Mat_Uniforms prevUniforms = model->materialUniforms;
 					const char* textureName =
 						prevUniforms.texture != -1 ? Texture::getFilename(prevUniforms.texture) : NULL;
 					int texture = textureName ? Texture::create(textureName) : -1;
-					CModel* newModel = GO::addModel(selectedGO, &inputModelName[0]);
+					CModel* newModel = GO::addModel(selectedGO, &inputGeoName[0]);
 					if(!newModel)
 					{
-						memset(&inputModelName[0], '\0', BUF_SIZE);
-						strcpy(&inputModelName[0], "NONE");
+						memset(&inputGeoName[0], '\0', BUF_SIZE);
+						strcpy(&inputGeoName[0], "NONE");
 					}
 					else
 					{
@@ -354,10 +348,11 @@ namespace Editor
 				else
 				{
 					Log::error("Editor::displayModel",
-							   "File " + std::string(&inputModelName[0]) + " not found, reverting back to previously attached");
-					memset(&inputModelName[0], '\0', BUF_SIZE);
-					int copySize = model->filename.size() > BUF_SIZE ? BUF_SIZE : model->filename.size();
-					strncpy(&inputModelName[0], model->filename.c_str(), copySize);
+							   "File " + std::string(&inputGeoName[0]) + " not found, reverting back to previously attached");
+					memset(&inputGeoName[0], '\0', BUF_SIZE);
+					const std::string filename = Geometry::getName(model->geometryIndex);
+					int copySize = filename.size() > BUF_SIZE ? BUF_SIZE : filename.size();
+					strncpy(&inputGeoName[0], filename.c_str(), copySize);
 				}
 			}
 			if(ImGui::IsItemHovered())
@@ -490,7 +485,7 @@ namespace Editor
 				memset(&inputName[0], '\0', BUF_SIZE);
 				memset(&inputNewName[0], '\0', BUF_SIZE);
 				memset(&inputTag[0], '\0', BUF_SIZE);
-				memset(&inputModelName[0], '\0', BUF_SIZE);
+				memset(&inputGeoName[0], '\0', BUF_SIZE);
 				memset(&inputModelTex[0], '\0', BUF_SIZE);
 			}
 		}

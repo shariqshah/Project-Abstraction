@@ -31,6 +31,7 @@ namespace Console
 		char preservedCommand[BUF_SIZE] = "";
 		std::vector<std::string> commandHistory;
 		int historyPos = -1;
+		bool scrollToEnd = true;
 	}
 
 	void initialize()
@@ -48,6 +49,7 @@ namespace Console
 		case MSG_COMMAND: newMessage = "[#] "    + message;	break;
 		};
 		messages.push_back(ConsoleMessage(type, newMessage));
+		scrollToEnd = true;
 	}
 	
 	void showDropDown(bool show)
@@ -228,7 +230,7 @@ namespace Console
 				ImGui::TextWrapped(message.text.c_str());
 				ImGui::PopStyleColor();
 			}
-			static bool scrollToEnd = true;
+			
 			if(scrollToEnd)
 			{
 				ImGui::SetScrollPosHere();

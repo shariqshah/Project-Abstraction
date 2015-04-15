@@ -32,37 +32,44 @@ namespace RigidBody
 					  float           mass,
 					  float           restitution)
 	{
-		btDiscreteDynamicsWorld* world = Physics::getWorld();
-		btVector3 inertia(0, 0, 0);
-		if(mass != 0) shape->getCollisionShape()->calculateLocalInertia(mass, inertia);
-		btRigidBody::btRigidBodyConstructionInfo consInfo(mass,
-														  motionState,
-														  shape->getCollisionShape(),
-														  inertia);
-		btRigidBody* body = new btRigidBody(consInfo);
-		body->setRestitution(restitution);
-		intptr_t temp = (intptr_t)gameObject->node;
-		body->setUserPointer((void*)temp);
-		world->addRigidBody(body);
 		CRigidBody rbHandle = -1;
-			
-		if(!freeList.empty())
+		if(shape->isValid())
 		{
-			rbHandle = freeList.back();
-			freeList.pop_back();
-
-			if(rigidBodies[rbHandle] != NULL)
-				Log::warning("Overwriting Rigidbody!");
+			btDiscreteDynamicsWorld* world = Physics::getWorld();
+			btVector3 inertia(0, 0, 0);
+			if(mass != 0) shape->getCollisionShape()->calculateLocalInertia(mass, inertia);
+			btRigidBody::btRigidBodyConstructionInfo consInfo(mass,
+															  motionState,
+															  shape->getCollisionShape(),
+															  inertia);
+			btRigidBody* body = new btRigidBody(consInfo);
+			body->setRestitution(restitution);
+			intptr_t temp = (intptr_t)gameObject->node;
+			body->setUserPointer((void*)temp);
+			world->addRigidBody(body);
 			
-			rigidBodies[rbHandle] = body;
+			if(!freeList.empty())
+			{
+				rbHandle = freeList.back();
+				freeList.pop_back();
+
+				if(rigidBodies[rbHandle] != NULL)
+					Log::warning("Overwriting Rigidbody!");
+			
+				rigidBodies[rbHandle] = body;
+			}
+			else
+			{
+				rigidBodies.push_back(body);
+				rbHandle = (int32_t) (rigidBodies.size() - 1);
+			}
+			CTransform* transform = GO::getTransform(gameObject);
+			setTransform(rbHandle, transform->transMat);
 		}
 		else
 		{
-			rigidBodies.push_back(body);
-			rbHandle = (int32_t) (rigidBodies.size() - 1);
+			Log::error("RigidBody::create", "Invalid collision shape, rigidbody not created");
 		}
-		CTransform* transform = GO::getTransform(gameObject);
-		setTransform(rbHandle, transform->transMat);
 		return rbHandle;
 	}
 	
@@ -237,7 +244,10 @@ namespace RigidBody
 	void setCollisionShape(CRigidBody body, CollisionShape* shape)
 	{
 		PA_ASSERT(shape);
-		rigidBodies[body]->setCollisionShape(shape->getCollisionShape());
+		if(shape->isValid())
+			rigidBodies[body]->setCollisionShape(shape->getCollisionShape());
+		else
+			Log::error("RigidBody::setCollisionShape", "Invalid collision shape");
 	}
 
 	const char* getCollisionShapeName(CRigidBody body)
@@ -255,5 +265,5 @@ namespace RigidBody
 			removeCollisionObject(btRigidBody::upcast(obj));
 		}
 		rigidBodies.clear();
-	} 
+	}
 }

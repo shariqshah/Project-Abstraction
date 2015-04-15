@@ -1,5 +1,5 @@
-#ifndef _model_H_
-#define _model_H_
+#ifndef model_H
+#define model_H
 
 #include "componentTypes.h"
 #include "mathdefs.h"
@@ -12,22 +12,15 @@ struct RenderParams;
 
 struct CModel
 {
-	Node                      node     = 0;
-	std::string               filename = "UNDEFINED";
-	std::vector<Vec3>         vertices;
-	std::vector<Vec3>         vertexColors;
-	std::vector<Vec3>         normals;
-	std::vector<Vec2>         uvs;
-	std::vector<unsigned int> indices;
-	int                       material = 0;
-	unsigned int              vao;
-	Mat_Uniforms              materialUniforms;
-	bool                      drawIndexed = false;
+	Node         node          = -1;
+	int          material      = 0;
+	int          geometryIndex = -1;
+	Mat_Uniforms materialUniforms;
 };
 
 namespace Model
 {
-	void    initialize(const char* path);
+	void    initialize();
 	void    renderAllModels(CCamera* camera, RenderParams* renderParams);
 	CModel* getModelAtIndex(int modelIndex);
 	CModel* findModel(const char* filename);
@@ -35,7 +28,6 @@ namespace Model
 	void    remove(unsigned int modelIndex);
 	void    generateBindings();
 	void    cleanup();
-	bool    loadFromFile(const char* filename, CModel* model);
 	void    setMaterialType(CModel* model, Mat_Type material);
 }
 	

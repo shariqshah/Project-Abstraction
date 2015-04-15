@@ -247,9 +247,9 @@ namespace Physics
 			return new Cylinder(halfExtent, axis);
 		}
 
-		CollisionShape* createCollisionMesh(CModel* model, bool isTriMesh)
+		CollisionShape* createCollisionMesh(const std::string& filename, bool isTriMesh)
 		{
-			return new CollisionMesh(model, isTriMesh);
+			return new CollisionMesh(filename.c_str(), isTriMesh);
 		}
 	}
 
