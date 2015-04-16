@@ -112,20 +112,17 @@ namespace Model
 				GameObject*   gameObject = SceneManager::find(model->node);
 				CTransform*   transform  = GO::getTransform(gameObject);					
 				Mat4 mvp                 = camera->viewProjMat * transform->transMat;
-				if(BoundingVolume::isIntersecting(&camera->frustum, transform))
-				{
-					Shader::setUniformMat4(shaderIndex, "mvp", mvp);
-					Shader::setUniformMat4(shaderIndex, "modelMat", transform->transMat);
-					Material::setMaterialUniforms(&model->materialUniforms, (Mat_Type)model->material);
-					Geometry::render(model->geometryIndex); // The actual render call
-					if(model->material == MAT_UNSHADED_TEXTURED || model->material == MAT_PHONG_TEXTURED)
-						Texture::unbindActiveTexture();
+				//if(BoundingVolume::isIntersecting(&camera->frustum, transform->position))
+
+				Shader::setUniformMat4(shaderIndex, "mvp", mvp);
+				Shader::setUniformMat4(shaderIndex, "modelMat", transform->transMat);
+				Material::setMaterialUniforms(&model->materialUniforms, (Mat_Type)model->material);
+				if(Geometry::render(model->geometryIndex, &camera->frustum, transform))
 					rendered++;
-				}
 				else
-				{
 					culled++;
-				}
+				if(model->material == MAT_UNSHADED_TEXTURED || model->material == MAT_PHONG_TEXTURED)
+					Texture::unbindActiveTexture();
 			}
 			Shader::unbindActiveShader();
 		}

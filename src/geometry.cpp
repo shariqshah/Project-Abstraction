@@ -6,6 +6,7 @@
 #include "passert.h"
 #include "renderer.h"
 #include "boundingvolumes.h"
+#include "editor.h"
 
 namespace Geometry
 {
@@ -58,6 +59,22 @@ namespace Geometry
 			if(vertex.y < boundingBox->min.y) boundingBox->min.y = vertex.y;
 			if(vertex.z < boundingBox->min.z) boundingBox->min.z = vertex.z;
 		}
+
+		boundingBox->size   = boundingBox->max - boundingBox->min;
+		boundingBox->center = (boundingBox->max + boundingBox->min) / 2.f;
+
+		Vec3 halfSize = boundingBox->size / 2.f;
+		Vec3 center   = boundingBox->center;
+		// Back
+		boundingBox->points[0] = Vec3(center.x - halfSize.x, center.y + halfSize.y, center.z - halfSize.z);
+		boundingBox->points[1] = Vec3(center.x + halfSize.x, center.y + halfSize.y, center.z - halfSize.z);
+		boundingBox->points[2] = Vec3(center.x - halfSize.x, center.y - halfSize.y, center.z - halfSize.z);
+		boundingBox->points[3] = Vec3(center.x + halfSize.x, center.y - halfSize.y, center.z - halfSize.z);
+		// Front
+		boundingBox->points[4] = Vec3(center.x - halfSize.x, center.y + halfSize.y, center.z + halfSize.z);
+		boundingBox->points[5] = Vec3(center.x + halfSize.x, center.y + halfSize.y, center.z + halfSize.z);
+		boundingBox->points[6] = Vec3(center.x - halfSize.x, center.y - halfSize.y, center.z + halfSize.z);
+		boundingBox->points[7] = Vec3(center.x + halfSize.x, center.y - halfSize.y, center.z + halfSize.z);
 	}
 
 	bool loadFromFile(GeometryData* geometry, const char* filename)
@@ -265,23 +282,30 @@ namespace Geometry
 		}
 	}
 
-	void render(int index)
+	bool render(int index, Frustum* frustum, CTransform* transform)
 	{
+		bool rendered = false;
 		if(index >= 0 && index < (int)geometryList.size())
 		{
 			GeometryData* geometry = &geometryList[index];
-			if(activeVAO != geometry->vao) // Only unbind if needed
+			int intersection = BoundingVolume::isIntersecting(frustum, &geometry->boundingBox, transform);
+			if(intersection == IT_INTERSECT || intersection == IT_INSIDE)
 			{
-				glBindVertexArray(0);
-				glBindVertexArray(geometry->vao);
-				activeVAO = geometry->vao;
-			}
+				if(activeVAO != geometry->vao) // Only unbind if needed
+				{
+					glBindVertexArray(0);
+					glBindVertexArray(geometry->vao);
+					activeVAO = geometry->vao;
+				}
 			
-			if(geometry->drawIndexed)
-				glDrawElements(GL_TRIANGLES, geometry->indices.size(), GL_UNSIGNED_INT, (void*)0);
-			else
-				glDrawArrays(GL_TRIANGLES, 0, geometry->vertices.size());
+				if(geometry->drawIndexed)
+					glDrawElements(GL_TRIANGLES, geometry->indices.size(), GL_UNSIGNED_INT, (void*)0);
+				else
+					glDrawArrays(GL_TRIANGLES, 0, geometry->vertices.size());
+				rendered = true;
+			}
 		}
+		return rendered;
 	}
 	
 	const std::string getName(int index)

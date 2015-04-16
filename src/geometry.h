@@ -6,6 +6,9 @@
 
 #include "mathdefs.h"
 
+struct CTransform;
+struct Frustum;
+
 namespace Geometry
 {
 	int                          create(const char* filename);
@@ -13,7 +16,7 @@ namespace Geometry
 	void                         initialize(const char* path);
 	void                         cleanup();
 	void                         remove(int index);
-	void                         render(int index);
+	bool                         render(int index, Frustum* frustum, CTransform* transform);
 	unsigned int                 getVAO(int index);
 	const std::string            getName(int index);
 	const std::vector<Vec3>*     getVertices(int index);

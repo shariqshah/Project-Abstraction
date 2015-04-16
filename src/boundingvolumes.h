@@ -9,6 +9,9 @@ struct BoundingBox
 {
 	Vec3 min;
 	Vec3 max;
+	Vec3 size;
+	Vec3 center;
+	Vec3 points[8];
 };
 
 struct Frustum
@@ -35,7 +38,7 @@ enum IntersectionType
 namespace BoundingVolume
 {
 	int  isIntersecting(Frustum* frustum, BoundingBox* boundingBox, CTransform* bboxTransform);
-	bool isIntersecting(Frustum* frustum, CTransform* transform);
+	bool isIntersecting(Frustum* frustum, const Vec3& point);
 }
 
 #endif
