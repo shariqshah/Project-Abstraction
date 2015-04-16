@@ -8,6 +8,8 @@ namespace Editor
 	void cleanup();
 	void setUpdateTime(const float time);
 	void setDrawTime(const float time);
+	void addDebugFloat(const char* description, float value);
+	void addDebugInt(const char* description, int value);
 }
 
 #endif

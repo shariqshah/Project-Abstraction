@@ -5,6 +5,7 @@
 #include "log.h"
 #include "passert.h"
 #include "renderer.h"
+#include "boundingvolumes.h"
 
 namespace Geometry
 {
@@ -19,6 +20,7 @@ namespace Geometry
 		std::vector<unsigned int> indices;
 		unsigned int              vao;
 		unsigned int              refCount;
+		BoundingBox               boundingBox;
 	};
 
 	namespace
@@ -41,6 +43,21 @@ namespace Geometry
 			}
 		}
 		return index;
+	}
+
+	void generateBoundingBox(int index)
+	{
+		BoundingBox* boundingBox = &geometryList[index].boundingBox;
+		for(Vec3& vertex : geometryList[index].vertices)
+		{
+			if(vertex.x > boundingBox->max.x) boundingBox->max.x = vertex.x;
+			if(vertex.y > boundingBox->max.y) boundingBox->max.y = vertex.y;
+			if(vertex.z > boundingBox->max.z) boundingBox->max.z = vertex.z;
+
+			if(vertex.x < boundingBox->min.x) boundingBox->min.x = vertex.x;
+			if(vertex.y < boundingBox->min.y) boundingBox->min.y = vertex.y;
+			if(vertex.z < boundingBox->min.z) boundingBox->min.z = vertex.z;
+		}
 	}
 
 	bool loadFromFile(GeometryData* geometry, const char* filename)
@@ -196,6 +213,7 @@ namespace Geometry
 			if(loadFromFile(newGeo, filename))
 			{
 				createVAO(newGeo);
+				generateBoundingBox(index);
 			}
 			else
 			{
@@ -219,7 +237,7 @@ namespace Geometry
 	
 	void initialize(const char* path)
 	{
-		geometryPath   = (char *)malloc(sizeof(char) * strlen(path) + 1);
+		geometryPath = (char *)malloc(sizeof(char) * strlen(path) + 1);
 		strcpy(geometryPath, path);
 	}
 	

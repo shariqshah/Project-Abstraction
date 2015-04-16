@@ -20,7 +20,7 @@ namespace Console
 		//int windowFlags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_ShowBorders;
 		int windowFlags = ImGuiWindowFlags_NoCollapse;
 		std::vector<ConsoleMessage> messages;
-		bool windowShown   = true;
+		bool windowShown   = false;
 		bool dropDownShown = false;
 		Vec4 colNormal     = Vec4(1.f);
 		Vec4 colWarning    = Vec4(1.f, 1.f, 0.f, 1.f);

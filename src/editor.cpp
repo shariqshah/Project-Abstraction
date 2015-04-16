@@ -20,10 +20,24 @@
 
 namespace Editor
 {
+	struct DebugInt
+	{
+		const char* description;
+		int         value;
+		DebugInt(const char* desc, int val) : description(desc), value(val) {}
+	};
+
+	struct DebugFloat
+	{
+		const char* description;
+		float         value;
+		DebugFloat(const char* desc, float val) : description(desc), value(val) {}
+	};
+	
 	namespace
 	{
 		bool showMainToolBar      = true;
-		bool showLog              = true;
+		bool showLog              = false;
 		bool showSceneObjects     = false;
 		bool showSelectedGO       = false;
 		bool showRendererSettings = false;
@@ -31,6 +45,7 @@ namespace Editor
 		bool showStatsWindow      = true;
 		bool showPhysicsWindow    = false;
 		bool showSample           = false;
+		bool showDebugVars        = false;
 
 		int  currentItem = 1;
 		
@@ -59,10 +74,12 @@ namespace Editor
 		char  csInputMeshName[BUF_SIZE];
 
 		ImGuiTextFilter gameObjectFilter;
+		std::vector<DebugInt> debugInts;
+		std::vector<DebugFloat> debugFloats;
 	}
 	
 	void initialize()
-	{	
+	{
 	}
 
 	void setUpdateTime(const float time)
@@ -644,6 +661,36 @@ namespace Editor
 
 		ImGui::End();
 	}
+
+	void displayDebugVars()
+	{
+		ImGui::Begin("Debug Variables", &showDebugVars, Vec2(40, 80), OPACITY, WF_NoCollapse);
+		ImGui::Columns(2, "DebugInts");
+		ImGui::Text("Description"); ImGui::NextColumn();
+		ImGui::Text("Value");       ImGui::NextColumn();
+		ImGui::Separator();
+		for(DebugInt& debugInt : debugInts)
+		{
+			ImGui::Text(debugInt.description); ImGui::NextColumn();
+			ImGui::Text("%d", debugInt.value); ImGui::NextColumn();
+		}
+		for(DebugFloat& debugFloat : debugFloats)
+		{
+			ImGui::Text(debugFloat.description);   ImGui::NextColumn();
+			ImGui::Text("%1.f", debugFloat.value); ImGui::NextColumn();
+		}
+		ImGui::End();
+	}
+
+	void addDebugFloat(const char* description, float value)
+	{
+		debugFloats.push_back(DebugFloat(description, value));
+	}
+	
+	void addDebugInt(const char* description, int value)
+	{
+		debugInts.push_back(DebugInt(description, value));
+	}
 	
 	void update(float deltaTime, bool* quit)
 	{
@@ -652,7 +699,8 @@ namespace Editor
 		if(ImGui::Button("Renderer"))  showRendererSettings = !showRendererSettings; ImGui::SameLine();
 		if(ImGui::Button("Physics"))   showPhysicsWindow    = !showPhysicsWindow;    ImGui::SameLine();
 		if(ImGui::Button("Scripting")) showScriptingWindow  = !showScriptingWindow;  ImGui::SameLine();
-		if(ImGui::Button("Sample"))    showSample           = !showSample;  ImGui::SameLine();
+		if(ImGui::Button("Sample"))    showSample           = !showSample;           ImGui::SameLine();
+		if(ImGui::Button("DebugVars")) showDebugVars        = !showDebugVars;        ImGui::SameLine();
 		if(ImGui::Button("Log"))
 		{
 			showLog = !showLog;
@@ -674,7 +722,11 @@ namespace Editor
 		if(showRendererSettings) displayRendererSettings();
 		if(showStatsWindow)      displayStatsWindow();
 		if(showPhysicsWindow)    displayPhysicsWindow();
+		if(showDebugVars)        displayDebugVars();
 		if(showSample)           ImGui::ShowTestWindow(&showSample);
+
+		debugInts.clear();
+		debugFloats.clear();
 	}
 	
 	void cleanup()

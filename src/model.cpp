@@ -13,6 +13,8 @@
 #include "renderer.h"
 #include "passert.h"
 #include "geometry.h"
+#include "boundingvolumes.h"
+#include "editor.h"
 
 namespace Model
 {
@@ -20,6 +22,8 @@ namespace Model
 	{
 		std::vector<CModel>        modelList;
 		std::vector<unsigned int>  emptyIndices;
+		int                        culled   = 0;
+		int                        rendered = 0;
   	}
 
 	void setLights(int shaderIndex)
@@ -108,15 +112,27 @@ namespace Model
 				GameObject*   gameObject = SceneManager::find(model->node);
 				CTransform*   transform  = GO::getTransform(gameObject);					
 				Mat4 mvp                 = camera->viewProjMat * transform->transMat;
-				Shader::setUniformMat4(shaderIndex, "mvp", mvp);
-				Shader::setUniformMat4(shaderIndex, "modelMat", transform->transMat);
-				Material::setMaterialUniforms(&model->materialUniforms, (Mat_Type)model->material);
-				Geometry::render(model->geometryIndex); // The actual render call
-				if(model->material == MAT_UNSHADED_TEXTURED || model->material == MAT_PHONG_TEXTURED)
-					Texture::unbindActiveTexture();
+				if(BoundingVolume::isIntersecting(&camera->frustum, transform))
+				{
+					Shader::setUniformMat4(shaderIndex, "mvp", mvp);
+					Shader::setUniformMat4(shaderIndex, "modelMat", transform->transMat);
+					Material::setMaterialUniforms(&model->materialUniforms, (Mat_Type)model->material);
+					Geometry::render(model->geometryIndex); // The actual render call
+					if(model->material == MAT_UNSHADED_TEXTURED || model->material == MAT_PHONG_TEXTURED)
+						Texture::unbindActiveTexture();
+					rendered++;
+				}
+				else
+				{
+					culled++;
+				}
 			}
 			Shader::unbindActiveShader();
 		}
+		Editor::addDebugInt("Rendered", rendered);
+		Editor::addDebugInt("Culled", culled);
+		rendered = 0;
+		culled   = 0;
 	}
 
 	int create(const char* filename)
@@ -166,86 +182,6 @@ namespace Model
 		modelList.clear();
 		emptyIndices.clear();
 	}
-
-	//////////////////////////////////////////////////////////////////////////////////////////
-	// Proxy functions for binding
-	//////////////////////////////////////////////////////////////////////////////////////////
-
-	// Vec3 getVertex(CModel* model, int index)
-	// {
-	// 	Vec3 vertex;
-	// 	if(index >= 0 && index < (int)model->vertices.size()) vertex = model->vertices.at(index);
-	// 	else Log::error("Model::getVertex", "Invalid index");
-	// 	return vertex;
-	// }
-		
-	// Vec3 getNormal(CModel* model, int index)
-	// {
-	// 	Vec3 normal;
-	// 	if(index >= 0 && index < (int)model->normals.size()) normal = model->normals.at(index);
-	// 	else Log::error("Model::getNormal", "Invalid index");
-	// 	return normal;
-	// }
-
-	// Vec2 getUV(CModel* model, int index)
-	// {
-	// 	Vec2 uvCoord;
-	// 	if(index >= 0 && index < (int)model->uvs.size()) uvCoord = model->uvs.at(index);
-	// 	else Log::error("Model::getUV", "Invalid index");
-	// 	return uvCoord;
-	// }
-
-	// uint getIndex(CModel* model, int index)
-	// {
-	// 	uint meshIndex = 0;
-	// 	if(index >= 0 && index < (int)model->indices.size()) meshIndex = model->indices.at(index);
-	// 	else Log::error("Model::getIndex", "Invalid index");
-	// 	return meshIndex;
-	// }
-
-	// void setVertex(CModel* model, int index, Vec3 value)
-	// {
-	// 	if(index >= 0 && index < (int)model->vertices.size()) model->vertices[index] = value;
-	// 	else Log::error("Model::setVertex", "Invalid index");
-	// }
-		
-	// void setNormal(CModel* model, int index, Vec3 value)
-	// {
-	// 	if(index >= 0 && index < (int)model->normals.size()) model->normals[index] = value;
-	// 	else Log::error("Model::setNormal", "Invalid index");
-	// }
-
-	// void setUV(CModel* model, int index, Vec2 value)
-	// {
-	// 	if(index >= 0 && index < (int)model->uvs.size()) model->uvs[index] = value;
-	// 	else Log::error("Model::setUV", "Invalid index");
-	// }
-
-	// void setIndex(CModel* model, int index, uint value)
-	// {
-	// 	if(index >= 0 && index < (int)model->indices.size()) model->indices[index] = value;
-	// 	else Log::error("Model::setIndex", "Invalid index");
-	// }
-
-	// void appendVertex(CModel* model, Vec3 vertex)
-	// {
-	// 	model->vertices.push_back(vertex);
-	// }
-
-	// void appendNormal(CModel* model, Vec3 normal)
-	// {
-	// 	model->normals.push_back(normal);
-	// }
-
-	// void appendUV(CModel* model, Vec2 uv)
-	// {
-	// 	model->uvs.push_back(uv);
-	// }
-
-	// void appendIndex(CModel* model, uint index)
-	// {
-	// 	model->indices.push_back(index);
-	// }
 		
 	void generateBindings()
 	{
@@ -266,66 +202,6 @@ namespace Model
 										  asFUNCTION(setMaterialType),
 										  asCALL_CDECL_OBJFIRST);
 		PA_ASSERT(rc >= 0);
-		// rc = engine->RegisterObjectMethod("Model",
-		// 								  "Vec3 getVertex(int)",
-		// 								  asFUNCTION(getVertex),
-		// 								  asCALL_CDECL_OBJFIRST);
-		// PA_ASSERT(rc >= 0);
-		// rc = engine->RegisterObjectMethod("Model",
-		// 								  "Vec3 getNormal(int)",
-		// 								  asFUNCTION(getNormal),
-		// 								  asCALL_CDECL_OBJFIRST);
-		// PA_ASSERT(rc >= 0);
-		// rc = engine->RegisterObjectMethod("Model",
-		// 								  "Vec2 getUV(int)",
-		// 								  asFUNCTION(getUV),
-		// 								  asCALL_CDECL_OBJFIRST);
-		// PA_ASSERT(rc >= 0);
-		// rc = engine->RegisterObjectMethod("Model",
-		// 								  "uint getIndex(int)",
-		// 								  asFUNCTION(getIndex),
-		// 								  asCALL_CDECL_OBJFIRST);
-		// PA_ASSERT(rc >= 0);
-		// rc = engine->RegisterObjectMethod("Model",
-		// 								  "void setVertex(int, Vec3)",
-		// 								  asFUNCTION(setVertex),
-		// 								  asCALL_CDECL_OBJFIRST);
-		// PA_ASSERT(rc >= 0);
-		// rc = engine->RegisterObjectMethod("Model",
-		// 								  "void setNormal(int, Vec3)",
-		// 								  asFUNCTION(setNormal),
-		// 								  asCALL_CDECL_OBJFIRST);
-		// PA_ASSERT(rc >= 0);
-		// rc = engine->RegisterObjectMethod("Model",
-		// 								  "void setUV(int, Vec2)",
-		// 								  asFUNCTION(setUV),
-		// 								  asCALL_CDECL_OBJFIRST);
-		// PA_ASSERT(rc >= 0);
-		// rc = engine->RegisterObjectMethod("Model",
-		// 								  "void setIndex(int, uint)",
-		// 								  asFUNCTION(setIndex),
-		// 								  asCALL_CDECL_OBJFIRST);
-		// PA_ASSERT(rc >= 0);
-		// rc = engine->RegisterObjectMethod("Model",
-		// 								  "void appendVertex(Vec3)",
-		// 								  asFUNCTION(appendVertex),
-		// 								  asCALL_CDECL_OBJFIRST);
-		// PA_ASSERT(rc >= 0);
-		// rc = engine->RegisterObjectMethod("Model",
-		// 								  "void appendNormal(Vec3)",
-		// 								  asFUNCTION(appendNormal),
-		// 								  asCALL_CDECL_OBJFIRST);
-		// PA_ASSERT(rc >= 0);
-		// rc = engine->RegisterObjectMethod("Model",
-		// 								  "void appendUV(Vec2)",
-		// 								  asFUNCTION(appendUV),
-		// 								  asCALL_CDECL_OBJFIRST);
-		// PA_ASSERT(rc >= 0);
-		// rc = engine->RegisterObjectMethod("Model",
-		// 								  "void appendIndex(uint)",
-		// 								  asFUNCTION(appendIndex),
-		// 								  asCALL_CDECL_OBJFIRST);
-		// PA_ASSERT(rc >= 0);
 	}
 
 	void remove(unsigned int modelIndex)
