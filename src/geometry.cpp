@@ -22,6 +22,7 @@ namespace Geometry
 		unsigned int              vao;
 		unsigned int              refCount;
 		BoundingBox               boundingBox;
+		BoundingSphere            boundingSphere;
 	};
 
 	namespace
@@ -35,11 +36,11 @@ namespace Geometry
 	int find(const char* filename)
 	{
 		int index = -1;
-		for(GeometryData& geometry : geometryList)
+		for(int i = 0; i < (int)geometryList.size(); i++)
 		{
-			if(strcmp(geometry.filename.c_str(), filename) == 0)
+			if(strcmp(geometryList[i].filename.c_str(), filename) == 0)
 			{
-				index = -1;
+				index = i;
 				break;
 			}
 		}
@@ -48,7 +49,8 @@ namespace Geometry
 
 	void generateBoundingBox(int index)
 	{
-		BoundingBox* boundingBox = &geometryList[index].boundingBox;
+		BoundingBox*    boundingBox    = &geometryList[index].boundingBox;
+		BoundingSphere* boundingSphere = &geometryList[index].boundingSphere;
 		for(Vec3& vertex : geometryList[index].vertices)
 		{
 			if(vertex.x > boundingBox->max.x) boundingBox->max.x = vertex.x;
@@ -60,6 +62,8 @@ namespace Geometry
 			if(vertex.z < boundingBox->min.z) boundingBox->min.z = vertex.z;
 		}
 
+		// boundingBox->min -= Vec3(10);
+		// boundingBox->max += Vec3(10);
 		boundingBox->size   = boundingBox->max - boundingBox->min;
 		boundingBox->center = (boundingBox->max + boundingBox->min) / 2.f;
 
@@ -75,6 +79,9 @@ namespace Geometry
 		boundingBox->points[5] = Vec3(center.x + halfSize.x, center.y + halfSize.y, center.z + halfSize.z);
 		boundingBox->points[6] = Vec3(center.x - halfSize.x, center.y - halfSize.y, center.z + halfSize.z);
 		boundingBox->points[7] = Vec3(center.x + halfSize.x, center.y - halfSize.y, center.z + halfSize.z);
+
+		boundingSphere->center = center;
+		boundingSphere->radius = glm::abs(glm::length(boundingBox->max - center));
 	}
 
 	bool loadFromFile(GeometryData* geometry, const char* filename)
@@ -289,6 +296,7 @@ namespace Geometry
 		{
 			GeometryData* geometry = &geometryList[index];
 			int intersection = BoundingVolume::isIntersecting(frustum, &geometry->boundingBox, transform);
+			//int intersection = BoundingVolume::isIntersecting(frustum, &geometry->boundingSphere, transform);
 			if(intersection == IT_INTERSECT || intersection == IT_INSIDE)
 			{
 				if(activeVAO != geometry->vao) // Only unbind if needed

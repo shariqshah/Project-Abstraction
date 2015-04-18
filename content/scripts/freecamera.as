@@ -4,7 +4,7 @@ class FreeCamera : BaseScript
 {
 	float maxUpDownRot   = 80.f;
 	float totalUpDownRot = 0.f;
-	float movSpeed       = 20.f;
+	float movSpeed       = 30.f;
 	float rotSpeed       = 0.5f;
 	float sprintFactor   = 3.f;
 	Vec3  translation(0.f);
@@ -42,10 +42,10 @@ class FreeCamera : BaseScript
 		if(Input::isPressed(Key::E))	  translation.y -= increment;
 		if(Input::isPressed(Key::LSHIFT)) translation *= sprintFactor;
 
-		if(Input::isPressed(Key::J)) leftRightRot -= rotSpeed;
-		if(Input::isPressed(Key::L)) leftRightRot += rotSpeed;
-		if(Input::isPressed(Key::I)) upDownRot -= rotSpeed;
-		if(Input::isPressed(Key::K)) upDownRot += rotSpeed;
+		if(Input::isPressed(Key::J)) leftRightRot -= 4.f * rotSpeed;
+		if(Input::isPressed(Key::L)) leftRightRot += 4.f * rotSpeed;
+		if(Input::isPressed(Key::I)) upDownRot -= 4.f * rotSpeed;
+		if(Input::isPressed(Key::K)) upDownRot += 4.f * rotSpeed;
 		
 		totalUpDownRot += upDownRot;
 		if(totalUpDownRot >= maxUpDownRot)

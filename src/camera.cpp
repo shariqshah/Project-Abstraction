@@ -158,126 +158,50 @@ namespace Camera
 										   camera->farZ);
 		updateViewProjection(camera);
 	}
-
-	float InvSqrt(float x)
-	{
-		float xhalf;
-		int i;
- 
-		xhalf = 0.5f * x;
-		i = *(int*)&x;
-		i = 0x5f3759df - (i >> 1);
-		x = *(float*)&i;
-		x = x * (1.5f - xhalf * x * x);
-		return x;
-	}
 	
 	void updateFrustum(CCamera* camera)
 	{
 		PA_ASSERT(camera);
-		
-		float t;
-		float m00,m01,m02,m03;
-		float m10,m11,m12,m13;
-		float m20,m21,m22,m23;
-		float m30,m31,m32,m33;
+
 		Frustum* frustum = &camera->frustum;
-		GameObject* gameObject = SceneManager::find(camera->node);
-		CTransform* transform  = GO::getTransform(gameObject);
-		Mat4 mvp = camera->viewProjMat;// * transform->transMat;
-		mvp = glm::transpose(mvp);
+		Mat4 mvp = camera->viewProjMat;
+
+		frustum->planes[Frustum::LEFT].x   = mvp[0][3] + mvp[0][0];
+		frustum->planes[Frustum::LEFT].y   = mvp[1][3] + mvp[1][0];
+		frustum->planes[Frustum::LEFT].z   = mvp[2][3] + mvp[2][0];
+		frustum->planes[Frustum::LEFT].w   = mvp[3][3] + mvp[3][0];
  
-		m00 = mvp[0][0];
-		m01 = mvp[0][1];
-		m02 = mvp[0][2];
-		m03 = mvp[0][3];
+		frustum->planes[Frustum::RIGHT].x  = mvp[0][3] - mvp[0][0];
+		frustum->planes[Frustum::RIGHT].y  = mvp[1][3] - mvp[1][0];
+		frustum->planes[Frustum::RIGHT].z  = mvp[2][3] - mvp[2][0];
+		frustum->planes[Frustum::RIGHT].w  = mvp[3][3] - mvp[3][0];
+       
+		frustum->planes[Frustum::BOTTOM].x = mvp[0][3] + mvp[0][1];
+		frustum->planes[Frustum::BOTTOM].y = mvp[1][3] + mvp[1][1];
+		frustum->planes[Frustum::BOTTOM].z = mvp[2][3] + mvp[2][1];
+		frustum->planes[Frustum::BOTTOM].w = mvp[3][3] + mvp[3][1];
  
-		m10 = mvp[1][0];
-		m11 = mvp[1][1];
-		m12 = mvp[1][2];
-		m13 = mvp[1][3];
+		frustum->planes[Frustum::TOP].x    = mvp[0][3] - mvp[0][1];
+		frustum->planes[Frustum::TOP].y    = mvp[1][3] - mvp[1][1];
+		frustum->planes[Frustum::TOP].z    = mvp[2][3] - mvp[2][1];
+		frustum->planes[Frustum::TOP].w    = mvp[3][3] - mvp[3][1];
  
-		m20 = mvp[2][0];
-		m21 = mvp[2][1];
-		m22 = mvp[2][2];
-		m23 = mvp[2][3];
- 
-		m30 = mvp[3][0];
-		m31 = mvp[3][1];
-		m32 = mvp[3][2];
-		m33 = mvp[3][3];
- 
-		frustum->planes[Frustum::RIGHT].x = m30 - m00;
-		frustum->planes[0].y = m31 - m01;
-		frustum->planes[0].z = m32 - m02;
-		frustum->planes[0].w = m33 - m03;
- 
-		t = InvSqrt(frustum->planes[0].x * frustum->planes[0].x + frustum->planes[0].y * frustum->planes[0].y + frustum->planes[0].z * frustum->planes[0].z);
- 
-		frustum->planes[0].x *= t;
-		frustum->planes[0].y *= t;
-		frustum->planes[0].z *= t;
-		frustum->planes[0].w *= t;
- 
-		frustum->planes[1].x = m30 + m00;
-		frustum->planes[1].y = m31 + m01;
-		frustum->planes[1].z = m32 + m02;
-		frustum->planes[1].w = m33 + m03;
- 
-		t = InvSqrt(frustum->planes[1].x * frustum->planes[1].x + frustum->planes[1].y * frustum->planes[1].y + frustum->planes[1].z * frustum->planes[1].z);
- 
-		frustum->planes[1].x *= t;
-		frustum->planes[1].y *= t;
-		frustum->planes[1].z *= t;
-		frustum->planes[1].w *= t;
- 
-		frustum->planes[2].x = m30 - m10;
-		frustum->planes[2].y = m31 - m11;
-		frustum->planes[2].z = m32 - m12;
-		frustum->planes[2].w = m33 - m13;
- 
-		t = InvSqrt(frustum->planes[2].x * frustum->planes[2].x + frustum->planes[2].y * frustum->planes[2].y + frustum->planes[2].z * frustum->planes[2].z);
- 
-		frustum->planes[2].x *= t;
-		frustum->planes[2].y *= t;
-		frustum->planes[2].z *= t;
-		frustum->planes[2].w *= t;
- 
-		frustum->planes[3].x = m30 + m10;
-		frustum->planes[3].y = m31 + m11;
-		frustum->planes[3].z = m32 + m12;
-		frustum->planes[3].w = m33 + m13;
- 
-		t = InvSqrt(frustum->planes[3].x * frustum->planes[3].x + frustum->planes[3].y * frustum->planes[3].y + frustum->planes[3].z * frustum->planes[3].z);
- 
-		frustum->planes[3].x *= t;
-		frustum->planes[3].y *= t;
-		frustum->planes[3].z *= t;
-		frustum->planes[3].w *= t;
- 
-		frustum->planes[4].x = m30 - m20;
-		frustum->planes[4].y = m31 - m21;
-		frustum->planes[4].z = m32 - m22;
-		frustum->planes[4].w = m33 - m23;
- 
-		t = InvSqrt(frustum->planes[4].x * frustum->planes[4].x + frustum->planes[4].y * frustum->planes[4].y + frustum->planes[4].z * frustum->planes[4].z);
- 
-		frustum->planes[4].x *= t;
-		frustum->planes[4].y *= t;
-		frustum->planes[4].z *= t;
-		frustum->planes[4].w *= t;
- 
-		frustum->planes[5].x = m30 + m20;
-		frustum->planes[5].y = m31 + m21;
-		frustum->planes[5].z = m32 + m22;
-		frustum->planes[5].w = m33 + m23;
- 
-		t = InvSqrt(frustum->planes[5].x * frustum->planes[5].x + frustum->planes[5].y * frustum->planes[5].y + frustum->planes[5].z * frustum->planes[5].z);
- 
-		frustum->planes[5].x *= t;
-		frustum->planes[5].y *= t;
-		frustum->planes[5].z *= t;
-		frustum->planes[5].w *= t;
+		frustum->planes[Frustum::NEAR].x   = mvp[0][3] + mvp[0][2];
+		frustum->planes[Frustum::NEAR].y   = mvp[1][3] + mvp[1][2];
+		frustum->planes[Frustum::NEAR].z   = mvp[2][3] + mvp[2][2];
+		frustum->planes[Frustum::NEAR].w   = mvp[3][3] + mvp[3][2];
+       
+		frustum->planes[Frustum::FAR].x    = mvp[0][3] - mvp[0][2];
+		frustum->planes[Frustum::FAR].y    = mvp[1][3] - mvp[1][2];
+		frustum->planes[Frustum::FAR].z    = mvp[2][3] - mvp[2][2];
+		frustum->planes[Frustum::FAR].w    = mvp[3][3] - mvp[3][2];
+
+		for(int i = 0; i < 6; i++)
+		{
+			float length = glm::length(glm::vec3(frustum->planes[i]));
+			frustum->planes[i] /= length;
+			//frustum->planes[i] = glm::normalize(frustum->planes[i]);
+		}
 	}
 	
 	void updateView(CCamera* camera)

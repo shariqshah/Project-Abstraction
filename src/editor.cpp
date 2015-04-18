@@ -17,6 +17,7 @@
 #include "rigidbody.h"
 #include "geometry.h"
 #include "utilities.h"
+#include "input.h"
 
 namespace Editor
 {
@@ -46,8 +47,6 @@ namespace Editor
 		bool showPhysicsWindow    = false;
 		bool showSample           = false;
 		bool showDebugVars        = false;
-
-		int  currentItem = 1;
 		
 		const float OPACITY  = 1.f;
 		const int   BUF_SIZE = 128;
@@ -143,6 +142,7 @@ namespace Editor
 		CRigidBody  body       = GO::getRigidBody(selectedGO);
 		if(ImGui::CollapsingHeader("RigidBody", "RigidBodyComponent", true, true))
 		{
+			ImGui::PushID("RigidBodyComponentProps");
 			float mass = RigidBody::getMass(body);
 			if(ImGui::InputFloat("Mass", &mass, 1.f, 5.f))
 				RigidBody::setMass(body, mass);
@@ -173,7 +173,7 @@ namespace Editor
 
 			if(showChangeCollisionShapeMenu)
 			{
-				CModel* model = NULL;
+				// CModel* model = NULL;
 				switch(collisionShapeCombo)
 				{
 				case 1:
@@ -225,6 +225,7 @@ namespace Editor
 					collisionShapeCombo = 0;
 				}
 			}
+			ImGui::PopID();
 		}
 	}
 	
@@ -234,78 +235,72 @@ namespace Editor
 		CTransform* transform  = GO::getTransform(selectedGO);
 		if(ImGui::CollapsingHeader("Transform", "TransformComponent", true, true))
 		{
+			static Transform::Space space = Transform::TS_WORLD;
+			ImGui::Text("Space"); ImGui::SameLine();
+			ImGui::RadioButton("World", (int*)&space, Transform::TS_WORLD); ImGui::SameLine();
+			ImGui::RadioButton("Local", (int*)&space, Transform::TS_LOCAL);
+			
 			float step     = 1.f;
 			float stepFast = 10.f;
-			float width    = ImGui::GetWindowWidth() / 5.f;
-			ImGui::PushItemWidth(width);
 			// Position
-			bool updatePosition = false;
 			ImGui::PushID("Position");
-			if(ImGui::InputFloat("X", &transform->position.x, step, stepFast))
-				updatePosition = true;
-					
-			ImGui::SameLine();
-			if(ImGui::InputFloat("Y", &transform->position.y, step, stepFast))
-				updatePosition = true;
-					
-			ImGui::SameLine();
-			if(ImGui::InputFloat("Z", &transform->position.z, step, stepFast))
-				updatePosition = true;
-
-			if(updatePosition)
-				Transform::setPosition(transform, transform->position);
-
-			ImGui::SameLine();
 			ImGui::Text("Position");
+			Vec3 position = transform->position;
+			if(ImGui::InputFloat("X", &position.x, step, stepFast))
+			{
+				float translation = position.x - transform->position.x;
+				Transform::translate(transform, Vec3(translation, 0, 0), space);
+			}
+			if(ImGui::InputFloat("Y", &position.y, step, stepFast))
+			{
+				float translation = position.y - transform->position.y;
+				Transform::translate(transform, Vec3(0, translation, 0), space);
+			}
+			if(ImGui::InputFloat("Z", &position.z, step, stepFast))
+			{
+				float translation = position.z - transform->position.z;
+				Transform::translate(transform, Vec3(0, 0, translation), space);
+			}
+			if(ImGui::Button("Reset")) Transform::setPosition(transform, Vec3(0.f));
+			ImGui::Separator();
 			ImGui::PopID();
 
 			// Rotation
 			Vec3 eulerAngles = glm::eulerAngles(transform->rotation);
+			Vec3 currentRot  = eulerAngles;
 			eulerAngles = glm::degrees(eulerAngles);
-			bool updateRotation = false;
+			currentRot  = glm::degrees(currentRot);
 			ImGui::PushID("Rotation");
-			if(ImGui::InputFloat("X", &eulerAngles.x, step, stepFast))
-				updateRotation = true;
-					
-			ImGui::SameLine();
-			if(ImGui::InputFloat("Y", &eulerAngles.y, step, stepFast))
-				updateRotation = true;
-
-			ImGui::SameLine();
-			if(ImGui::InputFloat("Z", &eulerAngles.z, step, stepFast))
-				updateRotation = true;
-
-			if(updateRotation)
-			{
-				eulerAngles = glm::radians(eulerAngles);
-				Quat newRotation(eulerAngles);
-				Transform::setRotation(transform, newRotation);
-			}
-			ImGui::SameLine();
 			ImGui::Text("Rotation");
+			if(ImGui::InputFloat("X", &eulerAngles.x, step, stepFast))
+			{
+				float angle = eulerAngles.x - currentRot.x;
+				Transform::rotate(transform, Transform::UNIT_X, angle, space);
+			}
+			if(ImGui::InputFloat("Y", &eulerAngles.y, step, stepFast))
+			{
+				float angle = eulerAngles.y - currentRot.y;
+				Transform::rotate(transform, Transform::UNIT_Y, angle, space);
+			}
+			if(ImGui::InputFloat("Z", &eulerAngles.z, step, stepFast))
+			{
+				float angle = eulerAngles.z - currentRot.z;
+				Transform::rotate(transform, Transform::UNIT_Z, angle, space);
+			}
+			if(ImGui::Button("Reset")) Transform::setRotation(transform, Quat(1, 0, 0, 0));
+			ImGui::Separator();
 			ImGui::PopID();
-					
+
 			// Scale
 			bool updateScale = false;
 			ImGui::PushID("Scale");
-			if(ImGui::InputFloat("X", &transform->scale.x, step, stepFast))
-				updateScale = true;
-					
-			ImGui::SameLine();
-			if(ImGui::InputFloat("Y", &transform->scale.y, step, stepFast))
-				updateScale = true;
-					
-			ImGui::SameLine();
-			if(ImGui::InputFloat("Z", &transform->scale.z, step, stepFast))
-				updateScale = true;
-
-			if(updateScale)
-				Transform::setScale(transform, transform->scale);
-
-			ImGui::SameLine();
 			ImGui::Text("Scale");
+			if(ImGui::InputFloat("X", &transform->scale.x, step, stepFast))	updateScale = true;
+			if(ImGui::InputFloat("Y", &transform->scale.y, step, stepFast))	updateScale = true;
+			if(ImGui::InputFloat("Z", &transform->scale.z, step, stepFast)) updateScale = true;
+			if(updateScale)	Transform::setScale(transform, transform->scale);
+			if(ImGui::Button("Reset")) Transform::setScale(transform, Vec3(1.f));
 			ImGui::PopID();
-			ImGui::PopItemWidth();
 		}
 	}
 
@@ -315,6 +310,7 @@ namespace Editor
 		CLight*     light      = GO::getLight(selectedGO);
 		if(ImGui::CollapsingHeader("Light", "LightComponent", true, true))
 		{
+			ImGui::PushID("LightComponentProps");
 			ImGui::SliderFloat("Intensity", &light->intensity, 0.f, 10.f);
 			ImGui::ColorEdit4("Color", glm::value_ptr(light->color));
 			ImGui::Combo("Type", &light->type, "Spot\0Directional\0Point\0\0", 3);
@@ -329,6 +325,7 @@ namespace Editor
 					ImGui::SliderAngle("Outer", &light->outerAngle, 0, 180);
 				}
 			}
+			ImGui::PopID();
 		}
 	}
 
@@ -340,37 +337,21 @@ namespace Editor
 		{
 			if(ImGui::InputText("Geometry", &inputGeoName[0], BUF_SIZE, ImGuiInputTextFlags_EnterReturnsTrue))
 			{
-				if(Utils::fileExists(&inputGeoName[0]))
+				int index = Geometry::create(&inputGeoName[0]);
+				if(index > -1)
 				{
-					int prevMaterial = model->material;
-					Mat_Uniforms prevUniforms = model->materialUniforms;
-					const char* textureName =
-						prevUniforms.texture != -1 ? Texture::getFilename(prevUniforms.texture) : NULL;
-					int texture = textureName ? Texture::create(textureName) : -1;
-					CModel* newModel = GO::addModel(selectedGO, &inputGeoName[0]);
-					if(!newModel)
-					{
-						memset(&inputGeoName[0], '\0', BUF_SIZE);
-						strcpy(&inputGeoName[0], "NONE");
-					}
-					else
-					{
-						Model::setMaterialType(newModel, (Mat_Type)prevMaterial);
-						newModel->materialUniforms = prevUniforms;
-						newModel->materialUniforms.texture = texture;
-						updateComponentViewers();
-						return;
-					}
+					model->geometryIndex = index;
 				}
 				else
 				{
 					Log::error("Editor::displayModel",
-							   "File " + std::string(&inputGeoName[0]) + " not found, reverting back to previously attached");
-					memset(&inputGeoName[0], '\0', BUF_SIZE);
-					const std::string filename = Geometry::getName(model->geometryIndex);
-					int copySize = filename.size() > BUF_SIZE ? BUF_SIZE : filename.size();
-					strncpy(&inputGeoName[0], filename.c_str(), copySize);
+							   "File '" + std::string(&inputGeoName[0]) + "' not found, reverting back to previously attached");
 				}
+				memset(&inputGeoName[0], '\0', BUF_SIZE);
+				const std::string filename = Geometry::getName(model->geometryIndex);
+				int copySize = filename.size() > BUF_SIZE ? BUF_SIZE : filename.size();
+				strncpy(&inputGeoName[0], filename.c_str(), copySize);
+				
 			}
 			if(ImGui::IsItemHovered())
 				ImGui::SetTooltip("Insert new name and press Enter to reload Model");
@@ -572,7 +553,7 @@ namespace Editor
 						Log::warning("Removing existing rigidbody from " + selectedGO->name);
 						GO::removeComponent(selectedGO, Component::RIGIDBODY);
 					}
-					GO::addRigidbody(selectedGO, new Box(Vec3(0.5f)));
+					GO::addRigidbody(selectedGO, new Box(Vec3(0.5f)), 0.f);
 					break;
 				default:
 					break;
@@ -691,6 +672,16 @@ namespace Editor
 	{
 		debugInts.push_back(DebugInt(description, value));
 	}
+
+	void checkKeys()
+	{
+		if(Input::isReleased(Input::Key::TILDE))
+		{
+			showLog = !showLog;
+			Console::showWindow(showLog);
+		}
+		
+	}
 	
 	void update(float deltaTime, bool* quit)
 	{
@@ -716,7 +707,8 @@ namespace Editor
 		ImGui::PopStyleColor(3);
 		ImGui::PopID();
 		ImGui::End();
-		
+
+		checkKeys();
 		// Selectable list of gameobjects currently in the scene
 		if(showSceneObjects)     displaySceneObjects();
 		if(showRendererSettings) displayRendererSettings();

@@ -300,6 +300,7 @@ namespace Input
 		engine->RegisterEnumValue("Key", "END", (int)Key::END);
 		engine->RegisterEnumValue("Key", "DELETE", (int)Key::DELETE);
 		engine->RegisterEnumValue("Key", "BACKSPC", (int)Key::BACKSPC);
+		engine->RegisterEnumValue("Key", "TILDE", (int)Key::TILDE);
 		engine->RegisterEnumValue("Key", "NP_PLUS", (int)Key::NP_PLUS);
 		engine->RegisterEnumValue("Key", "NP_MINUS", (int)Key::NP_MINUS);
 

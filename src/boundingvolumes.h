@@ -14,14 +14,20 @@ struct BoundingBox
 	Vec3 points[8];
 };
 
+struct BoundingSphere
+{
+	Vec3 center;
+	float radius;
+};
+
 struct Frustum
 {
 	enum FrustumPlanes
 	{
-		RIGHT = 0,
-		LEFT,
-		TOP,
+		LEFT = 0,
+		RIGHT,
 		BOTTOM,
+		TOP,
 		NEAR,
 		FAR,
 	};
@@ -37,7 +43,8 @@ enum IntersectionType
 
 namespace BoundingVolume
 {
-	int  isIntersecting(Frustum* frustum, BoundingBox* boundingBox, CTransform* bboxTransform);
+	int  isIntersecting(Frustum* frustum, BoundingBox* boundingBox, CTransform* transform);
+	int  isIntersecting(Frustum* frustum, BoundingSphere* boundingSphere, CTransform* transform);
 	bool isIntersecting(Frustum* frustum, const Vec3& point);
 }
 

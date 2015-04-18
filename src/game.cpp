@@ -58,7 +58,7 @@ Game::Game(const char* path)
 		cubeModel->materialUniforms.diffuseColor = Vec4(0, 1, 0, 1);
 		cubeModel->materialUniforms.texture = Texture::create("layingrock.png");
 		CTransform* cubeTran = GO::getTransform(cube);
-		Transform::setPosition(cubeTran, Vec3(5, 0, -5), true);
+		Transform::setPosition(cubeTran, Vec3(0, 5, -5), true);
 		ScriptEngine::addScript(cube, "test");
 	}
 
@@ -94,11 +94,11 @@ Game::Game(const char* path)
 	//System::CameraSystem::setActiveObject(playerPtr);
 	ScriptEngine::addScript(playerPtr, "freecamera");
 
-	GameObject* plane = SceneManager::create("Ground");
-	CModel* planeModel = GO::addModel(plane, "plane.pamesh");
-    Model::setMaterialType(planeModel, MAT_PHONG);
-	planeModel->materialUniforms.texture = Texture::create("test2.png");
-	GO::addRigidbody(plane, new Plane(Vec3(0, 1, 0), 1.f), 0.f, 1.f);
+	// GameObject* plane = SceneManager::create("Ground");
+	// CModel* planeModel = GO::addModel(plane, "plane.pamesh");
+    // Model::setMaterialType(planeModel, MAT_PHONG);
+	// planeModel->materialUniforms.texture = Texture::create("test2.png");
+	// GO::addRigidbody(plane, new Plane(Vec3(0, 1, 0), 1.f), 0.f, 1.f);
 	// ScriptEngine::addScript(plane, "test");
 
 	GameObject* tea = SceneManager::create("Teapot");
@@ -109,6 +109,12 @@ Game::Game(const char* path)
 	CTransform* tTran = GO::getTransform(tea);
 	Transform::setPosition(tTran, Vec3(0, 10, -5), true);
 	GO::addRigidbody(tea, new CollisionMesh("teapot.pamesh", true), 0, 0.2f);
+
+	GameObject* room = SceneManager::create("Room");
+	CModel* roomModel = GO::addModel(room, "room.pamesh");
+    Model::setMaterialType(roomModel, MAT_PHONG);
+	roomModel->materialUniforms.texture = Texture::create("test2.png");
+	GO::addRigidbody(room, new CollisionMesh("room.pamesh", true), 0.f);
 }
 
 Game::~Game()
