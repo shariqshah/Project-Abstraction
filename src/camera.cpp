@@ -199,7 +199,6 @@ namespace Camera
 		{
 			float length = glm::length(glm::vec3(frustum->planes[i]));
 			frustum->planes[i] /= length;
-			//frustum->planes[i] = glm::normalize(frustum->planes[i]);
 		}
 	}
 	
@@ -238,7 +237,7 @@ namespace Camera
 
 	bool remove(int cameraIndex)
 	{
-		bool alreadyRemoved = true;
+		bool alreadyRemoved = false;
 		for(unsigned int i = 0; i < emptyIndices.size(); i++)
 		{
 			if(emptyIndices[i] == cameraIndex)
@@ -248,7 +247,10 @@ namespace Camera
 			}
 		}
 		if(!alreadyRemoved)
+		{
 			emptyIndices.push_back(cameraIndex);
+			if(cameraIndex == activeCameraIndex) activeCameraIndex = -1;
+		}
 		else
 			Log::warning("Camera at index " + std::to_string(cameraIndex) + " already removed!");
 		return alreadyRemoved ? false : true;

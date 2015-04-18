@@ -11,7 +11,8 @@ struct Frustum;
 
 enum CullingMode
 {
-	CM_BOX = 0,
+	CM_NONE = 0,
+	CM_BOX,
 	CM_SPHERE
 };
 

@@ -504,6 +504,18 @@ namespace Editor
 			}
 		}
 
+		ImGui::SameLine();
+		if(ImGui::Button("Clear Scene"))
+		{
+			SceneManager::cleanup();
+			showSelectedGO = false;
+			memset(&inputName[0], '\0', BUF_SIZE);
+			memset(&inputNewName[0], '\0', BUF_SIZE);
+			memset(&inputTag[0], '\0', BUF_SIZE);
+			memset(&inputGeoName[0], '\0', BUF_SIZE);
+			memset(&inputModelTex[0], '\0', BUF_SIZE);
+		}
+
 		if(ImGui::InputText("Create New",
 							&inputNewName[0],
 							BUF_SIZE,
@@ -702,6 +714,7 @@ namespace Editor
 		if(isReleased(Input::Key::K3)) showDebugVars     = !showDebugVars;
 		if(isReleased(Input::Key::F1)) Geometry::setCullingMode(CM_BOX);
 		if(isReleased(Input::Key::F2)) Geometry::setCullingMode(CM_SPHERE);
+		if(isReleased(Input::Key::F3)) Geometry::setCullingMode(CM_NONE);
 	}
 	
 	void update(float deltaTime, bool* quit)

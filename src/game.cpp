@@ -65,23 +65,26 @@ Game::Game(const char* path)
 	Box* t1 = new Box(Vec3(0.5f));
 	for(int i = 0; i < 10; i++)
 	{
-		GameObject* cube2 = SceneManager::create("Cube" + std::to_string(i));
-		CModel* cubeModel = GO::addModel(cube2, "suzanne.pamesh");
-		Model::setMaterialType(cubeModel, MAT_PHONG);
-		cubeModel->materialUniforms.diffuseColor = Vec4(0, 1, 0, 1);
-		cubeModel->materialUniforms.texture = Texture::create("layingrock.png");
-		if((i % 2) == 0)
+		for(int j = 0; j < 10; j++)
 		{
-			cubeModel->materialUniforms.diffuseColor = Vec4(1, 0, 0, 1);
-			cubeModel->material = MAT_PHONG;
+			GameObject* cube2 = SceneManager::create("Cube" + std::to_string(i));
+			CModel* cubeModel = GO::addModel(cube2, "suzanne.pamesh");
+			Model::setMaterialType(cubeModel, MAT_PHONG);
+			cubeModel->materialUniforms.diffuseColor = Vec4(0, 1, 0, 1);
+			cubeModel->materialUniforms.texture = Texture::create("layingrock.png");
+			if((i % 2) == 0)
+			{
+				cubeModel->materialUniforms.diffuseColor = Vec4(1, 0, 0, 1);
+				cubeModel->material = MAT_PHONG;
+			}
+			else
+			{
+				cubeModel->materialUniforms.diffuseColor = Vec4(1);
+			}
+			CTransform* cube2Tran = GO::getTransform(cube2);
+			Transform::setPosition(cube2Tran, Vec3(i * j, 5, -j * 10));
+			GO::addRigidbody(cube2, t1);
 		}
-		else
-		{
-			cubeModel->materialUniforms.diffuseColor = Vec4(1);
-		}
-		CTransform* cube2Tran = GO::getTransform(cube2);
-		Transform::setPosition(cube2Tran, Vec3(i, i + 5, -i), true);
-		GO::addRigidbody(cube2, t1);
 	}
 	
 	GameObject* playerPtr = SceneManager::create("Player");
@@ -95,9 +98,9 @@ Game::Game(const char* path)
 	ScriptEngine::addScript(playerPtr, "freecamera");
 
 	GameObject* plane = SceneManager::create("Ground");
-	//CModel* planeModel = GO::addModel(plane, "plane.pamesh");
-    //Model::setMaterialType(planeModel, MAT_PHONG);
-	//planeModel->materialUniforms.texture = Texture::create("test2.png");
+	CModel* planeModel = GO::addModel(plane, "plane.pamesh");
+    Model::setMaterialType(planeModel, MAT_PHONG);
+	planeModel->materialUniforms.texture = Texture::create("test2.png");
 	GO::addRigidbody(plane, new Plane(Vec3(0, 1, 0), 1.f), 0.f, 1.f);
 	// ScriptEngine::addScript(plane, "test");
 

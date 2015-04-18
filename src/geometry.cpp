@@ -30,7 +30,6 @@ namespace Geometry
 		std::vector<GeometryData> geometryList;
 		std::vector<uint32_t>     emptyIndices;
 		char*                     geometryPath;
-		unsigned int              activeVAO;
 		int                       cullingMode = CM_BOX;
 	}
 
@@ -70,24 +69,24 @@ namespace Geometry
 
 		// boundingBox->min -= Vec3(10);
 		// boundingBox->max += Vec3(10);
-		boundingBox->size   = boundingBox->max - boundingBox->min;
-		boundingBox->center = (boundingBox->max + boundingBox->min) / 2.f;
+		// boundingBox->size   = boundingBox->max - boundingBox->min;
+		// boundingBox->center = (boundingBox->max + boundingBox->min) / 2.f;
 
-		Vec3 halfSize = boundingBox->size / 2.f;
-		Vec3 center   = boundingBox->center;
+		// Vec3 halfSize = boundingBox->size / 2.f;
+		// Vec3 center   = boundingBox->center;
 		// Back
-		boundingBox->points[0] = Vec3(center.x - halfSize.x, center.y + halfSize.y, center.z - halfSize.z);
-		boundingBox->points[1] = Vec3(center.x + halfSize.x, center.y + halfSize.y, center.z - halfSize.z);
-		boundingBox->points[2] = Vec3(center.x - halfSize.x, center.y - halfSize.y, center.z - halfSize.z);
-		boundingBox->points[3] = Vec3(center.x + halfSize.x, center.y - halfSize.y, center.z - halfSize.z);
-		// Front
-		boundingBox->points[4] = Vec3(center.x - halfSize.x, center.y + halfSize.y, center.z + halfSize.z);
-		boundingBox->points[5] = Vec3(center.x + halfSize.x, center.y + halfSize.y, center.z + halfSize.z);
-		boundingBox->points[6] = Vec3(center.x - halfSize.x, center.y - halfSize.y, center.z + halfSize.z);
-		boundingBox->points[7] = Vec3(center.x + halfSize.x, center.y - halfSize.y, center.z + halfSize.z);
+		// boundingBox->points[0] = Vec3(center.x - halfSize.x, center.y + halfSize.y, center.z - halfSize.z);
+		// boundingBox->points[1] = Vec3(center.x + halfSize.x, center.y + halfSize.y, center.z - halfSize.z);
+		// boundingBox->points[2] = Vec3(center.x - halfSize.x, center.y - halfSize.y, center.z - halfSize.z);
+		// boundingBox->points[3] = Vec3(center.x + halfSize.x, center.y - halfSize.y, center.z - halfSize.z);
+		// // Front
+		// boundingBox->points[4] = Vec3(center.x - halfSize.x, center.y + halfSize.y, center.z + halfSize.z);
+		// boundingBox->points[5] = Vec3(center.x + halfSize.x, center.y + halfSize.y, center.z + halfSize.z);
+		// boundingBox->points[6] = Vec3(center.x - halfSize.x, center.y - halfSize.y, center.z + halfSize.z);
+		// boundingBox->points[7] = Vec3(center.x + halfSize.x, center.y - halfSize.y, center.z + halfSize.z);
 
-		boundingSphere->center = center;
-		boundingSphere->radius = glm::abs(glm::length(boundingBox->max - center));
+		boundingSphere->center = (boundingBox->max + boundingBox->min) / 2.f;
+		boundingSphere->radius = glm::abs(glm::length(boundingBox->max - boundingSphere->center));
 	}
 
 	bool loadFromFile(GeometryData* geometry, const char* filename)
@@ -301,24 +300,19 @@ namespace Geometry
 		if(index >= 0 && index < (int)geometryList.size())
 		{
 			GeometryData* geometry = &geometryList[index];
-			int intersection = IT_OUTSIDE;
+			int intersection = IT_INSIDE;
 			if(cullingMode == CM_BOX)
 				 intersection = BoundingVolume::isIntersecting(frustum, &geometry->boundingBox, transform);
-			else
+			else if(cullingMode == CM_SPHERE)
 				intersection = BoundingVolume::isIntersecting(frustum, &geometry->boundingSphere, transform);
 			if(intersection == IT_INTERSECT || intersection == IT_INSIDE)
 			{
-				if(activeVAO != geometry->vao) // Only unbind if needed
-				{
-					glBindVertexArray(0);
-					glBindVertexArray(geometry->vao);
-					activeVAO = geometry->vao;
-				}
-			
+				glBindVertexArray(geometry->vao);
 				if(geometry->drawIndexed)
 					glDrawElements(GL_TRIANGLES, geometry->indices.size(), GL_UNSIGNED_INT, (void*)0);
 				else
 					glDrawArrays(GL_TRIANGLES, 0, geometry->vertices.size());
+				glBindVertexArray(0);
 				rendered = true;
 			}
 		}

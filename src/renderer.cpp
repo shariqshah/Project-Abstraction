@@ -431,8 +431,8 @@ namespace Renderer
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		if(camera)
 			Model::renderAllModels(camera, &renderParams);
-		else
-			Log::error("Renderer::renderFrame", "Can't render, no active camera set!");
+		// else
+		// 	Log::error("Renderer::renderFrame", "Can't render, no active camera set!");
 	}
 
 	Vec4 getClearColor()

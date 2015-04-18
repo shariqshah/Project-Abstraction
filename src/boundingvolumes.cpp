@@ -5,41 +5,45 @@ namespace BoundingVolume
 {
 	int isIntersecting(Frustum* frustum, BoundingBox* box, CTransform* transform)
 	{
-		int intersectionType = IT_OUTSIDE;
-		// for(Vec3& point : box->points)
+		// int completelyInside = 0;
+		// Vec3 points[8];
+		// for(int i = 0; i < 8; i++)
 		// {
-		// 	Vec3 transformedPoint = point + transform->position;
-		// 	transformedPoint *= transform->scale;
-		// 	if(isIntersecting(frustum, transformedPoint))
-		// 		pointsIntersecting++;
+		// 	points[i] = box->points[i] + transform->position;
+		// 	points[i] *= transform->scale;
 		// }
-		//int intersectionType = IT_OUTSIDE;
+		
+		// for(int i = 0; i < 6; i++)
+		// {
+		// 	int intersections = 0;
+		// 	for(Vec3& point : points)
+		// 	{
+		// 		if(glm::dot(Vec3(frustum->planes[i]), point) + frustum->planes[i].w > 0)
+		// 			intersections++;
+		// 	}
+		// 	if(intersections == 0)
+		// 		return IT_OUTSIDE;
+		// 	else if(intersections == 8)
+		// 		completelyInside++;
+		// }
+		// return completelyInside == 6 ? IT_INSIDE : IT_INTERSECT;
 
 		Vec3 min = (box->min + transform->position) * transform->scale;
 		Vec3 max = (box->max + transform->position) * transform->scale;
 		Vec3 size = max - min;
 		Vec3 center = (max + min) / 2.f;
-		//Vec3 center = transform->position + box->center;
 		Vec3 halfExt = size / 2.f;
-		for (int i = 0; i < 6; i++)
+		for(int i = 0; i < 6; i++)
 		{
 			glm::vec3 normal(frustum->planes[i]);
-			//normal = glm::normalize(normal);
 			float distance = frustum->planes[i].w;
-
 			float d = glm::dot(normal, center);
 			float r = glm::dot(halfExt, glm::abs(normal));
 			if(d + r < -distance)
 			{
-				intersectionType = IT_OUTSIDE;
 				return IT_OUTSIDE;
 			}
-			else
-			{
-				return IT_INTERSECT;
-			}
 		}
-
 		return IT_INSIDE;
 	}
 
@@ -50,7 +54,6 @@ namespace BoundingVolume
 		
 		for(int i = 0; i < 6; i++)
 		{
-			//Vec3 planeNormal = glm::normalize(Vec3(frustum->planes[i]));
 			Vec3 planeNormal = Vec3(frustum->planes[i]);
 			float distance   = frustum->planes[i].w;
 			float dot = glm::dot(planeNormal, center) + distance;
@@ -67,17 +70,6 @@ namespace BoundingVolume
 				return intersectionType;
 			}
 		}
-
-		// if(intersectCount > 0) intersectionType = IT_INTERSECT;
-
-		// for(int i = 0; i < 6; i++)
-		// {
-		// 	if((frustum->planes[i].x * center.x +
-		// 		frustum->planes[i].y * center.y +
-		// 		frustum->planes[i].z * center.z +
-		// 		frustum->planes[i].w) <= -sphere->radius)
-		// 		intersectionType = IT_OUTSIDE; break;
-		// }
 		return intersectionType;
 	}
 

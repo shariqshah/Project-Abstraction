@@ -9,9 +9,7 @@ struct BoundingBox
 {
 	Vec3 min;
 	Vec3 max;
-	Vec3 size;
-	Vec3 center;
-	Vec3 points[8];
+	//Vec3 points[8];
 };
 
 struct BoundingSphere
