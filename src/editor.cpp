@@ -46,7 +46,7 @@ namespace Editor
 		bool showStatsWindow      = true;
 		bool showPhysicsWindow    = false;
 		bool showSample           = false;
-		bool showDebugVars        = false;
+		bool showDebugVars        = true;
 		
 		const float OPACITY  = 1.f;
 		const int   BUF_SIZE = 128;
@@ -262,6 +262,14 @@ namespace Editor
 				Transform::translate(transform, Vec3(0, 0, translation), space);
 			}
 			if(ImGui::Button("Reset")) Transform::setPosition(transform, Vec3(0.f));
+			ImGui::SameLine();
+			if(ImGui::Button("Set to Camera Position"))
+			{
+				CCamera* camera = Camera::getActiveCamera();
+				GameObject* cameraGO = SceneManager::find(camera->node);
+				CTransform* cameraTransform = GO::getTransform(cameraGO);
+				Transform::setPosition(transform, cameraTransform->position);
+			}
 			ImGui::Separator();
 			ImGui::PopID();
 
@@ -288,6 +296,14 @@ namespace Editor
 				Transform::rotate(transform, Transform::UNIT_Z, angle, space);
 			}
 			if(ImGui::Button("Reset")) Transform::setRotation(transform, Quat(1, 0, 0, 0));
+			ImGui::SameLine();
+			if(ImGui::Button("Set to Camera Rotation"))
+			{
+				CCamera* camera = Camera::getActiveCamera();
+				GameObject* cameraGO = SceneManager::find(camera->node);
+				CTransform* cameraTransform = GO::getTransform(cameraGO);
+				Transform::setRotation(transform, cameraTransform->rotation);
+			}
 			ImGui::Separator();
 			ImGui::PopID();
 
@@ -680,7 +696,12 @@ namespace Editor
 			showLog = !showLog;
 			Console::showWindow(showLog);
 		}
-		
+
+		if(isReleased(Input::Key::K1)) showSceneObjects  = !showSceneObjects;
+		if(isReleased(Input::Key::K2)) showPhysicsWindow = !showPhysicsWindow;
+		if(isReleased(Input::Key::K3)) showDebugVars     = !showDebugVars;
+		if(isReleased(Input::Key::F1)) Geometry::setCullingMode(CM_BOX);
+		if(isReleased(Input::Key::F2)) Geometry::setCullingMode(CM_SPHERE);
 	}
 	
 	void update(float deltaTime, bool* quit)
@@ -723,6 +744,7 @@ namespace Editor
 	
 	void cleanup()
 	{
-		
+		debugInts.clear();
+		debugFloats.clear();
 	}
 }

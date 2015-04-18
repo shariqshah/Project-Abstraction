@@ -94,11 +94,11 @@ Game::Game(const char* path)
 	//System::CameraSystem::setActiveObject(playerPtr);
 	ScriptEngine::addScript(playerPtr, "freecamera");
 
-	// GameObject* plane = SceneManager::create("Ground");
-	// CModel* planeModel = GO::addModel(plane, "plane.pamesh");
-    // Model::setMaterialType(planeModel, MAT_PHONG);
-	// planeModel->materialUniforms.texture = Texture::create("test2.png");
-	// GO::addRigidbody(plane, new Plane(Vec3(0, 1, 0), 1.f), 0.f, 1.f);
+	GameObject* plane = SceneManager::create("Ground");
+	//CModel* planeModel = GO::addModel(plane, "plane.pamesh");
+    //Model::setMaterialType(planeModel, MAT_PHONG);
+	//planeModel->materialUniforms.texture = Texture::create("test2.png");
+	GO::addRigidbody(plane, new Plane(Vec3(0, 1, 0), 1.f), 0.f, 1.f);
 	// ScriptEngine::addScript(plane, "test");
 
 	GameObject* tea = SceneManager::create("Teapot");

@@ -15,11 +15,16 @@ namespace BoundingVolume
 		// }
 		//int intersectionType = IT_OUTSIDE;
 
-		Vec3 center = transform->position + box->center;
-		Vec3 halfExt = box->size / 2.f;
+		Vec3 min = (box->min + transform->position) * transform->scale;
+		Vec3 max = (box->max + transform->position) * transform->scale;
+		Vec3 size = max - min;
+		Vec3 center = (max + min) / 2.f;
+		//Vec3 center = transform->position + box->center;
+		Vec3 halfExt = size / 2.f;
 		for (int i = 0; i < 6; i++)
 		{
 			glm::vec3 normal(frustum->planes[i]);
+			//normal = glm::normalize(normal);
 			float distance = frustum->planes[i].w;
 
 			float d = glm::dot(normal, center);
@@ -45,6 +50,7 @@ namespace BoundingVolume
 		
 		for(int i = 0; i < 6; i++)
 		{
+			//Vec3 planeNormal = glm::normalize(Vec3(frustum->planes[i]));
 			Vec3 planeNormal = Vec3(frustum->planes[i]);
 			float distance   = frustum->planes[i].w;
 			float dot = glm::dot(planeNormal, center) + distance;
@@ -54,7 +60,8 @@ namespace BoundingVolume
 				intersectionType = IT_OUTSIDE;
 				return intersectionType;
 			}
-			else
+
+			if(glm::abs(dot) < sphere->radius)
 			{
 				intersectionType = IT_INTERSECT;
 				return intersectionType;

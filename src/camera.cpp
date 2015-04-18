@@ -162,7 +162,6 @@ namespace Camera
 	void updateFrustum(CCamera* camera)
 	{
 		PA_ASSERT(camera);
-
 		Frustum* frustum = &camera->frustum;
 		Mat4 mvp = camera->viewProjMat;
 

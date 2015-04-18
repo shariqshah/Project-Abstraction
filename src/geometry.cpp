@@ -31,6 +31,12 @@ namespace Geometry
 		std::vector<uint32_t>     emptyIndices;
 		char*                     geometryPath;
 		unsigned int              activeVAO;
+		int                       cullingMode = CM_BOX;
+	}
+
+	void setCullingMode(CullingMode mode)
+	{
+		cullingMode = (int)mode;
 	}
 
 	int find(const char* filename)
@@ -295,8 +301,11 @@ namespace Geometry
 		if(index >= 0 && index < (int)geometryList.size())
 		{
 			GeometryData* geometry = &geometryList[index];
-			int intersection = BoundingVolume::isIntersecting(frustum, &geometry->boundingBox, transform);
-			//int intersection = BoundingVolume::isIntersecting(frustum, &geometry->boundingSphere, transform);
+			int intersection = IT_OUTSIDE;
+			if(cullingMode == CM_BOX)
+				 intersection = BoundingVolume::isIntersecting(frustum, &geometry->boundingBox, transform);
+			else
+				intersection = BoundingVolume::isIntersecting(frustum, &geometry->boundingSphere, transform);
 			if(intersection == IT_INTERSECT || intersection == IT_INSIDE)
 			{
 				if(activeVAO != geometry->vao) // Only unbind if needed

@@ -9,6 +9,12 @@
 struct CTransform;
 struct Frustum;
 
+enum CullingMode
+{
+	CM_BOX = 0,
+	CM_SPHERE
+};
+
 namespace Geometry
 {
 	int                          create(const char* filename);
@@ -16,6 +22,7 @@ namespace Geometry
 	void                         initialize(const char* path);
 	void                         cleanup();
 	void                         remove(int index);
+	void                         setCullingMode(CullingMode mode);
 	bool                         render(int index, Frustum* frustum, CTransform* transform);
 	unsigned int                 getVAO(int index);
 	const std::string            getName(int index);
