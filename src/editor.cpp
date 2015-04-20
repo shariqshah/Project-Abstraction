@@ -471,6 +471,7 @@ namespace Editor
 				GameObject* gameObject = SceneManager::find(gameObjectNodes->at(i));
 				if(gameObject && gameObjectFilter.PassFilter(gameObject->name.c_str()))
 				{
+					ImGui::PushID(gameObject->node);
 					bool selected = selectedGONode == gameObject->node ? true : false;
 					if(ImGui::Selectable(gameObject->name.c_str(), selected))
 					{
@@ -484,6 +485,7 @@ namespace Editor
 						memcpy(&inputTag[0], &gameObject->tag[0], copySize);
 						updateComponentViewers();
 					}
+					ImGui::PopID();
 				}
 			}
 		}

@@ -6,6 +6,8 @@
 #include "renderer.h"
 #include "datatypes.h"
 
+#include "../include/rapidjson/document.h"
+
 struct CTransform
 {
     Vec3 position   = Vec3(0.f);
@@ -42,6 +44,7 @@ namespace Transform
 	void cleanup();
 	bool remove(unsigned int transformIndex);
 	int  create(Node node);
+	bool createFromJSON(CTransform* transform, const rapidjson::Value& value);
 	CTransform* getTransformAtIndex(int transformIndex);
 }
 

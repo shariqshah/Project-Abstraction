@@ -66,25 +66,6 @@ namespace Geometry
 			if(vertex.y < boundingBox->min.y) boundingBox->min.y = vertex.y;
 			if(vertex.z < boundingBox->min.z) boundingBox->min.z = vertex.z;
 		}
-
-		// boundingBox->min -= Vec3(10);
-		// boundingBox->max += Vec3(10);
-		// boundingBox->size   = boundingBox->max - boundingBox->min;
-		// boundingBox->center = (boundingBox->max + boundingBox->min) / 2.f;
-
-		// Vec3 halfSize = boundingBox->size / 2.f;
-		// Vec3 center   = boundingBox->center;
-		// Back
-		// boundingBox->points[0] = Vec3(center.x - halfSize.x, center.y + halfSize.y, center.z - halfSize.z);
-		// boundingBox->points[1] = Vec3(center.x + halfSize.x, center.y + halfSize.y, center.z - halfSize.z);
-		// boundingBox->points[2] = Vec3(center.x - halfSize.x, center.y - halfSize.y, center.z - halfSize.z);
-		// boundingBox->points[3] = Vec3(center.x + halfSize.x, center.y - halfSize.y, center.z - halfSize.z);
-		// // Front
-		// boundingBox->points[4] = Vec3(center.x - halfSize.x, center.y + halfSize.y, center.z + halfSize.z);
-		// boundingBox->points[5] = Vec3(center.x + halfSize.x, center.y + halfSize.y, center.z + halfSize.z);
-		// boundingBox->points[6] = Vec3(center.x - halfSize.x, center.y - halfSize.y, center.z + halfSize.z);
-		// boundingBox->points[7] = Vec3(center.x + halfSize.x, center.y - halfSize.y, center.z + halfSize.z);
-
 		boundingSphere->center = (boundingBox->max + boundingBox->min) / 2.f;
 		boundingSphere->radius = glm::abs(glm::length(boundingBox->max - boundingSphere->center));
 	}

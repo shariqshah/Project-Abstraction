@@ -3,6 +3,7 @@
 #include "transform.h"
 #include "scriptengine.h"
 #include "passert.h"
+#include "utilities.h"
 
 namespace SceneManager
 {
@@ -145,7 +146,7 @@ namespace SceneManager
 		removableNodes.clear();
 	}
 
-	GameObject* create(const std::string& name)
+	unsigned int createNewIndex()
 	{
 		unsigned int index = 0;
 		if(!emptyIndices.empty())
@@ -153,7 +154,6 @@ namespace SceneManager
 			index = emptyIndices.back();
 			emptyIndices.pop_back();
 			validNodes.push_back(index);
-			sceneObjects[index] = GameObject();
 		}
 		else
 		{
@@ -161,14 +161,113 @@ namespace SceneManager
 			index = sceneObjects.size() - 1;
 			validNodes.push_back(index);
 		}
-		
-		GameObject* newObj = &sceneObjects[index];
-		newObj->name = name;
-		newObj->node = index;
-		GO::addTransform(newObj);
-		ScriptEngine::registerGameObject(newObj);
-		Log::message(name + " added to scene");
-		
+		return index;
+	}
+
+	GameObject* createFromFile(const std::string& filename)
+	{
+		using namespace rapidjson;
+		bool success = true;
+		const char* error = "NONE";
+	    GameObject* gameobject = NULL;
+		Document document;
+		char* json = Utils::loadFileIntoCString(filename.c_str());
+		if(json)
+		{
+			document.Parse(json);
+			if(!document.IsObject() || !document.HasMember("GameObject"))
+			{
+				error = "Invalid file";
+				success = false;
+			}
+			else
+			{
+				Value& gameobjectNode = document["GameObject"];
+				if(gameobjectNode.IsObject())
+				{
+					if(gameobjectNode.HasMember("Name") && gameobjectNode["Name"].IsString())
+					{
+						Value& name = gameobjectNode["Name"];
+						int index = createNewIndex();
+						sceneObjects[index] = GameObject();
+						gameobject = &sceneObjects[index];
+						gameobject->node = index;
+						gameobject->name = name.GetString();
+						if(gameobjectNode.HasMember("Tag") && gameobjectNode["Tag"].IsString())
+							gameobject->tag = gameobjectNode["Tag"].GetString();
+						GO::addTransform(gameobject);
+						ScriptEngine::registerGameObject(gameobject);
+						Log::message(gameobject->name + " added to scene");
+						if(gameobjectNode.HasMember("Components"))
+						{
+							Value& componentNode = gameobjectNode["Components"];
+							if(componentNode.IsObject())
+							{
+								if(componentNode.HasMember("Transform"))
+								{
+									CTransform* transform = GO::getTransform(gameobject);
+									Transform::createFromJSON(transform, componentNode["Transform"]);
+								}
+							}
+							else
+							{
+								Log::warning("'Components' is not an object. No components added to " + gameobject->name);
+							}
+						}
+
+						if(gameobjectNode.HasMember("Scripts"))
+						{
+							Value& scripts = gameobjectNode["Scripts"];
+							if(scripts.IsArray())
+							{
+								for(SizeType i = 0; i < scripts.Size(); i++)
+								{
+									if(scripts[i].IsString())
+										ScriptEngine::addScript(gameobject, scripts[i].GetString());
+									else
+										Log::warning("Invalid script name in " + filename);
+								}
+							}
+							else if(scripts.IsString())
+							{
+								ScriptEngine::addScript(gameobject, scripts.GetString());
+							}
+							else
+							{
+								Log::warning("Invalid value for 'Scripts' in " + filename);
+							}
+						}
+					}
+					else
+					{
+						error = "Gameobject does not have a name";
+						success = false;
+					}
+				}
+			}
+			free(json);
+		}
+		if(!success) Log::error("SceneManager::createFromFile", error);
+		return gameobject;
+	}
+
+	GameObject* create(const std::string& name)
+	{
+		GameObject* newObj = NULL;
+		if(name.size() > 0)
+		{
+			unsigned int index = createNewIndex();
+			newObj = &sceneObjects[index];
+			newObj->name = name;
+			newObj->node = index;
+			GO::addTransform(newObj);
+			ScriptEngine::registerGameObject(newObj);
+			Log::message(name + " added to scene");
+		}
+		else
+		{
+			Log::error("SceneManager::create", "Invalid name");
+		}
 		return newObj;
 	}
 
@@ -220,6 +319,10 @@ namespace SceneManager
 		PA_ASSERT(rc >= 0);
 		rc = engine->RegisterGlobalFunction("GameObject@ create(const string)",
 											asFUNCTION(create),
+											asCALL_CDECL);
+		PA_ASSERT(rc >= 0);
+		rc = engine->RegisterGlobalFunction("GameObject@ createFromFile(const string)",
+											asFUNCTION(createFromFile),
 											asCALL_CDECL);
 		PA_ASSERT(rc >= 0);
 		engine->SetDefaultNamespace("");

@@ -5,29 +5,6 @@ namespace BoundingVolume
 {
 	int isIntersecting(Frustum* frustum, BoundingBox* box, CTransform* transform)
 	{
-		// int completelyInside = 0;
-		// Vec3 points[8];
-		// for(int i = 0; i < 8; i++)
-		// {
-		// 	points[i] = box->points[i] + transform->position;
-		// 	points[i] *= transform->scale;
-		// }
-		
-		// for(int i = 0; i < 6; i++)
-		// {
-		// 	int intersections = 0;
-		// 	for(Vec3& point : points)
-		// 	{
-		// 		if(glm::dot(Vec3(frustum->planes[i]), point) + frustum->planes[i].w > 0)
-		// 			intersections++;
-		// 	}
-		// 	if(intersections == 0)
-		// 		return IT_OUTSIDE;
-		// 	else if(intersections == 8)
-		// 		completelyInside++;
-		// }
-		// return completelyInside == 6 ? IT_INSIDE : IT_INTERSECT;
-
 		Vec3 min = (box->min + transform->position) * transform->scale;
 		Vec3 max = (box->max + transform->position) * transform->scale;
 		Vec3 size = max - min;
@@ -50,8 +27,7 @@ namespace BoundingVolume
 	int isIntersecting(Frustum* frustum, BoundingSphere* sphere, CTransform* transform)
 	{
 		int intersectionType = IT_INSIDE;
-		Vec3 center = sphere->center + transform->position;
-		
+		Vec3 center = (sphere->center + transform->position) * transform->scale;	
 		for(int i = 0; i < 6; i++)
 		{
 			Vec3 planeNormal = Vec3(frustum->planes[i]);

@@ -249,4 +249,58 @@ namespace Transform
 		rc = engine->RegisterGlobalProperty("const Vec3 UNIT_Y", (void *)&UNIT_Y); PA_ASSERT( rc >= 0 );
 		rc = engine->RegisterGlobalProperty("const Vec3 UNIT_Z", (void *)&UNIT_Z); PA_ASSERT( rc >= 0 );
 	}
+
+	bool createFromJSON(CTransform* transform, const rapidjson::Value& value)
+	{
+		using namespace rapidjson;
+		bool success = true;
+		const char* error = "NONE";
+		PA_ASSERT(transform);
+
+		if(value.IsObject())
+		{
+			if(value.HasMember("Position") && value["Position"].IsArray())
+			{
+				Vec3 position;
+				const Value& positionNode = value["Position"];
+				int items = positionNode.Size() < 3 ? positionNode.Size() : 3;
+				for(int i = 0; i < items; i++)
+				{
+					if(positionNode[i].IsNumber()) position[i] = (float)positionNode[i].GetDouble();
+				}
+				setPosition(transform, position);
+			}
+
+			if(value.HasMember("Rotation") && value["Rotation"].IsArray())
+			{
+				Quat rotation;
+				const Value& rotationNode = value["Rotation"];
+				int items = rotationNode.Size() < 4 ? rotationNode.Size() : 4;
+				for(int i = 0; i < items; i++)
+				{
+					if(rotationNode[i].IsNumber()) rotation[i] = (float)rotationNode[i].GetDouble();
+				}
+				setRotation(transform, rotation);
+			}
+
+			if(value.HasMember("Scale") && value["Scale"].IsArray())
+			{
+				Vec3 scale;
+				const Value& scaleNode = value["Scale"];
+				int items = scaleNode.Size() < 3 ? scaleNode.Size() : 3;
+				for(int i = 0; i < items; i++)
+				{
+					if(scaleNode[i].IsNumber()) scale[i] = (float)scaleNode[i].GetDouble();
+				}
+				setScale(transform, scale);
+			}
+		}
+		else
+		{
+			error   = "'Transform' must be an object";
+			success = false;
+		}
+		if(!success) Log::error("Transform::createFromJSON", error);
+		return success;
+	}
 }

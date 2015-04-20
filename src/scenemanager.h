@@ -16,7 +16,8 @@ namespace SceneManager
 	GameObject* find(const std::string& name);
 	GameObject* find(Node node);
 	GameObject* create(const std::string& name);
-
+	GameObject* createFromFile(const std::string& name);
+		
 	void update();
 	void cleanup();
 	void generateBindings();

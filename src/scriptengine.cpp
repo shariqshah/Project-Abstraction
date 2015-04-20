@@ -34,14 +34,15 @@ namespace ScriptEngine
 	namespace
 	{
 		asIScriptEngine*  engine = NULL;
-		asIScriptContext* context = NULL;
+		// asIScriptContext* context = NULL;
+		std::vector<asIScriptContext*> contextPool;
 		std::vector<ScriptContainer> scriptContainerList;
 		std::vector<int> scriptContainerEmptyIndices;
 		std::vector<int> activeScriptContainers;
 		std::string scriptDir = "../content/scripts/"; // TODO: Find a better way to do this
 		std::vector<std::string> scriptReloadQueue;
 		
-		int execute()
+		int execute(asIScriptContext* context)
 		{
 			int rc = context->Execute();
 			if(rc == asEXECUTION_EXCEPTION)
@@ -68,6 +69,28 @@ namespace ScriptEngine
 			}
 			return scriptLocation;
 		}
+	}
+
+	asIScriptContext* prepareContext(asIScriptFunction* function)
+	{
+		asIScriptContext* context = NULL;
+		if(contextPool.size() > 0)
+		{
+			context = contextPool.back();
+			contextPool.pop_back();
+		}
+		else
+		{
+			context = engine->CreateContext();
+		}
+		int rc = context->Prepare(function); PA_ASSERT(rc >= 0);
+		return context;
+	}
+
+	void returnContext(asIScriptContext* context)
+	{
+		contextPool.push_back(context);
+		context->Unprepare();
 	}
 
 	void MessageCallback(const asSMessageInfo *msg, void *param)
@@ -110,7 +133,7 @@ namespace ScriptEngine
 		{
 			// The script compiler will write any compiler messages to the callback.
 			engine->SetMessageCallback(asFUNCTION(MessageCallback), 0, asCALL_CDECL);
-			context = engine->CreateContext();
+			// context = engine->CreateContext();
 			RegisterStdString(engine); // Register string type
 			// Bind functions for script reloading
 			engine->SetDefaultNamespace("ScriptEngine");
@@ -137,7 +160,8 @@ namespace ScriptEngine
 	{
 		if(engine)
 		{
-			context->Release();
+			for(unsigned int i = 0; i < contextPool.size(); i++)
+				contextPool[i]->Release();
 			engine->ShutDownAndRelease();
 		}
 	}
@@ -283,9 +307,9 @@ namespace ScriptEngine
 		newScript.collisionFunc = type->GetMethodByDecl(onCollFuncDecl.c_str());
 
 		// Create the script object
-		context->Prepare(newScript.initFunc);
+		asIScriptContext* context = prepareContext(newScript.initFunc);
 		context->SetArgDWord(0, gameObject->node);
-		int rc = execute();
+		int rc = execute(context);
 		if(rc == asEXECUTION_FINISHED)
 		{
 			// Get the newly created scriptobject and increase it's reference count
@@ -298,6 +322,7 @@ namespace ScriptEngine
 			Log::error("ScriptEngine::addScript", scriptName + " not added to " + gameObject->name);
 			container->scripts.pop_back();
 		}
+		returnContext(context);
 	}
 
 	void updateAllScripts(float deltaTime)
@@ -310,14 +335,15 @@ namespace ScriptEngine
 			{
 				if(script.enabled)
 				{
-					context->Prepare(script.updateFunc);
+					asIScriptContext* context = prepareContext(script.updateFunc);
 					context->SetObject(script.scriptObj);
 					context->SetArgFloat(0, deltaTime);
-					execute();
+					execute(context);
+					returnContext(context);
 				}
 			}
 		}
-		// Check if scripts queued to be reloaded, reload them if any found
+		// If any scripts are queued to be reloaded, reload them
 		for(const std::string& queuedScript : scriptReloadQueue) reloadQueuedScript(queuedScript);
 		scriptReloadQueue.clear();
 	}
@@ -328,12 +354,13 @@ namespace ScriptEngine
 		ScriptContainer* container = &scriptContainerList[gameObject->scriptIndex];
 		for(Script& script : container->scripts)
 		{
-			context->PushState();
-			context->Prepare(script.collisionFunc);
+			//context->PushState();
+			asIScriptContext* context = prepareContext(script.collisionFunc);
 			context->SetObject(script.scriptObj);
 			context->SetArgObject(0, (void *)collisionData);
-			execute();
-			context->PopState();
+			execute(context);
+			returnContext(context);
+			//context->PopState();
 		}
 	}
 
@@ -470,10 +497,10 @@ namespace ScriptEngine
 							if(script.module == scriptName)
 							{
 								matchFound = true;
-								context->PushState();
-								context->Prepare(initFunc);
+								//context->PushState();
+								asIScriptContext* context = prepareContext(initFunc);
 								context->SetArgDWord(0, container.gameObjectNode);
-								int rc = execute();
+								int rc = execute(context);
 								if(rc == asEXECUTION_FINISHED)
 								{
 									// Get the newly created scriptobject and increase it's reference count
@@ -487,7 +514,8 @@ namespace ScriptEngine
 								{
 									success = false;
 								}
-								context->PushState();
+								returnContext(context);
+								//context->PushState();
 							}
 						}
 					}
