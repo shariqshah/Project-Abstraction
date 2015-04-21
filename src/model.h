@@ -5,6 +5,7 @@
 #include "mathdefs.h"
 #include "material.h"
 #include "datatypes.h"
+#include "jsondefs.h"
 
 struct CCamera;
 struct GameObject;
@@ -25,6 +26,7 @@ namespace Model
 	CModel* getModelAtIndex(int modelIndex);
 	CModel* findModel(const char* filename);
 	int     create(const char* filename);
+	bool    createFromJSON(CModel* model, const rapidjson::Value& value);
 	void    remove(unsigned int modelIndex);
 	void    generateBindings();
 	void    cleanup();

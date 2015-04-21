@@ -6,6 +6,7 @@
 #include "utilities.h"
 #include "light.h"
 #include "camera.h"
+#include "model.h"
 
 namespace SceneManager
 {
@@ -224,6 +225,13 @@ namespace SceneManager
 									CCamera* camera = GO::addCamera(gameobject);
 									if(!Camera::createFromJSON(camera, componentNode["Camera"]))
 										Log::warning("Errors while initializing Camera from " + filename);
+								}
+
+								if(componentNode.HasMember("Model"))
+								{
+									CModel* model = GO::addModel(gameobject, "default.pamesh");
+									if(!Model::createFromJSON(model, componentNode["Model"]))
+										Log::warning("Errors while initializing Model from " + filename);
 								}
 							}
 							else

@@ -237,5 +237,128 @@ namespace Model
 			Log::error("Model::setMaterialtype", "Model not found");
 		}
 	}
+
+	bool createFromJSON(CModel* model, const rapidjson::Value& value)
+	{
+		using namespace rapidjson;
+		bool success = true;
+		const char* error = "Invalid value in a field";
+		PA_ASSERT(model);
+
+		if(value.IsObject())
+		{
+			if(value.HasMember("Geometry") && value["Geometry"].IsString())
+			{
+				const Value& geometryNode = value["Geometry"];
+				const std::string& filename = geometryNode.GetString();
+				int index = Geometry::create(filename.c_str());
+				if(index > -1) model->geometryIndex = index;
+			}
+			else
+			{
+				success = false;
+			}
+
+			if(value.HasMember("Material") && value["Material"].IsInt())
+			{
+				const Value& materialNode = value["Material"];
+				int material = materialNode.GetInt();
+				if(material > -1 && material < 4)
+					setMaterialType(model, (Mat_Type)material);
+				else
+					success = false;
+			}
+			else
+			{
+				success = false;
+			}
+
+			if(value.HasMember("MaterialUniforms") && value["MaterialUniforms"].IsObject())
+			{
+				const Value& matUniforms = value["MaterialUniforms"];
+				if(matUniforms.HasMember("DiffuseColor") && matUniforms["DiffuseColor"].IsArray())
+				{
+					const Value& diffuseColorNode = matUniforms["DiffuseColor"];
+					int items = diffuseColorNode.Size() < 4 ? diffuseColorNode.Size() : 4;
+					for(int i = 0; i < items; i++)
+					{
+						if(diffuseColorNode[i].IsNumber())
+							model->materialUniforms.diffuseColor[i] = (float)diffuseColorNode[i].GetDouble();
+						else
+							success = false;
+					}
+				}
+				else
+				{
+					success = false;
+				}
+
+				if(matUniforms.HasMember("Texture") && matUniforms["Texture"].IsString())
+				{
+					const Value& textureNode = matUniforms["Texture"];
+					const std::string& filename = textureNode.GetString();
+					int index = Texture::create(filename.c_str());
+					if(index > -1) model->materialUniforms.texture = index;
+				}
+				else
+				{
+					success = false;
+				}
+
+				if(matUniforms.HasMember("Diffuse") && matUniforms["Diffuse"].IsNumber())
+				{
+					const Value& diffuseNode = matUniforms["Diffuse"];
+					float diffuse = (float)diffuseNode.GetDouble();
+					if(diffuse >= 0)
+						model->materialUniforms.diffuse = glm::clamp(diffuse, 0.f, 1.f);
+					else
+						success = false;
+				}
+				else
+				{
+					success = false;
+				}
+
+				if(matUniforms.HasMember("Specular") && matUniforms["Specular"].IsNumber())
+				{
+					const Value& specularNode = matUniforms["Specular"];
+					float specular = (float)specularNode.GetDouble();
+					if(specular >= 0)
+						model->materialUniforms.specular = glm::clamp(specular, 0.f, 1.f);
+					else
+						success = false;
+				}
+				else
+				{
+					success = false;
+				}
+
+				if(matUniforms.HasMember("SpecularStrength") && matUniforms["SpecularStrength"].IsNumber())
+				{
+					const Value& specularStrengthNode = matUniforms["SpecularStrength"];
+					float specularStrength = (float)specularStrengthNode.GetDouble();
+					if(specularStrength >= 0)
+						model->materialUniforms.specularStrength = specularStrength;
+					else
+						success = false;
+				}
+				else
+				{
+					success = false;
+				}
+			}
+			else
+			{
+				success = false;
+			}
+		}
+		else
+		{
+			error   = "'Model' must be an object";
+			success = false;
+		}
+		if(!success) Log::error("Model::createFromJSON", error);
+		return success;
+	}
 }
 
