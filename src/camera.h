@@ -6,6 +6,7 @@
 #include "mathdefs.h"
 #include "datatypes.h"
 #include "boundingvolumes.h"
+#include "jsondefs.h"
 
 struct GameObject;
 struct CTransform;
@@ -42,6 +43,7 @@ namespace Camera
 	int      create(GameObject* gameObject);
 	CCamera* getActiveCamera();
 	void     setActiveCamera(CCamera* camera); // Pass camera as NULL to reset active camera to none
+	bool     createFromJSON(CCamera* camera, const rapidjson::Value& value);
 }
 
 #endif

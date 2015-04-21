@@ -261,4 +261,91 @@ namespace Camera
 		cameraList.clear();
 		emptyIndices.clear();
 	}
+
+	bool createFromJSON(CCamera* camera, const rapidjson::Value& value)
+    {
+		using namespace rapidjson;
+		bool success = true;
+		const char* error = "Invalid value in a field";
+		PA_ASSERT(camera);
+
+		if(value.IsObject())
+		{
+			if(value.HasMember("NearZ") && value["NearZ"].IsNumber())
+			{
+				const Value& nearZNode = value["NearZ"];
+				float nearZ = (float)nearZNode.GetDouble();
+				if(nearZ > 0)
+					camera->nearZ = nearZ;
+				else
+					success = false;
+			}
+			else
+			{
+				success = false;
+			}
+
+			if(value.HasMember("FarZ") && value["FarZ"].IsNumber())
+			{
+				const Value& farZNode = value["FarZ"];
+				float farZ = (float)farZNode.GetDouble();
+				if(farZ > 0)
+					camera->farZ = farZ;
+				else
+					success = false;
+			}
+			else
+			{
+				success = false;
+			}
+
+			if(value.HasMember("Fov") && value["Fov"].IsNumber())
+			{
+				const Value& fovNode = value["Fov"];
+				float fov = (float)fovNode.GetDouble();
+				if(fov > 0)
+					camera->fov = glm::radians(fov);
+				else
+					success = false;
+			}
+			else
+			{
+				success = false;
+			}
+
+			if(value.HasMember("AspectRatio") && value["AspectRatio"].IsNumber())
+			{
+				const Value& aspectRatioNode = value["AspectRatio"];
+				float aspectRatio = (float)aspectRatioNode.GetDouble();
+				if(aspectRatio > 0)
+					camera->aspectRatio = aspectRatio;
+				else
+					success = false;
+			}
+			else
+			{
+				success = false;
+			}
+
+			if(value.HasMember("IsActive") && value["IsActive"].IsBool())
+			{
+				const Value& IsActiveNode = value["IsActive"];
+				if(IsActiveNode.GetBool())
+					Camera::setActiveCamera(camera);
+			}
+			else
+			{
+				success = false;
+			}
+			updateView(camera);
+			updateProjection(camera);
+		}
+		else
+		{
+			error   = "'Camera' must be an object";
+			success = false;
+		}
+		if(!success) Log::error("Camera::createFromJSON", error);
+		return success;
+	}
 }

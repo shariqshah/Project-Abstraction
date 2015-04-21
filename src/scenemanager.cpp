@@ -5,6 +5,7 @@
 #include "passert.h"
 #include "utilities.h"
 #include "light.h"
+#include "camera.h"
 
 namespace SceneManager
 {
@@ -216,6 +217,13 @@ namespace SceneManager
 									CLight* light = GO::addLight(gameobject);
 									if(!Light::createFromJSON(light, componentNode["Light"]))
 										Log::warning("Errors while initializing Light from " + filename);
+								}
+
+								if(componentNode.HasMember("Camera"))
+								{
+									CCamera* camera = GO::addCamera(gameobject);
+									if(!Camera::createFromJSON(camera, componentNode["Camera"]))
+										Log::warning("Errors while initializing Camera from " + filename);
 								}
 							}
 							else
