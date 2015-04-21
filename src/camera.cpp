@@ -152,7 +152,7 @@ namespace Camera
 	void updateProjection(CCamera* camera)
 	{
 		PA_ASSERT(camera);
-		camera->projMat = glm::perspective(glm::radians(camera->fov),
+		camera->projMat = glm::perspective(camera->fov,
 										   camera->aspectRatio,
 										   camera->nearZ,
 										   camera->farZ);

@@ -440,7 +440,7 @@ namespace Editor
 			bool updateProj = false;
 			if(ImGui::InputFloat("NearZ", &camera->nearZ, 0.1f, 1.f)) updateProj = true;
 			if(ImGui::InputFloat("FarZ", &camera->farZ, 1.f, 5.f))    updateProj = true;
-			if(ImGui::InputFloat("Fov", &camera->fov, 1.f, 5.f))	  updateProj = true;
+			if(ImGui::SliderAngle("Fov", &camera->fov, 0, 180))	      updateProj = true;
 			if(updateProj) Camera::updateProjection(camera);
 
 			CCamera* activeCamera = Camera::getActiveCamera();

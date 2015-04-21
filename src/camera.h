@@ -16,7 +16,7 @@ struct CCamera
 	Node    node        = 0;
 	float   nearZ       = 0.1f;
 	float   farZ        = 1000.f;
-	float   fov         = 75.f;
+	float   fov         = glm::radians(75.f);
 	float   aspectRatio = 4.f/3.f;
 	bool    valid       = true;
 	Mat4    viewMat;
