@@ -151,6 +151,7 @@ namespace Model
 				emptyIndices.pop_back();
 			}
 			Material::registerModel(index, (Mat_Type)model.material);
+			modelList[index].materialUniforms.texture = Texture::create("default.png");
 			modelList[index].geometryIndex = geometryIndex;
 		}
 		else
@@ -299,10 +300,6 @@ namespace Model
 					const std::string& filename = textureNode.GetString();
 					int index = Texture::create(filename.c_str());
 					if(index > -1) model->materialUniforms.texture = index;
-				}
-				else
-				{
-					success = false;
 				}
 
 				if(matUniforms.HasMember("Diffuse") && matUniforms["Diffuse"].IsNumber())
