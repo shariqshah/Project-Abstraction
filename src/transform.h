@@ -5,8 +5,7 @@
 #include "componentTypes.h"
 #include "renderer.h"
 #include "datatypes.h"
-
-#include "../include/rapidjson/document.h"
+#include "jsondefs.h"
 
 struct CTransform
 {

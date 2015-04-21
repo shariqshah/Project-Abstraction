@@ -4,6 +4,7 @@
 #include "scriptengine.h"
 #include "passert.h"
 #include "utilities.h"
+#include "light.h"
 
 namespace SceneManager
 {
@@ -206,7 +207,15 @@ namespace SceneManager
 								if(componentNode.HasMember("Transform"))
 								{
 									CTransform* transform = GO::getTransform(gameobject);
-									Transform::createFromJSON(transform, componentNode["Transform"]);
+									if(!Transform::createFromJSON(transform, componentNode["Transform"]))
+										Log::warning("Errors while initializing Transform from " + filename);
+								}
+
+								if(componentNode.HasMember("Light"))
+								{
+									CLight* light = GO::addLight(gameobject);
+									if(!Light::createFromJSON(light, componentNode["Light"]))
+										Log::warning("Errors while initializing Light from " + filename);
 								}
 							}
 							else

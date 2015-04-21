@@ -123,4 +123,130 @@ namespace Light
 		PA_ASSERT(rc >= 0);
 		
 	}
+
+	bool createFromJSON(CLight* light, const rapidjson::Value& value)
+	{
+		using namespace rapidjson;
+		bool success = true;
+		const char* error = "Invalid value in a field";
+		PA_ASSERT(light);
+
+		if(value.IsObject())
+		{
+			if(value.HasMember("Color") && value["Color"].IsArray())
+			{
+				const Value& colorNode = value["Color"];
+				int items = colorNode.Size() < 4 ? colorNode.Size() : 4;
+				for(int i = 0; i < items; i++)
+				{
+					if(colorNode[i].IsNumber())
+						light->color[i] = (float)colorNode[i].GetDouble();
+					else
+						success = false;
+				}
+			}
+			else
+			{
+				success = false;
+			}
+
+			if(value.HasMember("Type") && value["Type"].IsInt())
+			{
+				const Value& typeNode = value["Type"];
+				int type = typeNode.GetInt();
+				if(type >= 0 && type <= 2)
+					light->type = type;
+				else
+					success = false;
+			}
+			else
+			{
+				success = false;
+			}
+
+			if(value.HasMember("InnerAngle") && value["InnerAngle"].IsNumber())
+			{
+				const Value& innerAngleNode = value["InnerAngle"];
+				float innerAngle = (float)innerAngleNode.GetDouble();
+				if(innerAngle >= 0)
+					light->innerAngle = glm::radians(innerAngle);
+				else
+					success = false;
+			}
+			else
+			{
+				success = false;
+			}
+
+			if(value.HasMember("OuterAngle") && value["OuterAngle"].IsNumber())
+			{
+				const Value& outerangleNode = value["OuterAngle"];
+				float outerangle = (float)outerangleNode.GetDouble();
+				if(outerangle >= 0)
+					light->outerAngle = glm::radians(outerangle);
+				else
+					success = false;
+			}
+			else
+			{
+				success = false;
+			}
+
+			if(value.HasMember("Falloff") && value["Falloff"].IsNumber())
+			{
+				const Value& falloffNode = value["Falloff"];
+				float falloff = (float)falloffNode.GetDouble();
+				if(falloff >= 0)
+					light->falloff = falloff;
+				else
+					success = false;
+			}
+			else
+			{
+				success = false;
+			}
+
+			if(value.HasMember("Radius") && value["Radius"].IsNumber())
+			{
+				const Value& radiusNode = value["Radius"];
+				float radius = (float)radiusNode.GetDouble();
+				if(radius >= 0)
+					light->radius = radius;
+				else
+					success = false;
+			}
+			else
+			{
+				success = false;
+			}
+
+			if(value.HasMember("Intensity") && value["Intensity"].IsNumber())
+			{
+				const Value& intensityNode = value["Intensity"];
+				float intensity = (float)intensityNode.GetDouble();
+				light->intensity = glm::clamp(intensity, 0.f, 1.f);
+			}
+			else
+			{
+				success = false;
+			}
+
+			if(value.HasMember("CastShadow") && value["CastShadow"].IsBool())
+			{
+				const Value& castShadowNode = value["CastShadow"];
+				light->castShadow = castShadowNode.GetBool();
+			}
+			else
+			{
+				success = false;
+			}
+		}
+		else
+		{
+			error   = "'Light' must be an object";
+			success = false;
+		}
+		if(!success) Log::error("Light::createFromJSON", error);
+		return success;
+	}
 }

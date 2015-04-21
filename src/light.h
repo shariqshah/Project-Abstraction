@@ -5,6 +5,7 @@
 #include "mathdefs.h"
 #include "componentTypes.h"
 #include "datatypes.h"
+#include "jsondefs.h"
 
 enum LightType
 {
@@ -32,6 +33,7 @@ namespace Light
 {
 	const int MAX_LIGHTS = 32;
 	int                    create(Node node);
+	bool                   createFromJSON(CLight* light, const rapidjson::Value& value);
 	void                   initialize();
 	void                   generateBindings();		
 	void                   cleanup();

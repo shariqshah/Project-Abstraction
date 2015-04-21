@@ -254,7 +254,7 @@ namespace Transform
 	{
 		using namespace rapidjson;
 		bool success = true;
-		const char* error = "NONE";
+		const char* error = "Invalid value in a field";
 		PA_ASSERT(transform);
 
 		if(value.IsObject())
@@ -266,9 +266,16 @@ namespace Transform
 				int items = positionNode.Size() < 3 ? positionNode.Size() : 3;
 				for(int i = 0; i < items; i++)
 				{
-					if(positionNode[i].IsNumber()) position[i] = (float)positionNode[i].GetDouble();
+					if(positionNode[i].IsNumber())
+						position[i] = (float)positionNode[i].GetDouble();
+					else
+						success = false;
 				}
 				setPosition(transform, position);
+			}
+			else
+			{
+				success = false;
 			}
 
 			if(value.HasMember("Rotation") && value["Rotation"].IsArray())
@@ -278,9 +285,16 @@ namespace Transform
 				int items = rotationNode.Size() < 4 ? rotationNode.Size() : 4;
 				for(int i = 0; i < items; i++)
 				{
-					if(rotationNode[i].IsNumber()) rotation[i] = (float)rotationNode[i].GetDouble();
+					if(rotationNode[i].IsNumber())
+						rotation[i] = (float)rotationNode[i].GetDouble();
+					else
+						success = false;
 				}
 				setRotation(transform, rotation);
+			}
+			else
+			{
+				success = false;
 			}
 
 			if(value.HasMember("Scale") && value["Scale"].IsArray())
@@ -290,9 +304,16 @@ namespace Transform
 				int items = scaleNode.Size() < 3 ? scaleNode.Size() : 3;
 				for(int i = 0; i < items; i++)
 				{
-					if(scaleNode[i].IsNumber()) scale[i] = (float)scaleNode[i].GetDouble();
+					if(scaleNode[i].IsNumber())
+						scale[i] = (float)scaleNode[i].GetDouble();
+					else
+						success = false;
 				}
 				setScale(transform, scale);
+			}
+			else
+			{
+				success = false;
 			}
 		}
 		else
