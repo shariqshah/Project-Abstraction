@@ -102,11 +102,24 @@ Cylinder::Cylinder(Vec3 halfExtent, Vec3 axis)
 void Cylinder::initialize()
 {
 	if(mAxis == Vec3(0, 1, 0))
+	{
 		mShape = new btCylinderShape(Utils::toBullet(mHalfExtent));
+	}
 	else if(mAxis == Vec3(1, 0, 0))
+	{
 		mShape = new btCylinderShapeX(Utils::toBullet(mHalfExtent));
+	}
 	else if(mAxis == Vec3(0, 0, 1))
+	{
 		mShape = new btCylinderShapeZ(Utils::toBullet(mHalfExtent));
+	}
+	else
+	{
+		Log::error("Cylinder::initialize", "Invalid axis, reverting to default(0, 1, 0)");
+		mAxis = Vec3(0, 1, 0);
+		mShape = new btCylinderShape(Utils::toBullet(mHalfExtent));
+	}
+	
 
 	Physics::addCollisionShape(this);
 }

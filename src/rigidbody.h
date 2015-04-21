@@ -3,6 +3,7 @@
 
 #include "datatypes.h"
 #include "mathdefs.h"
+#include "jsondefs.h"
 
 class  CollisionShape;
 struct GameObject;
@@ -10,11 +11,13 @@ class  btMotionState;
 
 namespace RigidBody
 {
+	CollisionShape* getDefaultCollisionShape();
 	CRigidBody create(GameObject*     gameObject,
-					  CollisionShape* shape,
+					  CollisionShape* shape, // set to NULL to use default collision shape(sphere radius 1)
 					  btMotionState*  motionState,
 					  float           mass,
 					  float           restitution);
+	void  initialize();
 	void  setTransform(CRigidBody body, Vec3  position, Quat  rotation);
 	void  getTransform(CRigidBody body, Vec3* position, Quat* rotation);
 	void  setTransform(CRigidBody body, Mat4 transformMat);
@@ -31,6 +34,7 @@ namespace RigidBody
 	float getFriction(CRigidBody body);
 	void  setFriction(CRigidBody body, float friction);
 	const char* getCollisionShapeName(CRigidBody body);
+	bool  createFromJSON(CRigidBody body, const rapidjson::Value& value);
 	void  cleanup();
 }
 

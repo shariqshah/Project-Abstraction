@@ -202,29 +202,17 @@ namespace GO
 	CRigidBody addRigidbody(GameObject* gameObject, CollisionShape* shape, float mass, float restitution)
 	{
 		PA_ASSERT(gameObject);
-		PA_ASSERT(shape);
 		CRigidBody rigidbody = -1;
-		if(shape)
+	    if(!GO::hasComponent(gameObject, Component::RIGIDBODY))
 		{
-			if(!GO::hasComponent(gameObject, Component::RIGIDBODY))
-			{
-				MotionState* motionState = new MotionState(gameObject);
-				rigidbody = RigidBody::create(gameObject,
-													   shape,
-													   motionState,
-													   mass,
-													   restitution);
-				gameObject->compIndices[Component::RIGIDBODY] = rigidbody;
-				Log::message("Rigidbody added to " + gameObject->name);
-			}
-			else
-			{
-				Log::message("Rigidbody already attached to " + gameObject->name);
-			}
+			MotionState* motionState = new MotionState(gameObject);
+			rigidbody = RigidBody::create(gameObject, shape, motionState, mass, restitution);
+			gameObject->compIndices[Component::RIGIDBODY] = rigidbody;
+			Log::message("Rigidbody added to " + gameObject->name);
 		}
 		else
 		{
-			Log::error("GO::addRigidbody", "No collisionShape provided!");
+			Log::message("Rigidbody already attached to " + gameObject->name);
 		}
 		return rigidbody;
 	}

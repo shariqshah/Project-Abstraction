@@ -16,6 +16,7 @@ namespace RigidBody
 	{
 		std::vector<CRigidBody>      freeList;
 		std::vector<btRigidBody*>    rigidBodies;
+		CollisionShape*              defaultShape;
 
 		void removeCollisionObject(btRigidBody *body)
 		{
@@ -25,6 +26,11 @@ namespace RigidBody
 			body == NULL ? Log::message("RB is NULL") : delete body;
 		}
 	}
+
+	void initialize()
+	{
+		defaultShape = new Sphere();
+	}
 	
 	CRigidBody create(GameObject*     gameObject,
 					  CollisionShape* shape,
@@ -33,6 +39,7 @@ namespace RigidBody
 					  float           restitution)
 	{
 		CRigidBody rbHandle = -1;
+		if(!shape) shape = defaultShape;
 		if(shape->isValid())
 		{
 			btDiscreteDynamicsWorld* world = Physics::getWorld();
@@ -238,12 +245,16 @@ namespace RigidBody
 											asFUNCTION(applyForce),
 											asCALL_CDECL);
 		PA_ASSERT(rc >= 0);
+		rc = engine->RegisterGlobalFunction("void setColllisionShape(int, CollisionShape@)",
+											asFUNCTION(setCollisionShape),
+											asCALL_CDECL);
+		PA_ASSERT(rc >= 0);
 		engine->SetDefaultNamespace("");
 	}
 
 	void setCollisionShape(CRigidBody body, CollisionShape* shape)
 	{
-		PA_ASSERT(shape);
+		if(!shape) shape = defaultShape;
 		if(shape->isValid())
 			rigidBodies[body]->setCollisionShape(shape->getCollisionShape());
 		else
@@ -265,5 +276,248 @@ namespace RigidBody
 			removeCollisionObject(btRigidBody::upcast(obj));
 		}
 		rigidBodies.clear();
+	}
+
+	bool createFromJSON(CRigidBody body, const rapidjson::Value& value)
+	{
+		using namespace rapidjson;
+		bool success = true;
+		const char* error = "Invalid value in a field";
+		PA_ASSERT(body);
+
+		if(value.IsObject())
+		{
+			if(value.HasMember("Mass") && value["Mass"].IsNumber())
+			{
+				const Value& massNode = value["Mass"];
+				float mass = (float)massNode.GetDouble();
+				if(mass >= 0)
+					setMass(body, mass);
+				else
+					success = false;
+			}
+			else
+			{
+				success = false;
+			}
+
+			if(value.HasMember("Friction") && value["Friction"].IsNumber())
+			{
+				const Value& frictionNode = value["Friction"];
+				float friction = (float)frictionNode.GetDouble();
+				if(friction >= 0)
+					setFriction(body, friction);
+				else
+					success = false;
+			}
+			else
+			{
+				success = false;
+			}
+
+			if(value.HasMember("Restitution") && value["Restitution"].IsNumber())
+			{
+				const Value& restitutionNode = value["Restitution"];
+				float restitution = (float)restitutionNode.GetDouble();
+				if(restitution >= 0)
+					setRestitution(body, restitution);
+				else
+					success = false;
+			}
+			else
+			{
+				success = false;
+			}
+
+			if(value.HasMember("IsKinematic") && value["IsKinematic"].IsBool())
+			{
+				const Value& isKinematicNode = value["IsKinematic"];
+				setKinematic(body, isKinematicNode.GetBool());
+			}
+			else
+			{
+				success = false;
+			}
+
+			if(value.HasMember("Shape") && value["Shape"].IsObject())
+			{
+				const Value& shapeNode = value["Shape"];
+				if(shapeNode.HasMember("Type") && shapeNode["Type"].IsInt())
+				{
+					int type = shapeNode["Type"].GetInt();
+					CollisionShape* shape  = NULL;
+					switch(type)
+					{
+					case 0:		// Sphere
+					{
+						if(shapeNode.HasMember("Radius") && shapeNode["Radius"].IsNumber())
+							shape = new Sphere((float)shapeNode["Radius"].GetDouble());
+						else
+							shape = new Sphere();
+					}
+					break;
+					case 1:		// Box
+					{
+						Vec3 halfExt(0.5f);
+						if(shapeNode.HasMember("HalfExt") && shapeNode["HalfExt"].IsArray())
+						{
+							const Value& halfExtNode = shapeNode["HalfExt"];
+							int count = halfExtNode.Size() < 3 ? halfExtNode.Size() : 3;
+							for(int i = 0; i < count; i++)
+							{
+								if(halfExtNode[i].IsNumber())
+									halfExt[i] = halfExtNode[i].GetDouble();
+								else
+									success = false;
+							}
+							shape = new Box(halfExt);
+						}
+						else
+						{
+							shape = new Box();
+						}
+					}
+					break;
+					case 2:		// Capsule
+					{
+						float radius = 1.f;
+						float height = 2.f;
+						if(shapeNode.HasMember("Radius") && shapeNode["Radius"].IsNumber())
+						{
+							radius = (float)shapeNode["Radius"].GetDouble();
+							if(shapeNode.HasMember("Height") && shapeNode["Height"].IsNumber())
+								height = (float)shapeNode["Height"].GetDouble();
+							shape = new Capsule(radius, height);
+						}
+						else
+						{
+							shape = new Capsule();
+						}
+					}
+					break;
+					case 3:		// Plane
+					{
+						Vec3  normal(0, 1, 0);
+						float margin = 0.001f;
+						if(shapeNode.HasMember("Normal") && shapeNode["Normal"].IsArray())
+						{
+							const Value& normalNode = shapeNode["Normal"];
+							int count = normalNode.Size() < 3 ? normalNode.Size() : 3;
+							for(int i = 0; i < count; i++)
+							{
+								if(normalNode[i].IsNumber())
+									normal[i] = normalNode[i].GetDouble();
+								else
+									success = false;
+							}
+							if(shapeNode.HasMember("Margin") && shapeNode["Margin"].IsNumber())
+								margin = (float)shapeNode["Margin"].GetDouble();
+							shape = new Plane(normal, margin);
+						}
+						else
+						{
+							shape = new Plane();
+						}
+					}
+					break;
+					case 4: 	// Cone
+					{
+						float radius = 1.f;
+						float height = 2.f;
+						if(shapeNode.HasMember("Radius") && shapeNode["Radius"].IsNumber())
+						{
+							radius = (float)shapeNode["Radius"].GetDouble();
+							if(shapeNode.HasMember("Height") && shapeNode["Height"].IsNumber())
+								height = (float)shapeNode["Height"].GetDouble();
+							shape = new Cone(radius, height);
+						}
+						else
+						{
+							shape = new Cone();
+						}
+					}
+					break;
+					case 5: 	// Cylinder
+					{
+						Vec3 halfExt(0.5f);
+						Vec3 axis(0, 1, 0);
+						if(shapeNode.HasMember("HalfExt") && shapeNode["HalfExt"].IsArray())
+						{
+							const Value& halfExtNode = shapeNode["HalfExt"];
+							int count = halfExtNode.Size() < 3 ? halfExtNode.Size() : 3;
+							for(int i = 0; i < count; i++)
+							{
+								if(halfExtNode[i].IsNumber())
+									halfExt[i] = halfExtNode[i].GetDouble();
+								else
+									success = false;
+							}
+							
+							if(shapeNode.HasMember("Axis") && shapeNode["Axis"].IsArray())
+							{
+								const Value& axisNode = shapeNode["Axis"];
+								int count = axisNode.Size() < 3 ? axisNode.Size() : 3;
+								for(int i = 0; i < count; i++)
+								{
+									if(axisNode[i].IsNumber())
+										axis[i] = axisNode[i].GetDouble();
+									else
+										success = false;
+								}
+							}
+							shape = new Cylinder(halfExt, axis);
+						}
+						else
+						{
+							shape = new Cylinder();
+						}
+					}
+					break;
+					case 6:		// CollisionMesh
+					{
+						const char* filename = "default.pamesh";
+						bool isTriMesh = false;
+						if(shapeNode.HasMember("GeometryName") && shapeNode["GeometryName"].IsString())
+						{
+							const Value& geometryNameNode = shapeNode["GeometryName"];
+							filename = shapeNode["GeometryName"].GetString();
+
+							if(shapeNode.HasMember("IsTriMesh") && shapeNode["IsTriMesh"].IsBool())
+								isTriMesh = shapeNode["IsTriMesh"].GetBool();
+							shape = new CollisionMesh(filename, isTriMesh);
+						}
+						else
+						{
+							shape = new CollisionMesh();
+						}
+					}
+					break;
+					default:
+						error = "Invalid collision shape type";
+						success = false;
+						break;
+					}
+					setCollisionShape(body, shape);
+				}
+				else
+				{
+					error   = "Shape type not specified";
+					success = false;
+				}
+			}
+			else
+			{
+				success = false;
+			}
+			
+			setActivation(body, true);
+		}
+		else
+		{
+			error   = "'RigidBody' must be an object";
+			success = false;
+		}
+		if(!success) Log::error("RigidBody::createFromJSON", error);
+		return success;
 	}
 }

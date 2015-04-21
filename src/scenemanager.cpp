@@ -5,6 +5,7 @@
 #include "passert.h"
 #include "utilities.h"
 #include "light.h"
+#include "rigidbody.h"
 #include "camera.h"
 #include "model.h"
 
@@ -232,6 +233,13 @@ namespace SceneManager
 									CModel* model = GO::addModel(gameobject, "default.pamesh");
 									if(!Model::createFromJSON(model, componentNode["Model"]))
 										Log::warning("Errors while initializing Model from " + filename);
+								}
+
+								if(componentNode.HasMember("RigidBody"))
+								{
+									CRigidBody rigidbody = GO::addRigidbody(gameobject, NULL);
+									if(!RigidBody::createFromJSON(rigidbody, componentNode["RigidBody"]))
+										Log::warning("Errors while initializing Rigidbody from " + filename);
 								}
 							}
 							else
