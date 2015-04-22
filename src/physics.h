@@ -56,7 +56,7 @@ namespace Physics
 	bool isDebugDrawerEnabled();
 	void enable(bool enable);
 	void enableDebugDraw(bool enable);
-	const Vec3 getGravity();
+	Vec3 getGravity();
 	btDiscreteDynamicsWorld* getWorld();
 }
 

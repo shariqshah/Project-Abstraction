@@ -8,6 +8,8 @@
 #include "rigidbody.h"
 #include "camera.h"
 #include "model.h"
+#include "renderer.h"
+#include "physics.h"
 
 namespace SceneManager
 {
@@ -295,6 +297,7 @@ namespace SceneManager
 				success = false;
 				error   = "Invalid document";
 			}
+			free(json);
 		}
 		else
 		{
@@ -303,6 +306,214 @@ namespace SceneManager
 		}
 		if(!success) Log::error("SceneManager::createFromFile", error);
 		return gameobject;
+	}
+
+	bool loadScene(const std::string& filename)
+	{
+		using namespace rapidjson;
+		bool success = true;
+		const char* error = "Invalid field";
+		char* json = Utils::loadFileIntoCString(filename.c_str());
+		if(json)
+		{
+			Document document;
+			document.Parse(json);
+			if(document.IsObject() && document.HasMember("Scene") && document["Scene"].IsObject())
+			{
+				const Value& sceneNode = document["Scene"];
+				// Load all gameobjects
+				if(sceneNode.HasMember("SceneObjects") && sceneNode["SceneObjects"].IsArray())
+				{
+					const Value& sceneObjects = sceneNode["SceneObjects"];
+					int loaded = 0;
+					for(unsigned int i = 0; i < sceneObjects.Size(); i++)
+					{
+						if(sceneObjects[i].IsObject())
+						{
+							if(createFromJSON(sceneObjects[i], filename))
+								loaded++;
+						}
+						else
+						{
+							success = false;
+						}
+					}
+					Log::message(std::to_string(loaded) + " gameobjects loaded from " + filename);
+				}
+
+				// Set Renderer settings
+				if(sceneNode.HasMember("Renderer") && sceneNode["Renderer"].IsObject())
+				{
+					RenderParams* renderParams = Renderer::getRenderParams();
+					const Value&  rendererNode = sceneNode["Renderer"];
+
+					if(rendererNode.HasMember("AmbientLight") && rendererNode["AmbientLight"].IsArray())
+					{
+						const Value& colorNode = rendererNode["AmbientLight"];
+						int items = colorNode.Size() < 4 ? colorNode.Size() : 4;
+						for(int i = 0; i < items; i++)
+						{
+							if(colorNode[i].IsNumber())
+								renderParams->ambientLight[i] = (float)colorNode[i].GetDouble();
+							else
+								success = false;
+						}
+					}
+					else
+					{
+						success = false;
+						Log::error("SceneManger::loadScene", "Error while loading Renderer.AmbientLight");
+					}
+
+					if(rendererNode.HasMember("ClearColor") && rendererNode["ClearColor"].IsArray())
+					{
+						const Value& clearColorNode = rendererNode["ClearColor"];
+						int items = clearColorNode.Size() < 4 ? clearColorNode.Size() : 4;
+						Vec4 clearColor = Renderer::getClearColor();
+						for(int i = 0; i < items; i++)
+						{
+							if(clearColorNode[i].IsNumber())
+								clearColor[i] = (float)clearColorNode[i].GetDouble();
+							else
+								success = false;
+						}
+						Renderer::setClearColor(clearColor);
+					}
+					else
+					{
+						success = false;
+						Log::error("SceneManger::loadScene", "Error while loading Renderer.ClearColor");
+					}
+					
+					if(rendererNode.HasMember("Fog") && rendererNode["Fog"].IsObject())
+					{
+						const Value& fogNode = rendererNode["Fog"];
+						if(fogNode.HasMember("FogMode") && fogNode["FogMode"].IsInt())
+						{
+							int mode = fogNode["FogMode"].GetInt();
+							if(mode > -1 && mode < 4)
+								renderParams->fog.fogMode = mode;
+							else
+								success = false;
+						}
+						else
+						{
+							success = false;
+							Log::error("SceneManger::loadScene", "Error while loading Fog.FogMode");
+						}
+
+						if(fogNode.HasMember("Density") && fogNode["Density"].IsDouble())
+						{
+							int density = (float)fogNode["Density"].GetDouble();
+							if(density >= 0.f)
+								renderParams->fog.density = density;
+							else
+								success = false;
+						}
+						else
+						{
+							success = false;
+							Log::error("SceneManger::loadScene", "Error while loading Fog.Density");
+						}
+
+						if(fogNode.HasMember("Start") && fogNode["Start"].IsDouble())
+						{
+							int start = (float)fogNode["Start"].GetDouble();
+							if(start >= 0)
+								renderParams->fog.start = start;
+							else
+								success = false;
+						}
+						else
+						{
+							success = false;
+							Log::error("SceneManger::loadScene", "Error while loading Fog.Start");
+						}
+
+						if(fogNode.HasMember("Max") && fogNode["Max"].IsDouble())
+						{
+							int max = (float)fogNode["Max"].GetDouble();
+							if(max >= 0)
+								renderParams->fog.max = max;
+							else
+								success = false;
+						}
+						else
+						{
+							success = false;
+							Log::error("SceneManger::loadScene", "Error while loading Fog.max");
+						}
+
+						if(fogNode.HasMember("Color") && fogNode["Color"].IsArray())
+						{
+							const Value& colorNode = fogNode["Color"];
+							int items = colorNode.Size() < 4 ? colorNode.Size() : 4;
+							for(int i = 0; i < items; i++)
+							{
+								if(colorNode[i].IsNumber())
+									renderParams->fog.color[i] = (float)colorNode[i].GetDouble();
+								else
+									success = false;
+							}
+						}
+						else
+						{
+							success = false;
+							Log::error("SceneManger::loadScene", "Error while loading Fog.Color");
+						}
+					}
+				}
+				else
+				{
+					success = false;
+					Log::error("SceneManger::loadScene", "Error while loading Renderer");
+				}
+				
+				// Physics settings
+				if(sceneNode.HasMember("Physics") && sceneNode["Physics"].IsObject())
+				{
+					const Value& physicsNode = sceneNode["Physics"];
+					if(physicsNode.HasMember("Gravity") && physicsNode["Gravity"].IsArray())
+					{
+						const Value& gravityNode = physicsNode["Gravity"];
+						int items = gravityNode.Size() < 3 ? gravityNode.Size() : 3;
+						Vec3 gravity = Physics::getGravity();
+						for(int i = 0; i < items; i++)
+						{
+							if(gravityNode[i].IsNumber())
+								gravity[i] = (float)gravityNode[i].GetDouble();
+							else
+								success = false;
+						}
+						Physics::setGravity(gravity);
+					}
+					else
+					{
+						success = false;
+						Log::error("SceneManger::loadScene", "Error while loading gravity");
+					}
+				}
+				else
+				{
+					success = false;
+					Log::error("SceneManger::loadScene", "Error while loading Physics settings");
+				}
+			}
+			else
+			{
+				success = false;
+				error   = "Invalid document format";
+			}
+			free(json);
+		}
+		else
+		{
+			success = false;
+			error   = "File not found";
+		}
+	
+		if(!success) Log::error("SceneManager::loadScene", error);
+		return success;
 	}
 
 	GameObject* create(const std::string& name)
@@ -377,6 +588,10 @@ namespace SceneManager
 		PA_ASSERT(rc >= 0);
 		rc = engine->RegisterGlobalFunction("GameObject@ createFromFile(const string)",
 											asFUNCTION(createFromFile),
+											asCALL_CDECL);
+		PA_ASSERT(rc >= 0);
+		rc = engine->RegisterGlobalFunction("bool loadScene(const string &in)",
+											asFUNCTION(loadScene),
 											asCALL_CDECL);
 		PA_ASSERT(rc >= 0);
 		engine->SetDefaultNamespace("");

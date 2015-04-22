@@ -14,14 +14,6 @@ typedef std::vector<Node> NodeList;
 
 struct CCamera;
 
-enum Pipeline : uint8_t
-{
-	FORWARD  = 0,
-	DEFERRED = 1,
-	HDR      = 2,
-	RTT      = 3
-};
-
 enum class DebugLevel : uint8_t
 {
 	NONE   = 0,

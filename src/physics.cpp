@@ -209,7 +209,7 @@ namespace Physics
 		world->setGravity(gravity);
 	}
 
-	const Vec3 getGravity()
+	Vec3 getGravity()
 	{
 		return Utils::toGlm(gravity);
 	}
