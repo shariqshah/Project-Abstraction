@@ -245,9 +245,9 @@ namespace Transform
 										  asFUNCTION(updateTransformMatrix),
 										  asCALL_CDECL_OBJFIRST);
 		PA_ASSERT(rc >= 0);		
-		rc = engine->RegisterGlobalProperty("const Vec3 UNIT_X", (void *)&UNIT_X); PA_ASSERT( rc >= 0 );
-		rc = engine->RegisterGlobalProperty("const Vec3 UNIT_Y", (void *)&UNIT_Y); PA_ASSERT( rc >= 0 );
-		rc = engine->RegisterGlobalProperty("const Vec3 UNIT_Z", (void *)&UNIT_Z); PA_ASSERT( rc >= 0 );
+		rc = engine->RegisterGlobalProperty("const Vec3 UNIT_X", (void *)&UNIT_X); PA_ASSERT(rc >= 0);
+		rc = engine->RegisterGlobalProperty("const Vec3 UNIT_Y", (void *)&UNIT_Y); PA_ASSERT(rc >= 0);
+		rc = engine->RegisterGlobalProperty("const Vec3 UNIT_Z", (void *)&UNIT_Z); PA_ASSERT(rc >= 0);
 	}
 
 	bool createFromJSON(CTransform* transform, const rapidjson::Value& value)

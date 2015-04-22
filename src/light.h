@@ -5,6 +5,7 @@
 #include "mathdefs.h"
 #include "componentTypes.h"
 #include "datatypes.h"
+#include "boundingvolumes.h"
 #include "jsondefs.h"
 
 enum LightType
@@ -16,22 +17,22 @@ enum LightType
 
 struct CLight
 {
-	float       outerAngle  = glm::radians(30.f);
-	float       innerAngle  = glm::radians(20.f);
-	float       exponent    = 4.f;
-	float       falloff     = 1.5f;
-	float       intensity   = 1.0f;
-	Vec4        color       = Vec4(1.f);
-	Node        node        = 0;
-	bool        castShadow  = false;
-	bool        valid       = true;
-	int         type        = LT_POINT;
-	int         radius      = 30;
+	float          outerAngle  = glm::radians(30.f);
+	float          innerAngle  = glm::radians(20.f);
+	float          falloff     = 1.5f;
+	float          intensity   = 1.0f;
+	Vec4           color       = Vec4(1.f);
+	Node           node        = 0;
+	bool           castShadow  = false;
+	bool           valid       = true;
+	int            type        = LT_POINT;
+	int            radius      = 30;
+	BoundingSphere boundingSphere;
 };
 
 namespace Light
 {
-	const int MAX_LIGHTS = 32;
+	const static int MAX_LIGHTS = 32;
 	int                    create(Node node);
 	bool                   createFromJSON(CLight* light, const rapidjson::Value& value);
 	void                   initialize();
@@ -39,6 +40,7 @@ namespace Light
 	void                   cleanup();
 	void                   remove(uint32_t index);
 	CLight*                getLightAtIndex(uint32_t index);
+	void                   setRadius(CLight* light, float radius);
 	std::vector<uint32_t>* getActiveLights();
 }
 

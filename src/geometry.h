@@ -24,7 +24,7 @@ namespace Geometry
 	void                         cleanup();
 	void                         remove(int index);
 	void                         setCullingMode(CullingMode mode);
-	bool                         render(int index, Frustum* frustum, CTransform* transform);
+	int                          render(int index, Frustum* frustum, CTransform* transform);
 	unsigned int                 getVAO(int index);
 	const std::string            getName(int index);
 	const std::vector<Vec3>*     getVertices(int index);

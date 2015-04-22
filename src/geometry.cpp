@@ -275,9 +275,9 @@ namespace Geometry
 		}
 	}
 
-	bool render(int index, Frustum* frustum, CTransform* transform)
+	int render(int index, Frustum* frustum, CTransform* transform)
 	{
-		bool rendered = false;
+		int vertCount = 0;
 		if(index >= 0 && index < (int)geometryList.size())
 		{
 			GeometryData* geometry = &geometryList[index];
@@ -290,14 +290,19 @@ namespace Geometry
 			{
 				glBindVertexArray(geometry->vao);
 				if(geometry->drawIndexed)
+				{
 					glDrawElements(GL_TRIANGLES, geometry->indices.size(), GL_UNSIGNED_INT, (void*)0);
+					vertCount = geometry->indices.size();
+				}
 				else
+				{
 					glDrawArrays(GL_TRIANGLES, 0, geometry->vertices.size());
+					vertCount = geometry->vertices.size();
+				}
 				glBindVertexArray(0);
-				rendered = true;
 			}
 		}
-		return rendered;
+		return vertCount;
 	}
 	
 	const std::string getName(int index)

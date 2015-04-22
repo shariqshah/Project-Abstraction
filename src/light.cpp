@@ -89,7 +89,7 @@ namespace Light
 
 		lightList[index].node = node;
 		activeLights.push_back(index);
-			
+		setRadius(&lightList[index], lightList[index].radius);
 		return index;
 	}
 
@@ -121,7 +121,11 @@ namespace Light
 		PA_ASSERT(rc >= 0);
 		rc = engine->RegisterObjectProperty("Light", "LightType type", asOFFSET(CLight, type));
 		PA_ASSERT(rc >= 0);
-		
+		rc = engine->RegisterObjectMethod("Light",
+										  "void setRadius(float radius)",
+										  asFUNCTION(setRadius),
+										  asCALL_CDECL_OBJFIRST);
+		PA_ASSERT(rc >= 0);
 	}
 
 	bool createFromJSON(CLight* light, const rapidjson::Value& value)
@@ -211,7 +215,7 @@ namespace Light
 				const Value& radiusNode = value["Radius"];
 				float radius = (float)radiusNode.GetDouble();
 				if(radius >= 0)
-					light->radius = radius;
+					setRadius(light, radius);
 				else
 					success = false;
 			}
@@ -248,5 +252,11 @@ namespace Light
 		}
 		if(!success) Log::error("Light::createFromJSON", error);
 		return success;
+	}
+
+	void setRadius(CLight* light, float radius)
+	{
+		light->radius = radius;
+		light->boundingSphere.radius = radius;
 	}
 }

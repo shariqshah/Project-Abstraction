@@ -7,7 +7,6 @@ struct Light
 	float intensity;
 	float outerAngle;
 	float innerAngle;
-	float exponent;
 	float falloff;
 	int   radius;
 	int   type;

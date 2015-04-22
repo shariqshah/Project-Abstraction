@@ -22,23 +22,27 @@ namespace Model
 	{
 		std::vector<CModel>        modelList;
 		std::vector<unsigned int>  emptyIndices;
-		int                        culled   = 0;
-		int                        rendered = 0;
+		int                        culled      = 0;
+		int                        rendered    = 0;
+		int                        lightCount  = 0;
+		int                        totalVertCount   = 0;
   	}
 
-	void setLights(int shaderIndex)
+	int setLights(int shaderIndex, CCamera* camera)
 	{
-		// TODO: Add light culling!
 		std::vector<uint32_t>* activeLights = Light::getActiveLights();
 		uint32_t count = 0;
 		for(uint32_t lightIndex : *activeLights)
 		{
-			CLight* light = Light::getLightAtIndex(lightIndex);
-				
+			CLight*     light      = Light::getLightAtIndex(lightIndex);
+			GameObject* gameObject = SceneManager::find(light->node);
+			CTransform* transform  = GO::getTransform(gameObject);
+
+			if(light->type != LT_DIR &&
+			   !BoundingVolume::isIntersecting(&camera->frustum, &light->boundingSphere, transform))
+				continue;
+			
 			std::string arrayIndex = "lightList[" + std::to_string(count) + "].";
-			Shader::setUniformFloat(shaderIndex,
-									std::string(arrayIndex + "exponent").c_str(),
-									light->exponent);
 			Shader::setUniformFloat(shaderIndex,
 									std::string(arrayIndex + "intensity").c_str(),
 									light->intensity);
@@ -60,9 +64,6 @@ namespace Model
 			Shader::setUniformVec4(shaderIndex,
 								   std::string(arrayIndex + "color").c_str(),
 								   light->color);
-
-			GameObject* gameObject = SceneManager::find(light->node);
-			CTransform* transform  = GO::getTransform(gameObject);
 			Shader::setUniformVec3(shaderIndex,
 								   std::string(arrayIndex + "direction").c_str(),
 								   transform->forward);
@@ -77,13 +78,14 @@ namespace Model
 			}
 		}
 		Shader::setUniformInt(shaderIndex, "numLights", count);
+		return count;
 	}
 		
 	void renderAllModels(CCamera* camera, RenderParams* renderParams)
 	{
 		GameObject* viewer = SceneManager::find(camera->node);
 		CTransform* viewerTransform = GO::getTransform(viewer);
-			
+		
 		for(Mat_Type material : Material::MATERIAL_LIST)
 		{
 			// TODO: Add error checking for returned material params
@@ -94,7 +96,7 @@ namespace Model
 			if((material == MAT_PHONG || material == MAT_PHONG_TEXTURED)
 			   && registeredMeshes->size() > 0)
 			{
-				setLights(shaderIndex);					
+				lightCount = setLights(shaderIndex, camera);					
 			}
 			// Setup uniforms for material
 			Shader::setUniformVec3(shaderIndex, "eyePos", viewerTransform->position);
@@ -111,13 +113,14 @@ namespace Model
 				const CModel* model      = &modelList[modelIndex];
 				GameObject*   gameObject = SceneManager::find(model->node);
 				CTransform*   transform  = GO::getTransform(gameObject);					
-				Mat4 mvp                 = camera->viewProjMat * transform->transMat;
-				//if(BoundingVolume::isIntersecting(&camera->frustum, transform->position))
+				Mat4          mvp        = camera->viewProjMat * transform->transMat;
 
 				Shader::setUniformMat4(shaderIndex, "mvp", mvp);
 				Shader::setUniformMat4(shaderIndex, "modelMat", transform->transMat);
 				Material::setMaterialUniforms(&model->materialUniforms, (Mat_Type)model->material);
-				if(Geometry::render(model->geometryIndex, &camera->frustum, transform))
+				int vertCount = Geometry::render(model->geometryIndex, &camera->frustum, transform);
+				totalVertCount += vertCount;
+				if(vertCount > 0)
 					rendered++;
 				else
 					culled++;
@@ -126,10 +129,16 @@ namespace Model
 			}
 			Shader::unbindActiveShader();
 		}
+		Editor::addDebugInt("Vertices", totalVertCount);
+		Editor::addDebugInt("Tris", totalVertCount / 3);
 		Editor::addDebugInt("Rendered", rendered);
 		Editor::addDebugInt("Culled", culled);
-		rendered = 0;
-		culled   = 0;
+		Editor::addDebugInt("ActiveLights", lightCount);
+		Editor::addDebugInt("Total Lights", Light::getActiveLights()->size());
+		rendered       = 0;
+		culled         = 0;
+		lightCount     = 0;
+		totalVertCount = 0;
 	}
 
 	int create(const char* filename)
@@ -186,7 +195,6 @@ namespace Model
 		asIScriptEngine* engine = ScriptEngine::getEngine();
 		int rc = engine->RegisterObjectType("Model", sizeof(CModel), asOBJ_REF | asOBJ_NOCOUNT);
 		PA_ASSERT(rc >= 0);
-
 		rc = engine->RegisterObjectProperty("Model", "int32 node", asOFFSET(CModel, node));
 		PA_ASSERT(rc >= 0);
 		rc = engine->RegisterObjectProperty("Model", "int32 material", asOFFSET(CModel, material));
