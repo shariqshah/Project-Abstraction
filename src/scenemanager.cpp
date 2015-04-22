@@ -168,6 +168,112 @@ namespace SceneManager
 		return index;
 	}
 
+	GameObject* createFromJSON(const rapidjson::Value& gameobjectNode, const std::string& filename)
+	{
+		using namespace rapidjson;
+		bool success = true;
+		const char* error = "NONE";
+	    GameObject* gameobject = NULL;
+		if(gameobjectNode.IsObject())
+		{
+			if(gameobjectNode.HasMember("Name") && gameobjectNode["Name"].IsString())
+			{
+				const Value& name = gameobjectNode["Name"];
+				int index = createNewIndex();
+				sceneObjects[index] = GameObject();
+				gameobject = &sceneObjects[index];
+				gameobject->node = index;
+				gameobject->name = name.GetString();
+				if(gameobjectNode.HasMember("Tag") && gameobjectNode["Tag"].IsString())
+					gameobject->tag = gameobjectNode["Tag"].GetString();
+				GO::addTransform(gameobject);
+				ScriptEngine::registerGameObject(gameobject);
+				Log::message(gameobject->name + " added to scene");
+				if(gameobjectNode.HasMember("Components"))
+				{
+					const Value& componentNode = gameobjectNode["Components"];
+					if(componentNode.IsObject())
+					{
+						if(componentNode.HasMember("Transform"))
+						{
+							CTransform* transform = GO::getTransform(gameobject);
+							if(!Transform::createFromJSON(transform, componentNode["Transform"]))
+								Log::warning("Errors while initializing Transform from " + filename);
+						}
+
+						if(componentNode.HasMember("Light"))
+						{
+							CLight* light = GO::addLight(gameobject);
+							if(!Light::createFromJSON(light, componentNode["Light"]))
+								Log::warning("Errors while initializing Light from " + filename);
+						}
+
+						if(componentNode.HasMember("Camera"))
+						{
+							CCamera* camera = GO::addCamera(gameobject);
+							if(!Camera::createFromJSON(camera, componentNode["Camera"]))
+								Log::warning("Errors while initializing Camera from " + filename);
+						}
+
+						if(componentNode.HasMember("Model"))
+						{
+							CModel* model = GO::addModel(gameobject, "default.pamesh");
+							if(!Model::createFromJSON(model, componentNode["Model"]))
+								Log::warning("Errors while initializing Model from " + filename);
+						}
+
+						if(componentNode.HasMember("RigidBody"))
+						{
+							CRigidBody rigidbody = GO::addRigidbody(gameobject, NULL);
+							if(!RigidBody::createFromJSON(rigidbody, componentNode["RigidBody"]))
+								Log::warning("Errors while initializing Rigidbody from " + filename);
+						}
+					}
+					else
+					{
+						Log::warning("'Components' is not an object. No components added to " + gameobject->name);
+					}
+				}
+
+				if(gameobjectNode.HasMember("Scripts"))
+				{
+					const Value& scripts = gameobjectNode["Scripts"];
+					if(scripts.IsArray())
+					{
+						for(SizeType i = 0; i < scripts.Size(); i++)
+						{
+							if(scripts[i].IsString())
+								ScriptEngine::addScript(gameobject, scripts[i].GetString());
+							else
+								Log::warning("Invalid script name in " + filename);
+						}
+					}
+					else if(scripts.IsString())
+					{
+						ScriptEngine::addScript(gameobject, scripts.GetString());
+					}
+					else
+					{
+						Log::warning("Invalid value for 'Scripts' in " + filename);
+					}
+				}
+			}
+			else
+			{
+				success = false;
+				error   = "Gameobject does not have a name";
+			}
+		}
+		else
+		{
+			success = false;
+			error   = "'GameObject' should be an object";
+		}
+		
+		if(!success) Log::error("SceneManager::createFromFile", error);
+		return gameobject;
+	}
+
 	GameObject* createFromFile(const std::string& filename)
 	{
 		using namespace rapidjson;
@@ -179,106 +285,21 @@ namespace SceneManager
 		if(json)
 		{
 			document.Parse(json);
-			if(!document.IsObject() || !document.HasMember("GameObject"))
+			if(document.IsObject() && document.HasMember("GameObject") && document["GameObject"].IsObject())
 			{
-				error = "Invalid file";
-				success = false;
+				const Value& gameobjectNode = document["GameObject"];
+				gameobject = createFromJSON(gameobjectNode, filename);
 			}
 			else
 			{
-				Value& gameobjectNode = document["GameObject"];
-				if(gameobjectNode.IsObject())
-				{
-					if(gameobjectNode.HasMember("Name") && gameobjectNode["Name"].IsString())
-					{
-						Value& name = gameobjectNode["Name"];
-						int index = createNewIndex();
-						sceneObjects[index] = GameObject();
-						gameobject = &sceneObjects[index];
-						gameobject->node = index;
-						gameobject->name = name.GetString();
-						if(gameobjectNode.HasMember("Tag") && gameobjectNode["Tag"].IsString())
-							gameobject->tag = gameobjectNode["Tag"].GetString();
-						GO::addTransform(gameobject);
-						ScriptEngine::registerGameObject(gameobject);
-						Log::message(gameobject->name + " added to scene");
-						if(gameobjectNode.HasMember("Components"))
-						{
-							Value& componentNode = gameobjectNode["Components"];
-							if(componentNode.IsObject())
-							{
-								if(componentNode.HasMember("Transform"))
-								{
-									CTransform* transform = GO::getTransform(gameobject);
-									if(!Transform::createFromJSON(transform, componentNode["Transform"]))
-										Log::warning("Errors while initializing Transform from " + filename);
-								}
-
-								if(componentNode.HasMember("Light"))
-								{
-									CLight* light = GO::addLight(gameobject);
-									if(!Light::createFromJSON(light, componentNode["Light"]))
-										Log::warning("Errors while initializing Light from " + filename);
-								}
-
-								if(componentNode.HasMember("Camera"))
-								{
-									CCamera* camera = GO::addCamera(gameobject);
-									if(!Camera::createFromJSON(camera, componentNode["Camera"]))
-										Log::warning("Errors while initializing Camera from " + filename);
-								}
-
-								if(componentNode.HasMember("Model"))
-								{
-									CModel* model = GO::addModel(gameobject, "default.pamesh");
-									if(!Model::createFromJSON(model, componentNode["Model"]))
-										Log::warning("Errors while initializing Model from " + filename);
-								}
-
-								if(componentNode.HasMember("RigidBody"))
-								{
-									CRigidBody rigidbody = GO::addRigidbody(gameobject, NULL);
-									if(!RigidBody::createFromJSON(rigidbody, componentNode["RigidBody"]))
-										Log::warning("Errors while initializing Rigidbody from " + filename);
-								}
-							}
-							else
-							{
-								Log::warning("'Components' is not an object. No components added to " + gameobject->name);
-							}
-						}
-
-						if(gameobjectNode.HasMember("Scripts"))
-						{
-							Value& scripts = gameobjectNode["Scripts"];
-							if(scripts.IsArray())
-							{
-								for(SizeType i = 0; i < scripts.Size(); i++)
-								{
-									if(scripts[i].IsString())
-										ScriptEngine::addScript(gameobject, scripts[i].GetString());
-									else
-										Log::warning("Invalid script name in " + filename);
-								}
-							}
-							else if(scripts.IsString())
-							{
-								ScriptEngine::addScript(gameobject, scripts.GetString());
-							}
-							else
-							{
-								Log::warning("Invalid value for 'Scripts' in " + filename);
-							}
-						}
-					}
-					else
-					{
-						error = "Gameobject does not have a name";
-						success = false;
-					}
-				}
+				success = false;
+				error   = "Invalid document";
 			}
-			free(json);
+		}
+		else
+		{
+			success = false;
+			error   = "File not found";
 		}
 		if(!success) Log::error("SceneManager::createFromFile", error);
 		return gameobject;
