@@ -31,6 +31,7 @@ namespace Model
 	void    generateBindings();
 	void    cleanup();
 	void    setMaterialType(CModel* model, Mat_Type material);
+	bool    writeToJSON(CModel* model, rapidjson::Writer<rapidjson::StringBuffer>& writer);
 }
 	
 #endif

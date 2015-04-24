@@ -44,6 +44,7 @@ namespace Transform
 	bool remove(unsigned int transformIndex);
 	int  create(Node node);
 	bool createFromJSON(CTransform* transform, const rapidjson::Value& value);
+	bool writeToJSON(CTransform* transform, rapidjson::Writer<rapidjson::StringBuffer>& writer);
 	CTransform* getTransformAtIndex(int transformIndex);
 }
 

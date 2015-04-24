@@ -250,6 +250,34 @@ namespace Transform
 		rc = engine->RegisterGlobalProperty("const Vec3 UNIT_Z", (void *)&UNIT_Z); PA_ASSERT(rc >= 0);
 	}
 
+	bool writeToJSON(CTransform* transform, rapidjson::Writer<rapidjson::StringBuffer>& writer)
+	{
+		using namespace rapidjson;
+		bool success = true;
+
+		writer.Key("Transform");
+		writer.StartObject();
+
+		writer.Key("Position");
+		writer.StartArray();
+		for(int i = 0; i < 3; i++) writer.Double(transform->position[i]);
+		writer.EndArray();
+
+		writer.Key("Scale");
+		writer.StartArray();
+		for(int i = 0; i < 3; i++) writer.Double(transform->scale[i]);
+		writer.EndArray();
+
+		writer.Key("Rotation");
+		writer.StartArray();
+		for(int i = 0; i < 4; i++) writer.Double(transform->rotation[i]);
+		writer.EndArray();
+		
+		writer.EndObject();
+		
+		return success;
+	}
+
 	bool createFromJSON(CTransform* transform, const rapidjson::Value& value)
 	{
 		using namespace rapidjson;

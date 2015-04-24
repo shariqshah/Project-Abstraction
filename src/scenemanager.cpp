@@ -170,6 +170,73 @@ namespace SceneManager
 		return index;
 	}
 
+	bool writeToJSON(GameObject* gameobject, rapidjson::Writer<rapidjson::StringBuffer>& writer)
+	{
+		PA_ASSERT(gameobject);
+		using namespace rapidjson;
+		bool success = true;
+		
+		writer.StartObject();
+		writer.Key("Name");
+		writer.String(gameobject->name.c_str(), gameobject->name.size());
+		writer.Key("Tag");
+		writer.String(gameobject->tag.c_str(), gameobject->tag.size());
+		writer.Key("Components");
+		writer.StartObject();
+		// Transform
+		CTransform* transform = GO::getTransform(gameobject);
+		if(!Transform::writeToJSON(transform, writer))
+		{
+		 	success = false;
+			Log::error("SceneManager::writeToJSON", "Problem writing transform for " + gameobject->name);
+		}
+		// Model
+		if(GO::hasComponent(gameobject, Component::MODEL))
+		{
+			CModel* model = GO::getModel(gameobject);
+			if(!Model::writeToJSON(model, writer))
+			{
+				success = false;
+				Log::error("SceneManager::writeToJSON", "Problem writing model for " + gameobject->name);
+			}
+		}
+		writer.EndObject();
+		writer.EndObject();
+		return success;
+	}
+
+	bool saveGameObject(GameObject* gameobject,const std::string& filename)
+	{
+		PA_ASSERT(gameobject);
+		using namespace rapidjson;
+		bool success = true;
+		StringBuffer buffer;
+		PrettyWriter<StringBuffer> writer(buffer);
+		success = writeToJSON(gameobject, writer);
+
+		FILE* newFile = fopen(filename.c_str(), "w+");
+		if(newFile)
+		{
+			size_t rc = fwrite((void*)buffer.GetString(), buffer.GetSize(), 1, newFile);
+			if(rc <= 0)
+			{
+				success = false;
+				Log::error("SceneManager::saveGameObject", "Error writing file");
+			}
+			else
+			{
+				Log::message(gameobject->name + " saved to '" + filename + "'");
+			}
+			fclose(newFile);
+		}
+		else
+		{
+			success = false;
+			Log::error("SceneManager::saveGameObject", "File could not be created");
+		}
+		return success;
+	}
+
 	GameObject* createFromJSON(const rapidjson::Value& gameobjectNode, const std::string& filename)
 	{
 		using namespace rapidjson;
@@ -287,10 +354,10 @@ namespace SceneManager
 		if(json)
 		{
 			document.Parse(json);
-			if(document.IsObject() && document.HasMember("GameObject") && document["GameObject"].IsObject())
+			//if(document.IsObject() && document.HasMember("GameObject") && document["GameObject"].IsObject())
+			if(document.IsObject())
 			{
-				const Value& gameobjectNode = document["GameObject"];
-				gameobject = createFromJSON(gameobjectNode, filename);
+				gameobject = createFromJSON(document, filename);
 			}
 			else
 			{
@@ -592,6 +659,10 @@ namespace SceneManager
 		PA_ASSERT(rc >= 0);
 		rc = engine->RegisterGlobalFunction("bool loadScene(const string &in)",
 											asFUNCTION(loadScene),
+											asCALL_CDECL);
+		PA_ASSERT(rc >= 0);
+		rc = engine->RegisterGlobalFunction("bool saveGameObject(GameObject@, const string &in)",
+											asFUNCTION(saveGameObject),
 											asCALL_CDECL);
 		PA_ASSERT(rc >= 0);
 		engine->SetDefaultNamespace("");

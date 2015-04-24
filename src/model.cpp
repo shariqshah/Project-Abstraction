@@ -189,6 +189,31 @@ namespace Model
 		modelList.clear();
 		emptyIndices.clear();
 	}
+
+    bool writeToJSON(CModel* model, rapidjson::Writer<rapidjson::StringBuffer>& writer)
+	{
+		using namespace rapidjson;
+		bool success = true;
+		writer.Key("Model");
+		writer.StartObject();
+
+		writer.Key("Geometry"); writer.String(Geometry::getName(model->geometryIndex).c_str());
+		writer.Key("Material"); writer.Int(model->material);
+
+		writer.Key("MaterialUniforms");
+        writer.StartObject();
+		writer.Key("Diffuse");          writer.Double(model->materialUniforms.diffuse);
+		writer.Key("Specular");         writer.Double(model->materialUniforms.specular);
+		writer.Key("SpecularStrength"); writer.Double(model->materialUniforms.specularStrength);
+		writer.Key("DiffuseColor");
+		writer.StartArray();
+		for(int i = 0; i < 4; i++)      writer.Double(model->materialUniforms.diffuseColor[i]);
+		writer.EndArray();
+        writer.EndObject();
+		
+		writer.EndObject();
+		return success;
+	}
 		
 	void generateBindings()
 	{
@@ -266,6 +291,7 @@ namespace Model
 			else
 			{
 				success = false;
+				Log::error("Model::createFromJSON", "Error loading Geometry");
 			}
 
 			if(value.HasMember("Material") && value["Material"].IsInt())
@@ -280,6 +306,7 @@ namespace Model
 			else
 			{
 				success = false;
+				Log::error("Model::createFromJSON", "Error loading Material");
 			}
 
 			if(value.HasMember("MaterialUniforms") && value["MaterialUniforms"].IsObject())
@@ -300,6 +327,7 @@ namespace Model
 				else
 				{
 					success = false;
+					Log::error("Model::createFromJSON", "Error loading MaterialUniforms.DiffuseColor");
 				}
 
 				if(matUniforms.HasMember("Texture") && matUniforms["Texture"].IsString())
@@ -322,6 +350,7 @@ namespace Model
 				else
 				{
 					success = false;
+					Log::error("Model::createFromJSON", "Error loading Diffuse");
 				}
 
 				if(matUniforms.HasMember("Specular") && matUniforms["Specular"].IsNumber())
@@ -336,6 +365,7 @@ namespace Model
 				else
 				{
 					success = false;
+					Log::error("Model::createFromJSON", "Error loading Specular");
 				}
 
 				if(matUniforms.HasMember("SpecularStrength") && matUniforms["SpecularStrength"].IsNumber())
@@ -350,11 +380,13 @@ namespace Model
 				else
 				{
 					success = false;
+					Log::error("Model::createFromJSON", "Error loading SpecularStrength");
 				}
 			}
 			else
 			{
 				success = false;
+				Log::error("Model::createFromJSON", "Error loading MaterialUniforms");
 			}
 		}
 		else

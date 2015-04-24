@@ -13,6 +13,8 @@ namespace SceneManager
 	bool remove(const std::string& name);
 	bool remove(Node node);
 	bool loadScene(const std::string& filename);
+	bool saveScene(const std::string& filename);
+	bool saveGameObject(GameObject* gameobject, const std::string& filename);
 	
 	GameObject* find(const std::string& name);
 	GameObject* find(Node node);
