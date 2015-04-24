@@ -128,6 +128,27 @@ namespace Light
 		PA_ASSERT(rc >= 0);
 	}
 
+	bool writeToJSON(CLight* light, rapidjson::Writer<rapidjson::StringBuffer>& writer)
+	{
+		using namespace rapidjson;
+		bool success = true;
+		writer.Key("Light");
+		writer.StartObject();
+		writer.Key("Type");        writer.Int(light->type);
+		writer.Key("InnerAngle");  writer.Double(light->innerAngle);
+		writer.Key("OuterAngle");  writer.Double(light->outerAngle);
+		writer.Key("Falloff");     writer.Double(light->falloff);
+		writer.Key("Radius");      writer.Double(light->radius);
+		writer.Key("Intensity");   writer.Double(light->intensity);
+		writer.Key("CastShadow");  writer.Bool(light->castShadow);
+		writer.Key("Color");
+		writer.StartArray();
+		for(int i = 0; i < 4; i++) writer.Double(light->color[i]);
+		writer.EndArray();
+		writer.EndObject();
+		return success;
+	}
+
 	bool createFromJSON(CLight* light, const rapidjson::Value& value)
 	{
 		using namespace rapidjson;

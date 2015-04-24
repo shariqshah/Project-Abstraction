@@ -218,6 +218,16 @@ namespace SceneManager
 				Log::error("SceneManager::writeToJSON", "Problem writing camera for " + gameobject->name);
 			}
 		}
+		// Light
+		if(GO::hasComponent(gameobject, Component::LIGHT))
+		{
+			CLight* light = GO::getLight(gameobject);
+			if(!Light::writeToJSON(light, writer))
+			{
+				success = false;
+				Log::error("SceneManager::writeToJSON", "Problem writing light for " + gameobject->name);
+			}
+		}
 		writer.EndObject();
 		writer.EndObject();
 		return success;

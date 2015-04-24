@@ -41,6 +41,7 @@ namespace Light
 	void                   remove(uint32_t index);
 	CLight*                getLightAtIndex(uint32_t index);
 	void                   setRadius(CLight* light, float radius);
+	bool                   writeToJSON(CLight* light, rapidjson::Writer<rapidjson::StringBuffer>& writer);
 	std::vector<uint32_t>* getActiveLights();
 }
 
