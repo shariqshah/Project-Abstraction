@@ -177,10 +177,18 @@ namespace SceneManager
 		bool success = true;
 		
 		writer.StartObject();
-		writer.Key("Name");
-		writer.String(gameobject->name.c_str(), gameobject->name.size());
-		writer.Key("Tag");
-		writer.String(gameobject->tag.c_str(), gameobject->tag.size());
+		writer.Key("Name");	writer.String(gameobject->name.c_str(), gameobject->name.size());
+		writer.Key("Tag");  writer.String(gameobject->tag.c_str(), gameobject->tag.size());
+		// Scripts
+		int scriptCount = ScriptEngine::getAttachedScriptsCount(gameobject);
+		if(scriptCount > 0)
+		{
+			writer.Key("Scripts");
+			writer.StartArray();
+			for(int i = 0; i < scriptCount; i++)
+				writer.String(ScriptEngine::getAttachedScriptName(gameobject, i).c_str());
+			writer.EndArray();
+		}
 		writer.Key("Components");
 		writer.StartObject();
 		// Transform
@@ -198,6 +206,16 @@ namespace SceneManager
 			{
 				success = false;
 				Log::error("SceneManager::writeToJSON", "Problem writing model for " + gameobject->name);
+			}
+		}
+		// Camera
+		if(GO::hasComponent(gameobject, Component::CAMERA))
+		{
+			CCamera* camera = GO::getCamera(gameobject);
+			if(!Camera::writeToJSON(camera, writer))
+			{
+				success = false;
+				Log::error("SceneManager::writeToJSON", "Problem writing camera for " + gameobject->name);
 			}
 		}
 		writer.EndObject();

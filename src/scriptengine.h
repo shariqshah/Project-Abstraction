@@ -21,9 +21,11 @@ namespace ScriptEngine
     void registerGameObject(GameObject* gameObject);
 	bool removeScript(GameObject* gameobject, const std::string& scriptName);
 	void reloadScript(const std::string& scriptName);
-	asIScriptEngine* getEngine();
 	void registerScriptInterface();
 	void saveConfigToFile();
+	int  getAttachedScriptsCount(GameObject* gameobject);
+	const std::string getAttachedScriptName(GameObject* gameobject, int scriptLocation);
+	asIScriptEngine* getEngine();
 }
 
 #endif

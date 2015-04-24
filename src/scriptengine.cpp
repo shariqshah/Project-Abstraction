@@ -557,4 +557,24 @@ namespace ScriptEngine
 	{
 		WriteConfigToFile(engine, "angelConfig");
 	}
+
+	int getAttachedScriptsCount(GameObject* gameobject)
+	{
+		PA_ASSERT(gameobject);
+		ScriptContainer* container = &scriptContainerList[gameobject->scriptIndex];
+		return container->scripts.size();
+	}
+	
+	const std::string getAttachedScriptName(GameObject* gameobject, int scriptLocation)
+	{
+		PA_ASSERT(gameobject);
+		std::string scriptName = "";
+		ScriptContainer* container = &scriptContainerList[gameobject->scriptIndex];
+		if(scriptLocation >= 0 && scriptLocation < (int)container->scripts.size())
+		{
+			Script* script = &container->scripts[scriptLocation];
+			scriptName = script->module;
+		}
+		return scriptName;
+	}
 }

@@ -262,6 +262,21 @@ namespace Camera
 		emptyIndices.clear();
 	}
 
+	bool writeToJSON(CCamera* camera, rapidjson::Writer<rapidjson::StringBuffer>& writer)
+	{
+		using namespace rapidjson;
+		bool success = true;
+		writer.Key("Camera");
+		writer.StartObject();
+		writer.Key("NearZ");       writer.Double(camera->nearZ);
+		writer.Key("FarZ");        writer.Double(camera->farZ);
+		writer.Key("Fov");         writer.Double(camera->fov);
+		writer.Key("AspectRatio"); writer.Double(camera->aspectRatio);
+		writer.Key("IsActive");    writer.Bool(camera->node == getActiveCamera()->node ? true : false);
+		writer.EndObject();
+		return success;
+	}
+
 	bool createFromJSON(CCamera* camera, const rapidjson::Value& value)
     {
 		using namespace rapidjson;
