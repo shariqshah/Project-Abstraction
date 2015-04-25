@@ -319,7 +319,7 @@ namespace Camera
 				const Value& fovNode = value["Fov"];
 				float fov = (float)fovNode.GetDouble();
 				if(fov > 0)
-					camera->fov = glm::radians(fov);
+					camera->fov = fov;
 				else
 					success = false;
 			}

@@ -243,6 +243,93 @@ namespace SceneManager
 		return success;
 	}
 
+	bool writeSceneToJSON(rapidjson::Writer<rapidjson::StringBuffer>& writer)
+	{
+		using namespace rapidjson;
+		bool success = true;
+		writer.StartObject();
+		// Scene
+		writer.Key("Scene"); writer.StartObject();
+		{
+			writer.Key("SceneObjects");
+			writer.StartArray();
+			for(int i = 0; i < (int)validNodes.size(); i++)	writeToJSON(&sceneObjects[validNodes[i]], writer);
+			writer.EndArray();
+			// Renderer
+			RenderParams* renderParams = Renderer::getRenderParams();
+			writer.Key("Renderer"); writer.StartObject();
+			{
+				writer.Key("AmbientLight");
+				writer.StartArray();
+				for(int i = 0; i < 4; i++) writer.Double(renderParams->ambientLight[i]);
+				writer.EndArray();
+				writer.Key("ClearColor");
+				writer.StartArray();
+				Vec4 clearColor = Renderer::getClearColor();
+				for(int i = 0; i < 4; i++) writer.Double(clearColor[i]);
+				writer.EndArray();
+				writer.Key("Fog"); writer.StartObject();
+				{
+					writer.Key("FogMode"); writer.Int(renderParams->fog.fogMode);
+					writer.Key("Density"); writer.Double(renderParams->fog.density);
+					writer.Key("Start");   writer.Double(renderParams->fog.start);
+					writer.Key("Max");     writer.Double(renderParams->fog.max);
+					writer.Key("Color");
+					writer.StartArray();
+					for(int i = 0; i < 4; i++) writer.Double(renderParams->fog.color[i]);
+					writer.EndArray();
+				}
+				writer.EndObject();
+			}
+			writer.EndObject();
+			writer.Key("Physics"); writer.StartObject();
+			{
+				writer.Key("Gravity");
+				writer.StartArray();
+				Vec3 gravity = Physics::getGravity();
+				for(int i = 0; i < 3; i++) writer.Double(gravity[i]);
+				writer.EndArray();
+			}
+			writer.EndObject();
+		}
+		writer.EndObject();
+		writer.EndObject();
+		return success;
+	}
+
+	bool saveScene(const std::string& filename)
+	{
+		bool success = true;
+		using namespace rapidjson;
+		StringBuffer buffer;
+		PrettyWriter<StringBuffer> writer(buffer);
+		writer.SetIndent('\t', 1);
+		success = writeSceneToJSON(writer);
+
+		FILE* newFile = fopen(filename.c_str(), "w+");
+		if(newFile)
+		{
+			size_t rc = fwrite((void*)buffer.GetString(), buffer.GetSize(), 1, newFile);
+			if(rc <= 0)
+			{
+				success = false;
+				Log::error("SceneManager::saveScene", "Error writing file");
+			}
+			else
+			{
+				Log::message("Scene saved to '" + filename + "'");
+			}
+			fclose(newFile);
+		}
+		else
+		{
+			success = false;
+			Log::error("SceneManager::saveScene", "File could not be created");
+		}
+		
+		return success;
+	}
+
 	bool saveGameObject(GameObject* gameobject,const std::string& filename)
 	{
 		PA_ASSERT(gameobject);
@@ -252,7 +339,7 @@ namespace SceneManager
 		PrettyWriter<StringBuffer> writer(buffer);
 		writer.SetIndent('\t', 1);
 		success = writeToJSON(gameobject, writer);
-
+		
 		FILE* newFile = fopen(filename.c_str(), "w+");
 		if(newFile)
 		{
@@ -510,7 +597,7 @@ namespace SceneManager
 
 						if(fogNode.HasMember("Density") && fogNode["Density"].IsDouble())
 						{
-							int density = (float)fogNode["Density"].GetDouble();
+							float density = (float)fogNode["Density"].GetDouble();
 							if(density >= 0.f)
 								renderParams->fog.density = density;
 							else
@@ -524,7 +611,7 @@ namespace SceneManager
 
 						if(fogNode.HasMember("Start") && fogNode["Start"].IsDouble())
 						{
-							int start = (float)fogNode["Start"].GetDouble();
+							float start = (float)fogNode["Start"].GetDouble();
 							if(start >= 0)
 								renderParams->fog.start = start;
 							else
@@ -538,7 +625,7 @@ namespace SceneManager
 
 						if(fogNode.HasMember("Max") && fogNode["Max"].IsDouble())
 						{
-							int max = (float)fogNode["Max"].GetDouble();
+							float max = (float)fogNode["Max"].GetDouble();
 							if(max >= 0)
 								renderParams->fog.max = max;
 							else
@@ -702,6 +789,10 @@ namespace SceneManager
 		PA_ASSERT(rc >= 0);
 		rc = engine->RegisterGlobalFunction("bool saveGameObject(GameObject@, const string &in)",
 											asFUNCTION(saveGameObject),
+											asCALL_CDECL);
+		PA_ASSERT(rc >= 0);
+		rc = engine->RegisterGlobalFunction("bool saveScene(const string &in)",
+											asFUNCTION(saveScene),
 											asCALL_CDECL);
 		PA_ASSERT(rc >= 0);
 		engine->SetDefaultNamespace("");
