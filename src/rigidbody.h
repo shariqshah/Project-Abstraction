@@ -33,9 +33,12 @@ namespace RigidBody
 	void  setRestitution(CRigidBody body, float restitution);
 	float getFriction(CRigidBody body);
 	void  setFriction(CRigidBody body, float friction);
-	const char* getCollisionShapeName(CRigidBody body);
 	bool  createFromJSON(CRigidBody body, const rapidjson::Value& value);
+	bool  writeToJSON(CRigidBody body, rapidjson::Writer<rapidjson::StringBuffer>& writer);
+	bool  isKinematic(CRigidBody body);
 	void  cleanup();
+	int   getCollisionShapeType(CRigidBody body);
+	const char* getCollisionShapeName(CRigidBody body);
 }
 
 #endif

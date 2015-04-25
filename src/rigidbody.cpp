@@ -6,6 +6,7 @@
 #include "passert.h"
 #include "physics.h"
 #include "transform.h"
+#include "geometry.h"
 #include "collisionshapes.h"
 
 #include "../include/bullet/btBulletDynamicsCommon.h"
@@ -263,7 +264,20 @@ namespace RigidBody
 
 	const char* getCollisionShapeName(CRigidBody body)
 	{
-		return rigidBodies[body]->getCollisionShape()->getName();
+		const char* name = "INVALID";
+		int type = getCollisionShapeType(body);
+		switch(type)
+		{
+		case CS_SPHERE:       name = "Sphere";         break;
+		case CS_BOX:          name = "Box";            break;
+		case CS_CAPSULE:      name = "Capsule";        break;
+		case CS_PLANE:        name = "Plane";          break;
+		case CS_CONE:         name = "CONE";           break;
+		case CS_CYLINDER:     name = "Cylinder";       break;
+		case CS_CONCAVE_MESH: name = "Concave Mesh";   break;
+		case CS_CONVEX_MESH:  name = "Convex Mesh";    break;
+		}
+		return name;
 	}
 
 	void cleanup()
@@ -299,6 +313,7 @@ namespace RigidBody
 			else
 			{
 				success = false;
+				Log::error("RigidBody::createFromJSON", "Error loading Mass");
 			}
 
 			if(value.HasMember("Friction") && value["Friction"].IsNumber())
@@ -313,6 +328,7 @@ namespace RigidBody
 			else
 			{
 				success = false;
+				Log::error("RigidBody::createFromJSON", "Error loading Friction");
 			}
 
 			if(value.HasMember("Restitution") && value["Restitution"].IsNumber())
@@ -327,6 +343,7 @@ namespace RigidBody
 			else
 			{
 				success = false;
+				Log::error("RigidBody::createFromJSON", "Error loading Restitution");
 			}
 
 			if(value.HasMember("IsKinematic") && value["IsKinematic"].IsBool())
@@ -337,6 +354,7 @@ namespace RigidBody
 			else
 			{
 				success = false;
+				Log::error("RigidBody::createFromJSON", "Error loading IsKinematic");
 			}
 
 			if(value.HasMember("Shape") && value["Shape"].IsObject())
@@ -348,7 +366,7 @@ namespace RigidBody
 					CollisionShape* shape  = NULL;
 					switch(type)
 					{
-					case 0:		// Sphere
+					case CS_SPHERE:
 					{
 						if(shapeNode.HasMember("Radius") && shapeNode["Radius"].IsNumber())
 							shape = new Sphere((float)shapeNode["Radius"].GetDouble());
@@ -356,7 +374,7 @@ namespace RigidBody
 							shape = new Sphere();
 					}
 					break;
-					case 1:		// Box
+					case CS_BOX:
 					{
 						Vec3 halfExt(0.5f);
 						if(shapeNode.HasMember("HalfExt") && shapeNode["HalfExt"].IsArray())
@@ -378,7 +396,7 @@ namespace RigidBody
 						}
 					}
 					break;
-					case 2:		// Capsule
+					case CS_CAPSULE:
 					{
 						float radius = 1.f;
 						float height = 2.f;
@@ -395,7 +413,7 @@ namespace RigidBody
 						}
 					}
 					break;
-					case 3:		// Plane
+					case CS_PLANE:
 					{
 						Vec3  normal(0, 1, 0);
 						float margin = 0.001f;
@@ -420,7 +438,7 @@ namespace RigidBody
 						}
 					}
 					break;
-					case 4: 	// Cone
+					case CS_CONE:
 					{
 						float radius = 1.f;
 						float height = 2.f;
@@ -437,7 +455,7 @@ namespace RigidBody
 						}
 					}
 					break;
-					case 5: 	// Cylinder
+					case CS_CYLINDER:
 					{
 						Vec3 halfExt(0.5f);
 						Vec3 axis(0, 1, 0);
@@ -473,7 +491,7 @@ namespace RigidBody
 						}
 					}
 					break;
-					case 6:		// CollisionMesh
+					case CS_CONCAVE_MESH:
 					{
 						const char* filename = "default.pamesh";
 						bool isTriMesh = false;
@@ -481,9 +499,22 @@ namespace RigidBody
 						{
 							const Value& geometryNameNode = shapeNode["GeometryName"];
 							filename = shapeNode["GeometryName"].GetString();
-
-							if(shapeNode.HasMember("IsTriMesh") && shapeNode["IsTriMesh"].IsBool())
-								isTriMesh = shapeNode["IsTriMesh"].GetBool();
+							shape = new CollisionMesh(filename, isTriMesh);
+						}
+						else
+						{
+							shape = new CollisionMesh();
+						}
+					}
+					break;
+					case CS_CONVEX_MESH:
+					{
+						const char* filename = "default.pamesh";
+						bool isTriMesh = true;
+						if(shapeNode.HasMember("GeometryName") && shapeNode["GeometryName"].IsString())
+						{
+							const Value& geometryNameNode = shapeNode["GeometryName"];
+							filename = shapeNode["GeometryName"].GetString();
 							shape = new CollisionMesh(filename, isTriMesh);
 						}
 						else
@@ -519,5 +550,111 @@ namespace RigidBody
 		}
 		if(!success) Log::error("RigidBody::createFromJSON", error);
 		return success;
+	}
+
+	bool writeToJSON(CRigidBody body, rapidjson::Writer<rapidjson::StringBuffer>& writer)
+	{
+		using namespace rapidjson;
+		bool success = true;
+		writer.Key("RigidBody");
+		writer.StartObject();
+		writer.Key("Mass");        writer.Double(getMass(body));
+		writer.Key("Friction");    writer.Double(getFriction(body));
+		writer.Key("Restitution"); writer.Double(getRestitution(body));
+		writer.Key("IsKinematic"); writer.Bool(isKinematic(body));
+		writer.Key("Shape");
+		writer.StartObject();
+		
+		int type = getCollisionShapeType(body);
+		btCollisionShape* bulletShape = rigidBodies[body]->getCollisionShape();
+		intptr_t index = (intptr_t)bulletShape->getUserPointer();
+		CollisionShape* shape = Physics::getCollisionShapeAtIndex((int)index);
+		writer.Key("Type"); writer.Int(type);
+		switch(type)
+		{
+		case CS_SPHERE:
+		{
+			Sphere* sphere = (Sphere*)shape;
+			writer.Key("Radius"); writer.Double(sphere->radius);
+		}
+		break;
+		case CS_BOX:
+		{
+			Box* box = (Box*)shape;
+			writer.Key("HalfExt");
+			writer.StartArray();
+			for(int i = 0; i < 3; i++) writer.Double(box->halfExtent[i]);
+			writer.EndArray();
+		}
+		break;
+		case CS_CAPSULE:
+		{
+			Capsule* capsule = (Capsule*)shape;
+			writer.Key("Radius"); writer.Double(capsule->radius);
+			writer.Key("Height"); writer.Double(capsule->height);
+		}
+		break;
+		case CS_PLANE:
+		{
+			Plane* plane = (Plane*)shape;
+			writer.Key("Margin"); writer.Double(plane->margin);
+			writer.Key("Normal");
+			writer.StartArray();
+			for(int i = 0; i < 3; i++) writer.Double(plane->normal[i]);
+			writer.EndArray();
+		}
+		break;
+		case CS_CONE:
+		{
+			Cone* cone = (Cone*)shape;
+			writer.Key("Radius"); writer.Double(cone->radius);
+			writer.Key("Height"); writer.Double(cone->height);
+		}
+		break;
+		case CS_CYLINDER:
+		{
+			Cylinder* cylinder = (Cylinder*)shape;
+			writer.Key("Axis");
+			writer.StartArray();
+			for(int i = 0; i < 3; i++) writer.Double(cylinder->axis[i]);
+			writer.EndArray();
+			writer.Key("HalfExt");
+			writer.StartArray();
+			for(int i = 0; i < 3; i++) writer.Double(cylinder->halfExtent[i]);
+			writer.EndArray();
+		}
+		break;
+		case CS_CONVEX_MESH:
+		{
+			CollisionMesh* collisionMesh = (CollisionMesh*)shape;
+			const std::string geomtryName = Geometry::getName(collisionMesh->geometryIndex);
+			writer.Key("GeometryName"); writer.String(geomtryName.c_str(), geomtryName.size());
+		}
+		break;
+		case CS_CONCAVE_MESH:
+		{
+			CollisionMesh* collisionMesh = (CollisionMesh*)shape;
+			const std::string geomtryName = Geometry::getName(collisionMesh->geometryIndex);
+			writer.Key("GeometryName"); writer.String(geomtryName.c_str(), geomtryName.size());
+		}
+		break;
+		}
+		writer.EndObject();
+		
+		writer.EndObject();
+		return success;
+	}
+
+	bool isKinematic(CRigidBody body)
+	{
+		return rigidBodies[body]->isKinematicObject();
+	}
+
+	int getCollisionShapeType(CRigidBody body)
+	{
+		btCollisionShape* bulletShape = rigidBodies[body]->getCollisionShape();
+		intptr_t index = (intptr_t)bulletShape->getUserPointer();
+		CollisionShape* shape = Physics::getCollisionShapeAtIndex((int)index);
+		return shape->getType();
 	}
 }

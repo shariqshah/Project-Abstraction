@@ -58,6 +58,7 @@ namespace Physics
 	void enableDebugDraw(bool enable);
 	Vec3 getGravity();
 	btDiscreteDynamicsWorld* getWorld();
+	CollisionShape* getCollisionShapeAtIndex(int index);
 }
 
 #endif

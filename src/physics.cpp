@@ -216,7 +216,18 @@ namespace Physics
 
 	void addCollisionShape(CollisionShape* shape)
 	{
+		intptr_t index = (intptr_t)collisionShapes.size();
+		shape->getCollisionShape()->setUserPointer((void*)index);
 		collisionShapes.push_back(shape);
+	}
+
+	CollisionShape* getCollisionShapeAtIndex(int index)
+	{
+		CollisionShape* shape = NULL;
+		if(index > -1 && index < collisionShapes.size())
+			shape = collisionShapes[index];
+
+		return shape;
 	}
 
 	// For scripts only

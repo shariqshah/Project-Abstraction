@@ -12,16 +12,21 @@
 
 btCollisionShape* CollisionShape::getCollisionShape()
 {
-	return mShape;
+	return shape;
 }
 
-CollisionShape::CollisionShape() : mShape(NULL) {}	
+int CollisionShape::getType()
+{
+	return CS_INVALID;
+}
+
+CollisionShape::CollisionShape() : shape(NULL) {}	
 void CollisionShape::initialize() {}
 	
 CollisionShape:: ~CollisionShape()
 {
-	if(mShape)
-		delete mShape;
+	if(shape)
+		delete shape;
 }
 
 bool CollisionShape::isValid()
@@ -31,102 +36,136 @@ bool CollisionShape::isValid()
 
 Sphere::Sphere(float radius)
 {
-	mRadius = radius;
+	this->radius = radius;
 	initialize();
+}
+
+int Sphere::getType()
+{
+	return CS_SPHERE;
 }
 
 void Sphere::initialize()
 {
-	mShape = new btSphereShape(mRadius);
+	shape = new btSphereShape(radius);
 	Physics::addCollisionShape(this);
 }
 	
 Box::Box(Vec3 halfExtent)
 {
-	mHalfExtent = halfExtent;
+	this->halfExtent = halfExtent;
 	initialize();
 }
 
+int Box::getType()
+{
+	return CS_BOX;
+}
+
+
 void Box::initialize()
 {
-	mShape = new btBoxShape(Utils::toBullet(mHalfExtent));
+	shape = new btBoxShape(Utils::toBullet(halfExtent));
 	Physics::addCollisionShape(this);
 }
 
 Capsule::Capsule(float radius, float height)
 {
-	mRadius = radius;
-	mHeight = height;
+	this->radius = radius;
+	this->height = height;
 	initialize();
+}
+
+int Capsule::getType()
+{
+	return CS_CAPSULE;
 }
 
 void Capsule::initialize()
 {
-	mShape = new btCapsuleShape(btScalar(mRadius), btScalar(mHeight));
+	shape = new btCapsuleShape(btScalar(radius), btScalar(height));
 	Physics::addCollisionShape(this);
 }
 
 Plane::Plane(Vec3 normal, float margin)
 {
-	mNormal = normal;
-	mMargin = margin;
+	this->normal = normal;
+	this->margin = margin;
 	initialize();
 }
 
 void Plane::initialize()
 {
-	mShape = new btStaticPlaneShape(Utils::toBullet(mNormal), btScalar(mMargin));
+	shape = new btStaticPlaneShape(Utils::toBullet(normal), btScalar(margin));
 	Physics::addCollisionShape(this);
+}
+
+int Plane::getType()
+{
+	return CS_PLANE;
 }
 
 Cone::Cone(float radius, float height)
 {
-	mRadius = radius;
-	mHeight = height;
+	this->radius = radius;
+	this->height = height;
 	initialize();
+}
+
+int Cone::getType()
+{
+	return CS_CONE;
 }
 
 void Cone::initialize()
 {
-	mShape = new btConeShape(btScalar(mRadius), btScalar(mHeight));
+	shape = new btConeShape(btScalar(radius), btScalar(height));
 	Physics::addCollisionShape(this);
 }
 
 Cylinder::Cylinder(Vec3 halfExtent, Vec3 axis)
 {
-	mHalfExtent = halfExtent;
-	mAxis       = axis;
+	this->halfExtent = halfExtent;
+	this->axis       = axis;
 	initialize();
+}
+
+int Cylinder::getType()
+{
+	return CS_CYLINDER;
 }
 
 void Cylinder::initialize()
 {
-	if(mAxis == Vec3(0, 1, 0))
+	if(axis == Vec3(0, 1, 0))
 	{
-		mShape = new btCylinderShape(Utils::toBullet(mHalfExtent));
+		shape = new btCylinderShape(Utils::toBullet(halfExtent));
 	}
-	else if(mAxis == Vec3(1, 0, 0))
+	else if(axis == Vec3(1, 0, 0))
 	{
-		mShape = new btCylinderShapeX(Utils::toBullet(mHalfExtent));
+		shape = new btCylinderShapeX(Utils::toBullet(halfExtent));
 	}
-	else if(mAxis == Vec3(0, 0, 1))
+	else if(axis == Vec3(0, 0, 1))
 	{
-		mShape = new btCylinderShapeZ(Utils::toBullet(mHalfExtent));
+		shape = new btCylinderShapeZ(Utils::toBullet(halfExtent));
 	}
 	else
 	{
 		Log::error("Cylinder::initialize", "Invalid axis, reverting to default(0, 1, 0)");
-		mAxis = Vec3(0, 1, 0);
-		mShape = new btCylinderShape(Utils::toBullet(mHalfExtent));
+		axis = Vec3(0, 1, 0);
+		shape = new btCylinderShape(Utils::toBullet(halfExtent));
 	}
-	
-
 	Physics::addCollisionShape(this);
+}
+
+int CollisionMesh::getType()
+{
+	return triMesh ? CS_CONVEX_MESH : CS_CONCAVE_MESH;
 }
 
 CollisionMesh::CollisionMesh(const char* filename, bool isTriMesh)
 {
-	mTriMesh      = isTriMesh;
+	triMesh       = isTriMesh;
 	geometryIndex = Geometry::create(filename);
 	if(geometryIndex == -1)
 		valid = false;
@@ -168,9 +207,9 @@ void CollisionMesh::initialize()
 				triMesh->addTriangle(v1, v2, v3);
 			}
 		}
-		if(mTriMesh)
+		if(triMesh)
 		{
-			mShape = new btBvhTriangleMeshShape(triMesh, false);
+			shape = new btBvhTriangleMeshShape(triMesh, false);
 		}
 		else
 		{
@@ -179,7 +218,7 @@ void CollisionMesh::initialize()
 			btScalar margin = tempConShape->getMargin();
 			hull->buildHull(margin);
 			tempConShape->setUserPointer(hull);
-			mShape = new btConvexHullShape(&(hull->getVertexPointer()->getX()), hull->numVertices());
+			shape = new btConvexHullShape(&(hull->getVertexPointer()->getX()), hull->numVertices());
 			delete tempConShape;
 		}
 		Physics::addCollisionShape(this);

@@ -228,6 +228,16 @@ namespace SceneManager
 				Log::error("SceneManager::writeToJSON", "Problem writing light for " + gameobject->name);
 			}
 		}
+		// RigidBody
+		if(GO::hasComponent(gameobject, Component::RIGIDBODY))
+		{
+			CRigidBody rigidBody = GO::getRigidBody(gameobject);
+			if(!RigidBody::writeToJSON(rigidBody, writer))
+			{
+				success = false;
+				Log::error("SceneManager::writeToJSON", "Problem writing rigidBody for " + gameobject->name);
+			}
+		}
 		writer.EndObject();
 		writer.EndObject();
 		return success;
@@ -240,6 +250,7 @@ namespace SceneManager
 		bool success = true;
 		StringBuffer buffer;
 		PrettyWriter<StringBuffer> writer(buffer);
+		writer.SetIndent('\t', 1);
 		success = writeToJSON(gameobject, writer);
 
 		FILE* newFile = fopen(filename.c_str(), "w+");
