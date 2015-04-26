@@ -84,6 +84,7 @@ namespace Light
 		else
 		{
 			index = emptyIndices.back();
+			emptyIndices.pop_back();
 			lightList[index] = CLight();
 		}
 
@@ -173,6 +174,7 @@ namespace Light
 			else
 			{
 				success = false;
+				Log::error("Light::creatFromJSON", "Error reading Color");
 			}
 
 			if(value.HasMember("Type") && value["Type"].IsInt())
@@ -187,6 +189,7 @@ namespace Light
 			else
 			{
 				success = false;
+				Log::error("Light::creatFromJSON", "Error reading Typer");
 			}
 
 			if(value.HasMember("InnerAngle") && value["InnerAngle"].IsNumber())
@@ -194,13 +197,14 @@ namespace Light
 				const Value& innerAngleNode = value["InnerAngle"];
 				float innerAngle = (float)innerAngleNode.GetDouble();
 				if(innerAngle >= 0)
-					light->innerAngle = glm::radians(innerAngle);
+					light->innerAngle = innerAngle;
 				else
 					success = false;
 			}
 			else
 			{
 				success = false;
+				Log::error("Light::creatFromJSON", "Error reading InnerAngle");
 			}
 
 			if(value.HasMember("OuterAngle") && value["OuterAngle"].IsNumber())
@@ -208,13 +212,14 @@ namespace Light
 				const Value& outerangleNode = value["OuterAngle"];
 				float outerangle = (float)outerangleNode.GetDouble();
 				if(outerangle >= 0)
-					light->outerAngle = glm::radians(outerangle);
+					light->outerAngle = outerangle;
 				else
 					success = false;
 			}
 			else
 			{
 				success = false;
+				Log::error("Light::creatFromJSON", "Error reading OuterAngle");
 			}
 
 			if(value.HasMember("Falloff") && value["Falloff"].IsNumber())
@@ -229,6 +234,7 @@ namespace Light
 			else
 			{
 				success = false;
+				Log::error("Light::creatFromJSON", "Error reading Falloff");
 			}
 
 			if(value.HasMember("Radius") && value["Radius"].IsNumber())
@@ -243,6 +249,7 @@ namespace Light
 			else
 			{
 				success = false;
+				Log::error("Light::creatFromJSON", "Error reading Radius");
 			}
 
 			if(value.HasMember("Intensity") && value["Intensity"].IsNumber())
@@ -254,6 +261,7 @@ namespace Light
 			else
 			{
 				success = false;
+				Log::error("Light::creatFromJSON", "Error reading Intensity");
 			}
 
 			if(value.HasMember("CastShadow") && value["CastShadow"].IsBool())
@@ -264,6 +272,7 @@ namespace Light
 			else
 			{
 				success = false;
+				Log::error("Light::creatFromJSON", "Error reading CastShadow");
 			}
 		}
 		else

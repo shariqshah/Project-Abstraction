@@ -159,7 +159,8 @@ namespace Model
 				modelList[index] = model;
 				emptyIndices.pop_back();
 			}
-			Material::registerModel(index, (Mat_Type)model.material);
+			if(!Material::registerModel(index, (Mat_Type)model.material))
+				Log::warning("Model already registered with material");
 			modelList[index].materialUniforms.texture = Texture::create("default.png");
 			modelList[index].geometryIndex = geometryIndex;
 		}
