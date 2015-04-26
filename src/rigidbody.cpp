@@ -297,8 +297,6 @@ namespace RigidBody
 		using namespace rapidjson;
 		bool success = true;
 		const char* error = "Invalid value in a field";
-		PA_ASSERT(body);
-
 		if(value.IsObject())
 		{
 			if(value.HasMember("Mass") && value["Mass"].IsNumber())

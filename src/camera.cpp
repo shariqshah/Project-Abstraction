@@ -137,8 +137,8 @@ namespace Camera
 		CCamera* camera = NULL;
 		if(cameraIndex >= 0 && cameraIndex < (int)cameraList.size())
 			camera = &cameraList[cameraIndex];
-		else
-			Log::error("Camera::getCameraAtIndex", "Invalid cameraIndex " + std::to_string(cameraIndex));
+		// else
+		// 	Log::error("Camera::getCameraAtIndex", "Invalid cameraIndex " + std::to_string(cameraIndex));
 		return camera;
 	}
 

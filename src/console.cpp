@@ -248,6 +248,11 @@ namespace Console
 				historyPos = -1;
 			}
 			if(ImGui::IsItemHovered()) ImGui::SetKeyboardFocusHere(-1);
+			ImGui::SameLine();
+			if(ImGui::Button("Clear Log"))
+			{
+				messages.clear();
+			}
 			
 			ImGui::End();
 		}

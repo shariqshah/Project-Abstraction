@@ -150,6 +150,8 @@ namespace SceneManager
 		update();
 		sceneObjects.clear();
 		removableNodes.clear();
+		validNodes.clear();
+		emptyIndices.clear();
 	}
 
 	unsigned int createNewIndex()

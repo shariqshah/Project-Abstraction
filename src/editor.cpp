@@ -21,6 +21,20 @@
 
 namespace Editor
 {
+	void clearTextFieldBuffers();
+	void resetCollisionShapeParams();
+	void updateComponentViewers();
+	void displayRigidBody();
+	void displayTransform();
+	void displayLight();
+	void displayModel();
+	void displayCamera();
+	void displaySceneObjects();
+	void displayRendererSettings();
+	void displayStatsWindow();
+	void displayDebugVars();
+	void checkKeys();
+	
 	struct DebugInt
 	{
 		const char* description;
@@ -47,6 +61,8 @@ namespace Editor
 		bool showPhysicsWindow    = false;
 		bool showSample           = false;
 		bool showDebugVars        = true;
+		bool showSceneSave        = false;
+		bool showSceneLoad        = false;
 		
 		const float OPACITY  = 1.f;
 		const int   BUF_SIZE = 128;
@@ -56,6 +72,8 @@ namespace Editor
 		char inputTag[BUF_SIZE]        = "";
 		char inputGeoName[BUF_SIZE]    = "";
 		char inputModelTex[BUF_SIZE]   = "";
+		char inputSceneSave[BUF_SIZE]  = "";
+		char inputSceneLoad[BUF_SIZE]  = "";
 		Node selectedGONode = -1;
 
 		float updateTime = 0.f;
@@ -459,9 +477,62 @@ namespace Editor
 	void displaySceneObjects()
     {
 		ImGui::Begin("SceneObjects", &showSceneObjects, Vec2(400, 350), OPACITY);
+
+		if(ImGui::Button("Clear Scene"))
+		{
+			SceneManager::cleanup();
+			showSelectedGO = false;
+			clearTextFieldBuffers();
+		}
+
+		ImGui::SameLine();
+		if(ImGui::Button("Save Scene"))
+		{
+			showSceneSave = !showSceneSave;
+			showSceneLoad = false;
+			clearTextFieldBuffers();
+		}
+
+		ImGui::SameLine();
+		if(ImGui::Button("Load Scene"))
+		{
+			showSceneLoad = !showSceneLoad;
+			showSceneSave = false;
+			clearTextFieldBuffers();
+		}
+
+		if(showSceneLoad)
+		{
+			if(ImGui::InputText("Load file", &inputSceneLoad[0], BUF_SIZE, ImGuiInputTextFlags_EnterReturnsTrue))
+			{
+				if(strlen(&inputSceneLoad[0]) > 0)
+				{
+					if(Utils::fileExists(&inputSceneLoad[0]))
+					{
+						SceneManager::cleanup();
+						SceneManager::loadScene(&inputSceneLoad[0]);
+					}
+					else
+					{
+						Log::error("Editor::LoadScene", "File " + std::string(&inputSceneLoad[0]) + " not found");
+					}
+				}
+				memset(&inputSceneLoad[0], '\0', BUF_SIZE);
+				showSceneLoad = false;
+			}
+		}
+
+		if(showSceneSave)
+		{
+			if(ImGui::InputText("Save Scene as", &inputSceneSave[0], BUF_SIZE, ImGuiInputTextFlags_EnterReturnsTrue))
+			{
+				if(strlen(&inputSceneSave[0]) > 0) SceneManager::saveScene(&inputSceneSave[0]);
+				memset(&inputSceneSave[0], '\0', BUF_SIZE);
+				showSceneSave = false;
+			}
+		}
 		
 		std::vector<Node>* gameObjectNodes = SceneManager::getSceneObjects();
-		ImGui::Text("Total : %d", gameObjectNodes->size());
 		gameObjectFilter.Draw("Filter by name");
 
 		if(ImGui::ListBoxHeader("GameObjects"))
@@ -498,25 +569,12 @@ namespace Editor
 				// Remove the gameobject and reset state
 				SceneManager::remove(selectedGONode);
 				showSelectedGO = false;
-				memset(&inputName[0], '\0', BUF_SIZE);
-				memset(&inputNewName[0], '\0', BUF_SIZE);
-				memset(&inputTag[0], '\0', BUF_SIZE);
-				memset(&inputGeoName[0], '\0', BUF_SIZE);
-				memset(&inputModelTex[0], '\0', BUF_SIZE);
+				clearTextFieldBuffers();
 			}
 		}
+		if(ImGui::IsItemHovered()) ImGui::SetTooltip("Remove currently selected gameobject");
 
-		ImGui::SameLine();
-		if(ImGui::Button("Clear Scene"))
-		{
-			SceneManager::cleanup();
-			showSelectedGO = false;
-			memset(&inputName[0], '\0', BUF_SIZE);
-			memset(&inputNewName[0], '\0', BUF_SIZE);
-			memset(&inputTag[0], '\0', BUF_SIZE);
-			memset(&inputGeoName[0], '\0', BUF_SIZE);
-			memset(&inputModelTex[0], '\0', BUF_SIZE);
-		}
+		ImGui::SameLine(); ImGui::Text("Total : %d", gameObjectNodes->size());
 
 		if(ImGui::InputText("Create New",
 							&inputNewName[0],
@@ -620,6 +678,17 @@ namespace Editor
 			if(GO::hasComponent(selectedGO, Component::RIGIDBODY)) displayRigidBody();				
 			ImGui::End();
 		}
+	}
+
+	void clearTextFieldBuffers()
+	{
+		memset(&inputName[0], '\0', BUF_SIZE);
+		memset(&inputNewName[0], '\0', BUF_SIZE);
+		memset(&inputTag[0], '\0', BUF_SIZE);
+		memset(&inputGeoName[0], '\0', BUF_SIZE);
+		memset(&inputModelTex[0], '\0', BUF_SIZE);
+		memset(&inputSceneSave[0], '\0', BUF_SIZE);
+		memset(&inputSceneLoad[0], '\0', BUF_SIZE);
 	}
 
 	void displayRendererSettings()

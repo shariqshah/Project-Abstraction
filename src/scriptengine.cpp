@@ -164,6 +164,10 @@ namespace ScriptEngine
 				contextPool[i]->Release();
 			engine->ShutDownAndRelease();
 		}
+		scriptContainerList.clear();
+		scriptContainerEmptyIndices.clear();
+		scriptReloadQueue.clear();
+		activeScriptContainers.clear();
 	}
 	
 	asIScriptEngine* getEngine()

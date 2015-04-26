@@ -227,5 +227,6 @@ void CollisionMesh::initialize()
 	else
 	{
 		Log::warning("CollisionMesh::Initialize : Model provided for collision mesh is Invalid");
+		valid = false;
 	}
 }

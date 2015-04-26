@@ -278,7 +278,7 @@ namespace GO
 		if(hasComponent(gameObject, type))
 		{
 			int index = gameObject->compIndices[type];
-			gameObject->compIndices[(int)type] = EMPTY_INDEX;
+			gameObject->compIndices[type] = EMPTY_INDEX;
 			
 			switch(type)
 			{

@@ -20,6 +20,11 @@ namespace Geometry
 		std::vector<Vec2>         uvs;
 		std::vector<unsigned int> indices;
 		unsigned int              vao;
+		unsigned int              vertexVBO;
+		unsigned int              uvVBO;
+		unsigned int              normalVBO;
+		unsigned int              colorVBO;
+		unsigned int              indexVBO;
 		unsigned int              refCount;
 		BoundingBox               boundingBox;
 		BoundingSphere            boundingSphere;
@@ -136,9 +141,8 @@ namespace Geometry
 		glGenVertexArrays(1, &geometry->vao);
 		glBindVertexArray(geometry->vao);
 
-		GLuint vertexVBO;
-		glGenBuffers(1, &vertexVBO);
-		glBindBuffer(GL_ARRAY_BUFFER, vertexVBO);
+		glGenBuffers(1, &geometry->vertexVBO);
+		glBindBuffer(GL_ARRAY_BUFFER, geometry->vertexVBO);
 		glBufferData(GL_ARRAY_BUFFER,
 					 geometry->vertices.size() * sizeof(Vec3),
 					 geometry->vertices.data(),
@@ -149,9 +153,8 @@ namespace Geometry
 
 		if(geometry->normals.size() > 0)
 		{
-			GLuint normalVBO;
-			glGenBuffers(1, &normalVBO);
-			glBindBuffer(GL_ARRAY_BUFFER, normalVBO);
+			glGenBuffers(1, &geometry->normalVBO);
+			glBindBuffer(GL_ARRAY_BUFFER, geometry->normalVBO);
 			glBufferData(GL_ARRAY_BUFFER,
 						 geometry->normals.size() * sizeof(Vec3),
 						 geometry->normals.data(),
@@ -163,9 +166,8 @@ namespace Geometry
 
 		if(geometry->uvs.size() > 0)
 		{
-			GLuint uvVBO;
-			glGenBuffers(1, &uvVBO);
-			glBindBuffer(GL_ARRAY_BUFFER, uvVBO);
+			glGenBuffers(1, &geometry->uvVBO);
+			glBindBuffer(GL_ARRAY_BUFFER, geometry->uvVBO);
 			glBufferData(GL_ARRAY_BUFFER,
 						 geometry->uvs.size() * sizeof(Vec2),
 						 geometry->uvs.data(),
@@ -177,9 +179,8 @@ namespace Geometry
 
 		if(geometry->vertexColors.size() > 0)
 		{
-			GLuint colorVBO;
-			glGenBuffers(1, &colorVBO);
-			glBindBuffer(GL_ARRAY_BUFFER, colorVBO);
+			glGenBuffers(1, &geometry->colorVBO);
+			glBindBuffer(GL_ARRAY_BUFFER, geometry->colorVBO);
 			glBufferData(GL_ARRAY_BUFFER,
 						 geometry->vertexColors.size() * sizeof(Vec3),
 						 geometry->vertexColors.data(),
@@ -191,9 +192,8 @@ namespace Geometry
 
 		if(geometry->indices.size() > 0)
 		{
-			GLuint ibo;
-			glGenBuffers(1, &ibo);
-			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
+			glGenBuffers(1, &geometry->indexVBO);
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, geometry->indexVBO);
 			glBufferData(GL_ELEMENT_ARRAY_BUFFER,
 						 geometry->indices.size() * sizeof(GLuint),
 						 geometry->indices.data(),
@@ -265,12 +265,18 @@ namespace Geometry
 			if(--geometryList[index].refCount == 0)
 			{
 				emptyIndices.push_back(index);
+				glDeleteBuffers(1, &geometryList[index].vertexVBO);
+				glDeleteBuffers(1, &geometryList[index].normalVBO);
+				glDeleteBuffers(1, &geometryList[index].colorVBO);
+				glDeleteBuffers(1, &geometryList[index].uvVBO);
+				glDeleteBuffers(1, &geometryList[index].indexVBO);
 				glDeleteVertexArrays(1, &geometryList[index].vao);
 				geometryList[index].vertices.clear();
 				geometryList[index].indices.clear();
 				geometryList[index].normals.clear();
 				geometryList[index].uvs.clear();
 				geometryList[index].vertexColors.clear();
+				geometryList[index].filename.clear();
 			}
 		}
 	}
