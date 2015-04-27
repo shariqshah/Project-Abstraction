@@ -481,6 +481,7 @@ namespace Editor
 		if(ImGui::Button("Clear Scene"))
 		{
 			SceneManager::cleanup();
+			Material::clearAllRegisteredModels();
 			showSelectedGO = false;
 			clearTextFieldBuffers();
 		}

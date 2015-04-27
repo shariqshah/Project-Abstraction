@@ -236,9 +236,10 @@ namespace Model
 		PA_ASSERT(rc >= 0);
 	}
 
-	void remove(unsigned int modelIndex)
+	void remove(int modelIndex)
 	{
 		CModel* model = &modelList[modelIndex];
+		model->node   = -1;
 		Material::removeMaterialUniforms(&model->materialUniforms, (Mat_Type)model->material);
 		if(!Material::unRegisterModel(modelIndex, (Mat_Type)model->material))
 			Log::warning("Model at index " + std::to_string(modelIndex) + " not unregistered");
@@ -263,9 +264,16 @@ namespace Model
 		}
 		if(index != -1)
 		{
-			Material::unRegisterModel(index, (Mat_Type)model->material);
-			model->material = material;
-			Material::registerModel(index, material);
+			if(Material::unRegisterModel(index, (Mat_Type)model->material))
+			{
+				model->material = material;
+				if(!Material::registerModel(index, material))
+					Log::error("Model::setMaterialType", "Model could not be registered");	
+			}
+			else
+			{
+				Log::error("Model::setMaterialType", "Model could not be unregistered");
+			}
 		}
 		else
 		{

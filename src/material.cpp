@@ -109,11 +109,20 @@ namespace Material
 				break;
 			}
 		}
-
 		if(found)
 			registeredNodes->erase(registeredNodes->begin() + index);
-
+		else
+			Log::error("Material::unRegisterModel", "Could not unregister model");
+		Log::message("Registered Nodes for " + std::to_string((int)material) + " : " + std::to_string(registeredNodes->size()));
 		return found;
+	}
+
+	void clearAllRegisteredModels()
+	{
+		unshaded.registeredModels.clear();
+		unshadedTextured.registeredModels.clear();
+		phong.registeredModels.clear();
+		phongTextured.registeredModels.clear();
 	}
 	
 	std::vector<int>* getRegisteredModels(Mat_Type material)

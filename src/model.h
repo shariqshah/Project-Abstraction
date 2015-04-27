@@ -27,7 +27,7 @@ namespace Model
 	CModel* findModel(const char* filename);
 	int     create(const char* filename);
 	bool    createFromJSON(CModel* model, const rapidjson::Value& value);
-	void    remove(unsigned int modelIndex);
+	void    remove(int modelIndex);
 	void    generateBindings();
 	void    cleanup();
 	void    setMaterialType(CModel* model, Mat_Type material);
