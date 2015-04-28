@@ -298,6 +298,7 @@ namespace ScriptEngine
 					   "No class implmenting IScriptable interface found in " + scriptName);
 			Log::error("ScriptEngine::addScript", scriptName + " not added to " + gameObject->name);
 			container->scripts.pop_back();
+			module->Discard();
 			return;
 		}
 
@@ -325,6 +326,7 @@ namespace ScriptEngine
 		{
 			Log::error("ScriptEngine::addScript", scriptName + " not added to " + gameObject->name);
 			container->scripts.pop_back();
+			module->Discard();
 		}
 		returnContext(context);
 	}
@@ -476,6 +478,7 @@ namespace ScriptEngine
 			if(!type)
 			{
 				Log::error("ScriptEngine::reloadScript", "Could not reload script '" + scriptName + "'");
+				module->Discard();
 				success = false;
 			}
 			else

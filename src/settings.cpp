@@ -80,8 +80,8 @@ namespace Settings
 			writer.Key("Height"); writer.Int(windowHeight);
 			writer.EndObject();
 
-			size_t rc = fwrite((void*)buffer.GetString(), buffer.GetSize(), 1, newFile);
-			if(rc > 0)
+			size_t bytes = fwrite((void*)buffer.GetString(), buffer.GetSize(), 1, newFile);
+			if(bytes > 0)
 			{
 				Log::message("Settings saved to settings.json");
 			}
