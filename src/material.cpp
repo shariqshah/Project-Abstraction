@@ -111,9 +111,6 @@ namespace Material
 		}
 		if(found)
 			registeredNodes->erase(registeredNodes->begin() + index);
-		else
-			Log::error("Material::unRegisterModel", "Could not unregister model");
-		Log::message("Registered Nodes for " + std::to_string((int)material) + " : " + std::to_string(registeredNodes->size()));
 		return found;
 	}
 

@@ -18,6 +18,7 @@
 #include "geometry.h"
 #include "utilities.h"
 #include "input.h"
+#include "scriptengine.h"
 
 namespace Editor
 {
@@ -34,6 +35,7 @@ namespace Editor
 	void displayStatsWindow();
 	void displayDebugVars();
 	void checkKeys();
+	void displayScripts();
 	
 	struct DebugInt
 	{
@@ -60,7 +62,7 @@ namespace Editor
 		bool showStatsWindow      = true;
 		bool showPhysicsWindow    = false;
 		bool showSample           = false;
-		bool showDebugVars        = true;
+		bool showDebugVars        = false;
 		bool showSceneSave        = false;
 		bool showSceneLoad        = false;
 		
@@ -74,6 +76,7 @@ namespace Editor
 		char inputModelTex[BUF_SIZE]   = "";
 		char inputSceneSave[BUF_SIZE]  = "";
 		char inputSceneLoad[BUF_SIZE]  = "";
+		char inputAddScript[BUF_SIZE]  = "";
 		Node selectedGONode = -1;
 
 		float updateTime = 0.f;
@@ -481,7 +484,6 @@ namespace Editor
 		if(ImGui::Button("Clear Scene"))
 		{
 			SceneManager::cleanup();
-			Material::clearAllRegisteredModels();
 			showSelectedGO = false;
 			clearTextFieldBuffers();
 		}
@@ -607,6 +609,10 @@ namespace Editor
 			if(ImGui::InputText("Tag", &inputTag[0], BUF_SIZE, ImGuiInputTextFlags_EnterReturnsTrue))
 				selectedGO->tag = inputTag;
 
+			displayScripts();
+			ImGui::Separator();
+			ImGui::Text("Components");
+
 			int selected = 0;
 			const char* components = "None\0Camera\0Model\0Light\0Rigidbody\0\0";
 			if(ImGui::Combo("Add New Component", &selected, components, 5))
@@ -690,6 +696,7 @@ namespace Editor
 		memset(&inputModelTex[0], '\0', BUF_SIZE);
 		memset(&inputSceneSave[0], '\0', BUF_SIZE);
 		memset(&inputSceneLoad[0], '\0', BUF_SIZE);
+		memset(&inputAddScript[0], '\0', BUF_SIZE);
 	}
 
 	void displayRendererSettings()
@@ -831,5 +838,61 @@ namespace Editor
 	{
 		debugInts.clear();
 		debugFloats.clear();
+	}
+
+	void displayScripts()
+	{
+		GameObject* gameobject = SceneManager::find(selectedGONode);
+		static bool showInputBox = false;
+		if(!ImGui::CollapsingHeader("Scripts", "GameObject_Scripts", true, true))
+			return;
+
+		if(ImGui::Button("Add"))
+			showInputBox = !showInputBox;
+
+		if(showInputBox)
+		{
+			if(ImGui::InputText("ScriptName", &inputAddScript[0], BUF_SIZE, ImGuiInputTextFlags_EnterReturnsTrue))
+			{
+				const char* scriptName = &inputAddScript[0];
+				ScriptEngine::addScript(gameobject, scriptName);
+				memset(&inputAddScript[0], '\0', BUF_SIZE);
+			}
+		}
+		int scriptCount = ScriptEngine::getAttachedScriptsCount(gameobject);
+		if(scriptCount == 0)
+			return;
+		static int selectedScript = -1;
+		static std::string scriptID;
+		bool selected = false;
+		if(ImGui::ListBoxHeader("Scripts", 3, 3))
+		{
+			for(int i = 0; i < scriptCount; i++)
+			{
+				const std::string scriptName = ScriptEngine::getAttachedScriptName(gameobject, i);
+				scriptID = scriptName + std::to_string(i);
+			    ImGui::PushID(scriptID.c_str());
+				selected = selectedScript == i ? true : false;
+				if(ImGui::Selectable(scriptName.c_str(), selected))
+					selectedScript = i;
+				ImGui::PopID();
+			}
+		}
+		ImGui::ListBoxFooter();
+		if(selected)
+		{
+			if(ImGui::Button("Reload", Vec2(0), false))
+			{
+				const std::string scriptName = ScriptEngine::getAttachedScriptName(gameobject, selectedScript);
+				ScriptEngine::reloadScript(scriptName);
+			}
+
+			ImGui::SameLine();
+			if(ImGui::Button("Remove", Vec2(0), false))
+			{
+				const std::string scriptName = ScriptEngine::getAttachedScriptName(gameobject, selectedScript);
+				ScriptEngine::removeScript(gameobject, scriptName);
+			}
+		}
 	}
 }

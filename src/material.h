@@ -41,7 +41,6 @@ namespace Material
 	bool              unRegisterModel(int modelIndex, Mat_Type material);
 	void              setMaterialUniforms(const Mat_Uniforms* materialUniforms, Mat_Type material);
 	void              removeMaterialUniforms(const Mat_Uniforms* materialUniforms, Mat_Type material);
-	void              clearAllRegisteredModels();
 }
 
 #endif
