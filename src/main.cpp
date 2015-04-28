@@ -146,11 +146,14 @@ bool init()
 					free(directory);
 					Input::initializeInput();
 				}
-
 			}	
 		}
+		else
+		{
+			success = false;
+			Log::error("Main::init", "Error loading settings");
+		}
 	}
-
 	return success;
 }
 

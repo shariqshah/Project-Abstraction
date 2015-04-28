@@ -113,14 +113,6 @@ namespace Material
 			registeredNodes->erase(registeredNodes->begin() + index);
 		return found;
 	}
-
-	void clearAllRegisteredModels()
-	{
-		unshaded.registeredModels.clear();
-		unshadedTextured.registeredModels.clear();
-		phong.registeredModels.clear();
-		phongTextured.registeredModels.clear();
-	}
 	
 	std::vector<int>* getRegisteredModels(Mat_Type material)
     {
