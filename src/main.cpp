@@ -37,12 +37,12 @@ int main(int argc, char** args)
     //Initialize SDL and OpenGL
     if(!init())
     {
-		std::cerr<<"Could not initialize \n";
+		Log::error("Main::main", "Could not initialize");
     }
     else
     {
         //Event handler
-        SDL_Event e;
+        SDL_Event event;
         float current, previous, deltaTime;
 		current = previous = deltaTime = 0.f;
 		
@@ -53,7 +53,7 @@ int main(int argc, char** args)
             deltaTime = (current - previous) / 1000.f;
 
             //Handle events on a queue
-            handleEvents(&e, &quit);
+            handleEvents(&event, &quit);
 
             //Render to screen
 			float timeBeforeUpdate = SDL_GetTicks();
@@ -98,7 +98,7 @@ bool init()
 	//Initialize SDL
     if(SDL_Init(SDL_INIT_EVERYTHING) < 0)
     {
-		std::cerr<<"ERROR : SDL could not initialize. "<<SDL_GetError()<<std::endl;
+		Log::error("Main::init", "SDL could not initialize. " + std::string(SDL_GetError()));
         success = false;
     }
     else
@@ -117,7 +117,7 @@ bool init()
 			
 			if(window == NULL)
 			{
-				std::cerr<<"ERROR : Window could not be created. "<<SDL_GetError()<<std::endl;
+				Log::error("Main::init", "Window could not be created. " + std::string(SDL_GetError()));
 				success = false;
 			}
 			else
@@ -130,7 +130,7 @@ bool init()
 				
 				if(context == NULL)
 				{
-					std::cerr<<"ERROR : Creating OpenGL context, "<<SDL_GetError()<<std::endl;
+					Log::error("Main::init", "Creating OpenGL context failed " + std::string(SDL_GetError()));
 					success = false;
 				}
 				else
@@ -202,7 +202,6 @@ char* getWorkingDirectory()
 	long size;
 	char *buf;
 	char *ptr;
-
 	size = pathconf(".", _PC_PATH_MAX);
 
 	if ((buf = (char *)malloc((size_t)size)) != NULL)

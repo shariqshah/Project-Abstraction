@@ -230,8 +230,12 @@ namespace Model
 											asOFFSET(CModel, materialUniforms));
 		PA_ASSERT(rc >= 0);
 		rc = engine->RegisterObjectMethod("Model",
-										  "void setMaterialType(Mat_Type)",
+										  "bool setMaterialType(Mat_Type)",
 										  asFUNCTION(setMaterialType),
+										  asCALL_CDECL_OBJFIRST);
+		rc = engine->RegisterObjectMethod("Model",
+										  "bool setGeometry(const string &in)",
+										  asFUNCTION(setGeometry),
 										  asCALL_CDECL_OBJFIRST);
 		PA_ASSERT(rc >= 0);
 	}
@@ -251,9 +255,10 @@ namespace Model
 	{
 	}
 
-	void setMaterialType(CModel* model, Mat_Type material)
+	bool setMaterialType(CModel* model, Mat_Type material)
 	{
 		int index = -1;
+		bool success = true;
 		for(int i = 0; i < (int)modelList.size(); i++)
 		{
 			if(model->node == modelList[i].node)
@@ -268,17 +273,23 @@ namespace Model
 			{
 				model->material = material;
 				if(!Material::registerModel(index, material))
-					Log::error("Model::setMaterialType", "Model could not be registered");	
+				{
+					Log::error("Model::setMaterialType", "Model could not be registered");
+					success = false;
+				}
 			}
 			else
 			{
 				Log::error("Model::setMaterialType", "Model could not be unregistered");
+				success = false;
 			}
 		}
 		else
 		{
 			Log::error("Model::setMaterialtype", "Model not found");
+			success = false;
 		}
+		return success;
 	}
 
 	bool createFromJSON(CModel* model, const rapidjson::Value& value)
@@ -294,8 +305,7 @@ namespace Model
 			{
 				const Value& geometryNode = value["Geometry"];
 				const std::string& filename = geometryNode.GetString();
-				int index = Geometry::create(filename.c_str());
-				if(index > -1) model->geometryIndex = index;
+				setGeometry(model, filename.c_str());
 			}
 			else
 			{
@@ -405,6 +415,18 @@ namespace Model
 		}
 		if(!success) Log::error("Model::createFromJSON", error);
 		return success;
+	}
+
+	bool setGeometry(CModel* model, const std::string& filename)
+	{
+		PA_ASSERT(model);
+		bool success = true;
+		int geometryIndex = Geometry::create(filename.c_str());
+		if(geometryIndex > -1)
+			model->geometryIndex = geometryIndex;
+		else
+			success = false;
+		return success; 
 	}
 }
 

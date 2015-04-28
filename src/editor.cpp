@@ -379,12 +379,8 @@ namespace Editor
 		{
 			if(ImGui::InputText("Geometry", &inputGeoName[0], BUF_SIZE, ImGuiInputTextFlags_EnterReturnsTrue))
 			{
-				int index = Geometry::create(&inputGeoName[0]);
-				if(index > -1)
-				{
-					model->geometryIndex = index;
-				}
-				else
+				bool success = Model::setGeometry(model, &inputGeoName[0]);
+				if(!success)
 				{
 					Log::error("Editor::displayModel",
 							   "File '" + std::string(&inputGeoName[0]) + "' not found, reverting back to previously attached");

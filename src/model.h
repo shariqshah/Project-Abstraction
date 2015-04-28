@@ -30,7 +30,8 @@ namespace Model
 	void    remove(int modelIndex);
 	void    generateBindings();
 	void    cleanup();
-	void    setMaterialType(CModel* model, Mat_Type material);
+	bool    setMaterialType(CModel* model, Mat_Type material);
+	bool    setGeometry(CModel* model, const std::string& filename);
 	bool    writeToJSON(CModel* model, rapidjson::Writer<rapidjson::StringBuffer>& writer);
 }
 	
