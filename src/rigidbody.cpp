@@ -132,38 +132,16 @@ namespace RigidBody
 
 		if(kinematic)
 		{
-			temp->setFlags(rigidBodies[body]->getFlags() |
-						   btCollisionObject::CF_KINEMATIC_OBJECT |
-						   btCollisionObject::CF_NO_CONTACT_RESPONSE);
+			temp->setCollisionFlags(temp->getCollisionFlags() | btCollisionObject::CF_KINEMATIC_OBJECT);
 			temp->setActivationState(DISABLE_DEACTIVATION);
 		}
 		else
 		{
-			//rigidBodies[body]->setFlags(~btCollisionObject::CF_KINEMATIC_OBJECT);
-			temp->setFlags(rigidBodies[body]->getFlags() |
-						   btCollisionObject::CF_STATIC_OBJECT);
+			temp->setCollisionFlags(temp->getCollisionFlags() & ~btCollisionObject::CF_KINEMATIC_OBJECT);
 			temp->setActivationState(WANTS_DEACTIVATION);
-			//rigidBodies[body]->activate(true);
 		}
 
 		world->addRigidBody(temp);
-		// if(kinematic)
-		// {
-		// 	rigidBodies[body]->setFlags(rigidBodies[body]->getFlags() |
-		// 								 btCollisionObject::CF_KINEMATIC_OBJECT |
-		// 								 btCollisionObject::CF_NO_CONTACT_RESPONSE);
-		// 	rigidBodies[body]->setActivationState(DISABLE_DEACTIVATION);
-		// }
-		// else
-		// {
-		// 	//rigidBodies[body]->setFlags(~btCollisionObject::CF_KINEMATIC_OBJECT);
-		// 	rigidBodies[body]->setFlags(rigidBodies[body]->getFlags() |
-		// 								 ~(btCollisionObject::CF_KINEMATIC_OBJECT) |
-		// 								 btCollisionObject::CF_STATIC_OBJECT);
-		// 	rigidBodies[body]->setActivationState(WANTS_DEACTIVATION);
-		// 	//rigidBodies[body]->activate(true);
-		// }
-		
 	}
 
 	void setMass(CRigidBody body, float mass)

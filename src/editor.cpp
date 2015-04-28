@@ -164,6 +164,11 @@ namespace Editor
 		if(ImGui::CollapsingHeader("RigidBody", "RigidBodyComponent", true, true))
 		{
 			ImGui::PushID("RigidBodyComponentProps");
+
+			bool isKinematic = RigidBody::isKinematic(body);
+			if(ImGui::Checkbox("Kinematic", &isKinematic))
+				RigidBody::setKinematic(body, isKinematic);
+			
 			float mass = RigidBody::getMass(body);
 			if(ImGui::InputFloat("Mass", &mass, 1.f, 5.f))
 				RigidBody::setMass(body, mass);
