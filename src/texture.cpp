@@ -17,6 +17,9 @@
 
 namespace Texture
 {
+	GLuint createTexture(int width, int height, int format, int internalFormat);
+	int    createNewIndex();
+	
 	struct TextureObj
 	{
 		SDL_Surface*  surface;
@@ -24,6 +27,7 @@ namespace Texture
 		char*         name;
 		uint32_t      refCount = 0;
 	};
+	
 	namespace
 	{	
 		std::vector<TextureObj> textureList;
@@ -43,6 +47,52 @@ namespace Texture
 			}
 			return loaded;
 		}
+	}
+
+	int createNewIndex()
+	{
+		int index = -1;
+		if(!emptyIndices.empty())
+		{
+			index = emptyIndices.back();
+			emptyIndices.pop_back();
+		}
+		else
+		{
+			textureList.push_back(TextureObj());
+			index = textureList.size() - 1;
+		}
+		return index;
+	}
+
+	unsigned int createTexture(int width, int height, int format, int internalFormat, int type, void* data)
+	{
+		GLuint id = 0;
+		glGenTextures(1, &id);
+		glBindTexture(GL_TEXTURE_2D, id);
+		glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, format, type, data);
+		Renderer::checkGLError("Texture::createTexture");
+		glBindTexture(GL_TEXTURE_2D, 0);
+		
+		return id;
+	}
+
+	void setTextureParameter(int index, int parameter, int value)
+	{
+		TextureObj* textureObj = NULL;
+		if(index > -1 && index < (int)textureList.size())
+			textureObj = &textureList[index];
+		else
+			return;
+
+		GLint currentTexture = 0;
+		glGetIntegerv(GL_TEXTURE_BINDING_2D, &currentTexture);
+
+		glBindTexture(GL_TEXTURE_2D, textureObj->id);
+		glTexParameteri(GL_TEXTURE_2D, parameter, value);
+		Renderer::checkGLError("Texture::setTextureParameter");
+		if(currentTexture != 0)
+			glBindTexture(GL_TEXTURE_2D, currentTexture);
 	}
 
 	void initialize(const char* path)
@@ -69,11 +119,7 @@ namespace Texture
 			free(fullPath);
 
 			if(newSurface)
-			{							
-				GLuint id = 0;
-				glGenTextures(1, &id);
-				glBindTexture(GL_TEXTURE_2D, id);
-
+			{
 				int format         = GL_RGB;
 				int internalFormat = GL_RGB;
 				int textureType    = GL_UNSIGNED_BYTE;
@@ -101,50 +147,23 @@ namespace Texture
 				}
 
 				SDL_LockSurface(newSurface);
-				glTexImage2D(GL_TEXTURE_2D,
-							 0,
-							 internalFormat,
-							 newSurface->w,
-							 newSurface->h,
-							 0,
-							 format,
-							 textureType,
-							 newSurface->pixels);
-
-				// glTexImage2D(GL_TEXTURE_2D,
-				// 			 0,
-				// 			 format,
-				// 			 w,
-				// 			 h,
-				// 			 0,
-				// 			 format,
-				// 			 GL_UNSIGNED_BYTE,
-				// 			 data);
-
-				Renderer::checkGLError("Texture::create");
+				GLuint id = createTexture(newSurface->w,
+										  newSurface->h,
+										  format,
+										  internalFormat,
+										  textureType,
+					                      newSurface->pixels);
 				SDL_UnlockSurface(newSurface);
-		
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-				glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_REPEAT);
-				glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_REPEAT);
-				glBindTexture(GL_TEXTURE_2D, 0);
 
-				if(!emptyIndices.empty())
-				{
-					index = emptyIndices.back();
-					emptyIndices.pop_back();
-				}
-				else
-				{
-					textureList.push_back(TextureObj());
-					index = textureList.size() - 1;
-				}
-
+				int index = createNewIndex();
 				TextureObj *newTexture = &textureList[index];
 				newTexture->id = id;
 				newTexture->surface = newSurface;
 				newTexture->refCount++;
+				setTextureParameter(index, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+				setTextureParameter(index, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+				setTextureParameter(index,GL_TEXTURE_WRAP_S,GL_REPEAT);
+				setTextureParameter(index,GL_TEXTURE_WRAP_T,GL_REPEAT);
 			
 				if(newTexture->name != NULL)
 					free(newTexture->name);
@@ -162,6 +181,24 @@ namespace Texture
 		{
 			textureList[index].refCount++;
 		}
+		return index;
+	}
+
+	int create(int width, int height, int format, int internalFormat, int type, void* data)
+	{
+		GLuint id = createTexture(width,
+								  height,
+								  format,
+								  internalFormat,
+								  type,
+								  data);
+		int index = createNewIndex();
+		TextureObj *newTexture = &textureList[index];
+		newTexture->id       = id;
+		newTexture->surface  = NULL;
+		newTexture->name     = NULL;
+		newTexture->refCount++;
+		Log::message("New custom texture created");
 		return index;
 	}
 	
@@ -258,7 +295,7 @@ namespace Texture
 
 	void cleanup()
 	{
-		free(texturePath);		
+		free(texturePath);
 		for(unsigned int i = 0; i < textureList.size(); i ++)
 			remove(i);
 		textureList.clear();
@@ -269,9 +306,25 @@ namespace Texture
 	void generateBindings()
 	{
 		asIScriptEngine* engine = ScriptEngine::getEngine();
-		engine->SetDefaultNamespace("Texture");
-		engine->RegisterGlobalFunction("int create(string)", asFUNCTION(create), asCALL_CDECL);
+		int rc = engine->SetDefaultNamespace("Texture");
+		rc = engine->RegisterGlobalFunction("int create(const string)",
+											asFUNCTIONPR(create, (const char*), int),
+											asCALL_CDECL);
+		PA_ASSERT(rc >= 0);
+		// rc = engine->RegisterGlobalFunction("int create(int, int, int, int)",
+		// 									asFUNCTIONPR(create, (int, int, int, int), int),
+		// 									asCALL_CDECL);
+		// PA_ASSERT(rc >= 0);
 		engine->RegisterGlobalFunction("void remove(string)", asFUNCTION(remove), asCALL_CDECL);
+		PA_ASSERT(rc >= 0);
 		engine->SetDefaultNamespace("");
+	}
+
+	unsigned int getTextureID(int textureIndex)
+	{
+		unsigned int id = 0;
+		if(textureIndex > -1 && textureIndex < (int)textureList.size())
+			id = textureList[textureIndex].id;
+		return id;
 	}
 }

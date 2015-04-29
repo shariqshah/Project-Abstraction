@@ -20,6 +20,7 @@
 #include "scriptengine.h"
 #include "passert.h"
 #include "collisionshapes.h"
+#include "framebuffer.h"
 
 Game::Game(const char* path)
 {
@@ -27,98 +28,8 @@ Game::Game(const char* path)
 	System::initialize();
 	Gui::initialize();
 	
-	// {
-	// 	Vec4 color = Vec4(0, 1, 1, 1);
-	// 	GameObject* sphere = SceneManager::create("sphere");
-	// 	CModel* sphereModel = GO::addModel(sphere, "sphere.pamesh");
-	// 	sphereModel->materialUniforms.diffuseColor = color;
-	// 	CLight* light = GO::addLight(sphere);
-	// 	light->type  = LT_POINT;
-	// 	light->color = color;
-	// 	CTransform* modelTransform = GO::getTransform(sphere);
-	// 	Transform::setPosition(modelTransform, Vec3(-5, 10, -5), true);
-	// }
-
-	// {
-	// 	Vec4 color = Vec4(1, 0.6, 0, 1);
-	// 	GameObject* sphere = SceneManager::create("sphere2");
-	// 	CModel* sphereModel = GO::addModel(sphere, "sphere.pamesh");
-	// 	sphereModel->materialUniforms.diffuseColor = color;
-	// 	CLight* light = GO::addLight(sphere);
-	// 	light->type  = LT_POINT;
-	// 	light->color = color;
-	// 	CTransform* modelTransform = GO::getTransform(sphere);
-	// 	Transform::setPosition(modelTransform, Vec3(15 , 10, -5), true);
-	// }
-
-	// {
-	// 	GameObject* cube = SceneManager::create("Cube");
-	// 	CModel* cubeModel = GO::addModel(cube, "suzanne.pamesh");
-	// 	Model::setMaterialType(cubeModel, MAT_PHONG);
-	// 	cubeModel->materialUniforms.diffuseColor = Vec4(0, 1, 0, 1);
-	// 	cubeModel->materialUniforms.texture = Texture::create("layingrock.png");
-	// 	CTransform* cubeTran = GO::getTransform(cube);
-	// 	Transform::setPosition(cubeTran, Vec3(0, 5, -5), true);
-	// 	ScriptEngine::addScript(cube, "test");
-	// }
-
-	// Box* t1 = new Box(Vec3(0.5f));
-	// for(int i = 0; i < 10; i++)
-	// {
-	// 	for(int j = 0; j < 10; j++)
-	// 	{
-	// 		GameObject* cube2 = SceneManager::create("Cube" + std::to_string(i));
-	// 		CModel* cubeModel = GO::addModel(cube2, "suzanne.pamesh");
-	// 		Model::setMaterialType(cubeModel, MAT_PHONG);
-	// 		cubeModel->materialUniforms.diffuseColor = Vec4(0, 1, 0, 1);
-	// 		cubeModel->materialUniforms.texture = Texture::create("layingrock.png");
-	// 		if((i % 2) == 0)
-	// 		{
-	// 			cubeModel->materialUniforms.diffuseColor = Vec4(1, 0, 0, 1);
-	// 			cubeModel->material = MAT_PHONG;
-	// 		}
-	// 		else
-	// 		{
-	// 			cubeModel->materialUniforms.diffuseColor = Vec4(1);
-	// 		}
-	// 		CTransform* cube2Tran = GO::getTransform(cube2);
-	// 		Transform::setPosition(cube2Tran, Vec3(i * j, 5, -j * 10));
-	// 		GO::addRigidbody(cube2, t1);
-	// 	}
-	// }
-	
-	// GameObject* playerPtr = SceneManager::create("Player");
-	// player = playerPtr->node;
-	// playerPtr->tag = "FreeCamera";
-	// CTransform* transform = GO::getTransform(playerPtr);
-	// Transform::translate(transform, Vec3(0, 3, 5));
-	// CCamera* camera = GO::addCamera(playerPtr);
-	// Camera::setActiveCamera(camera);
-	// //System::CameraSystem::setActiveObject(playerPtr);
-	// ScriptEngine::addScript(playerPtr, "freecamera");
-
-	// GameObject* plane = SceneManager::create("Ground");
-	// CModel* planeModel = GO::addModel(plane, "plane.pamesh");
-    // Model::setMaterialType(planeModel, MAT_PHONG);
-	// planeModel->materialUniforms.texture = Texture::create("test2.png");
-	// GO::addRigidbody(plane, new Plane(Vec3(0, 1, 0), 1.f), 0.f, 1.f);
-	// // ScriptEngine::addScript(plane, "test");
-
-	// GameObject* tea = SceneManager::create("Teapot");
-	// CModel* teapot = GO::addModel(tea, "teapot.pamesh");
-	// Model::setMaterialType(teapot, MAT_PHONG);
-	// teapot->materialUniforms.specularStrength = 60.f;
-	// teapot->materialUniforms.texture = Texture::create("chessboard.png");
-	// CTransform* tTran = GO::getTransform(tea);
-	// Transform::setPosition(tTran, Vec3(0, 10, -5), true);
-	// GO::addRigidbody(tea, new CollisionMesh("teapot.pamesh", true), 0, 0.2f);
-
-	// GameObject* room = SceneManager::create("Room");
-	// CModel* roomModel = GO::addModel(room, "room.pamesh");
-    // Model::setMaterialType(roomModel, MAT_PHONG);
-	// roomModel->materialUniforms.texture = Texture::create("test2.png");
-	// GO::addRigidbody(room, new CollisionMesh("room.pamesh", true), 0.f);
 	SceneManager::loadScene("../content/scenes/savetest.json");
+	int fbo = Framebuffer::create(1024, 768);
 }
 
 Game::~Game()

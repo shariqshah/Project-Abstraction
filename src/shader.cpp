@@ -29,12 +29,13 @@ namespace Shader
 	{
 		size_t len = strlen(shaderText);
 		int lineCount = 1;
-		// std::cout<<std::to_string(lineCount) + ". ";
 		printf("%d. ", lineCount);
 		for(uint i = 0; i < len; i++)
 		{
-			if(shaderText[i] != '\n') printf("%c", shaderText[i]);
-			else                      printf("\n%d. ", ++lineCount);
+			if(shaderText[i] != '\n')
+				printf("%c", shaderText[i]);
+			else
+				printf("\n%d. ", ++lineCount);
 		}
 		printf("\n END_DEBUG_PRINT\n\n");
 	}
@@ -44,7 +45,6 @@ namespace Shader
 		char* includeLoc = strstr(shaderText, "//include");
 		if(includeLoc)
 		{
-			// size_t len = strlen(includeLoc);
 			char* lineEnd = strchr(includeLoc, '\n');
 			int lineSize = lineEnd - includeLoc;
 			char* incLine = (char*)malloc((sizeof(char) * lineSize) + 1);

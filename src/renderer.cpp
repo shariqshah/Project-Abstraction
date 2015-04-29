@@ -10,6 +10,7 @@
 #include "settings.h"
 #include "passert.h"
 #include "geometry.h"
+#include "framebuffer.h"
 
 namespace Renderer
 {
@@ -390,6 +391,7 @@ namespace Renderer
 		free(contentDir);
 		cleanupText();
 		Model::cleanup();
+		Framebuffer::cleanup();
 		Texture::cleanup();
 		Shader::cleanup();
 		Material::cleanup();
