@@ -53,7 +53,7 @@ namespace Renderer
 
 		int texture = -1;
 		int quadGeo = -1;
-		int depthMap = -1;
+		int renderOutput = -1;
 		
 		void updateTextVBOs()
 		{
@@ -411,9 +411,11 @@ namespace Renderer
 		indices.push_back(0); indices.push_back(1); indices.push_back(2);
 		indices.push_back(2); indices.push_back(3); indices.push_back(0);
 
-		quadGeo  = Geometry::create("Quad", &vertices, &uvs, &normals, &indices);
-		depthMap = Framebuffer::create("DepthMap", 128, 256, false);
-		texture  = Texture::create("chessboard.png");
+		quadGeo      = Geometry::create("Quad", &vertices, &uvs, &normals, &indices);
+		renderOutput = Framebuffer::create("DepthMap",
+										   Settings::getRenderWidth(),
+										   Settings::getRenderHeight(),
+										   false);
 	}
 
 	void cleanup()
@@ -462,8 +464,8 @@ namespace Renderer
 		checkGLError("Renderer::renderFrame");
 		static int quad = Shader::create("fbo.vert", "fbo.frag");
 		
-		Framebuffer::bind(depthMap);
-		glViewport(0, 0, Framebuffer::getWidth(depthMap), Framebuffer::getHeight(depthMap));
+		Framebuffer::bind(renderOutput);
+		glViewport(0, 0, Framebuffer::getWidth(renderOutput), Framebuffer::getHeight(renderOutput));
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glEnable(GL_DEPTH_TEST);
 		glDepthFunc(GL_LESS);
@@ -475,8 +477,7 @@ namespace Renderer
 		glViewport(0, 0, Settings::getWindowWidth(), Settings::getWindowHeight());
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		Shader::bind(quad);
-		Framebuffer::bindTexture(depthMap);
-		//Texture::bind(texture);
+		Framebuffer::bindTexture(renderOutput);
 		Geometry::render(quadGeo);
 		Texture::unbind();
 		Shader::unbind();

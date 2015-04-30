@@ -91,6 +91,7 @@ namespace Gui
 		glDisable(GL_DEPTH_TEST);
 		glEnable(GL_SCISSOR_TEST);
 		glActiveTexture(GL_TEXTURE0);
+		glViewport(0, 0, Settings::getWindowWidth(), Settings::getWindowHeight());
 
 		// Setup orthographic projection matrix
 		const float height = ImGui::GetIO().DisplaySize.y;

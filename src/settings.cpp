@@ -9,6 +9,8 @@ namespace Settings
 	{
 		int windowWidth;
 		int windowHeight;
+		int renderWidth;
+		int renderHeight;
 		const char* settingsFile = "../content/settings.json";
 	}
 	
@@ -23,20 +25,38 @@ namespace Settings
 			document.Parse(settings);
 			if(document.IsObject())
 			{
-				if(document.HasMember("Width") && document["Width"].IsInt())
+				if(document.HasMember("WindowWidth") && document["WindowWidth"].IsInt())
 				{
-					const int width = document["Width"].GetInt();
+					const int width = document["WindowWidth"].GetInt();
 					if(width > 0)
 						windowWidth = width;
 					else
 						success = false;
 				}
 
-				if(document.HasMember("Height") && document["Height"].IsInt())
+				if(document.HasMember("WindowHeight") && document["WindowHeight"].IsInt())
 				{
-					const int height = document["Height"].GetInt();
+					const int height = document["WindowHeight"].GetInt();
 					if(height > 0)
 						windowHeight = height;
+					else
+						success = false;
+				}
+
+				if(document.HasMember("RenderWidth") && document["RenderWidth"].IsInt())
+				{
+					const int width = document["RenderWidth"].GetInt();
+					if(width > 0)
+						renderWidth = width;
+					else
+						success = false;
+				}
+
+				if(document.HasMember("RenderHeight") && document["RenderHeight"].IsInt())
+				{
+					const int height = document["RenderHeight"].GetInt();
+					if(height > 0)
+						renderHeight = height;
 					else
 						success = false;
 				}
@@ -58,8 +78,8 @@ namespace Settings
 		if(!success)
 		{
 			 // Set defaults and save if file not found or erros reading
-			windowWidth  = 800;
-			windowHeight = 600;
+			renderWidth  = windowWidth  = 800;
+			renderHeight = windowHeight = 600;
 			success = saveSettingsToFile();
 		}
 		return success;
@@ -76,8 +96,10 @@ namespace Settings
 			Writer<StringBuffer> writer(buffer);
 
 			writer.StartObject();
-			writer.Key("Width");  writer.Int(windowWidth);
-			writer.Key("Height"); writer.Int(windowHeight);
+			writer.Key("WindowWidth");  writer.Int(windowWidth);
+			writer.Key("WindowHeight"); writer.Int(windowHeight);
+			writer.Key("RenderWidth");  writer.Int(renderWidth);
+			writer.Key("RenderHeight"); writer.Int(renderHeight);
 			writer.EndObject();
 
 			size_t bytes = fwrite((void*)buffer.GetString(), buffer.GetSize(), 1, newFile);
@@ -105,6 +127,16 @@ namespace Settings
 		return windowHeight;
 	}
 
+	int getRenderWidth()
+	{
+		return renderWidth;
+	}
+
+	int getRenderHeight()
+	{
+		return renderHeight;
+	}
+
 	void setWindowWidth(int width)
 	{
 		windowWidth = width;
@@ -113,6 +145,16 @@ namespace Settings
 	void setWindowHeight(int height)
 	{
 		windowHeight = height;
+	}
+	
+	void setRenderWidth(int width)
+	{
+		renderWidth = width;
+	}
+
+	void setRenderHeight(int height)
+	{
+		renderHeight = height;
 	}
 	
 }
