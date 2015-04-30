@@ -155,7 +155,7 @@ namespace Texture
 					                      newSurface->pixels);
 				SDL_UnlockSurface(newSurface);
 
-				int index = createNewIndex();
+				index = createNewIndex();
 				TextureObj *newTexture = &textureList[index];
 				newTexture->id = id;
 				newTexture->surface = newSurface;
@@ -184,7 +184,7 @@ namespace Texture
 		return index;
 	}
 
-	int create(int width, int height, int format, int internalFormat, int type, void* data)
+	int create(const char* name, int width, int height, int format, int internalFormat, int type, void* data)
 	{
 		GLuint id = createTexture(width,
 								  height,
@@ -196,7 +196,8 @@ namespace Texture
 		TextureObj *newTexture = &textureList[index];
 		newTexture->id       = id;
 		newTexture->surface  = NULL;
-		newTexture->name     = NULL;
+		newTexture->name     = (char*)malloc(strlen(name) + 1);
+		strcpy(newTexture->name, name);
 		newTexture->refCount++;
 		Log::message("New custom texture created");
 		return index;
@@ -228,12 +229,12 @@ namespace Texture
 		}
 		else
 		{
-			Log::error("Texture::remove", "Texture index " + std::to_string(textureIndex) + "is invalid");
+			Log::error("Texture::remove", "Texture index " + std::to_string(textureIndex) + " is invalid");
 		}
 	}
 	
 
-	void bindTexture(int textureIndex)
+	void bind(int textureIndex)
 	{
 		if(textureIndex >= 0 && textureIndex < (int)textureList.size())
 		{
@@ -243,7 +244,7 @@ namespace Texture
 		}
 		else
 		{
-			Log::error("Texture::bind", "Texture index " + std::to_string(textureIndex) + "is invalid");
+			Log::error("Texture::bind", "Texture index " + std::to_string(textureIndex) + " is invalid");
 		}
 	}
 
@@ -262,7 +263,7 @@ namespace Texture
 		}
 	}
 
-	void unbindActiveTexture()
+	void unbind()
 	{
 		glBindTexture(GL_TEXTURE_2D, 0);
 	}
@@ -284,7 +285,8 @@ namespace Texture
 	{
 		if(textureIndex >= 0 && textureIndex < (int)textureList.size())
 		{
-			textureList[textureIndex].refCount--;
+			if(--textureList[textureIndex].refCount == 0)
+				remove(textureIndex);
 		}
 		else
 		{

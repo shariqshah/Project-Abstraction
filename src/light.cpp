@@ -1,6 +1,8 @@
 #include "light.h"
 #include "scriptengine.h"
 #include "passert.h"
+#include "camera.h"
+#include "scenemanager.h"
 
 namespace Light
 {
@@ -89,6 +91,7 @@ namespace Light
 		}
 
 		lightList[index].node = node;
+		lightList[index].cameraIndex = Camera::create(SceneManager::find(node));
 		activeLights.push_back(index);
 		setRadius(&lightList[index], lightList[index].radius);
 		return index;

@@ -29,7 +29,6 @@ Game::Game(const char* path)
 	Gui::initialize();
 	
 	SceneManager::loadScene("../content/scenes/savetest.json");
-	int fbo = Framebuffer::create(1024, 768);
 }
 
 Game::~Game()

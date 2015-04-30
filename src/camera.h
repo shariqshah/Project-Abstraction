@@ -13,12 +13,13 @@ struct CTransform;
 
 struct CCamera
 {
-	Node    node        = 0;
-	float   nearZ       = 0.1f;
-	float   farZ        = 1000.f;
-	float   fov         = glm::radians(75.f);
-	float   aspectRatio = 4.f/3.f;
-	bool    valid       = true;
+	Node    node           = 0;
+	float   nearZ          = 0.1f;
+	float   farZ           = 1000.f;
+	float   fov            = glm::radians(75.f);
+	float   aspectRatio    = 4.f/3.f;
+	bool    valid          = true;
+	bool    isOrthographic = false;
 	Mat4    viewMat;
 	Mat4    projMat;
 	Mat4    viewProjMat;

@@ -27,6 +27,7 @@ struct CLight
 	bool           valid       = true;
 	int            type        = LT_POINT;
 	int            radius      = 30;
+	int            cameraIndex = -1;
 	BoundingSphere boundingSphere;
 };
 

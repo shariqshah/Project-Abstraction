@@ -94,7 +94,7 @@ namespace Gui
 
 		// Setup orthographic projection matrix
 		const float height = ImGui::GetIO().DisplaySize.y;
-		Shader::bindShader(shader_handle);
+		Shader::bind(shader_handle);
 		glUniform1i(texture_location, 0);
 		Shader::setUniformMat4(shader_handle, "projMat", projMat);
 
@@ -145,7 +145,7 @@ namespace Gui
 
 		// Restore modified state
 		glBindVertexArray(0);
-		Shader::unbindActiveShader();
+		Shader::unbind();
 		glDisable(GL_SCISSOR_TEST);
 		glBindTexture(GL_TEXTURE_2D, 0);
 		glEnable(GL_DEPTH_TEST);

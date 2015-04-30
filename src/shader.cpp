@@ -225,18 +225,18 @@ namespace Shader
 		return index;
 	}
 
-	void bindShader(const unsigned int shaderIndex)
+	void bind(const int shaderIndex)
 	{
 		ShaderObject shaderObject = shaderList[shaderIndex];
 		glUseProgram(shaderObject.program);
 	}
 
-	void unbindActiveShader()
+	void unbind()
 	{
 		glUseProgram(0);
 	}
 
-	int getUniformLocation(const unsigned int shaderIndex, const char* name)
+	int getUniformLocation(const int shaderIndex, const char* name)
 	{
 		ShaderObject shaderObject = shaderList[shaderIndex];
 		GLint handle = glGetUniformLocation(shaderObject.program, name);
@@ -247,49 +247,49 @@ namespace Shader
 		return handle;
 	}
 
-	void setUniformInt(const unsigned int shaderIndex, const char* name, const int value)
+	void setUniformInt(const int shaderIndex, const char* name, const int value)
 	{
 		GLint location = getUniformLocation(shaderIndex, name);
 		if(location >= 0)
 			glUniform1i(location, value);
 	}
 	
-	void setUniformFloat(const unsigned int shaderIndex, const char* name, const float value)
+	void setUniformFloat(const int shaderIndex, const char* name, const float value)
     {
 		GLint location = getUniformLocation(shaderIndex, name);
 		if(location >= 0)
 			glUniform1f(location, value);
 	}
 	
-	void setUniformVec2(const unsigned int shaderIndex,  const char* name, const Vec2 value)
+	void setUniformVec2(const int shaderIndex,  const char* name, const Vec2 value)
 	{
 		GLint location = getUniformLocation(shaderIndex, name);
 		if(location >= 0)
 			glUniform2fv(location, 1, glm::value_ptr(value));
 	}
 	
-	void setUniformVec3(const unsigned int shaderIndex,  const char* name, const Vec3 value)
+	void setUniformVec3(const int shaderIndex,  const char* name, const Vec3 value)
 	{
 		GLint location = getUniformLocation(shaderIndex, name);
 		if(location >= 0)
 			glUniform3fv(location, 1, glm::value_ptr(value));
 	}
 	
-	void setUniformVec4(const unsigned int shaderIndex,  const char* name, const Vec4 value)
+	void setUniformVec4(const int shaderIndex,  const char* name, const Vec4 value)
 	{
 		GLint location = getUniformLocation(shaderIndex, name);
 		if(location >= 0)
 			glUniform4fv(location, 1, glm::value_ptr(value));
 	}
 	
-	void setUniformMat4(const unsigned int shaderIndex,  const char* name, const Mat4 value)	
+	void setUniformMat4(const int shaderIndex,  const char* name, const Mat4 value)	
 	{
 		GLint location = getUniformLocation(shaderIndex, name);
 		if(location >= 0)
 			glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(value));
 	}
 
-	void remove(const unsigned int shaderIndex)
+	void remove(const int shaderIndex)
 	{
 		ShaderObject shaderObject = shaderList[shaderIndex];
 		glDeleteProgram(shaderObject.program);
@@ -301,7 +301,7 @@ namespace Shader
 	void cleanup()
 	{
 		free(shaderPath);
-		for(unsigned int i = 0; i < shaderList.size(); i++)
+		for(int i = 0; i < shaderList.size(); i++)
 			remove(i);
 
 		shaderList.clear();

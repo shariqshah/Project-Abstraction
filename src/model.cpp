@@ -91,7 +91,7 @@ namespace Model
 			// TODO: Add error checking for returned material params
 			std::vector<int>* registeredMeshes = Material::getRegisteredModels(material);
 			int shaderIndex = Material::getShaderIndex(material);
-			Shader::bindShader(shaderIndex);
+			Shader::bind(shaderIndex);
 				
 			if((material == MAT_PHONG || material == MAT_PHONG_TEXTURED)
 			   && registeredMeshes->size() > 0)
@@ -125,9 +125,9 @@ namespace Model
 				else
 					culled++;
 				if(model->material == MAT_UNSHADED_TEXTURED || model->material == MAT_PHONG_TEXTURED)
-					Texture::unbindActiveTexture();
+					Texture::unbind();
 			}
-			Shader::unbindActiveShader();
+			Shader::unbind();
 		}
 		Editor::addDebugInt("Vertices", totalVertCount);
 		Editor::addDebugInt("Tris", totalVertCount / 3);

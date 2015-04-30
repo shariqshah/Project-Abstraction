@@ -52,7 +52,9 @@ namespace Renderer
 	    Mat4 textProjMat;
 
 		int texture = -1;
-
+		int quadGeo = -1;
+		int depthMap = -1;
+		
 		void updateTextVBOs()
 		{
 			std::vector<Vec2>     totalVertices;
@@ -253,7 +255,10 @@ namespace Renderer
 
 	void cleanupText()
 	{
-		Texture::remove(texture);
+		//Texture::remove(texture);
+		glDeleteBuffers(1, &textVertVBO);
+		glDeleteBuffers(1, &textUVBO);
+		glDeleteBuffers(1, &textIndexVBO);
 		glDeleteVertexArrays(1, &textVAO);
 		Shader::remove(textShader);
 	}
@@ -275,12 +280,12 @@ namespace Renderer
 	void renderText()
 	{
 		// TODO: Bitmap font rendering
-		Shader::bindShader(textShader);
+		Shader::bind(textShader);
 		Shader::setUniformVec4(textShader, "textColor", textColor);
 		glBindVertexArray(textVAO);
 		// glBindVertexArray(temp_vao);
 
-		Texture::bindTexture((unsigned int)texture);
+		Texture::bind((unsigned int)texture);
 		
 		for(uint32_t i = 0; i < textList.size(); i++)
 		{
@@ -293,9 +298,9 @@ namespace Renderer
 		// Shader::setUniformMat4(textShader, "mvp", mvp);
 		// glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, (void*)0);
 
-		Texture::unbindActiveTexture();
+		Texture::unbind();
 		glBindVertexArray(0);
-		Shader::unbindActiveShader();
+		Shader::unbind();
 	}
 
 	void checkGLError(const char* context)
@@ -333,7 +338,9 @@ namespace Renderer
 		}
 
 		if(error != GL_NO_ERROR)
+		{
 			Log::error(context, errorString);
+		}
 	}
 
 	void setClearColor(const Vec4 newClearColor)
@@ -380,10 +387,33 @@ namespace Renderer
 		Material::initialize();
 		Model::initialize();
 
-		initText();	
+		//initText();	
 		free(texturePath);
 		free(shaderPath);
 		free(geoPath);
+
+		std::vector<Vec3> vertices;
+		vertices.push_back(Vec3(-1, -1, 0));
+		vertices.push_back(Vec3( 1, -1, 0));
+		vertices.push_back(Vec3( 1,  1, 0));
+		vertices.push_back(Vec3(-1,  1, 0));
+		
+		std::vector<Vec3> normals;
+		normals.push_back(Vec3(0, 1, 0));
+		
+		std::vector<Vec2> uvs;
+		uvs.push_back(Vec2(0, 0));
+		uvs.push_back(Vec2(1, 0));
+		uvs.push_back(Vec2(1, 1));
+		uvs.push_back(Vec2(0, 1));
+		
+		std::vector<unsigned int> indices;
+		indices.push_back(0); indices.push_back(1); indices.push_back(2);
+		indices.push_back(2); indices.push_back(3); indices.push_back(0);
+
+		quadGeo  = Geometry::create("Quad", &vertices, &uvs, &normals, &indices);
+		depthMap = Framebuffer::create("DepthMap", 128, 256, false);
+		texture  = Texture::create("chessboard.png");
 	}
 
 	void cleanup()
@@ -429,12 +459,28 @@ namespace Renderer
 
 	void renderFrame()
 	{
-		CCamera* camera = Camera::getActiveCamera();
+		checkGLError("Renderer::renderFrame");
+		static int quad = Shader::create("fbo.vert", "fbo.frag");
+		
+		Framebuffer::bind(depthMap);
+		glViewport(0, 0, Framebuffer::getWidth(depthMap), Framebuffer::getHeight(depthMap));
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glEnable(GL_DEPTH_TEST);
+		glDepthFunc(GL_LESS);
+		CCamera* camera = Camera::getActiveCamera();
 		if(camera)
 			Model::renderAllModels(camera, &renderParams);
-		// else
-		// 	Log::error("Renderer::renderFrame", "Can't render, no active camera set!");
+		Framebuffer::unbind();
+
+		glViewport(0, 0, Settings::getWindowWidth(), Settings::getWindowHeight());
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		Shader::bind(quad);
+		Framebuffer::bindTexture(depthMap);
+		//Texture::bind(texture);
+		Geometry::render(quadGeo);
+		Texture::unbind();
+		Shader::unbind();
+		
 	}
 
 	Vec4 getClearColor()

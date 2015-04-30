@@ -13,16 +13,16 @@ namespace Shader
     
 	int  create(const char* vertexShaderName, const char* fragmentShaderName);
 	void initialize(const char* path);
-	void bindShader(const unsigned int shaderIndex);
-	void remove(const unsigned int shaderIndex);
-	void unbindActiveShader();
-	void setUniformInt(const unsigned int shaderIndex, const char* name, const int value);
-	void setUniformFloat(const unsigned int shaderIndex, const char* name, const float value);
-	void setUniformVec2(const unsigned int shaderIndex,  const char* name, const Vec2 value);
-	void setUniformVec3(const unsigned int shaderIndex,  const char* name, const Vec3 value);
-	void setUniformVec4(const unsigned int shaderIndex,  const char* name, const Vec4 value);
-	void setUniformMat4(const unsigned int shaderIndex,  const char* name, const Mat4 value);
-	int  getUniformLocation(const unsigned int shaderIndex, const char* name);
+	void bind(const int shaderIndex);
+	void remove(const int shaderIndex);
+	void unbind();
+	void setUniformInt(const int shaderIndex, const char* name, const int value);
+	void setUniformFloat(const int shaderIndex, const char* name, const float value);
+	void setUniformVec2(const int shaderIndex,  const char* name, const Vec2 value);
+	void setUniformVec3(const int shaderIndex,  const char* name, const Vec3 value);
+	void setUniformVec4(const int shaderIndex,  const char* name, const Vec4 value);
+	void setUniformMat4(const int shaderIndex,  const char* name, const Mat4 value);
+	int  getUniformLocation(const int shaderIndex, const char* name);
 	void cleanup();
 }
 

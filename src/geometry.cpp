@@ -10,6 +10,8 @@
 
 namespace Geometry
 {
+	int createNewIndex();
+	
 	struct GeometryData
 	{
 		std::string               filename    = "UNDEFINED";
@@ -36,6 +38,22 @@ namespace Geometry
 		std::vector<uint32_t>     emptyIndices;
 		char*                     geometryPath;
 		int                       cullingMode = CM_BOX;
+	}
+
+	int createNewIndex()
+	{
+		int index = -1;
+		if(emptyIndices.size() == 0)
+		{
+			geometryList.push_back(GeometryData());
+			index = geometryList.size() - 1;
+		}
+		else
+		{
+			index = emptyIndices.back();
+			emptyIndices.pop_back();
+		}
+		return index;
 	}
 
 	void setCullingMode(CullingMode mode)
@@ -209,16 +227,7 @@ namespace Geometry
 		int index = find(filename);
 		if(index == -1)
 		{
-			if(emptyIndices.size() == 0)
-			{
-				geometryList.push_back(GeometryData());
-				index = geometryList.size() - 1;
-			}
-			else
-			{
-				index = emptyIndices.back();
-				emptyIndices.pop_back();
-			}
+			index = createNewIndex();
 			GeometryData* newGeo = &geometryList[index];
 			if(loadFromFile(newGeo, filename))
 			{
@@ -310,6 +319,20 @@ namespace Geometry
 		}
 		return vertCount;
 	}
+
+	void render(int index)
+	{
+		if(index >= 0 && index < (int)geometryList.size())
+		{
+			GeometryData* geometry = &geometryList[index];
+			glBindVertexArray(geometry->vao);
+			if(geometry->drawIndexed)
+				glDrawElements(GL_TRIANGLES, geometry->indices.size(), GL_UNSIGNED_INT, (void*)0);
+			else
+				glDrawArrays(GL_TRIANGLES, 0, geometry->vertices.size());
+			glBindVertexArray(0);
+		}
+	}
 	
 	const std::string getName(int index)
 	{
@@ -357,5 +380,32 @@ namespace Geometry
 		if(index >= 0 && index < (int)geometryList.size())
 			indices = &geometryList[index].indices;
 		return indices;
+	}
+
+	int  create(const char*                name,
+				std::vector<Vec3>*         vertices,
+				std::vector<Vec2>*         uvs,
+				std::vector<Vec3>*         normals,
+				std::vector<unsigned int>* indices)
+	{
+		int index = createNewIndex();
+		GeometryData* newGeo = &geometryList[index];
+		// Vertices
+		newGeo->vertices.reserve(vertices->size());
+		newGeo->vertices = std::vector<Vec3>(*vertices);
+		// UVs
+		newGeo->uvs.reserve(uvs->size());
+		newGeo->uvs = std::vector<Vec2>(*uvs);
+		// Normals
+		newGeo->normals.reserve(normals->size());
+		newGeo->normals = std::vector<Vec3>(*normals);
+		// Indices
+		newGeo->indices.reserve(indices->size());
+		newGeo->indices = std::vector<unsigned int>(*indices);
+		
+		newGeo->filename = name;
+		createVAO(newGeo);
+		generateBoundingBox(index);
+		return index;
 	}
 }
