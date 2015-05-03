@@ -418,9 +418,12 @@ namespace Renderer
 		indices.push_back(0); indices.push_back(1); indices.push_back(2);
 		indices.push_back(2); indices.push_back(3); indices.push_back(0);
 
+		int width  = Settings::getRenderWidth();
+		int height = Settings::getRenderHeight();
+		
 		quadGeo        = Geometry::create("Quad", &vertices, &uvs, &normals, &indices);
 		defaultRenderTexture = Texture::create("DefaultRenderTexture",
-											   1024, 1024,
+											   width, height,
 											   GL_RGBA,
 											   GL_RGBA,
 											   GL_UNSIGNED_BYTE,
@@ -430,7 +433,7 @@ namespace Renderer
 		Texture::setTextureParameter(defaultRenderTexture, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 		Texture::setTextureParameter(defaultRenderTexture, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 		defaultDepthTexture = Texture::create("DefaultDepthTexture",
-											  1024, 1024,
+											  width, height,
 											  GL_DEPTH_COMPONENT,
 											  GL_DEPTH_COMPONENT,
 											  GL_FLOAT,
@@ -439,11 +442,10 @@ namespace Renderer
 		Texture::setTextureParameter(defaultDepthTexture, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 		Texture::setTextureParameter(defaultDepthTexture, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		Texture::setTextureParameter(defaultDepthTexture, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		Texture::setTextureParameter(defaultDepthTexture, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 		Texture::setTextureParameter(defaultDepthTexture, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_R_TO_TEXTURE);
 		Texture::setTextureParameter(defaultDepthTexture, GL_TEXTURE_COMPARE_FUNC, GL_LESS);
 		
-		shadowOutput   = Framebuffer::create(1024, 1024, true, true);
+		shadowOutput   = Framebuffer::create(width, height, true, true);
 	}
 
 	void cleanup()
@@ -496,37 +498,41 @@ namespace Renderer
 		static GLenum drawbuffers[1];
 		std::vector<uint32_t>* activeLights = Light::getActiveLights();
 		Framebuffer::bind(shadowOutput);
-		glEnable(GL_DEPTH_TEST);
-		glDepthFunc(GL_LESS);
-		glViewport(0, 0, Framebuffer::getWidth(shadowOutput), Framebuffer::getHeight(shadowOutput));
-		drawbuffers[0] = GL_NONE;
-		glDrawBuffers(1, drawbuffers);
-		Shader::bind(shadowShader);
+		int count = 0;
 		for(uint32_t lightIndex : *activeLights)
 		{
 			CLight* light = Light::getLightAtIndex(lightIndex);
 			if(light->castShadow)
 			{
+				glViewport(0, 0, Framebuffer::getWidth(shadowOutput), Framebuffer::getHeight(shadowOutput));
+				drawbuffers[0] = GL_NONE;
+				glDrawBuffers(1, drawbuffers);
+				glEnable(GL_DEPTH_TEST);
+				glDepthFunc(GL_LESS);
 				Framebuffer::setTexture(shadowOutput, light->depthMap, GL_DEPTH_ATTACHMENT);
 				glClear(GL_DEPTH_BUFFER_BIT);
+				Shader::bind(shadowShader);
 				CCamera* camera = Camera::getCameraAtIndex(light->cameraIndex);
 				Model::renderAllModels(camera, shadowShader);
 				Editor::addDebugTexture("Light", light->depthMap);
+
+				Shader::unbind();
 			}
+
+			// Render Pass
+			drawbuffers[0] = GL_COLOR_ATTACHMENT0;
+			glDrawBuffers(1, drawbuffers);
+			glEnable(GL_DEPTH_TEST);
+			glDepthFunc(GL_LESS);
+			glViewport(0, 0, Framebuffer::getWidth(shadowOutput), Framebuffer::getHeight(shadowOutput));
+			Framebuffer::setTexture(shadowOutput, defaultRenderTexture, GL_COLOR_ATTACHMENT0);
+			Framebuffer::setTexture(shadowOutput, defaultDepthTexture, GL_DEPTH_ATTACHMENT);
+			if(count == 0) glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			CCamera* viewer = Camera::getActiveCamera();
+			if(viewer)
+				Model::renderAllModels(viewer, &renderParams, light);
+			count++;
 		}
-		Shader::unbind();
-		// Render Pass
-		drawbuffers[0] = GL_COLOR_ATTACHMENT0;
-		glDrawBuffers(1, drawbuffers);
-		//glViewport(0, 0, Framebuffer::getWidth(shadowOutput), Framebuffer::getHeight(shadowOutput));
-		Framebuffer::setTexture(shadowOutput, defaultRenderTexture, GL_COLOR_ATTACHMENT0);
-		Framebuffer::setTexture(shadowOutput, defaultDepthTexture, GL_DEPTH_ATTACHMENT);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		glEnable(GL_DEPTH_TEST);
-		glDepthFunc(GL_LESS);
-		CCamera* camera = Camera::getActiveCamera();
-		if(camera)
-			Model::renderAllModels(camera, &renderParams);
 		Framebuffer::unbind();
 		
 		glViewport(0, 0, Settings::getWindowWidth(), Settings::getWindowHeight());

@@ -87,12 +87,92 @@ namespace Model
 		{
 			if(model.node == -1 || model.materialUniforms.castShadow == false)
 				continue;
+
 			GameObject*   gameObject = SceneManager::find(model.node);
 			CTransform*   transform  = GO::getTransform(gameObject);					
 			Mat4          mvp        = camera->viewProjMat * transform->transMat;
 			Shader::setUniformMat4(shader, "mvp", mvp);
 			Geometry::render(model.geometryIndex, &camera->frustum, transform);
 		}
+	}
+
+	void renderAllModels(CCamera* camera, RenderParams* renderParams, CLight* light)
+	{
+		GameObject* viewer = SceneManager::find(camera->node);
+		CTransform* viewerTransform = GO::getTransform(viewer);
+		
+		for(Mat_Type material : Material::MATERIAL_LIST)
+		{
+			// TODO: Add error checking for returned material params
+			std::vector<int>* registeredMeshes = Material::getRegisteredModels(material);
+			int shaderIndex = Material::getShaderIndex(material);
+			Shader::bind(shaderIndex);
+				
+			if((material == MAT_PHONG || material == MAT_PHONG_TEXTURED)
+			   && registeredMeshes->size() > 0)
+			{
+				GameObject* lightGO = SceneManager::find(light->node);
+				CTransform* lightTransform = GO::getTransform(lightGO);
+				
+				Shader::setUniformFloat(shaderIndex, "light.intensity",  light->intensity);
+				Shader::setUniformFloat(shaderIndex, "light.outerAngle", light->outerAngle);
+				Shader::setUniformFloat(shaderIndex, "light.innerAngle", light->innerAngle);
+				Shader::setUniformFloat(shaderIndex, "light.falloff",    light->falloff);
+				Shader::setUniformInt(shaderIndex,   "light.radius",     light->radius);
+				Shader::setUniformInt(shaderIndex,   "light.type",       light->type);
+				Shader::setUniformInt(shaderIndex,   "light.castShadow", light->castShadow);
+				Shader::setUniformVec4(shaderIndex,  "light.color", 	 light->color);
+				Shader::setUniformVec3(shaderIndex,  "light.direction",  lightTransform->forward);
+				Shader::setUniformVec3(shaderIndex,  "light.position",   lightTransform->position);
+
+				CCamera* lightCamera = Camera::getCameraAtIndex(light->cameraIndex);
+				Shader::setUniformMat4(shaderIndex, "lightVPMat", lightCamera->viewProjMat);
+				if(light->castShadow) Texture::bind(light->depthMap);
+			}
+
+			
+			// Setup uniforms for material
+			Shader::setUniformVec3(shaderIndex, "eyePos", viewerTransform->position);
+			Shader::setUniformFloat(shaderIndex, "fog.density",  renderParams->fog.density);
+			Shader::setUniformFloat(shaderIndex, "fog.start",    renderParams->fog.start);
+			Shader::setUniformFloat(shaderIndex, "fog.max",      renderParams->fog.max);
+			Shader::setUniformInt(shaderIndex,   "fog.fogMode",  renderParams->fog.fogMode);
+			Shader::setUniformVec4(shaderIndex,  "fog.color",    renderParams->fog.color);
+			if(material == MAT_PHONG || material == MAT_PHONG_TEXTURED)
+				Shader::setUniformVec4(shaderIndex,  "ambientLight", renderParams->ambientLight);
+				
+			for(int modelIndex : *registeredMeshes)
+			{
+				const CModel* model      = &modelList[modelIndex];
+				GameObject*   gameObject = SceneManager::find(model->node);
+				CTransform*   transform  = GO::getTransform(gameObject);					
+				Mat4          mvp        = camera->viewProjMat * transform->transMat;
+
+				Shader::setUniformMat4(shaderIndex, "mvp", mvp);
+				Shader::setUniformMat4(shaderIndex, "modelMat", transform->transMat);
+				Material::setMaterialUniforms(&model->materialUniforms, (Mat_Type)model->material);
+				int vertCount = Geometry::render(model->geometryIndex, &camera->frustum, transform);
+				totalVertCount += vertCount;
+				if(vertCount > 0)
+					rendered++;
+				else
+					culled++;
+				if(model->material == MAT_UNSHADED_TEXTURED || model->material == MAT_PHONG_TEXTURED)
+					Texture::unbind();
+			}
+			Shader::unbind();
+			Texture::unbind();
+		}
+		Editor::addDebugInt("Vertices", totalVertCount);
+		Editor::addDebugInt("Tris", totalVertCount / 3);
+		Editor::addDebugInt("Rendered", rendered);
+		Editor::addDebugInt("Culled", culled);
+		Editor::addDebugInt("ActiveLights", lightCount);
+		Editor::addDebugInt("Total Lights", Light::getActiveLights()->size());
+		rendered       = 0;
+		culled         = 0;
+		lightCount     = 0;
+		totalVertCount = 0;
 	}
 		
 	void renderAllModels(CCamera* camera, RenderParams* renderParams)

@@ -96,25 +96,14 @@ namespace Light
 		lightList[index].node = node;
 		int cameraIndex = Camera::create(SceneManager::find(node));
 		CCamera* camera = Camera::getCameraAtIndex(cameraIndex);
+		camera->farZ  = lightList[index].radius;
+		camera->nearZ = 0.05f;
+		camera->fov   = glm::radians(75.f);
+		camera->aspectRatio = Settings::getRenderWidth() / Settings::getRenderHeight();
 		Camera::updateView(camera);
+		Camera::updateProjection(camera);
 		camera->node = node;
 		lightList[index].cameraIndex = cameraIndex;
-		std::string depthMapName = "DepthMap" + std::to_string(node);
-		int texture = Texture::create(depthMapName.c_str(),
-									  1024, 1024,
-									  GL_DEPTH_COMPONENT,
-									  GL_DEPTH_COMPONENT,
-									  GL_FLOAT,
-									  NULL);
-		lightList[index].depthMap = texture;
-		Texture::setTextureParameter(texture, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		Texture::setTextureParameter(texture, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-		Texture::setTextureParameter(texture, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		Texture::setTextureParameter(texture, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		Texture::setTextureParameter(texture, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-		Texture::setTextureParameter(texture, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_R_TO_TEXTURE);
-		Texture::setTextureParameter(texture, GL_TEXTURE_COMPARE_FUNC, GL_LESS);
-		
 		activeLights.push_back(index);
 		setRadius(&lightList[index], lightList[index].radius);
 		return index;
@@ -149,8 +138,38 @@ namespace Light
 		rc = engine->RegisterObjectProperty("Light", "LightType type", asOFFSET(CLight, type));
 		PA_ASSERT(rc >= 0);
 		rc = engine->RegisterObjectMethod("Light",
-										  "void setRadius(float radius)",
+										  "void setRadius(float)",
 										  asFUNCTION(setRadius),
+										  asCALL_CDECL_OBJFIRST);
+		PA_ASSERT(rc >= 0);
+		rc = engine->RegisterObjectMethod("Light",
+										  "void setType(int)",
+										  asFUNCTION(setType),
+										  asCALL_CDECL_OBJFIRST);
+		PA_ASSERT(rc >= 0);
+		rc = engine->RegisterObjectMethod("Light",
+										  "void setOuterAngle(float)",
+										  asFUNCTION(setOuterAngle),
+										  asCALL_CDECL_OBJFIRST);
+		PA_ASSERT(rc >= 0);
+		rc = engine->RegisterObjectMethod("Light",
+										  "void setInnerAngle(float)",
+										  asFUNCTION(setInnerAngle),
+										  asCALL_CDECL_OBJFIRST);
+		PA_ASSERT(rc >= 0);
+		rc = engine->RegisterObjectMethod("Light",
+										  "void setFalloff(float)",
+										  asFUNCTION(setFalloff),
+										  asCALL_CDECL_OBJFIRST);
+		PA_ASSERT(rc >= 0);
+		rc = engine->RegisterObjectMethod("Light",
+										  "void setIntensity(float)",
+										  asFUNCTION(setIntensity),
+										  asCALL_CDECL_OBJFIRST);
+		PA_ASSERT(rc >= 0);
+		rc = engine->RegisterObjectMethod("Light",
+										  "void setCastShadow(bool)",
+										  asFUNCTION(setCastShadow),
 										  asCALL_CDECL_OBJFIRST);
 		PA_ASSERT(rc >= 0);
 	}
@@ -208,7 +227,7 @@ namespace Light
 				const Value& typeNode = value["Type"];
 				int type = typeNode.GetInt();
 				if(type >= 0 && type <= 2)
-					light->type = type;
+					setType(light, (LightType)type);
 				else
 					success = false;
 			}
@@ -238,7 +257,7 @@ namespace Light
 				const Value& outerangleNode = value["OuterAngle"];
 				float outerangle = (float)outerangleNode.GetDouble();
 				if(outerangle >= 0)
-					light->outerAngle = outerangle;
+					setOuterAngle(light, outerangle);
 				else
 					success = false;
 			}
@@ -282,7 +301,7 @@ namespace Light
 			{
 				const Value& intensityNode = value["Intensity"];
 				float intensity = (float)intensityNode.GetDouble();
-				light->intensity = glm::clamp(intensity, 0.f, 1.f);
+				light->intensity = glm::clamp(intensity, 0.f, 10.f);
 			}
 			else
 			{
@@ -294,6 +313,7 @@ namespace Light
 			{
 				const Value& castShadowNode = value["CastShadow"];
 				light->castShadow = castShadowNode.GetBool();
+				setCastShadow(light, light->castShadow);
 			}
 			else
 			{
@@ -312,7 +332,68 @@ namespace Light
 
 	void setRadius(CLight* light, float radius)
 	{
+		PA_ASSERT(light);
 		light->radius = radius;
 		light->boundingSphere.radius = radius;
+		CCamera* camera = Camera::getCameraAtIndex(light->cameraIndex);
+		camera->farZ = light->radius * 2.f;
+		Camera::updateProjection(camera);
+	}
+
+	void setType(CLight* light, LightType type)
+	{
+		PA_ASSERT(light);
+		light->type = type;
+	}
+	
+	void setOuterAngle(CLight* light, float outerAngle)
+	{
+		PA_ASSERT(light);
+		light->outerAngle = outerAngle;
+		CCamera* camera = Camera::getCameraAtIndex(light->cameraIndex);
+		camera->fov = outerAngle;
+		Camera::updateProjection(camera);
+	}
+
+	void setInnerAngle(CLight* light, float innerAngle)
+	{
+		PA_ASSERT(light);
+		light->innerAngle = innerAngle;
+	}
+	
+	void setFalloff(CLight* light, float falloff)
+	{
+		PA_ASSERT(light);
+		light->falloff = falloff;
+	}
+	
+	void setIntensity(CLight* light, float intensity)
+	{
+		PA_ASSERT(light);
+		light->intensity = glm::clamp(intensity, 0.f, 10.f);
+	}
+	
+	void setCastShadow(CLight* light, bool castShadow)
+	{
+		PA_ASSERT(light);
+		light->castShadow = castShadow;
+		if(castShadow && light->depthMap == -1)
+		{
+			std::string depthMapName = "DepthMap" + std::to_string(light->node);
+			int texture = Texture::create(depthMapName.c_str(),
+										  Settings::getRenderWidth(),
+										  Settings::getRenderHeight(),
+										  GL_DEPTH_COMPONENT,
+										  GL_DEPTH_COMPONENT,
+										  GL_FLOAT,
+										  NULL);
+			light->depthMap = texture;
+			Texture::setTextureParameter(texture, GL_TEXTURE_WRAP_S, GL_CLAMP);
+			Texture::setTextureParameter(texture, GL_TEXTURE_WRAP_T, GL_CLAMP);
+			Texture::setTextureParameter(texture, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			Texture::setTextureParameter(texture, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+			Texture::setTextureParameter(texture, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_R_TO_TEXTURE);
+			Texture::setTextureParameter(texture, GL_TEXTURE_COMPARE_FUNC, GL_LESS);
+		}
 	}
 }

@@ -365,21 +365,25 @@ namespace Editor
 			ImGui::PushID("LightComponentProps");
 			ImGui::SliderFloat("Intensity", &light->intensity, 0.f, 10.f);
 			ImGui::ColorEdit4("Color", glm::value_ptr(light->color));
-			ImGui::Combo("Type", &light->type, "Spot\0Directional\0Point\0\0", 3);
-			ImGui::Checkbox("Cast Shadows", &light->castShadow);
+			if(ImGui::Combo("Type", &light->type, "Spot\0Directional\0Point\0\0", 3))
+				Light::setType(light, (LightType)light->type);
+			if(ImGui::Checkbox("Cast Shadows", &light->castShadow))
+				Light::setCastShadow(light, light->castShadow);
 			if(light->type == LT_SPOT || light->type == LT_POINT)
 			{
-				ImGui::InputInt("Radius", &light->radius, 1.f, 5.f);
+				if(ImGui::InputInt("Radius", &light->radius, 1.f, 5.f))
+					Light::setRadius(light, light->radius);
 				ImGui::InputFloat("Falloff", &light->falloff, 0.5f, 5.f);
 				if(light->type == LT_SPOT)
 				{
 					ImGui::SliderAngle("Inner", &light->innerAngle, 0, 180);
-					ImGui::SliderAngle("Outer", &light->outerAngle, 0, 180);
+					if(ImGui::SliderAngle("Outer", &light->outerAngle, 0, 180))
+						Light::setOuterAngle(light, light->outerAngle);
 				}
 			}
 			ImGui::PopID();
 			if(ImGui::CollapsingHeader("DepthMap", "LightComponentDepthMap", false, false))
-				ImGui::Image((ImTextureID)Texture::getTextureID(light->depthMap), Vec2(512, 512));
+				ImGui::Image((ImTextureID)Texture::getTextureID(light->depthMap), Vec2(256, 256));
 		}
 	}
 

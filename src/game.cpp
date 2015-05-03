@@ -28,7 +28,7 @@ Game::Game(const char* path)
 	System::initialize();
 	Gui::initialize();
 	
-	SceneManager::loadScene("../content/scenes/savetest.json");
+	SceneManager::loadScene("../content/scenes/testsave.json");
 }
 
 Game::~Game()

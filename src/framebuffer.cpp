@@ -155,8 +155,6 @@ namespace Framebuffer
 								   Texture::getTextureID(texture),
 								   0);
 			Renderer::checkGLError("Framebuffer::setTexture, glFramebufferTexture2D");
-			// glFramebufferTexture(GL_FRAMEBUFFER, attachment, Texture::getTextureID(texture), 0);
-			// Renderer::checkGLError("Framebuffer::setTexture, glFramebuffertexture");
 			glBindFramebuffer(GL_FRAMEBUFFER, currentFBO);
 		}
 	}

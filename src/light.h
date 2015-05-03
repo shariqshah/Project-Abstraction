@@ -28,7 +28,7 @@ struct CLight
 	int            type        = LT_POINT;
 	int            radius      = 30;
 	int            cameraIndex = -1;
-	int            depthMap    = 0;
+	int            depthMap    = -1;
 	BoundingSphere boundingSphere;
 };
 
@@ -43,6 +43,12 @@ namespace Light
 	void                   remove(uint32_t index);
 	CLight*                getLightAtIndex(uint32_t index);
 	void                   setRadius(CLight* light, float radius);
+	void                   setType(CLight* light, LightType type);
+	void                   setOuterAngle(CLight* light, float outerAngle);
+	void                   setInnerAngle(CLight* light, float innerAngle);
+	void                   setFalloff(CLight* light, float falloff);
+	void                   setIntensity(CLight* light, float intensity);
+	void                   setCastShadow(CLight* light, bool castShadow);
 	bool                   writeToJSON(CLight* light, rapidjson::Writer<rapidjson::StringBuffer>& writer);
 	std::vector<uint32_t>* getActiveLights();
 }
