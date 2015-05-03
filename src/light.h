@@ -28,6 +28,7 @@ struct CLight
 	int            type        = LT_POINT;
 	int            radius      = 30;
 	int            cameraIndex = -1;
+	int            depthMap    = 0;
 	BoundingSphere boundingSphere;
 };
 

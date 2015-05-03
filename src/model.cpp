@@ -80,6 +80,20 @@ namespace Model
 		Shader::setUniformInt(shaderIndex, "numLights", count);
 		return count;
 	}
+
+	void renderAllModels(CCamera* camera, int shader)
+	{
+		for(CModel& model : modelList)
+		{
+			if(model.node == -1 || model.materialUniforms.castShadow == false)
+				continue;
+			GameObject*   gameObject = SceneManager::find(model.node);
+			CTransform*   transform  = GO::getTransform(gameObject);					
+			Mat4          mvp        = camera->viewProjMat * transform->transMat;
+			Shader::setUniformMat4(shader, "mvp", mvp);
+			Geometry::render(model.geometryIndex, &camera->frustum, transform);
+		}
+	}
 		
 	void renderAllModels(CCamera* camera, RenderParams* renderParams)
 	{

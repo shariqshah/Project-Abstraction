@@ -10,6 +10,7 @@ namespace Editor
 	void setDrawTime(const float time);
 	void addDebugFloat(const char* description, float value);
 	void addDebugInt(const char* description, int value);
+	void addDebugTexture(const char* description, int texture);
 }
 
 #endif

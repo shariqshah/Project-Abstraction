@@ -3,7 +3,8 @@
 
 namespace Framebuffer
 {
-	int  create(const char* name, int width, int height, bool isDepthMap);
+	//int  create(const char* name, int width, int height, bool isDepthMap);
+	int  create(int width, int height, bool hasDepthAttachment, bool hasColorAttachment);
 	void bind(int index);
 	void remove(int index);
 	void bindTexture(int index);
@@ -11,6 +12,8 @@ namespace Framebuffer
 	void cleanup();
 	int  getWidth(int index);
 	int  getHeight(int index);
+	void setTexture(int index, int texture, int attachment);
+	int  getTexture(int index);
 }
 
 #endif

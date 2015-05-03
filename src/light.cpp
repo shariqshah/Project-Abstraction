@@ -1,8 +1,11 @@
+#include <GL/gl.h>
+
 #include "light.h"
 #include "scriptengine.h"
 #include "passert.h"
 #include "camera.h"
 #include "scenemanager.h"
+#include "texture.h"
 
 namespace Light
 {
@@ -91,7 +94,27 @@ namespace Light
 		}
 
 		lightList[index].node = node;
-		lightList[index].cameraIndex = Camera::create(SceneManager::find(node));
+		int cameraIndex = Camera::create(SceneManager::find(node));
+		CCamera* camera = Camera::getCameraAtIndex(cameraIndex);
+		Camera::updateView(camera);
+		camera->node = node;
+		lightList[index].cameraIndex = cameraIndex;
+		std::string depthMapName = "DepthMap" + std::to_string(node);
+		int texture = Texture::create(depthMapName.c_str(),
+									  1024, 1024,
+									  GL_DEPTH_COMPONENT,
+									  GL_DEPTH_COMPONENT,
+									  GL_FLOAT,
+									  NULL);
+		lightList[index].depthMap = texture;
+		Texture::setTextureParameter(texture, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		Texture::setTextureParameter(texture, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		Texture::setTextureParameter(texture, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		Texture::setTextureParameter(texture, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		Texture::setTextureParameter(texture, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		Texture::setTextureParameter(texture, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_R_TO_TEXTURE);
+		Texture::setTextureParameter(texture, GL_TEXTURE_COMPARE_FUNC, GL_LESS);
+		
 		activeLights.push_back(index);
 		setRadius(&lightList[index], lightList[index].radius);
 		return index;

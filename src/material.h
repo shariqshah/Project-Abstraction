@@ -22,6 +22,7 @@ struct Mat_Uniforms
 	float specular          = 1.f;
 	float specularStrength  = 50.f;
 	int   texture           = -1;
+	bool  castShadow        = true;
 
 	Mat_Uniforms& operator=(const Mat_Uniforms& other);
 };

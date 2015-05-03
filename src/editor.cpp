@@ -34,6 +34,7 @@ namespace Editor
 	void displayRendererSettings();
 	void displayStatsWindow();
 	void displayDebugVars();
+	void displayDebugTextures();
 	void checkKeys();
 	void displayScripts();
 	
@@ -50,6 +51,13 @@ namespace Editor
 		float         value;
 		DebugFloat(const char* desc, float val) : description(desc), value(val) {}
 	};
+
+	struct DebugTexture
+	{
+		const char* description;
+		int         texture;
+		DebugTexture(const char* desc, int val) : description(desc), texture(val) {}
+	};
 	
 	namespace
 	{
@@ -63,6 +71,7 @@ namespace Editor
 		bool showPhysicsWindow    = false;
 		bool showSample           = false;
 		bool showDebugVars        = false;
+		bool showDebugTextures    = false;
 		bool showSceneSave        = false;
 		bool showSceneLoad        = false;
 		
@@ -96,6 +105,7 @@ namespace Editor
 		ImGuiTextFilter gameObjectFilter;
 		std::vector<DebugInt> debugInts;
 		std::vector<DebugFloat> debugFloats;
+		std::vector<DebugTexture> debugTextures;;
 	}
 	
 	void initialize()
@@ -368,6 +378,8 @@ namespace Editor
 				}
 			}
 			ImGui::PopID();
+			if(ImGui::CollapsingHeader("DepthMap", "LightComponentDepthMap", false, false))
+				ImGui::Image((ImTextureID)Texture::getTextureID(light->depthMap), Vec2(512, 512));
 		}
 	}
 
@@ -415,6 +427,7 @@ namespace Editor
 				}
 			}
 			ImGui::ColorEdit4("Diffuse Color", &model->materialUniforms.diffuseColor[0]);
+			ImGui::Checkbox("Cast Shadow", &model->materialUniforms.castShadow);
 			// Texture
 			if(model->material == MAT_PHONG_TEXTURED || model->material == MAT_UNSHADED_TEXTURED)
 			{
@@ -443,6 +456,7 @@ namespace Editor
 						}
 					}
 				}
+				ImGui::Image((ImTextureID)Texture::getTextureID(model->materialUniforms.texture), Vec2(40, 40));
 			}
 			if(model->material == MAT_PHONG || model->material == MAT_PHONG_TEXTURED)
 			{
@@ -771,6 +785,19 @@ namespace Editor
 		ImGui::End();
 	}
 
+	void displayDebugTextures()
+	{
+		ImGui::Begin("Debug Textures", &showDebugTextures, Vec2(40, 80), OPACITY, WF_NoCollapse);
+
+		int count = 0;
+		for(DebugTexture& debugTexture : debugTextures)
+		{
+			if(ImGui::CollapsingHeader(debugTexture.description, std::to_string(++count).c_str(), false, false))
+				ImGui::Image((ImTextureID)Texture::getTextureID(debugTexture.texture), Vec2(200, 200));
+		}
+		ImGui::End();
+	}
+
 	void addDebugFloat(const char* description, float value)
 	{
 		debugFloats.push_back(DebugFloat(description, value));
@@ -779,6 +806,11 @@ namespace Editor
 	void addDebugInt(const char* description, int value)
 	{
 		debugInts.push_back(DebugInt(description, value));
+	}
+
+	void addDebugTexture(const char* description, int texture)
+	{
+		debugTextures.push_back(DebugTexture(description, texture));
 	}
 
 	void checkKeys()
@@ -806,6 +838,7 @@ namespace Editor
 		if(ImGui::Button("Scripting")) showScriptingWindow  = !showScriptingWindow;  ImGui::SameLine();
 		if(ImGui::Button("Sample"))    showSample           = !showSample;           ImGui::SameLine();
 		if(ImGui::Button("DebugVars")) showDebugVars        = !showDebugVars;        ImGui::SameLine();
+		if(ImGui::Button("DebugTexs")) showDebugTextures    = !showDebugTextures;    ImGui::SameLine();
 		if(ImGui::Button("Log"))
 		{
 			showLog = !showLog;
@@ -829,10 +862,12 @@ namespace Editor
 		if(showStatsWindow)      displayStatsWindow();
 		if(showPhysicsWindow)    displayPhysicsWindow();
 		if(showDebugVars)        displayDebugVars();
+		if(showDebugTextures)    displayDebugTextures();
 		if(showSample)           ImGui::ShowTestWindow(&showSample);
 
 		debugInts.clear();
 		debugFloats.clear();
+		debugTextures.clear();
 	}
 	
 	void cleanup()

@@ -202,6 +202,9 @@ namespace Material
 		rc = engine->RegisterObjectProperty("Mat_Uniforms",
 											"int texture",
 											asOFFSET(Mat_Uniforms, texture));
+		rc = engine->RegisterObjectProperty("Mat_Uniforms",
+											"bool castShadow",
+											asOFFSET(Mat_Uniforms, castShadow));
 		PA_ASSERT(rc >= 0);
 	} 
 }

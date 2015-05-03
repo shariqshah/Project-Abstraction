@@ -11,6 +11,10 @@
 #include "passert.h"
 #include "geometry.h"
 #include "framebuffer.h"
+#include "light.h"
+#include "scenemanager.h"
+#include "gameobject.h"
+#include "editor.h"
 
 namespace Renderer
 {
@@ -51,9 +55,12 @@ namespace Renderer
 		Vec4 textColor = Vec4(1, 1, 0, 1);
 	    Mat4 textProjMat;
 
-		int texture = -1;
-		int quadGeo = -1;
-		int renderOutput = -1;
+		int texture        = -1;
+		int quadGeo        = -1;
+		int renderOutput   = -1;
+		int shadowOutput   = -1;
+		int defaultRenderTexture = -1;
+		int defaultDepthTexture  = -1;
 		
 		void updateTextVBOs()
 		{
@@ -411,11 +418,32 @@ namespace Renderer
 		indices.push_back(0); indices.push_back(1); indices.push_back(2);
 		indices.push_back(2); indices.push_back(3); indices.push_back(0);
 
-		quadGeo      = Geometry::create("Quad", &vertices, &uvs, &normals, &indices);
-		renderOutput = Framebuffer::create("DepthMap",
-										   Settings::getRenderWidth(),
-										   Settings::getRenderHeight(),
-										   false);
+		quadGeo        = Geometry::create("Quad", &vertices, &uvs, &normals, &indices);
+		defaultRenderTexture = Texture::create("DefaultRenderTexture",
+											   1024, 1024,
+											   GL_RGBA,
+											   GL_RGBA,
+											   GL_UNSIGNED_BYTE,
+											   NULL);
+		Texture::setTextureParameter(defaultRenderTexture, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		Texture::setTextureParameter(defaultRenderTexture, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		Texture::setTextureParameter(defaultRenderTexture, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		Texture::setTextureParameter(defaultRenderTexture, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		defaultDepthTexture = Texture::create("DefaultDepthTexture",
+											  1024, 1024,
+											  GL_DEPTH_COMPONENT,
+											  GL_DEPTH_COMPONENT,
+											  GL_FLOAT,
+											  NULL);
+		Texture::setTextureParameter(defaultDepthTexture, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		Texture::setTextureParameter(defaultDepthTexture, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		Texture::setTextureParameter(defaultDepthTexture, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		Texture::setTextureParameter(defaultDepthTexture, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		Texture::setTextureParameter(defaultDepthTexture, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		Texture::setTextureParameter(defaultDepthTexture, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_R_TO_TEXTURE);
+		Texture::setTextureParameter(defaultDepthTexture, GL_TEXTURE_COMPARE_FUNC, GL_LESS);
+		
+		shadowOutput   = Framebuffer::create(1024, 1024, true, true);
 	}
 
 	void cleanup()
@@ -429,6 +457,7 @@ namespace Renderer
 		Material::cleanup();
 		Geometry::cleanup();
 		Camera::cleanup();
+		Light::cleanup();
 	}
 
 	void setDebugLevel(DebugLevel level)
@@ -463,9 +492,35 @@ namespace Renderer
 	{
 		checkGLError("Renderer::renderFrame");
 		static int quad = Shader::create("fbo.vert", "fbo.frag");
-		
-		Framebuffer::bind(renderOutput);
-		glViewport(0, 0, Framebuffer::getWidth(renderOutput), Framebuffer::getHeight(renderOutput));
+		static int shadowShader = Shader::create("shadow.vert", "shadow.frag");
+		static GLenum drawbuffers[1];
+		std::vector<uint32_t>* activeLights = Light::getActiveLights();
+		Framebuffer::bind(shadowOutput);
+		glEnable(GL_DEPTH_TEST);
+		glDepthFunc(GL_LESS);
+		glViewport(0, 0, Framebuffer::getWidth(shadowOutput), Framebuffer::getHeight(shadowOutput));
+		drawbuffers[0] = GL_NONE;
+		glDrawBuffers(1, drawbuffers);
+		Shader::bind(shadowShader);
+		for(uint32_t lightIndex : *activeLights)
+		{
+			CLight* light = Light::getLightAtIndex(lightIndex);
+			if(light->castShadow)
+			{
+				Framebuffer::setTexture(shadowOutput, light->depthMap, GL_DEPTH_ATTACHMENT);
+				glClear(GL_DEPTH_BUFFER_BIT);
+				CCamera* camera = Camera::getCameraAtIndex(light->cameraIndex);
+				Model::renderAllModels(camera, shadowShader);
+				Editor::addDebugTexture("Light", light->depthMap);
+			}
+		}
+		Shader::unbind();
+		// Render Pass
+		drawbuffers[0] = GL_COLOR_ATTACHMENT0;
+		glDrawBuffers(1, drawbuffers);
+		//glViewport(0, 0, Framebuffer::getWidth(shadowOutput), Framebuffer::getHeight(shadowOutput));
+		Framebuffer::setTexture(shadowOutput, defaultRenderTexture, GL_COLOR_ATTACHMENT0);
+		Framebuffer::setTexture(shadowOutput, defaultDepthTexture, GL_DEPTH_ATTACHMENT);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glEnable(GL_DEPTH_TEST);
 		glDepthFunc(GL_LESS);
@@ -473,15 +528,17 @@ namespace Renderer
 		if(camera)
 			Model::renderAllModels(camera, &renderParams);
 		Framebuffer::unbind();
-
+		
 		glViewport(0, 0, Settings::getWindowWidth(), Settings::getWindowHeight());
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		Shader::bind(quad);
-		Framebuffer::bindTexture(renderOutput);
+		Texture::bind(defaultRenderTexture);
 		Geometry::render(quadGeo);
 		Texture::unbind();
 		Shader::unbind();
 		
+		Editor::addDebugTexture("Default Render", defaultRenderTexture);
+		Editor::addDebugTexture("DefaultDepthTexture", defaultDepthTexture);
 	}
 
 	Vec4 getClearColor()

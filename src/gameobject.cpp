@@ -325,5 +325,12 @@ namespace GO
 			RigidBody::setTransform(rigidbody, transform->transMat);
 			RigidBody::setActivation(rigidbody, true);
 		}
+
+		if(hasComponent(gameObject, Component::LIGHT))
+		{
+			CLight* light   = getLight(gameObject);
+			CCamera* camera = Camera::getCameraAtIndex(light->cameraIndex);
+			Camera::updateView(camera);
+		}
 	}
 }

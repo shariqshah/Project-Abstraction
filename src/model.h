@@ -23,6 +23,7 @@ namespace Model
 {
 	void    initialize();
 	void    renderAllModels(CCamera* camera, RenderParams* renderParams);
+	void    renderAllModels(CCamera* camera, int shader);
 	CModel* getModelAtIndex(int modelIndex);
 	CModel* findModel(const char* filename);
 	int     create(const char* filename);

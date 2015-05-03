@@ -24,97 +24,58 @@ namespace Framebuffer
 		std::vector<int> emptyIndices;
 	}
 	
-	int create(const char* name, int width, int height, bool isDepthMap)
+	int create(int width, int height, bool hasDepthAttachment, bool hasColorAttachment)
 	{
-		int index = -1;
+		int index   = -1;
 		GLuint fbo;
 		GLuint renderbuffer;
-		GLuint format                 = isDepthMap ? GL_DEPTH_COMPONENT   : GL_RGBA;
-		GLuint internalFormat         = isDepthMap ? GL_DEPTH_COMPONENT32 : GL_RGBA;
-		GLuint fboTextureAttachment   = isDepthMap ? GL_DEPTH_ATTACHMENT  : GL_COLOR_ATTACHMENT0;
-		GLuint renderBufferStorageFmt = isDepthMap ? GL_DEPTH_COMPONENT   : GL_DEPTH24_STENCIL8;
 		
-		int texture = Texture::create(name, width, height, format, internalFormat, GL_FLOAT, NULL);
-		if(texture > -1)
+		glGenFramebuffers(1, &fbo);
+		glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+		if(hasColorAttachment)
 		{
-			Texture::bind(texture);
-			if(isDepthMap)
-			{
-				Texture::setTextureParameter(texture, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-				Texture::setTextureParameter(texture, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-				Texture::setTextureParameter(texture, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-				Texture::setTextureParameter(texture, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-				Texture::setTextureParameter(texture, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-				Texture::setTextureParameter(texture,GL_TEXTURE_COMPARE_MODE, GL_COMPARE_R_TO_TEXTURE);
-				Texture::setTextureParameter(texture,GL_TEXTURE_COMPARE_FUNC, GL_LESS);
-			}
-			else
-			{
-				Texture::setTextureParameter(texture, GL_TEXTURE_WRAP_S, GL_REPEAT);
-				Texture::setTextureParameter(texture, GL_TEXTURE_WRAP_T, GL_REPEAT);
-				Texture::setTextureParameter(texture, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-				Texture::setTextureParameter(texture, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-			}
-			glGenFramebuffers(1, &fbo);
-			glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 			glGenRenderbuffers(1, &renderbuffer);
 			glBindRenderbuffer(GL_RENDERBUFFER, renderbuffer);
 			glRenderbufferStorage(GL_RENDERBUFFER,
-								  renderBufferStorageFmt,
+								  GL_DEPTH24_STENCIL8,
 								  width,
 								  height);
 			Renderer::checkGLError("Framebuffer::create");
 			glFramebufferRenderbuffer(GL_FRAMEBUFFER,
-									  isDepthMap ? GL_DEPTH_ATTACHMENT : GL_DEPTH_STENCIL_ATTACHMENT,
+									  GL_DEPTH_STENCIL_ATTACHMENT,
 									  GL_RENDERBUFFER,
 									  renderbuffer);
 			Renderer::checkGLError("Framebuffer::create");
-			glFramebufferTexture2D(GL_FRAMEBUFFER,
-								   fboTextureAttachment,
-								   GL_TEXTURE_2D,
-								   Texture::getTextureID(texture),
-								   0);
+		}
+		Renderer::checkGLError("Framebuffer::create");
+		GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+		if(status != GL_FRAMEBUFFER_COMPLETE)
+		{
+			Log::error("Framebuffer::create", "Framebuffer not created!");
 			Renderer::checkGLError("Framebuffer::create");
-			// glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, Texture::getTextureID(texture), 0);
-			// Renderer::checkGLError("Framebuffer::create");
-			GLenum drawbuffers[1];
-			drawbuffers[0] = isDepthMap ? GL_NONE : GL_COLOR_ATTACHMENT0;
-			glDrawBuffers(1, drawbuffers);
-			Renderer::checkGLError("Framebuffer::create");
-			GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-			if(status != GL_FRAMEBUFFER_COMPLETE)
-			{
-				Log::error("Framebuffer::create", "Framebuffer not created!");
-				Renderer::checkGLError("Framebuffer::create");
-			}
-			else
-			{
-				if(emptyIndices.empty())
-				{
-					framebufferList.push_back(FBO());
-					index = (int)framebufferList.size() - 1;
-				}
-				else
-				{
-					index = emptyIndices.back();
-					emptyIndices.pop_back();
-				}
-				FBO* framebuffer = &framebufferList[index];
-				framebuffer->fbo          = fbo;
-				framebuffer->renderbuffer = renderbuffer;
-				framebuffer->texture      = texture;
-				framebuffer->width        = width;
-				framebuffer->height       = height;
-				Log::message("Framebuffer created successfully");
-			}
-			glBindFramebuffer(GL_FRAMEBUFFER, 0);
-			glBindRenderbuffer(GL_RENDERBUFFER, 0);
-			Texture::unbind();
 		}
 		else
 		{
-			Log::error("Framebuffer::create", "Could not create texture");
+			if(emptyIndices.empty())
+			{
+				framebufferList.push_back(FBO());
+				index = (int)framebufferList.size() - 1;
+			}
+			else
+			{
+				index = emptyIndices.back();
+				emptyIndices.pop_back();
+			}
+			FBO* framebuffer = &framebufferList[index];
+			framebuffer->fbo          = fbo;
+			framebuffer->renderbuffer = renderbuffer;
+			framebuffer->texture      = -1;
+			framebuffer->width        = width;
+			framebuffer->height       = height;
+			Log::message("Framebuffer created successfully");
 		}
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		glBindRenderbuffer(GL_RENDERBUFFER, 0);
 		return index;
 	}
 	
@@ -123,7 +84,7 @@ namespace Framebuffer
 		if(index > -1 && index < (int)framebufferList.size())
 		{
 			FBO* framebuffer = &framebufferList[index];
-			Texture::remove(framebuffer->texture);
+			if(framebuffer->texture != -1) Texture::remove(framebuffer->texture);
 			glDeleteRenderbuffers(1, &framebuffer->renderbuffer);
 			glDeleteFramebuffers(1, &framebuffer->fbo);
 		}
@@ -179,4 +140,36 @@ namespace Framebuffer
 		}
 		return height;
 	}
+
+	void setTexture(int index, int texture, int attachment)
+	{
+		if(index > -1 && index < (int)framebufferList.size())
+		{
+			GLint currentFBO = 0;
+			glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &currentFBO);
+			Renderer::checkGLError("Framebuffer::setTexture, glGet");
+			bind(index);
+			glFramebufferTexture2D(GL_FRAMEBUFFER,
+								   attachment,
+								   GL_TEXTURE_2D,
+								   Texture::getTextureID(texture),
+								   0);
+			Renderer::checkGLError("Framebuffer::setTexture, glFramebufferTexture2D");
+			// glFramebufferTexture(GL_FRAMEBUFFER, attachment, Texture::getTextureID(texture), 0);
+			// Renderer::checkGLError("Framebuffer::setTexture, glFramebuffertexture");
+			glBindFramebuffer(GL_FRAMEBUFFER, currentFBO);
+		}
+	}
+
+	int getTexture(int index)
+	{
+		int texture = -1;
+		if(index > -1 && index < (int)framebufferList.size())
+		{
+			FBO* framebuffer = &framebufferList[index];
+			texture = framebuffer->texture;
+		}
+		return texture;
+	}
+	
 }
