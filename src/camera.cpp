@@ -154,8 +154,8 @@ namespace Camera
 		PA_ASSERT(camera);
 		if(camera->isOrthographic)
 		{
-			float limit = 70.f;
-			camera->projMat = glm::ortho(-limit, limit, -limit, limit, -camera->farZ, camera->farZ);
+			float limit = 50.f;
+			camera->projMat = glm::ortho(-limit, limit, -limit, limit, -camera->farZ / 2.f, camera->farZ);
 		}
 		else
 		{

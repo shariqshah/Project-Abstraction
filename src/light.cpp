@@ -178,6 +178,7 @@ namespace Light
 		writer.Key("Radius");      writer.Double(light->radius);
 		writer.Key("Intensity");   writer.Double(light->intensity);
 		writer.Key("CastShadow");  writer.Bool(light->castShadow);
+		writer.Key("PcfEnabled");  writer.Bool(light->pcfEnabled);
 		writer.Key("DepthBias");   writer.Double(light->depthBias);
 		writer.Key("Color");
 		writer.StartArray();
@@ -326,6 +327,17 @@ namespace Light
 			{
 				success = false;
 				Log::error("Light::creatFromJSON", "Error reading CastShadow");
+			}
+
+			if(value.HasMember("PcfEnabled") && value["PcfEnabled"].IsBool())
+			{
+				const Value& pcfEnabledNode = value["PcfEnabled"];
+				light->pcfEnabled = pcfEnabledNode.GetBool();
+			}
+			else
+			{
+				success = false;
+				Log::error("Light::creatFromJSON", "Error reading PcfEnabled");
 			}
 		}
 		else

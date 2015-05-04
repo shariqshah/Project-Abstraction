@@ -369,6 +369,7 @@ namespace Editor
 				Light::setType(light, (LightType)light->type);
 			if(ImGui::Checkbox("Cast Shadows", &light->castShadow))
 				Light::setCastShadow(light, light->castShadow);
+			ImGui::Checkbox("PCF Enabled", &light->pcfEnabled);
 			ImGui::InputFloat("ShadowMap Depth Bias", &light->depthBias, 0.0001f, 0.001f);
 			if(light->type == LT_SPOT || light->type == LT_POINT)
 			{

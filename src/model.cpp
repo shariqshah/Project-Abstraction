@@ -132,6 +132,7 @@ namespace Model
 				Shader::setUniformFloat(shaderIndex, "light.depthBias",  light->depthBias);
 				Shader::setUniformInt(shaderIndex,   "light.type",       light->type);
 				Shader::setUniformInt(shaderIndex,   "light.castShadow", light->castShadow);
+				Shader::setUniformInt(shaderIndex,   "light.pcfEnabled", light->pcfEnabled);
 				Shader::setUniformVec4(shaderIndex,  "light.color", 	 light->color);
 				Shader::setUniformVec3(shaderIndex,  "light.direction",  lightTransform->forward);
 				Shader::setUniformVec3(shaderIndex,  "light.position",   lightTransform->position);

@@ -24,6 +24,7 @@ struct CLight
 	Vec4           color       = Vec4(1.f);
 	Node           node        = 0;
 	bool           castShadow  = false;
+	bool           pcfEnabled  = false;
 	bool           valid       = true;
 	int            type        = LT_POINT;
 	int            radius      = 30;

@@ -11,6 +11,7 @@ struct Light
 	int   radius;
 	int   type;
 	int   castShadow;
+	int   pcfEnabled;
 	float depthBias;
 };
 
@@ -58,35 +59,32 @@ float calcShadowFactor(vec3 projCoords)
 	}
 	else
 	{
-		// for (int i = 0; i < 16; i++)
-		// {
-		// 	if(texture2D(shadowMap, uvCoords.xy + poissonDisk[i]/1000.0 ).z + light.depthBias <  z)
-		// 		visibility -= 0.06;
-
-		// }
-		// float depth = texture2D(shadowMap, uvCoords).r;
-		// if((depth + light.depthBias) < z)
-		// 	return 0.1;
-		// else
-		// 	return 1.0;
-
-		
-		float xOffset = 1.0/mapSize.x;
-		float yOffset = 1.0/mapSize.y;
-
-		float Factor = 0.0;
-
-		for (int y = -1 ; y <= 1 ; y++)
+		if(light.pcfEnabled == 0)
 		{
-			for (int x = -1 ; x <= 1 ; x++)
-			{
-				vec2 Offsets = vec2(x * xOffset, y * yOffset);
-				vec3 UVC = vec3(uvCoords + Offsets, z + EPSILON);
-				Factor += texture(shadowMap, UVC);
-			}
+			float depth = texture(shadowMap, vec3(uvCoords, z + EPSILON));
+			if((depth + light.depthBias) < z)
+				visibility = 0.5;
+			else
+				visibility = 1.0;
 		}
+		else
+		{
+			float xOffset = 1.0/mapSize.x;
+			float yOffset = 1.0/mapSize.y;
+			float Factor = 0.0;
 
-		visibility = (0.5 + (Factor / 20.0));
+			for (int y = -1 ; y <= 1 ; y++)
+			{
+				for (int x = -1 ; x <= 1 ; x++)
+				{
+					vec2 Offsets = vec2(x * xOffset, y * yOffset);
+					vec3 UVC = vec3(uvCoords + Offsets, z + EPSILON);
+					Factor += texture(shadowMap, UVC);
+				}
+			}
+
+			visibility = (0.5 + (Factor / 20.0));
+		}
 	}
 	return visibility;
 }
