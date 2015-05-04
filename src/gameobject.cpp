@@ -320,8 +320,8 @@ namespace GO
 		//Update the rigidbody's transform
 		if(hasComponent(gameObject, Component::RIGIDBODY) && syncPhysics)
 		{
-			CRigidBody  rigidbody  = getRigidBody(gameObject);
-			CTransform* transform  = getTransform(gameObject);
+			CRigidBody  rigidbody = getRigidBody(gameObject);
+			CTransform* transform = getTransform(gameObject);
 			RigidBody::setTransform(rigidbody, transform->transMat);
 			RigidBody::setActivation(rigidbody, true);
 		}

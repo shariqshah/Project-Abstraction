@@ -46,6 +46,7 @@ namespace Camera
 	void     setActiveCamera(CCamera* camera); // Pass camera as NULL to reset active camera to none
 	bool     createFromJSON(CCamera* camera, const rapidjson::Value& value);
 	bool     writeToJSON(CCamera* camera, rapidjson::Writer<rapidjson::StringBuffer>& writer);
+	void     setOrthographic(CCamera* camera, bool ortho);
 }
 
 #endif

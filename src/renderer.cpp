@@ -513,7 +513,7 @@ namespace Renderer
 				glClear(GL_DEPTH_BUFFER_BIT);
 				Shader::bind(shadowShader);
 				CCamera* camera = Camera::getCameraAtIndex(light->cameraIndex);
-				Model::renderAllModels(camera, shadowShader);
+				Model::renderAllModels(camera, light, shadowShader);
 				Editor::addDebugTexture("Light", light->depthMap);
 
 				Shader::unbind();

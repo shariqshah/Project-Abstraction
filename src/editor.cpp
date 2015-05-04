@@ -25,11 +25,11 @@ namespace Editor
 	void clearTextFieldBuffers();
 	void resetCollisionShapeParams();
 	void updateComponentViewers();
-	void displayRigidBody();
-	void displayTransform();
-	void displayLight();
-	void displayModel();
-	void displayCamera();
+	void displayRigidBody(Node goNode);
+	void displayTransform(Node goNode);
+	void displayLight(Node goNode);
+	void displayModel(Node goNode);
+	void displayCamera(Node goNode, bool isLightCamera = false);
 	void displaySceneObjects();
 	void displayRendererSettings();
 	void displayStatsWindow();
@@ -167,9 +167,9 @@ namespace Editor
 		collisionShapeCombo = 0;
 	}
 
-	void displayRigidBody()
+	void displayRigidBody(Node goNode)
 	{
-		GameObject* selectedGO = SceneManager::find(selectedGONode);
+		GameObject* selectedGO = SceneManager::find(goNode);
 		CRigidBody  body       = GO::getRigidBody(selectedGO);
 		if(ImGui::CollapsingHeader("RigidBody", "RigidBodyComponent", true, true))
 		{
@@ -265,9 +265,9 @@ namespace Editor
 		}
 	}
 	
-	void displayTransform()
+	void displayTransform(Node goNode)
 	{
-		GameObject* selectedGO = SceneManager::find(selectedGONode);
+		GameObject* selectedGO = SceneManager::find(goNode);
 		CTransform* transform  = GO::getTransform(selectedGO);
 		if(ImGui::CollapsingHeader("Transform", "TransformComponent", true, true))
 		{
@@ -356,9 +356,9 @@ namespace Editor
 		}
 	}
 
-	void displayLight()
+	void displayLight(Node goNode)
 	{
-		GameObject* selectedGO = SceneManager::find(selectedGONode);
+		GameObject* selectedGO = SceneManager::find(goNode);
 		CLight*     light      = GO::getLight(selectedGO);
 		if(ImGui::CollapsingHeader("Light", "LightComponent", true, true))
 		{
@@ -384,12 +384,19 @@ namespace Editor
 			ImGui::PopID();
 			if(ImGui::CollapsingHeader("DepthMap", "LightComponentDepthMap", false, false))
 				ImGui::Image((ImTextureID)Texture::getTextureID(light->depthMap), Vec2(256, 256));
+
+			if(ImGui::CollapsingHeader("Light Camera", "LightComponentCamera", false, false))
+			{
+				ImGui::PushID("LightCamera");
+				displayCamera(goNode, true);
+				ImGui::PopID();
+			}
 		}
 	}
 
-	void displayModel()
+	void displayModel(Node goNode)
 	{
-		GameObject* selectedGO = SceneManager::find(selectedGONode);
+		GameObject* selectedGO = SceneManager::find(goNode);
 		CModel*     model      = GO::getModel(selectedGO);
 		if(ImGui::CollapsingHeader("Model", "ModelComponent", true, true))
 		{
@@ -471,10 +478,20 @@ namespace Editor
 		}
 	}
 
-	void displayCamera()
+	void displayCamera(Node goNode, bool isLightCamera)
 	{
-		GameObject* selectedGO = SceneManager::find(selectedGONode);
-		CCamera*    camera     = GO::getCamera(selectedGO);
+		GameObject* selectedGO = SceneManager::find(goNode);
+		CCamera*    camera     = NULL;
+		if(isLightCamera)
+		{
+			CLight* light = GO::getLight(selectedGO);
+			camera = Camera::getCameraAtIndex(light->cameraIndex);
+		}
+		else
+		{
+			camera = GO::getCamera(selectedGO);
+		}
+		
 		if(ImGui::CollapsingHeader("Camera", "CameraComponent", true, true))
 		{
 			bool updateProj = false;
@@ -493,6 +510,9 @@ namespace Editor
 			}
 			if(ImGui::IsItemHovered())
 				ImGui::SetTooltip("Check to make the camera the active viewer for the scene");
+
+			if(ImGui::Checkbox("Is Orthographic", &camera->isOrthographic))
+				Camera::setOrthographic(camera, camera->isOrthographic);
 		}
 	}
 
@@ -697,11 +717,11 @@ namespace Editor
 				ImGui::SetTooltip("Only components attached can be removed");
 
 			// Display Components
-			displayTransform();
-			if(GO::hasComponent(selectedGO, Component::LIGHT))	   displayLight();
-			if(GO::hasComponent(selectedGO, Component::MODEL))     displayModel();
-			if(GO::hasComponent(selectedGO, Component::CAMERA))	   displayCamera();				
-			if(GO::hasComponent(selectedGO, Component::RIGIDBODY)) displayRigidBody();				
+			displayTransform(selectedGONode);
+			if(GO::hasComponent(selectedGO, Component::LIGHT))	   displayLight(selectedGONode);
+			if(GO::hasComponent(selectedGO, Component::MODEL))     displayModel(selectedGONode);
+			if(GO::hasComponent(selectedGO, Component::CAMERA))	   displayCamera(selectedGONode);				
+			if(GO::hasComponent(selectedGO, Component::RIGIDBODY)) displayRigidBody(selectedGONode);				
 			ImGui::End();
 		}
 	}

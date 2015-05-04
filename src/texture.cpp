@@ -39,7 +39,11 @@ namespace Texture
 			int loaded = -1;
 			for(uint i = 0; i < textureList.size(); i++)
 			{
-				if(strcmp(name, textureList[i].name) == 0)
+				if(!textureList[i].name)
+				{
+					continue;
+				}
+				else if(strcmp(name, textureList[i].name) == 0)
 				{
 					loaded = i;
 					break;

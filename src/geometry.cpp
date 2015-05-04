@@ -408,4 +408,9 @@ namespace Geometry
 		generateBoundingBox(index);
 		return index;
 	}
+
+	int getCullingMode()
+	{
+		return cullingMode;
+	}
 }

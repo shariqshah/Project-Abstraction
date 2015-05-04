@@ -61,8 +61,8 @@ vec4 calcDirLight(Light dirLight)
 	vec3  normalizedNormal = normalize(normal);
 	float cosAngIncidence  = dot(normalizedNormal, -dirLight.direction);
 	cosAngIncidence = clamp(cosAngIncidence, 0, 1);
-	// float shadowFactor = calcShadowFactor(vertLightSpace.xyz);
-
+	float shadowFactor = 1.0;
+	
 	if(cosAngIncidence > 0)
 	{
 		diffuse = dirLight.color * material.diffuse * cosAngIncidence;
@@ -72,9 +72,13 @@ vec4 calcDirLight(Light dirLight)
 		float specularFactor = max(0.0, dot(vertexToEye, lightReflect));
 		specularFactor = pow(specularFactor, material.specularStrength);
 		specular = dirLight.color * material.specular * specularFactor;
+		if(light.castShadow == 1)
+		{
+			shadowFactor = calcShadowFactor(vertLightSpace.xyz);
+		}
 	}
 	// return dirLight.intensity * shadowFactor * (diffuse + specular);
-	return (dirLight.intensity * (diffuse + specular));
+	return (dirLight.intensity * (diffuse + specular)) * shadowFactor;
 }
 
 vec4 calcPointLight(Light pointLight)

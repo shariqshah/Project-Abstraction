@@ -97,6 +97,7 @@ namespace Transform
 	{
 		PA_ASSERT(transform);
 		transform->position = position;
+		updateLookAt(transform);
 		updateTransformMatrix(transform, syncPhysics);
 	}
 

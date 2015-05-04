@@ -24,6 +24,7 @@ namespace Geometry
 	void                         cleanup();
 	void                         remove(int index);
 	void                         setCullingMode(CullingMode mode);
+	int                          getCullingMode();
 	int                          render(int index, Frustum* frustum, CTransform* transform);
 	void                         render(int index);
 	unsigned int                 getVAO(int index);

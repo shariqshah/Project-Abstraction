@@ -336,7 +336,7 @@ namespace Light
 		light->radius = radius;
 		light->boundingSphere.radius = radius;
 		CCamera* camera = Camera::getCameraAtIndex(light->cameraIndex);
-		camera->farZ = light->radius * 2.f;
+		camera->farZ = light->radius;
 		Camera::updateProjection(camera);
 	}
 
@@ -344,6 +344,8 @@ namespace Light
 	{
 		PA_ASSERT(light);
 		light->type = type;
+		CCamera* camera = Camera::getCameraAtIndex(light->cameraIndex);
+		Camera::setOrthographic(camera, type == LT_DIR ? true : false);
 	}
 	
 	void setOuterAngle(CLight* light, float outerAngle)
@@ -351,7 +353,7 @@ namespace Light
 		PA_ASSERT(light);
 		light->outerAngle = outerAngle;
 		CCamera* camera = Camera::getCameraAtIndex(light->cameraIndex);
-		camera->fov = outerAngle;
+		camera->fov = outerAngle * 1.5;
 		Camera::updateProjection(camera);
 	}
 
@@ -394,6 +396,11 @@ namespace Light
 			Texture::setTextureParameter(texture, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 			Texture::setTextureParameter(texture, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_R_TO_TEXTURE);
 			Texture::setTextureParameter(texture, GL_TEXTURE_COMPARE_FUNC, GL_LESS);
+		}
+		else if(!castShadow && light->depthMap != -1)
+		{
+			Texture::remove(light->depthMap);
+			light->depthMap = -1;
 		}
 	}
 }

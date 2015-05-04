@@ -81,19 +81,36 @@ namespace Model
 		return count;
 	}
 
-	void renderAllModels(CCamera* camera, int shader)
+	void renderAllModels(CCamera* camera, CLight* light, int shader)
 	{
+		int currentCullingMode = Geometry::getCullingMode();
+		Geometry::setCullingMode(CM_NONE);
+		Mat4 viewProjMat = camera->viewProjMat;
+		if(light->type == LT_DIR)
+		{
+			GameObject* cameraGO        = SceneManager::find(camera->node);
+			CTransform* cameraTransform = GO::getTransform(cameraGO);
+			CCamera*    viewerCamera    = Camera::getActiveCamera();
+			GameObject* viewer          = SceneManager::find(viewerCamera->node);
+			CTransform* viewerTransform = GO::getTransform(viewer);
+			if(cameraTransform->position != viewerTransform->position)
+				Transform::setPosition(cameraTransform, viewerTransform->position);
+			// transMat = viewerTransform->transMat;
+			//viewProjMat = camera->projMat * viewerCamera->viewMat;
+		}
+		
 		for(CModel& model : modelList)
 		{
 			if(model.node == -1 || model.materialUniforms.castShadow == false)
 				continue;
-
-			GameObject*   gameObject = SceneManager::find(model.node);
-			CTransform*   transform  = GO::getTransform(gameObject);					
-			Mat4          mvp        = camera->viewProjMat * transform->transMat;
+			GameObject* gameObject = SceneManager::find(model.node);
+			CTransform* transform  = GO::getTransform(gameObject);
+			Mat4        transMat   = transform->transMat;
+			Mat4        mvp        = camera->viewProjMat * transform->transMat;
 			Shader::setUniformMat4(shader, "mvp", mvp);
 			Geometry::render(model.geometryIndex, &camera->frustum, transform);
 		}
+		Geometry::setCullingMode((CullingMode)currentCullingMode);
 	}
 
 	void renderAllModels(CCamera* camera, RenderParams* renderParams, CLight* light)

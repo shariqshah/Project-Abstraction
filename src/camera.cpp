@@ -152,10 +152,17 @@ namespace Camera
 	void updateProjection(CCamera* camera)
 	{
 		PA_ASSERT(camera);
-		camera->projMat = glm::perspective(camera->fov,
-										   camera->aspectRatio,
-										   camera->nearZ,
-										   camera->farZ);
+		if(camera->isOrthographic)
+		{
+			camera->projMat = glm::ortho(-100.f, 100.f, -100.f, 100.f, -camera->farZ, camera->farZ);
+		}
+		else
+		{
+			camera->projMat = glm::perspective(camera->fov,
+											   camera->aspectRatio,
+											   camera->nearZ,
+											   camera->farZ);
+		}
 		updateViewProjection(camera);
 	}
 	
@@ -362,5 +369,12 @@ namespace Camera
 		}
 		if(!success) Log::error("Camera::createFromJSON", error);
 		return success;
+	}
+
+    void setOrthographic(CCamera* camera, bool ortho)
+	{
+		PA_ASSERT(camera);
+		camera->isOrthographic = ortho;
+		updateProjection(camera);
 	}
 }
