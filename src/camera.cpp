@@ -154,7 +154,8 @@ namespace Camera
 		PA_ASSERT(camera);
 		if(camera->isOrthographic)
 		{
-			camera->projMat = glm::ortho(-100.f, 100.f, -100.f, 100.f, -camera->farZ, camera->farZ);
+			float limit = 70.f;
+			camera->projMat = glm::ortho(-limit, limit, -limit, limit, -camera->farZ, camera->farZ);
 		}
 		else
 		{
@@ -275,11 +276,12 @@ namespace Camera
 		bool success = true;
 		writer.Key("Camera");
 		writer.StartObject();
-		writer.Key("NearZ");       writer.Double(camera->nearZ);
-		writer.Key("FarZ");        writer.Double(camera->farZ);
-		writer.Key("Fov");         writer.Double(camera->fov);
-		writer.Key("AspectRatio"); writer.Double(camera->aspectRatio);
-		writer.Key("IsActive");    writer.Bool(camera->node == getActiveCamera()->node ? true : false);
+		writer.Key("NearZ");          writer.Double(camera->nearZ);
+		writer.Key("FarZ");           writer.Double(camera->farZ);
+		writer.Key("Fov");            writer.Double(camera->fov);
+		writer.Key("AspectRatio");    writer.Double(camera->aspectRatio);
+		writer.Key("IsOrthographic"); writer.Bool(camera->isOrthographic ? true : false);
+		writer.Key("IsActive");       writer.Bool(camera->node == getActiveCamera()->node ? true : false);
 		writer.EndObject();
 		return success;
 	}
@@ -349,6 +351,16 @@ namespace Camera
 				success = false;
 			}
 
+			if(value.HasMember("IsOrthographic") && value["IsOrthographic"].IsBool())
+			{
+				const Value& isOrtho = value["IsOrthographic"];
+				Camera::setOrthographic(camera, isOrtho.GetBool());
+			}
+			else
+			{
+				success = false;
+			}
+
 			if(value.HasMember("IsActive") && value["IsActive"].IsBool())
 			{
 				const Value& IsActiveNode = value["IsActive"];
@@ -359,6 +371,7 @@ namespace Camera
 			{
 				success = false;
 			}
+			
 			updateView(camera);
 			updateProjection(camera);
 		}

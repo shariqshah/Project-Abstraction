@@ -165,8 +165,8 @@ namespace GO
 		}
 		else
 		{
-			Log::warning("Camera couldnot be added to " + gameObject->name +
-						 " because it already has one");
+			newCamera = getCamera(gameObject);
+			Log::warning("Camera couldnot be added to " + gameObject->name + " because it already has one");
 		}
 		return newCamera;
 	}

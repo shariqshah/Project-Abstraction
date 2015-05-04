@@ -11,6 +11,7 @@ struct Light
 	int   radius;
 	int   type;
 	int   castShadow;
+	float depthBias;
 };
 
 struct Material
@@ -29,7 +30,17 @@ uniform Material material;
 uniform int numLights;
 uniform Light lightList[MAX_LIGHTS];
 uniform Light light;
-uniform sampler2D shadowMap;
+uniform sampler2DShadow shadowMap;
+uniform vec2 mapSize;
+
+#define EPSILON 0.00001
+
+const vec2 poissonDisk[4] = vec2[](
+	vec2( -0.94201624, -0.39906216 ),
+	vec2( 0.94558609, -0.76890725 ),
+	vec2( -0.094184101, -0.92938870 ),
+	vec2( 0.34495938, 0.29387760 )
+	);
 
 float calcShadowFactor(vec3 projCoords)
 {
@@ -38,7 +49,8 @@ float calcShadowFactor(vec3 projCoords)
 	uvCoords.x = (projCoords.x * bias) + bias;
 	uvCoords.y = (projCoords.y * bias) + bias;
 	float z    = (projCoords.z * bias) + bias;
-
+	float visibility = 1.0;
+	
 	//if uv outside shadowmap range then point out of shadow
 	if(uvCoords.x > 1.0 || uvCoords.x < 0.0 ||	uvCoords.y > 1.0 || uvCoords.y < 0.0)
 	{
@@ -46,12 +58,37 @@ float calcShadowFactor(vec3 projCoords)
 	}
 	else
 	{
-		float depth = texture2D(shadowMap, uvCoords).r;
-		if((depth + 0.001) < z)
-			return 0.1;
-		else
-			return 1.0;
+		// for (int i = 0; i < 16; i++)
+		// {
+		// 	if(texture2D(shadowMap, uvCoords.xy + poissonDisk[i]/1000.0 ).z + light.depthBias <  z)
+		// 		visibility -= 0.06;
+
+		// }
+		// float depth = texture2D(shadowMap, uvCoords).r;
+		// if((depth + light.depthBias) < z)
+		// 	return 0.1;
+		// else
+		// 	return 1.0;
+
+		
+		float xOffset = 1.0/mapSize.x;
+		float yOffset = 1.0/mapSize.y;
+
+		float Factor = 0.0;
+
+		for (int y = -1 ; y <= 1 ; y++)
+		{
+			for (int x = -1 ; x <= 1 ; x++)
+			{
+				vec2 Offsets = vec2(x * xOffset, y * yOffset);
+				vec3 UVC = vec3(uvCoords + Offsets, z + EPSILON);
+				Factor += texture(shadowMap, UVC);
+			}
+		}
+
+		visibility = (0.5 + (Factor / 20.0));
 	}
+	return visibility;
 }
 
 vec4 calcDirLight(Light dirLight)

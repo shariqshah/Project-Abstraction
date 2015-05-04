@@ -28,6 +28,7 @@ struct CLight
 	int            type        = LT_POINT;
 	int            radius      = 30;
 	int            depthMap    = -1;
+	float          depthBias   = 0.0005f;
 	BoundingSphere boundingSphere;
 };
 

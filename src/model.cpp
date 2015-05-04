@@ -85,7 +85,6 @@ namespace Model
 	{
 		int currentCullingMode = Geometry::getCullingMode();
 		Geometry::setCullingMode(CM_NONE);
-		Mat4 viewProjMat = camera->viewProjMat;
 		if(light->type == LT_DIR)
 		{
 			CTransform* cameraTransform = Transform::getTransformAtIndex(camera->node);
@@ -93,8 +92,6 @@ namespace Model
 			CTransform* viewerTransform = Transform::getTransformAtIndex(viewerCamera->node);
 			if(cameraTransform->position != viewerTransform->position)
 				Transform::setPosition(cameraTransform, viewerTransform->position);
-			// transMat = viewerTransform->transMat;
-			//viewProjMat = camera->projMat * viewerCamera->viewMat;
 		}
 		
 		for(CModel& model : modelList)
@@ -132,6 +129,7 @@ namespace Model
 				Shader::setUniformFloat(shaderIndex, "light.innerAngle", light->innerAngle);
 				Shader::setUniformFloat(shaderIndex, "light.falloff",    light->falloff);
 				Shader::setUniformInt(shaderIndex,   "light.radius",     light->radius);
+				Shader::setUniformFloat(shaderIndex, "light.depthBias",  light->depthBias);
 				Shader::setUniformInt(shaderIndex,   "light.type",       light->type);
 				Shader::setUniformInt(shaderIndex,   "light.castShadow", light->castShadow);
 				Shader::setUniformVec4(shaderIndex,  "light.color", 	 light->color);
@@ -141,6 +139,9 @@ namespace Model
 				CCamera* lightCamera = Camera::getCameraAtIndex(light->node);
 				Shader::setUniformMat4(shaderIndex, "lightVPMat", lightCamera->viewProjMat);
 				if(light->castShadow) Texture::bind(light->depthMap);
+
+				Shader::setUniformVec2(shaderIndex, "mapSize", Vec2(Settings::getRenderWidth(),
+																	Settings::getRenderHeight()));
 			}
 
 			
@@ -313,6 +314,7 @@ namespace Model
 		writer.Key("Diffuse");          writer.Double(model->materialUniforms.diffuse);
 		writer.Key("Specular");         writer.Double(model->materialUniforms.specular);
 		writer.Key("SpecularStrength"); writer.Double(model->materialUniforms.specularStrength);
+		writer.Key("CastShadow");       writer.Bool(model->materialUniforms.castShadow);
 		writer.Key("DiffuseColor");
 		writer.StartArray();
 		for(int i = 0; i < 4; i++)      writer.Double(model->materialUniforms.diffuseColor[i]);
@@ -462,6 +464,12 @@ namespace Model
 					const std::string& filename = textureNode.GetString();
 					int index = Texture::create(filename.c_str());
 					if(index > -1) model->materialUniforms.texture = index;
+				}
+
+				if(matUniforms.HasMember("CastShadow") && matUniforms["CastShadow"].IsBool())
+				{
+					const Value& castShadowNode = matUniforms["CastShadow"];
+					model->materialUniforms.castShadow = castShadowNode.GetBool();
 				}
 
 				if(matUniforms.HasMember("Diffuse") && matUniforms["Diffuse"].IsNumber())

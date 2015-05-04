@@ -178,6 +178,7 @@ namespace Light
 		writer.Key("Radius");      writer.Double(light->radius);
 		writer.Key("Intensity");   writer.Double(light->intensity);
 		writer.Key("CastShadow");  writer.Bool(light->castShadow);
+		writer.Key("DepthBias");   writer.Double(light->depthBias);
 		writer.Key("Color");
 		writer.StartArray();
 		for(int i = 0; i < 4; i++) writer.Double(light->color[i]);
@@ -257,6 +258,21 @@ namespace Light
 				success = false;
 				Log::error("Light::creatFromJSON", "Error reading OuterAngle");
 			}
+
+			if(value.HasMember("DepthBias") && value["DepthBias"].IsNumber())
+			{
+				const Value& depthBiasNode = value["DepthBias"];
+				float depthBias = (float)depthBiasNode.GetDouble();
+				if(depthBias >= 0)
+					light->depthBias = depthBias;
+				else
+					success = false;
+			}
+			else
+			{
+				success = false;
+				Log::error("Light::creatFromJSON", "Error reading DepthBias");
+			}	
 
 			if(value.HasMember("Falloff") && value["Falloff"].IsNumber())
 			{
@@ -386,16 +402,16 @@ namespace Light
 										  Settings::getRenderWidth(),
 										  Settings::getRenderHeight(),
 										  GL_DEPTH_COMPONENT,
-										  GL_DEPTH_COMPONENT,
+										  GL_DEPTH_COMPONENT24,
 										  GL_FLOAT,
 										  NULL);
 			light->depthMap = texture;
-			Texture::setTextureParameter(texture, GL_TEXTURE_WRAP_S, GL_CLAMP);
-			Texture::setTextureParameter(texture, GL_TEXTURE_WRAP_T, GL_CLAMP);
+			Texture::setTextureParameter(texture, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+			Texture::setTextureParameter(texture, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 			Texture::setTextureParameter(texture, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 			Texture::setTextureParameter(texture, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-			Texture::setTextureParameter(texture, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_R_TO_TEXTURE);
-			Texture::setTextureParameter(texture, GL_TEXTURE_COMPARE_FUNC, GL_LESS);
+			Texture::setTextureParameter(texture, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE);
+			Texture::setTextureParameter(texture, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
 
 			GameObject* gameobject = SceneManager::find(light->node);
 			CCamera* camera = GO::getCamera(gameobject);
@@ -407,9 +423,11 @@ namespace Light
 			if(light->type == LT_DIR)
 			{
 				Camera::setOrthographic(camera, true);
+				Camera::updateView(camera);
 			}
 			else
 			{
+				Camera::setOrthographic(camera, false);
 				Camera::updateView(camera);
 				Camera::updateProjection(camera);
 			}

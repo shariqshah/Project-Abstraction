@@ -509,6 +509,7 @@ namespace Renderer
 				glDrawBuffers(1, drawbuffers);
 				glEnable(GL_DEPTH_TEST);
 				glDepthFunc(GL_LESS);
+				glCullFace(GL_FRONT);
 				Framebuffer::setTexture(shadowOutput, light->depthMap, GL_DEPTH_ATTACHMENT);
 				glClear(GL_DEPTH_BUFFER_BIT);
 				Shader::bind(shadowShader);
@@ -524,6 +525,7 @@ namespace Renderer
 			glDrawBuffers(1, drawbuffers);
 			glEnable(GL_DEPTH_TEST);
 			glDepthFunc(GL_LESS);
+			glCullFace(GL_BACK);
 			glViewport(0, 0, Framebuffer::getWidth(shadowOutput), Framebuffer::getHeight(shadowOutput));
 			Framebuffer::setTexture(shadowOutput, defaultRenderTexture, GL_COLOR_ATTACHMENT0);
 			Framebuffer::setTexture(shadowOutput, defaultDepthTexture, GL_DEPTH_ATTACHMENT);
