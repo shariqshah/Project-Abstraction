@@ -6,6 +6,7 @@
 #include "camera.h"
 #include "scenemanager.h"
 #include "texture.h"
+#include "gameobject.h"
 
 namespace Light
 {
@@ -94,16 +95,6 @@ namespace Light
 		}
 
 		lightList[index].node = node;
-		int cameraIndex = Camera::create(SceneManager::find(node));
-		CCamera* camera = Camera::getCameraAtIndex(cameraIndex);
-		camera->farZ  = lightList[index].radius;
-		camera->nearZ = 0.05f;
-		camera->fov   = glm::radians(75.f);
-		camera->aspectRatio = Settings::getRenderWidth() / Settings::getRenderHeight();
-		Camera::updateView(camera);
-		Camera::updateProjection(camera);
-		camera->node = node;
-		lightList[index].cameraIndex = cameraIndex;
 		activeLights.push_back(index);
 		setRadius(&lightList[index], lightList[index].radius);
 		return index;
@@ -335,26 +326,35 @@ namespace Light
 		PA_ASSERT(light);
 		light->radius = radius;
 		light->boundingSphere.radius = radius;
-		CCamera* camera = Camera::getCameraAtIndex(light->cameraIndex);
-		camera->farZ = light->radius;
-		Camera::updateProjection(camera);
+		if(light->castShadow)
+		{
+			CCamera* camera = Camera::getCameraAtIndex(light->node);
+			camera->farZ = light->radius;
+			Camera::updateProjection(camera);
+		}
 	}
 
 	void setType(CLight* light, LightType type)
 	{
 		PA_ASSERT(light);
 		light->type = type;
-		CCamera* camera = Camera::getCameraAtIndex(light->cameraIndex);
-		Camera::setOrthographic(camera, type == LT_DIR ? true : false);
+		if(light->castShadow)
+		{
+			CCamera* camera = Camera::getCameraAtIndex(light->node);
+			Camera::setOrthographic(camera, type == LT_DIR ? true : false);
+		}
 	}
 	
 	void setOuterAngle(CLight* light, float outerAngle)
 	{
 		PA_ASSERT(light);
 		light->outerAngle = outerAngle;
-		CCamera* camera = Camera::getCameraAtIndex(light->cameraIndex);
-		camera->fov = outerAngle * 1.5;
-		Camera::updateProjection(camera);
+		if(light->castShadow)
+		{
+			CCamera* camera = Camera::getCameraAtIndex(light->node);
+			camera->fov = outerAngle * 1.5;
+			Camera::updateProjection(camera);
+		}
 	}
 
 	void setInnerAngle(CLight* light, float innerAngle)
@@ -396,6 +396,23 @@ namespace Light
 			Texture::setTextureParameter(texture, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 			Texture::setTextureParameter(texture, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_R_TO_TEXTURE);
 			Texture::setTextureParameter(texture, GL_TEXTURE_COMPARE_FUNC, GL_LESS);
+
+			GameObject* gameobject = SceneManager::find(light->node);
+			CCamera* camera = GO::getCamera(gameobject);
+			if(!camera)	camera = GO::addCamera(gameobject);
+			camera->farZ = light->radius;
+			camera->nearZ = 1.5f;
+			camera->fov   = light->radius * 1.5f;
+			camera->aspectRatio = Settings::getRenderWidth() / Settings::getRenderHeight();
+			if(light->type == LT_DIR)
+			{
+				Camera::setOrthographic(camera, true);
+			}
+			else
+			{
+				Camera::updateView(camera);
+				Camera::updateProjection(camera);
+			}
 		}
 		else if(!castShadow && light->depthMap != -1)
 		{

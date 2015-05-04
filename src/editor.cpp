@@ -29,7 +29,7 @@ namespace Editor
 	void displayTransform(Node goNode);
 	void displayLight(Node goNode);
 	void displayModel(Node goNode);
-	void displayCamera(Node goNode, bool isLightCamera = false);
+	void displayCamera(Node goNode);
 	void displaySceneObjects();
 	void displayRendererSettings();
 	void displayStatsWindow();
@@ -384,13 +384,6 @@ namespace Editor
 			ImGui::PopID();
 			if(ImGui::CollapsingHeader("DepthMap", "LightComponentDepthMap", false, false))
 				ImGui::Image((ImTextureID)Texture::getTextureID(light->depthMap), Vec2(256, 256));
-
-			if(ImGui::CollapsingHeader("Light Camera", "LightComponentCamera", false, false))
-			{
-				ImGui::PushID("LightCamera");
-				displayCamera(goNode, true);
-				ImGui::PopID();
-			}
 		}
 	}
 
@@ -478,20 +471,10 @@ namespace Editor
 		}
 	}
 
-	void displayCamera(Node goNode, bool isLightCamera)
+	void displayCamera(Node goNode)
 	{
 		GameObject* selectedGO = SceneManager::find(goNode);
-		CCamera*    camera     = NULL;
-		if(isLightCamera)
-		{
-			CLight* light = GO::getLight(selectedGO);
-			camera = Camera::getCameraAtIndex(light->cameraIndex);
-		}
-		else
-		{
-			camera = GO::getCamera(selectedGO);
-		}
-		
+		CCamera*    camera     = GO::getCamera(selectedGO);
 		if(ImGui::CollapsingHeader("Camera", "CameraComponent", true, true))
 		{
 			bool updateProj = false;
