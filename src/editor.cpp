@@ -841,13 +841,13 @@ namespace Editor
 	void update(float deltaTime, bool* quit)
 	{
 		ImGui::Begin("Tools", &showMainToolBar, Vec2(80, 20), OPACITY, (WF_NoTitleBar | WF_NoCollapse));
-		if(ImGui::Button("Scene"))     showSceneObjects     = !showSceneObjects;     ImGui::SameLine();
-		if(ImGui::Button("Renderer"))  showRendererSettings = !showRendererSettings; ImGui::SameLine();
-		if(ImGui::Button("Physics"))   showPhysicsWindow    = !showPhysicsWindow;    ImGui::SameLine();
-		if(ImGui::Button("Scripting")) showScriptingWindow  = !showScriptingWindow;  ImGui::SameLine();
-		if(ImGui::Button("Sample"))    showSample           = !showSample;           ImGui::SameLine();
-		if(ImGui::Button("DebugVars")) showDebugVars        = !showDebugVars;        ImGui::SameLine();
-		if(ImGui::Button("DebugTexs")) showDebugTextures    = !showDebugTextures;    ImGui::SameLine();
+		if(ImGui::Button("Scene"))         showSceneObjects     = !showSceneObjects;     ImGui::SameLine();
+		if(ImGui::Button("Renderer"))      showRendererSettings = !showRendererSettings; ImGui::SameLine();
+		if(ImGui::Button("Physics"))       showPhysicsWindow    = !showPhysicsWindow;    ImGui::SameLine();
+		if(ImGui::Button("Scripting"))     showScriptingWindow  = !showScriptingWindow;  ImGui::SameLine();
+		if(ImGui::Button("Sample"))        showSample           = !showSample;           ImGui::SameLine();
+		if(ImGui::Button("DebugVars"))     showDebugVars        = !showDebugVars;        ImGui::SameLine();
+		if(ImGui::Button("DebugTextures")) showDebugTextures    = !showDebugTextures;    ImGui::SameLine();
 		if(ImGui::Button("Log"))
 		{
 			showLog = !showLog;

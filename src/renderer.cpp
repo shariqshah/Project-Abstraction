@@ -499,54 +499,63 @@ namespace Renderer
 	void renderFrame()
 	{
 		checkGLError("Renderer::renderFrame");
-		static int quad = Shader::create("fbo.vert", "fbo.frag");
+		static int quad         = Shader::create("fbo.vert", "fbo.frag");
 		static int shadowShader = Shader::create("shadow.vert", "shadow.frag");
 		std::vector<uint32_t>* activeLights = Light::getActiveLights();
 		int count = 0;
 		Framebuffer::bind(shadowOutput);
-		glViewport(0, 0, Framebuffer::getWidth(shadowOutput), Framebuffer::getHeight(shadowOutput));
-		glDrawBuffer(GL_NONE);
-		glDepthFunc(GL_LEQUAL);
-		glCullFace(GL_FRONT);
-		for(uint32_t lightIndex : *activeLights)
 		{
-			CLight* light = Light::getLightAtIndex(lightIndex);
-			if(light->castShadow)
+			glViewport(0, 0, Framebuffer::getWidth(shadowOutput), Framebuffer::getHeight(shadowOutput));
+			glDrawBuffer(GL_NONE);
+			glDepthFunc(GL_LEQUAL);
+			glCullFace(GL_FRONT);
+			for(uint32_t lightIndex : *activeLights)
 			{
-				GameObject* gameobject = SceneManager::find(light->node);
-				CCamera*    camera     = GO::getCamera(gameobject);
-				Framebuffer::setTexture(shadowOutput, light->depthMap, GL_DEPTH_ATTACHMENT);
-				glClear(GL_DEPTH_BUFFER_BIT);
-				Shader::bind(shadowShader);
-				Model::renderAllModels(camera, light, shadowShader);
-				Editor::addDebugTexture("Light", light->depthMap);
-				Shader::unbind();
+				CLight* light = Light::getLightAtIndex(lightIndex);
+				if(light->castShadow)
+				{
+					GameObject* gameobject = SceneManager::find(light->node);
+					CCamera*    camera     = GO::getCamera(gameobject);
+					Framebuffer::setTexture(shadowOutput, light->depthMap, GL_DEPTH_ATTACHMENT);
+					glClear(GL_DEPTH_BUFFER_BIT);
+					Shader::bind(shadowShader);
+					Model::renderAllModels(camera, light, shadowShader);
+					Editor::addDebugTexture("Light", light->depthMap);
+					Shader::unbind();
+				}
 			}
 		}
 		Framebuffer::unbind();
 
 		Framebuffer::bind(renderOutput);
-		Framebuffer::setTexture(renderOutput, defaultRenderTexture, GL_COLOR_ATTACHMENT0);
-		Framebuffer::setTexture(renderOutput, defaultDepthTexture, GL_DEPTH_ATTACHMENT);
-		glDrawBuffer(GL_COLOR_ATTACHMENT0);
-		glDepthFunc(GL_LESS);
-		glCullFace(GL_BACK);
-		glViewport(0, 0, Framebuffer::getWidth(renderOutput), Framebuffer::getHeight(renderOutput));
-		glEnable(GL_BLEND);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		for(uint32_t lightIndex : *activeLights)
 		{
-			CCamera* viewer = Camera::getActiveCamera();
-			CLight*  light  = Light::getLightAtIndex(lightIndex);
-			if(viewer)
-				Model::renderAllModels(viewer, &renderParams, light);
-			count++;
+			glDrawBuffer(GL_COLOR_ATTACHMENT0);
+			glDepthFunc(GL_LEQUAL);
+			glCullFace(GL_BACK);
+			glEnable(GL_BLEND);
+			glBlendEquation(GL_FUNC_ADD);
+			glViewport(0, 0, Framebuffer::getWidth(renderOutput), Framebuffer::getHeight(renderOutput));
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			for(uint32_t lightIndex : *activeLights)
+			{
+				if(count == 0)
+					glBlendFunc(GL_ONE, GL_ZERO);
+				else if(count == 1)
+					glBlendFunc(GL_ONE, GL_ONE);
+				CCamera* viewer = Camera::getActiveCamera();
+				CLight*  light  = Light::getLightAtIndex(lightIndex);
+				if(viewer)
+					Model::renderAllModels(viewer, &renderParams, light);
+				count++;
+			}
+			glDisable(GL_BLEND);
 		}
 		Framebuffer::unbind();
 		
 		glViewport(0, 0, Settings::getWindowWidth(), Settings::getWindowHeight());
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		Shader::bind(quad);
 		Texture::bind(defaultRenderTexture);
 		Geometry::render(quadGeo);
