@@ -47,6 +47,10 @@ namespace Framebuffer
 									  renderbuffer);
 			Renderer::checkGLError("Framebuffer::create");
 		}
+		else
+		{
+			glDrawBuffer(GL_NONE);
+		}
 		Renderer::checkGLError("Framebuffer::create");
 		GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
 		if(status != GL_FRAMEBUFFER_COMPLETE)

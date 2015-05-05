@@ -83,7 +83,7 @@ float calcShadowFactor(vec3 projCoords)
 				}
 			}
 
-			visibility = (0.5 + (Factor / 20.0));
+			visibility = (0.5 + (Factor / 18.0));
 		}
 	}
 	return visibility;

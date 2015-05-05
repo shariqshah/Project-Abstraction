@@ -356,7 +356,8 @@ namespace Light
 		light->boundingSphere.radius = radius;
 		if(light->castShadow)
 		{
-			CCamera* camera = Camera::getCameraAtIndex(light->node);
+			GameObject* gameobject = SceneManager::find(light->node);
+			CCamera*    camera     = GO::getCamera(gameobject);
 			camera->farZ = light->radius;
 			Camera::updateProjection(camera);
 		}
@@ -368,7 +369,8 @@ namespace Light
 		light->type = type;
 		if(light->castShadow)
 		{
-			CCamera* camera = Camera::getCameraAtIndex(light->node);
+			GameObject* gameobject = SceneManager::find(light->node);
+			CCamera*    camera     = GO::getCamera(gameobject);
 			Camera::setOrthographic(camera, type == LT_DIR ? true : false);
 		}
 	}
@@ -379,7 +381,8 @@ namespace Light
 		light->outerAngle = outerAngle;
 		if(light->castShadow)
 		{
-			CCamera* camera = Camera::getCameraAtIndex(light->node);
+			GameObject* gameobject = SceneManager::find(light->node);
+			CCamera*    camera     = GO::getCamera(gameobject);
 			camera->fov = outerAngle * 1.5;
 			Camera::updateProjection(camera);
 		}
@@ -411,10 +414,10 @@ namespace Light
 		{
 			std::string depthMapName = "DepthMap" + std::to_string(light->node);
 			int texture = Texture::create(depthMapName.c_str(),
-										  Settings::getRenderWidth(),
-										  Settings::getRenderHeight(),
+										  Settings::getShadowMapWidth(),
+										  Settings::getShadowMapHeight(),
 										  GL_DEPTH_COMPONENT,
-										  GL_DEPTH_COMPONENT24,
+										  GL_DEPTH_COMPONENT32F,
 										  GL_FLOAT,
 										  NULL);
 			light->depthMap = texture;
@@ -430,7 +433,7 @@ namespace Light
 			if(!camera)	camera = GO::addCamera(gameobject);
 			camera->farZ = light->radius;
 			camera->nearZ = 1.5f;
-			camera->fov   = light->radius * 1.5f;
+			camera->fov   = light->outerAngle * 1.5f;
 			camera->aspectRatio = Settings::getRenderWidth() / Settings::getRenderHeight();
 			if(light->type == LT_DIR)
 			{

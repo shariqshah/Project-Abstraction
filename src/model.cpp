@@ -87,9 +87,12 @@ namespace Model
 		Geometry::setCullingMode(CM_NONE);
 		if(light->type == LT_DIR)
 		{
-			CTransform* cameraTransform = Transform::getTransformAtIndex(camera->node);
+			GameObject* cameraGO        = SceneManager::find(camera->node);
+			CTransform* cameraTransform = GO::getTransform(cameraGO);
 			CCamera*    viewerCamera    = Camera::getActiveCamera();
-			CTransform* viewerTransform = Transform::getTransformAtIndex(viewerCamera->node);
+			GameObject* viewerGO        = SceneManager::find(viewerCamera->node);
+			if(!viewerGO) return; // No active camera in scene
+			CTransform* viewerTransform = GO::getTransform(viewerGO);
 			if(cameraTransform->position != viewerTransform->position)
 				Transform::setPosition(cameraTransform, viewerTransform->position);
 		}
@@ -110,7 +113,7 @@ namespace Model
 
 	void renderAllModels(CCamera* camera, RenderParams* renderParams, CLight* light)
 	{
-		GameObject* viewer = SceneManager::find(camera->node);
+		GameObject* viewer          = SceneManager::find(camera->node);
 		CTransform* viewerTransform = GO::getTransform(viewer);
 		
 		for(Mat_Type material : Material::MATERIAL_LIST)
@@ -123,7 +126,8 @@ namespace Model
 			if((material == MAT_PHONG || material == MAT_PHONG_TEXTURED)
 			   && registeredMeshes->size() > 0)
 			{
-				CTransform* lightTransform = Transform::getTransformAtIndex(light->node);
+				GameObject* lightGO        = SceneManager::find(light->node);
+				CTransform* lightTransform = GO::getTransform(lightGO);
 				Shader::setUniformFloat(shaderIndex, "light.intensity",  light->intensity);
 				Shader::setUniformFloat(shaderIndex, "light.outerAngle", light->outerAngle);
 				Shader::setUniformFloat(shaderIndex, "light.innerAngle", light->innerAngle);
@@ -137,12 +141,14 @@ namespace Model
 				Shader::setUniformVec3(shaderIndex,  "light.direction",  lightTransform->forward);
 				Shader::setUniformVec3(shaderIndex,  "light.position",   lightTransform->position);
 
-				CCamera* lightCamera = Camera::getCameraAtIndex(light->node);
-				Shader::setUniformMat4(shaderIndex, "lightVPMat", lightCamera->viewProjMat);
-				if(light->castShadow) Texture::bind(light->depthMap);
-
-				Shader::setUniformVec2(shaderIndex, "mapSize", Vec2(Settings::getRenderWidth(),
-																	Settings::getRenderHeight()));
+				if(light->castShadow)
+				{
+					CCamera* lightCamera = GO::getCamera(lightGO);
+					Shader::setUniformMat4(shaderIndex, "lightVPMat", lightCamera->viewProjMat);
+					Texture::bind(light->depthMap);
+				}
+				Shader::setUniformVec2(shaderIndex, "mapSize", Vec2(Settings::getShadowMapWidth(),
+																	Settings::getShadowMapHeight()));
 			}
 
 			

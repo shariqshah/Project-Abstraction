@@ -257,6 +257,7 @@ namespace Camera
 		if(!alreadyRemoved)
 		{
 			emptyIndices.push_back(cameraIndex);
+			cameraList[cameraIndex].node = -1;
 			if(cameraIndex == activeCameraIndex) activeCameraIndex = -1;
 		}
 		else

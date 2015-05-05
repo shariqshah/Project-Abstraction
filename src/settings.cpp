@@ -11,6 +11,8 @@ namespace Settings
 		int windowHeight;
 		int renderWidth;
 		int renderHeight;
+		int shadowMapWidth;
+		int shadowMapHeight;
 		const char* settingsFile = "../content/settings.json";
 	}
 	
@@ -60,6 +62,24 @@ namespace Settings
 					else
 						success = false;
 				}
+
+				if(document.HasMember("ShadowMapWidth") && document["ShadowMapWidth"].IsInt())
+				{
+					const int width = document["ShadowMapWidth"].GetInt();
+					if(width > 0)
+						shadowMapWidth = width;
+					else
+						success = false;
+				}
+
+				if(document.HasMember("ShadowMapHeight") && document["ShadowMapHeight"].IsInt())
+				{
+					const int height = document["ShadowMapHeight"].GetInt();
+					if(height > 0)
+						shadowMapHeight = height;
+					else
+						success = false;
+				}
 			}
 			else
 			{
@@ -80,6 +100,7 @@ namespace Settings
 			 // Set defaults and save if file not found or erros reading
 			renderWidth  = windowWidth  = 800;
 			renderHeight = windowHeight = 600;
+			shadowMapWidth = shadowMapHeight = 512;
 			success = saveSettingsToFile();
 		}
 		return success;
@@ -96,10 +117,12 @@ namespace Settings
 			Writer<StringBuffer> writer(buffer);
 
 			writer.StartObject();
-			writer.Key("WindowWidth");  writer.Int(windowWidth);
-			writer.Key("WindowHeight"); writer.Int(windowHeight);
-			writer.Key("RenderWidth");  writer.Int(renderWidth);
-			writer.Key("RenderHeight"); writer.Int(renderHeight);
+			writer.Key("WindowWidth");     writer.Int(windowWidth);
+			writer.Key("WindowHeight");    writer.Int(windowHeight);
+			writer.Key("RenderWidth");     writer.Int(renderWidth);
+			writer.Key("RenderHeight");    writer.Int(renderHeight);
+			writer.Key("ShadowMapWidth");  writer.Int(shadowMapWidth);
+			writer.Key("ShadowMapHeight"); writer.Int(shadowMapHeight);
 			writer.EndObject();
 
 			size_t bytes = fwrite((void*)buffer.GetString(), buffer.GetSize(), 1, newFile);
@@ -137,6 +160,16 @@ namespace Settings
 		return renderHeight;
 	}
 
+	int getShadowMapWidth()
+	{
+		return shadowMapWidth;
+	}
+
+	int getShadowMapHeight()
+	{
+		return shadowMapHeight;
+	}
+
 	void setWindowWidth(int width)
 	{
 		windowWidth = width;
@@ -155,6 +188,16 @@ namespace Settings
 	void setRenderHeight(int height)
 	{
 		renderHeight = height;
+	}
+
+	void setShadowMapWidth(int width)
+	{
+		shadowMapWidth = width;
+	}
+
+	void setShadowMapHeight(int height)
+	{
+		shadowMapHeight = height;
 	}
 	
 }

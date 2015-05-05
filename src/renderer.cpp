@@ -436,16 +436,22 @@ namespace Renderer
 											  width, height,
 											  GL_DEPTH_COMPONENT,
 											  GL_DEPTH_COMPONENT,
-											  GL_FLOAT,
+											  GL_UNSIGNED_BYTE,
 											  NULL);
 		Texture::setTextureParameter(defaultDepthTexture, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 		Texture::setTextureParameter(defaultDepthTexture, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 		Texture::setTextureParameter(defaultDepthTexture, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		Texture::setTextureParameter(defaultDepthTexture, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		Texture::setTextureParameter(defaultDepthTexture, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_R_TO_TEXTURE);
-		Texture::setTextureParameter(defaultDepthTexture, GL_TEXTURE_COMPARE_FUNC, GL_LESS);
+		Texture::setTextureParameter(defaultDepthTexture, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
 		
-		shadowOutput   = Framebuffer::create(width, height, true, true);
+		shadowOutput = Framebuffer::create(Settings::getShadowMapWidth(),
+										   Settings::getShadowMapHeight(),
+										   true,
+										   true);
+		renderOutput = Framebuffer::create(width, height, true, true);
+		Framebuffer::setTexture(renderOutput, defaultRenderTexture, GL_COLOR_ATTACHMENT0);
+		Framebuffer::setTexture(renderOutput, defaultDepthTexture, GL_DEPTH_ATTACHMENT);
 	}
 
 	void cleanup()
@@ -495,42 +501,44 @@ namespace Renderer
 		checkGLError("Renderer::renderFrame");
 		static int quad = Shader::create("fbo.vert", "fbo.frag");
 		static int shadowShader = Shader::create("shadow.vert", "shadow.frag");
-		static GLenum drawbuffers[1];
 		std::vector<uint32_t>* activeLights = Light::getActiveLights();
-		Framebuffer::bind(shadowOutput);
 		int count = 0;
+		Framebuffer::bind(shadowOutput);
+		glViewport(0, 0, Framebuffer::getWidth(shadowOutput), Framebuffer::getHeight(shadowOutput));
+		glDrawBuffer(GL_NONE);
+		glDepthFunc(GL_LEQUAL);
+		glCullFace(GL_FRONT);
 		for(uint32_t lightIndex : *activeLights)
 		{
 			CLight* light = Light::getLightAtIndex(lightIndex);
 			if(light->castShadow)
 			{
-				glViewport(0, 0, Framebuffer::getWidth(shadowOutput), Framebuffer::getHeight(shadowOutput));
-				drawbuffers[0] = GL_NONE;
-				glDrawBuffers(1, drawbuffers);
-				glEnable(GL_DEPTH_TEST);
-				glDepthFunc(GL_LESS);
-				glCullFace(GL_FRONT);
+				GameObject* gameobject = SceneManager::find(light->node);
+				CCamera*    camera     = GO::getCamera(gameobject);
 				Framebuffer::setTexture(shadowOutput, light->depthMap, GL_DEPTH_ATTACHMENT);
 				glClear(GL_DEPTH_BUFFER_BIT);
 				Shader::bind(shadowShader);
-				CCamera* camera = Camera::getCameraAtIndex(light->node);
 				Model::renderAllModels(camera, light, shadowShader);
 				Editor::addDebugTexture("Light", light->depthMap);
-
 				Shader::unbind();
 			}
+		}
+		Framebuffer::unbind();
 
-			// Render Pass
-			drawbuffers[0] = GL_COLOR_ATTACHMENT0;
-			glDrawBuffers(1, drawbuffers);
-			glEnable(GL_DEPTH_TEST);
-			glDepthFunc(GL_LESS);
-			glCullFace(GL_BACK);
-			glViewport(0, 0, Framebuffer::getWidth(shadowOutput), Framebuffer::getHeight(shadowOutput));
-			Framebuffer::setTexture(shadowOutput, defaultRenderTexture, GL_COLOR_ATTACHMENT0);
-			Framebuffer::setTexture(shadowOutput, defaultDepthTexture, GL_DEPTH_ATTACHMENT);
-			if(count == 0) glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		Framebuffer::bind(renderOutput);
+		Framebuffer::setTexture(renderOutput, defaultRenderTexture, GL_COLOR_ATTACHMENT0);
+		Framebuffer::setTexture(renderOutput, defaultDepthTexture, GL_DEPTH_ATTACHMENT);
+		glDrawBuffer(GL_COLOR_ATTACHMENT0);
+		glDepthFunc(GL_LESS);
+		glCullFace(GL_BACK);
+		glViewport(0, 0, Framebuffer::getWidth(renderOutput), Framebuffer::getHeight(renderOutput));
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		for(uint32_t lightIndex : *activeLights)
+		{
 			CCamera* viewer = Camera::getActiveCamera();
+			CLight*  light  = Light::getLightAtIndex(lightIndex);
 			if(viewer)
 				Model::renderAllModels(viewer, &renderParams, light);
 			count++;

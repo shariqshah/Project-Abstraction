@@ -2,5 +2,7 @@
     "WindowWidth": 800,
     "WindowHeight": 600,
     "RenderWidth": 1440,
-    "RenderHeight": 900
+    "RenderHeight": 900,
+	"ShadowMapWidth":  1024,
+    "ShadowMapHeight": 1024
 }
