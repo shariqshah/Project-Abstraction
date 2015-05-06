@@ -83,8 +83,6 @@ namespace Model
 
 	void renderAllModels(CCamera* camera, CLight* light, int shader)
 	{
-		int currentCullingMode = Geometry::getCullingMode();
-		Geometry::setCullingMode(CM_NONE);
 		if(light->type == LT_DIR)
 		{
 			GameObject* cameraGO        = SceneManager::find(camera->node);
@@ -96,7 +94,7 @@ namespace Model
 			if(cameraTransform->position != viewerTransform->position)
 				Transform::setPosition(cameraTransform, viewerTransform->position);
 		}
-		
+
 		for(CModel& model : modelList)
 		{
 			if(model.node == -1 || model.materialUniforms.castShadow == false)
@@ -108,10 +106,9 @@ namespace Model
 			Shader::setUniformMat4(shader, "mvp", mvp);
 			Geometry::render(model.geometryIndex, &camera->frustum, transform);
 		}
-		Geometry::setCullingMode((CullingMode)currentCullingMode);
 	}
 
-	void renderAllModels(CCamera* camera, RenderParams* renderParams, CLight* light)
+	void renderAllModels(CCamera* camera, RenderParams* renderParams, CLight* light, int iteration)
 	{
 		GameObject* viewer          = SceneManager::find(camera->node);
 		CTransform* viewerTransform = GO::getTransform(viewer);
@@ -150,17 +147,23 @@ namespace Model
 				Shader::setUniformVec2(shaderIndex, "mapSize", Vec2(Settings::getShadowMapWidth(),
 																	Settings::getShadowMapHeight()));
 			}
-
 			
 			// Setup uniforms for material
 			Shader::setUniformVec3(shaderIndex, "eyePos", viewerTransform->position);
 			Shader::setUniformFloat(shaderIndex, "fog.density",  renderParams->fog.density);
 			Shader::setUniformFloat(shaderIndex, "fog.start",    renderParams->fog.start);
 			Shader::setUniformFloat(shaderIndex, "fog.max",      renderParams->fog.max);
-			Shader::setUniformInt(shaderIndex,   "fog.fogMode",  renderParams->fog.fogMode);
 			Shader::setUniformVec4(shaderIndex,  "fog.color",    renderParams->fog.color);
+			// After first iteration only add light contribution and disable fog and ambient light
+			Shader::setUniformInt(shaderIndex,
+								  "fog.fogMode",
+								  iteration == 0 ? renderParams->fog.fogMode : FG_NONE);
 			if(material == MAT_PHONG || material == MAT_PHONG_TEXTURED)
-				Shader::setUniformVec4(shaderIndex,  "ambientLight", renderParams->ambientLight);
+			{
+				Shader::setUniformVec4(shaderIndex,
+									   "ambientLight",
+									   iteration == 0 ? renderParams->ambientLight : Vec4(0.0f));
+			}
 				
 			for(int modelIndex : *registeredMeshes)
 			{
@@ -182,7 +185,6 @@ namespace Model
 					Texture::unbind();
 			}
 			Shader::unbind();
-			Texture::unbind();
 		}
 		Editor::addDebugInt("Vertices", totalVertCount);
 		Editor::addDebugInt("Tris", totalVertCount / 3);

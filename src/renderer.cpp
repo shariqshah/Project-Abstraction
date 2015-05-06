@@ -423,6 +423,7 @@ namespace Renderer
 		
 		quadGeo        = Geometry::create("Quad", &vertices, &uvs, &normals, &indices);
 		defaultRenderTexture = Texture::create("DefaultRenderTexture",
+											   GL_TEXTURE_2D,
 											   width, height,
 											   GL_RGBA,
 											   GL_RGBA,
@@ -433,6 +434,7 @@ namespace Renderer
 		Texture::setTextureParameter(defaultRenderTexture, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 		Texture::setTextureParameter(defaultRenderTexture, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 		defaultDepthTexture = Texture::create("DefaultDepthTexture",
+											  GL_TEXTURE_2D,
 											  width, height,
 											  GL_DEPTH_COMPONENT,
 											  GL_DEPTH_COMPONENT,
@@ -545,7 +547,7 @@ namespace Renderer
 				CCamera* viewer = Camera::getActiveCamera();
 				CLight*  light  = Light::getLightAtIndex(lightIndex);
 				if(viewer)
-					Model::renderAllModels(viewer, &renderParams, light);
+					Model::renderAllModels(viewer, &renderParams, light, count);
 				count++;
 			}
 			glDisable(GL_BLEND);

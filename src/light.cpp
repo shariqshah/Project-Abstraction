@@ -414,6 +414,7 @@ namespace Light
 		{
 			std::string depthMapName = "DepthMap" + std::to_string(light->node);
 			int texture = Texture::create(depthMapName.c_str(),
+										  GL_TEXTURE_2D,
 										  Settings::getShadowMapWidth(),
 										  Settings::getShadowMapHeight(),
 										  GL_DEPTH_COMPONENT,

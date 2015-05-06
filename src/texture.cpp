@@ -17,7 +17,14 @@
 
 namespace Texture
 {
-	GLuint createTexture(int width, int height, int format, int internalFormat);
+	unsigned int createTexture(int target,
+							   int width,
+							   int height,
+							   int format,
+							   int internalFormat,
+							   int type,
+							   void* data,
+							   int levels = 1);
 	int    createNewIndex();
 	
 	struct TextureObj
@@ -26,6 +33,7 @@ namespace Texture
 		unsigned int  id;
 		char*         name;
 		uint32_t      refCount = 0;
+		int           target   = 0;
 	};
 	
 	namespace
@@ -33,6 +41,7 @@ namespace Texture
 		std::vector<TextureObj> textureList;
 		std::vector<int>        emptyIndices;
 		char*                   texturePath;
+		int                     currentTarget = 0;
 
 		int isLoaded(const char* name)
 		{
@@ -69,15 +78,29 @@ namespace Texture
 		return index;
 	}
 
-	unsigned int createTexture(int width, int height, int format, int internalFormat, int type, void* data)
+	unsigned int createTexture(int target,
+							   int width,
+							   int height,
+							   int format,
+							   int internalFormat,
+							   int type,
+							   void* data,
+							   int levels)
 	{
 		GLuint id = 0;
 		glGenTextures(1, &id);
-		glBindTexture(GL_TEXTURE_2D, id);
-		glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, format, type, data);
+		glBindTexture(target, id);
+		if(target == GL_TEXTURE_2D)
+		{
+			glTexImage2D(target, 0, internalFormat, width, height, 0, format, type, data);
+		}
+		else if(target == GL_TEXTURE_2D_ARRAY)
+		{
+			for(int i = 0; i < levels; i++)
+				glTexImage3D(target, i, internalFormat, width, height, levels, 0, format, type, data);
+		}
 		Renderer::checkGLError("Texture::createTexture");
-		glBindTexture(GL_TEXTURE_2D, 0);
-		
+		glBindTexture(target, 0);
 		return id;
 	}
 
@@ -90,13 +113,14 @@ namespace Texture
 			return;
 
 		GLint currentTexture = 0;
-		glGetIntegerv(GL_TEXTURE_BINDING_2D, &currentTexture);
-
-		glBindTexture(GL_TEXTURE_2D, textureObj->id);
-		glTexParameteri(GL_TEXTURE_2D, parameter, value);
+		int bindingTarget = textureObj->target == GL_TEXTURE_2D ?
+			GL_TEXTURE_BINDING_2D : GL_TEXTURE_BINDING_2D_ARRAY;
+		glGetIntegerv(bindingTarget, &currentTexture);
+		glBindTexture(textureObj->target, textureObj->id);
+		glTexParameteri(textureObj->target, parameter, value);
 		Renderer::checkGLError("Texture::setTextureParameter");
 		if(currentTexture != 0)
-			glBindTexture(GL_TEXTURE_2D, currentTexture);
+			glBindTexture(textureObj->target, currentTexture);
 	}
 
 	void initialize(const char* path)
@@ -151,7 +175,8 @@ namespace Texture
 				}
 
 				SDL_LockSurface(newSurface);
-				GLuint id = createTexture(newSurface->w,
+				GLuint id = createTexture(GL_TEXTURE_2D,
+										  newSurface->w,
 										  newSurface->h,
 										  format,
 										  internalFormat,
@@ -161,8 +186,9 @@ namespace Texture
 
 				index = createNewIndex();
 				TextureObj *newTexture = &textureList[index];
-				newTexture->id = id;
-				newTexture->surface = newSurface;
+				newTexture->id         = id;
+				newTexture->surface    = newSurface;
+				newTexture->target     = GL_TEXTURE_2D;
 				newTexture->refCount++;
 				setTextureParameter(index, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 				setTextureParameter(index, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -188,19 +214,30 @@ namespace Texture
 		return index;
 	}
 
-	int create(const char* name, int width, int height, int format, int internalFormat, int type, void* data)
+	int create(const char* name,
+			   int target,
+			   int width,
+			   int height,
+			   int format,
+			   int internalFormat,
+			   int type,
+			   void* data,
+			   int levels)
 	{
-		GLuint id = createTexture(width,
+		GLuint id = createTexture(target,
+								  width,
 								  height,
 								  format,
 								  internalFormat,
 								  type,
-								  data);
+								  data,
+								  levels);
 		int index = createNewIndex();
 		TextureObj *newTexture = &textureList[index];
-		newTexture->id       = id;
-		newTexture->surface  = NULL;
-		newTexture->name     = (char*)malloc(strlen(name) + 1);
+		newTexture->id         = id;
+		newTexture->surface    = NULL;
+		newTexture->target     = target;
+		newTexture->name       = (char*)malloc(strlen(name) + 1);
 		strcpy(newTexture->name, name);
 		newTexture->refCount++;
 		Log::message("New custom texture created");
@@ -237,13 +274,14 @@ namespace Texture
 		}
 	}
 	
-
 	void bind(int textureIndex)
 	{
 		if(textureIndex >= 0 && textureIndex < (int)textureList.size())
 		{
-			TextureObj obj = textureList[textureIndex];
-			glBindTexture(GL_TEXTURE_2D, obj.id);
+			TextureObj* obj = &textureList[textureIndex];
+			glBindTexture(obj->target, obj->id);
+			//glBindTexture(GL_TEXTURE_2D, obj->id);
+			currentTarget = obj->target;
 			Renderer::checkGLError("Texture::bind");
 		}
 		else
@@ -256,8 +294,8 @@ namespace Texture
 	{		
 		if(textureIndex >= 0 && textureIndex < (int)textureList.size())
 		{
-			TextureObj obj = textureList[textureIndex];
-			return obj.name;
+			TextureObj* obj = &textureList[textureIndex];
+			return obj->name;
 		}
 		else
 		{
@@ -269,7 +307,8 @@ namespace Texture
 
 	void unbind()
 	{
-		glBindTexture(GL_TEXTURE_2D, 0);
+		glBindTexture(currentTarget, 0);
+		currentTarget = 0;
 	}
 
 	void increaseRefCount(int textureIndex)
@@ -317,10 +356,6 @@ namespace Texture
 											asFUNCTIONPR(create, (const char*), int),
 											asCALL_CDECL);
 		PA_ASSERT(rc >= 0);
-		// rc = engine->RegisterGlobalFunction("int create(int, int, int, int)",
-		// 									asFUNCTIONPR(create, (int, int, int, int), int),
-		// 									asCALL_CDECL);
-		// PA_ASSERT(rc >= 0);
 		engine->RegisterGlobalFunction("void remove(string)", asFUNCTION(remove), asCALL_CDECL);
 		PA_ASSERT(rc >= 0);
 		engine->SetDefaultNamespace("");

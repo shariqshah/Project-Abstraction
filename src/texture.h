@@ -16,12 +16,14 @@ namespace Texture
 	void         decreaseRefCount(int textureIndex);
 	unsigned int getTextureID(int textureIndex);
 	int          create(const char* name,
+						int   target,
 						int   width,
 						int   height,
 						int   format,
 						int   internalFormat,
 						int   type,
-						void* data);
+						void* data,
+						int   levels = 1);
 }
 
 #endif
