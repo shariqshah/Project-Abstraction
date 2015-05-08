@@ -384,8 +384,11 @@ namespace Editor
 				}
 			}
 			ImGui::PopID();
-			if(ImGui::CollapsingHeader("DepthMap", "LightComponentDepthMap", false, false))
-				ImGui::Image((ImTextureID)Texture::getTextureID(light->depthMap), Vec2(256, 256));
+			if(ImGui::CollapsingHeader("ShadowMaps", "LightComponentDepthMap", false, false))
+			{
+				for(int i = 0; i < MAX_SHADOWMAPS; i++)
+					ImGui::Image((ImTextureID)Texture::getTextureID(light->shadowMap[i]), Vec2(256, 256));
+			}
 		}
 	}
 

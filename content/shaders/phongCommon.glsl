@@ -22,6 +22,8 @@ struct Material
 	float specularStrength;
 };
 
+#define EPSILON 0.00001
+
 const int MAX_LIGHTS = 32;
 const int LT_SPOT    = 0;
 const int LT_DIR     = 1;
@@ -31,17 +33,12 @@ uniform Material material;
 uniform int numLights;
 uniform Light lightList[MAX_LIGHTS];
 uniform Light light;
-uniform sampler2DShadow shadowMap;
-uniform vec2 mapSize;
-
-#define EPSILON 0.00001
-
-const vec2 poissonDisk[4] = vec2[](
-	vec2( -0.94201624, -0.39906216 ),
-	vec2( 0.94558609, -0.76890725 ),
-	vec2( -0.094184101, -0.92938870 ),
-	vec2( 0.34495938, 0.29387760 )
-	);
+uniform sampler2DShadow      shadowMap0;
+uniform sampler2DShadow      shadowMap1;
+uniform sampler2DShadow      shadowMap2;
+uniform sampler2DShadow      shadowMap3;
+uniform vec2                 mapSize;
+uniform int                  selectedShadowMap;
 
 float calcShadowFactor(vec3 projCoords)
 {
@@ -53,7 +50,7 @@ float calcShadowFactor(vec3 projCoords)
 	float visibility = 1.0;
 	
 	//if uv outside shadowmap range then point out of shadow
-	if(uvCoords.x > 1.0 || uvCoords.x < 0.0 ||	uvCoords.y > 1.0 || uvCoords.y < 0.0)
+	if(uvCoords.x > 1.0 || uvCoords.x < 0.0 || uvCoords.y > 1.0 || uvCoords.y < 0.0)
 	{
 		return 1.0;
 	}
@@ -61,7 +58,21 @@ float calcShadowFactor(vec3 projCoords)
 	{
 		if(light.pcfEnabled == 0)
 		{
-			float depth = texture(shadowMap, vec3(uvCoords, z + EPSILON));
+			float depth = 0;
+			if(light.type == LT_DIR)
+			{
+				switch(selectedShadowMap)
+				{
+				case 0:	depth = texture(shadowMap0, vec3(uvCoords, z + EPSILON)); break;
+				case 1:	depth = texture(shadowMap1, vec3(uvCoords, z + EPSILON)); break;
+				case 2:	depth = texture(shadowMap2, vec3(uvCoords, z + EPSILON)); break;
+				case 3:	depth = texture(shadowMap3, vec3(uvCoords, z + EPSILON)); break;
+				}
+			}
+			else
+			{
+				depth = texture(shadowMap0, vec3(uvCoords, z + EPSILON));
+			}
 			if((depth + light.depthBias) < z)
 				visibility = 0.5;
 			else
@@ -79,7 +90,21 @@ float calcShadowFactor(vec3 projCoords)
 				{
 					vec2 Offsets = vec2(x * xOffset, y * yOffset);
 					vec3 UVC = vec3(uvCoords + Offsets, z + EPSILON);
-					Factor += texture(shadowMap, UVC);
+					if(light.type == LT_DIR)
+					{
+						switch(selectedShadowMap)
+						{
+						case 0: Factor += texture(shadowMap0, UVC); break;
+						case 1: Factor += texture(shadowMap1, UVC); break;
+						case 2: Factor += texture(shadowMap2, UVC); break;
+						case 3: Factor += texture(shadowMap3, UVC); break;
+						}
+					}
+					else
+					{
+						Factor += texture(shadowMap0, UVC);
+					}
+					
 				}
 			}
 

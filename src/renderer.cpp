@@ -426,7 +426,7 @@ namespace Renderer
 											   GL_TEXTURE_2D,
 											   width, height,
 											   GL_RGBA,
-											   GL_RGBA,
+											   GL_RGBA8,
 											   GL_UNSIGNED_BYTE,
 											   NULL);
 		Texture::setTextureParameter(defaultRenderTexture, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -450,8 +450,8 @@ namespace Renderer
 		shadowOutput = Framebuffer::create(Settings::getShadowMapWidth(),
 										   Settings::getShadowMapHeight(),
 										   true,
-										   true);
-		renderOutput = Framebuffer::create(width, height, true, true);
+										   false);
+		renderOutput = Framebuffer::create(width, height, false, true);
 		Framebuffer::setTexture(renderOutput, defaultRenderTexture, GL_COLOR_ATTACHMENT0);
 		Framebuffer::setTexture(renderOutput, defaultDepthTexture, GL_DEPTH_ATTACHMENT);
 	}
@@ -518,11 +518,16 @@ namespace Renderer
 				{
 					GameObject* gameobject = SceneManager::find(light->node);
 					CCamera*    camera     = GO::getCamera(gameobject);
-					Framebuffer::setTexture(shadowOutput, light->depthMap, GL_DEPTH_ATTACHMENT);
-					glClear(GL_DEPTH_BUFFER_BIT);
+
 					Shader::bind(shadowShader);
-					Model::renderAllModels(camera, light, shadowShader);
-					Editor::addDebugTexture("Light", light->depthMap);
+					int shadowMaps = light->type == LT_DIR ? MAX_SHADOWMAPS : 1;
+					for(int i = 0; i < shadowMaps; i++)
+					{
+						Framebuffer::setTexture(shadowOutput, light->shadowMap[i], GL_DEPTH_ATTACHMENT);
+						glClear(GL_DEPTH_BUFFER_BIT);
+						Model::renderAllModels(camera, light, shadowShader);
+						Editor::addDebugTexture("ShadowMap", light->shadowMap[i]);
+					}
 					Shader::unbind();
 				}
 			}
@@ -540,9 +545,9 @@ namespace Renderer
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 			for(uint32_t lightIndex : *activeLights)
 			{
-				if(count == 0)
+				if(count == 0)	// On first pass ignore what's already on the texture
 					glBlendFunc(GL_ONE, GL_ZERO);
-				else if(count == 1)
+				else if(count == 1) // Afterwards, blend between results of each pass
 					glBlendFunc(GL_ONE, GL_ONE);
 				CCamera* viewer = Camera::getActiveCamera();
 				CLight*  light  = Light::getLightAtIndex(lightIndex);

@@ -141,8 +141,19 @@ namespace Model
 				if(light->castShadow)
 				{
 					CCamera* lightCamera = GO::getCamera(lightGO);
+					
 					Shader::setUniformMat4(shaderIndex, "lightVPMat", lightCamera->viewProjMat);
-					Texture::bind(light->depthMap);
+					int shadowMaps = light->type == LT_DIR ? MAX_SHADOWMAPS : 1;
+					for(int i = 0; i < shadowMaps; i++)
+					{
+						std::string shadowMapName = "shadowMap" + std::to_string(i);
+						Shader::setUniformInt(shaderIndex,
+											  shadowMapName.c_str(),
+											  (GL_TEXTURE0 + TU_SHADOWMAP0) - GL_TEXTURE0);
+						glActiveTexture(GL_TEXTURE0 + TU_SHADOWMAP0 + i);
+						Texture::bind(light->shadowMap[i]);
+					}
+					Shader::setUniformInt(shaderIndex, "selectedShadowMap", 0);
 				}
 				Shader::setUniformVec2(shaderIndex, "mapSize", Vec2(Settings::getShadowMapWidth(),
 																	Settings::getShadowMapHeight()));
@@ -182,7 +193,16 @@ namespace Model
 				else
 					culled++;
 				if(model->material == MAT_UNSHADED_TEXTURED || model->material == MAT_PHONG_TEXTURED)
+					if(model->materialUniforms.texture != -1) Texture::unbind();
+			}
+
+			if(material == MAT_PHONG || material == MAT_PHONG_TEXTURED)
+			{
+				if(light->castShadow)
+				{
 					Texture::unbind();
+					glActiveTexture(GL_TEXTURE0);
+				}
 			}
 			Shader::unbind();
 		}

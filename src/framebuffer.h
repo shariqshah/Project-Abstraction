@@ -13,6 +13,7 @@ namespace Framebuffer
 	int  getWidth(int index);
 	int  getHeight(int index);
 	void setTexture(int index, int texture, int attachment);
+	void setTextureLayer(int index, int texture, int attachment, int layer);
 	int  getTexture(int index);
 }
 

@@ -1,6 +1,15 @@
 #ifndef texture_H
 #define texture_H
 
+enum TextureUnit
+{
+	TU_ALBEDO = 0,
+	TU_SHADOWMAP0,
+	TU_SHADOWMAP1,
+	TU_SHADOWMAP2,
+	TU_SHADOWMAP3
+};
+
 namespace Texture
 {
 	int          create(const char* filename);

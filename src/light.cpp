@@ -10,6 +10,8 @@
 
 namespace Light
 {
+	void removeShadowMaps(CLight* light);
+	
 	namespace
 	{
 		std::vector<CLight>   lightList;
@@ -57,6 +59,7 @@ namespace Light
 			{
 				emptyIndices.push_back(index);
 				lightList[index].valid = false;
+				removeShadowMaps(&lightList[index]);
 				activeLights.erase(activeLights.begin() + indexToErase);
 			}
 			else
@@ -372,6 +375,8 @@ namespace Light
 			GameObject* gameobject = SceneManager::find(light->node);
 			CCamera*    camera     = GO::getCamera(gameobject);
 			Camera::setOrthographic(camera, type == LT_DIR ? true : false);
+			removeShadowMaps(light);
+			setCastShadow(light, true);
 		}
 	}
 	
@@ -410,24 +415,28 @@ namespace Light
 	{
 		PA_ASSERT(light);
 		light->castShadow = castShadow;
-		if(castShadow && light->depthMap == -1)
+		if(castShadow && light->shadowMap[0] == -1)
 		{
-			std::string depthMapName = "DepthMap" + std::to_string(light->node);
-			int texture = Texture::create(depthMapName.c_str(),
-										  GL_TEXTURE_2D,
-										  Settings::getShadowMapWidth(),
-										  Settings::getShadowMapHeight(),
-										  GL_DEPTH_COMPONENT,
-										  GL_DEPTH_COMPONENT32F,
-										  GL_FLOAT,
-										  NULL);
-			light->depthMap = texture;
-			Texture::setTextureParameter(texture, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-			Texture::setTextureParameter(texture, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-			Texture::setTextureParameter(texture, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-			Texture::setTextureParameter(texture, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-			Texture::setTextureParameter(texture, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE);
-			Texture::setTextureParameter(texture, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
+			int shadowMaps = light->type == LT_DIR ? MAX_SHADOWMAPS : 1;
+			for(int i = 0; i < shadowMaps; i++)
+			{
+				std::string shadowMapName = "ShadowMap" + std::to_string(light->node);
+				int texture = Texture::create(shadowMapName.c_str(),
+											  GL_TEXTURE_2D,
+											  Settings::getShadowMapWidth(),
+											  Settings::getShadowMapHeight(),
+											  GL_DEPTH_COMPONENT,
+											  GL_DEPTH_COMPONENT32F,
+											  GL_FLOAT,
+											  NULL);
+				light->shadowMap[i] = texture;
+				Texture::setTextureParameter(texture, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+				Texture::setTextureParameter(texture, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+				Texture::setTextureParameter(texture, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+				Texture::setTextureParameter(texture, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+				Texture::setTextureParameter(texture, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE);
+				Texture::setTextureParameter(texture, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
+			}
 
 			GameObject* gameobject = SceneManager::find(light->node);
 			CCamera* camera = GO::getCamera(gameobject);
@@ -448,10 +457,22 @@ namespace Light
 				Camera::updateProjection(camera);
 			}
 		}
-		else if(!castShadow && light->depthMap != -1)
+		else if(!castShadow)
 		{
-			Texture::remove(light->depthMap);
-			light->depthMap = -1;
+			removeShadowMaps(light);
 		}
 	}
+
+	void removeShadowMaps(CLight* light)
+	{
+		for(int i = 0; i < MAX_SHADOWMAPS; i++)
+		{
+			if(light->shadowMap[i] != -1)
+			{
+				Texture::remove(light->shadowMap[i]);
+				light->shadowMap[i] = -1;
+			}
+		}
+	}
+	
 }

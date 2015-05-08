@@ -32,25 +32,28 @@ namespace Framebuffer
 		
 		glGenFramebuffers(1, &fbo);
 		glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+		glGenRenderbuffers(1, &renderbuffer);
+		glBindRenderbuffer(GL_RENDERBUFFER, renderbuffer);
+		glRenderbufferStorage(GL_RENDERBUFFER,
+							  GL_DEPTH24_STENCIL8,
+							  width,
+							  height);
+		Renderer::checkGLError("Framebuffer::create");
+		glFramebufferRenderbuffer(GL_FRAMEBUFFER,
+								  GL_DEPTH_STENCIL_ATTACHMENT,
+								  GL_RENDERBUFFER,
+								  renderbuffer);
+		Renderer::checkGLError("Framebuffer::create");
 		if(hasColorAttachment)
 		{
-			glGenRenderbuffers(1, &renderbuffer);
-			glBindRenderbuffer(GL_RENDERBUFFER, renderbuffer);
-			glRenderbufferStorage(GL_RENDERBUFFER,
-								  GL_DEPTH24_STENCIL8,
-								  width,
-								  height);
-			Renderer::checkGLError("Framebuffer::create");
-			glFramebufferRenderbuffer(GL_FRAMEBUFFER,
-									  GL_DEPTH_STENCIL_ATTACHMENT,
-									  GL_RENDERBUFFER,
-									  renderbuffer);
-			Renderer::checkGLError("Framebuffer::create");
+			glDrawBuffer(GL_COLOR_ATTACHMENT0);
 		}
-		else
+		
+		if(hasDepthAttachment)
 		{
 			glDrawBuffer(GL_NONE);
 		}
+		
 		Renderer::checkGLError("Framebuffer::create");
 		GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
 		if(status != GL_FRAMEBUFFER_COMPLETE)
@@ -159,6 +162,29 @@ namespace Framebuffer
 								   Texture::getTextureID(texture),
 								   0);
 			Renderer::checkGLError("Framebuffer::setTexture, glFramebufferTexture2D");
+			glBindFramebuffer(GL_FRAMEBUFFER, currentFBO);
+		}
+	}
+
+	void setTextureLayer(int index, int texture, int attachment, int layer)
+	{
+		if(index > -1 && index < (int)framebufferList.size())
+		{
+			GLint currentFBO = 0;
+			glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &currentFBO);
+			Renderer::checkGLError("Framebuffer::setTextureLayer, glGet");
+			bind(index);
+			glFramebufferTextureLayer(GL_FRAMEBUFFER,
+									  attachment,
+									  Texture::getTextureID(texture),
+									  0,
+									  layer);
+			// glFramebufferTexture3D(GL_FRAMEBUFFER,
+			// 					   attachment,
+			// 					   GL_TEXTURE_2D_ARRAY,
+			// 					   Texture::getTextureID(texture),
+			// 					   0, layer);
+			Renderer::checkGLError("Framebuffer::setTextureLauer, glFramebufferTextureLayer");
 			glBindFramebuffer(GL_FRAMEBUFFER, currentFBO);
 		}
 	}

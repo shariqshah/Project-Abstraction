@@ -8,6 +8,8 @@
 #include "boundingvolumes.h"
 #include "jsondefs.h"
 
+#define MAX_SHADOWMAPS 4
+
 enum LightType
 {
 	LT_SPOT  = 0,
@@ -17,19 +19,19 @@ enum LightType
 
 struct CLight
 {
-	float          outerAngle  = glm::radians(30.f);
-	float          innerAngle  = glm::radians(20.f);
-	float          falloff     = 1.5f;
-	float          intensity   = 1.0f;
-	Vec4           color       = Vec4(1.f);
-	Node           node        = 0;
-	bool           castShadow  = false;
-	bool           pcfEnabled  = false;
-	bool           valid       = true;
-	int            type        = LT_POINT;
-	int            radius      = 30;
-	int            depthMap    = -1;
-	float          depthBias   = 0.0005f;
+	float          outerAngle   = glm::radians(30.f);
+	float          innerAngle   = glm::radians(20.f);
+	float          falloff      = 1.5f;
+	float          intensity    = 1.0f;
+	Vec4           color        = Vec4(1.f);
+	Node           node         = 0;
+	bool           castShadow   = false;
+	bool           pcfEnabled   = false;
+	bool           valid        = true;
+	int            type         = LT_POINT;
+	int            radius       = 30;
+	int            shadowMap[4] = {-1, -1, -1, -1};
+	float          depthBias    = 0.0005f;
 	BoundingSphere boundingSphere;
 };
 

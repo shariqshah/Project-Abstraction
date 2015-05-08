@@ -96,8 +96,9 @@ namespace Texture
 		}
 		else if(target == GL_TEXTURE_2D_ARRAY)
 		{
+			glTexImage3D(target, 0, internalFormat, width, height, levels, 0, format, type, data);
 			for(int i = 0; i < levels; i++)
-				glTexImage3D(target, i, internalFormat, width, height, levels, 0, format, type, data);
+				glTexSubImage3D(target, 0, 0, 0, i, width, height, levels, format, type, NULL);
 		}
 		Renderer::checkGLError("Texture::createTexture");
 		glBindTexture(target, 0);
@@ -280,7 +281,6 @@ namespace Texture
 		{
 			TextureObj* obj = &textureList[textureIndex];
 			glBindTexture(obj->target, obj->id);
-			//glBindTexture(GL_TEXTURE_2D, obj->id);
 			currentTarget = obj->target;
 			Renderer::checkGLError("Texture::bind");
 		}
@@ -308,7 +308,8 @@ namespace Texture
 	void unbind()
 	{
 		glBindTexture(currentTarget, 0);
-		currentTarget = 0;
+		Renderer::checkGLError("Texture::unbind");
+		currentTarget = GL_TEXTURE_2D;
 	}
 
 	void increaseRefCount(int textureIndex)
