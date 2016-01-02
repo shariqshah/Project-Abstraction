@@ -20,7 +20,7 @@ An abstraction layer for creating realtime rendered applications. All the work d
 - [ImGui](https://github.com/ocornut/imgui)
 
 ## Gallery ##
-![2015-05-08-125923_2806x900_scrot.png](https://bitbucket.org/repo/doMRzn/image/4124583816-2015-05-08-125923_2806x900_scrot.png)
+![2015-05-08-125923_2806x900_scrot.png](https://bitbucket.org/repo/doMRzn/images/4124583816-2015-05-08-125923_2806x900_scrot.png)
 ![2015-05-03-200303_2806x900_scrot.png](https://bitbucket.org/repo/doMRzn/images/2235684618-2015-05-03-200303_2806x900_scrot.png)
 ![2015-04-10-211847_2806x900_scrot.png](https://bitbucket.org/repo/doMRzn/images/2781071521-2015-04-10-211847_2806x900_scrot.png)
 ![2015-05-04-192719_2806x900_scrot.png](https://bitbucket.org/repo/doMRzn/images/1414654832-2015-05-04-192719_2806x900_scrot.png)
