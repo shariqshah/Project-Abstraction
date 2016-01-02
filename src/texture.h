@@ -3,11 +3,11 @@
 
 enum TextureUnit
 {
-	TU_ALBEDO = 0,
-	TU_SHADOWMAP0,
+	TU_SHADOWMAP0 = 0,
 	TU_SHADOWMAP1,
 	TU_SHADOWMAP2,
-	TU_SHADOWMAP3
+	TU_SHADOWMAP3,
+	TU_ALBEDO,
 };
 
 namespace Texture
@@ -16,9 +16,9 @@ namespace Texture
     void         remove(int textureIndex);
 	void         setTextureParameter(int textureIndex, int parameter, int value);
 	void         initialize(const char* path);
-	void         bind(int textureIndex);
+	void         bind(int textureIndex, int textureUnit);
 	const char*  getFilename(int textureIndex);
-	void         unbind();
+	void         unbind(int textureUnit);
 	void         cleanup();
 	void         generateBindings();
 	void         increaseRefCount(int textureIndex);

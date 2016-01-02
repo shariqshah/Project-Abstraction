@@ -33,12 +33,12 @@ uniform Material material;
 uniform int numLights;
 uniform Light lightList[MAX_LIGHTS];
 uniform Light light;
-uniform sampler2DShadow      shadowMap0;
-uniform sampler2DShadow      shadowMap1;
-uniform sampler2DShadow      shadowMap2;
-uniform sampler2DShadow      shadowMap3;
-uniform vec2                 mapSize;
-uniform int                  selectedShadowMap;
+uniform sampler2DShadow shadowMap0;
+uniform sampler2DShadow shadowMap1;
+uniform sampler2DShadow shadowMap2;
+uniform sampler2DShadow shadowMap3;
+uniform vec2            mapSize;
+//uniform int             selectedShadowMap;
 
 float calcShadowFactor(vec3 projCoords)
 {
@@ -56,6 +56,17 @@ float calcShadowFactor(vec3 projCoords)
 	}
 	else
 	{
+		float dist = distance(eyePos, vertex);
+		int selectedShadowMap = 0;
+		if(dist <= 30)
+			selectedShadowMap = 0;
+		else if(dist > 30 && dist <= 80)
+			selectedShadowMap = 1;
+		else if(dist > 80 && dist <= 120)
+			selectedShadowMap = 2;
+		else
+			selectedShadowMap = 3;
+		
 		if(light.pcfEnabled == 0)
 		{
 			float depth = 0;

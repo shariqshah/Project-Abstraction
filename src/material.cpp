@@ -138,7 +138,10 @@ namespace Material
 		Shader::setUniformVec4(shaderIndex, "diffuseColor", materialUniforms->diffuseColor);
 		// Bind texture if applicable
 		if(material == MAT_UNSHADED_TEXTURED || material == MAT_PHONG_TEXTURED)
-			Texture::bind(materialUniforms->texture);
+		{
+			Shader::setUniformInt(shaderIndex, "sampler", (GL_TEXTURE0 + 4) - GL_TEXTURE0);
+			Texture::bind(materialUniforms->texture, 4);
+		}
 
 		if(material == MAT_PHONG || material == MAT_PHONG_TEXTURED)
 		{

@@ -36,6 +36,7 @@ namespace Camera
 	void     generateBindings();
 	void     updateProjection(CCamera* camera);
 	void     updateView(CCamera* camera);
+	void     updateViewProjection(CCamera* camera);
 	void     updateFrustum(CCamera* camera);
 	bool     remove(int cameraIndex);
 	void     cleanup();

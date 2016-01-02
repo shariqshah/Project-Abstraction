@@ -2,7 +2,7 @@
 
 class FreeCamera : BaseScript
 {
-	float maxUpDownRot   = 80.f;
+	float maxUpDownRot   = 60.f;
 	float totalUpDownRot = 0.f;
 	float movSpeed       = 30.f;
 	float rotSpeed       = 0.5f;
@@ -58,8 +58,30 @@ class FreeCamera : BaseScript
 			totalUpDownRot = -maxUpDownRot;
 			upDownRot = 0.f;
 		}
-		if(upDownRot != 0.f)    transform.rotate(-UNIT_X, upDownRot, Space::LOCAL);
-		if(leftRightRot != 0.f)	transform.rotate(UNIT_Y, -leftRightRot, Space::WORLD);
+		if(upDownRot != 0.f)
+		{
+			transform.rotate(-UNIT_X, upDownRot, Space::LOCAL);
+			Log::message("UP : " +
+						 transform.up.x + ", " +
+						 transform.up.y + ", " +
+						 transform.up.z);
+			Log::message("FORWARD : " +
+						 transform.forward.x + ", " +
+						 transform.forward.y + ", " +
+						 transform.forward.z);
+		}
+		if(leftRightRot != 0.f)
+		{
+			transform.rotate(UNIT_Y, -leftRightRot, Space::WORLD);
+			Log::message("UP : " +
+						 transform.up.x + ", " +
+						 transform.up.y + ", " +
+						 transform.up.z);
+			Log::message("FORWARD : " +
+						 transform.forward.x + ", " +
+						 transform.forward.y + ", " +
+						 transform.forward.z);
+		}
 
 		if(translation.x != 0 || translation.y != 0 || translation.z != 0)
 			transform.translate(translation, Space::LOCAL);

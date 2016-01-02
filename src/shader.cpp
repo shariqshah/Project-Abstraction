@@ -301,7 +301,7 @@ namespace Shader
 	void cleanup()
 	{
 		free(shaderPath);
-		for(int i = 0; i < shaderList.size(); i++)
+		for(int i = 0; i < (int)shaderList.size(); i++)
 			remove(i);
 
 		shaderList.clear();

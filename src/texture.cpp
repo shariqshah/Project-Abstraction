@@ -275,11 +275,12 @@ namespace Texture
 		}
 	}
 	
-	void bind(int textureIndex)
+	void bind(int textureIndex, int textureUnit)
 	{
 		if(textureIndex >= 0 && textureIndex < (int)textureList.size())
 		{
 			TextureObj* obj = &textureList[textureIndex];
+			glActiveTexture(GL_TEXTURE0 + textureUnit);
 			glBindTexture(obj->target, obj->id);
 			currentTarget = obj->target;
 			Renderer::checkGLError("Texture::bind");
@@ -305,8 +306,9 @@ namespace Texture
 		}
 	}
 
-	void unbind()
+	void unbind(int textureUnit)
 	{
+		glActiveTexture(GL_TEXTURE0 + textureUnit);
 		glBindTexture(currentTarget, 0);
 		Renderer::checkGLError("Texture::unbind");
 		currentTarget = GL_TEXTURE_2D;

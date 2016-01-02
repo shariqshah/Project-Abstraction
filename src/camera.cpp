@@ -11,16 +11,16 @@ namespace
 	std::vector<CCamera> cameraList;
 	std::vector<int>     emptyIndices;
 	int                  activeCameraIndex;
-		
+}
+	
+namespace Camera
+{
 	void updateViewProjection(CCamera* camera)
 	{
 		camera->viewProjMat = camera->projMat * camera->viewMat;
 		Camera::updateFrustum(camera);
 	}
-}
-	
-namespace Camera
-{
+
 	void initialize()
 	{
 		activeCameraIndex = -1;

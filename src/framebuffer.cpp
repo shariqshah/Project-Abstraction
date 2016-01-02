@@ -122,7 +122,7 @@ namespace Framebuffer
 		if(index > -1 && index < (int)framebufferList.size())
 		{
 			FBO* framebuffer = &framebufferList[index];
-			Texture::bind(framebuffer->texture);
+			Texture::bind(framebuffer->texture, 4);
 		}
 	}
 

@@ -287,27 +287,27 @@ namespace Renderer
 	void renderText()
 	{
 		// TODO: Bitmap font rendering
-		Shader::bind(textShader);
-		Shader::setUniformVec4(textShader, "textColor", textColor);
-		glBindVertexArray(textVAO);
-		// glBindVertexArray(temp_vao);
+		// Shader::bind(textShader);
+		// Shader::setUniformVec4(textShader, "textColor", textColor);
+		// glBindVertexArray(textVAO);
+		// // glBindVertexArray(temp_vao);
 
-		Texture::bind((unsigned int)texture);
+		// Texture::bind((unsigned int)texture);
 		
-		for(uint32_t i = 0; i < textList.size(); i++)
-		{
-			Mat4 mvp = textProjMat * textList[i].transMat;
-			Shader::setUniformMat4(textShader, "mvp", mvp);
-			glDrawElementsBaseVertex(GL_TRIANGLES, 6, GL_UNSIGNED_INT, (void*) 0, (i * 4));
-		}
+		// for(uint32_t i = 0; i < textList.size(); i++)
+		// {
+		// 	Mat4 mvp = textProjMat * textList[i].transMat;
+		// 	Shader::setUniformMat4(textShader, "mvp", mvp);
+		// 	glDrawElementsBaseVertex(GL_TRIANGLES, 6, GL_UNSIGNED_INT, (void*) 0, (i * 4));
+		// }
 
-		// Mat4 mvp = textProjMat * Mat4(1.f);
-		// Shader::setUniformMat4(textShader, "mvp", mvp);
-		// glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, (void*)0);
+		// // Mat4 mvp = textProjMat * Mat4(1.f);
+		// // Shader::setUniformMat4(textShader, "mvp", mvp);
+		// // glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, (void*)0);
 
-		Texture::unbind();
-		glBindVertexArray(0);
-		Shader::unbind();
+		// Texture::unbind();
+		// glBindVertexArray(0);
+		// Shader::unbind();
 	}
 
 	void checkGLError(const char* context)
@@ -525,7 +525,7 @@ namespace Renderer
 					{
 						Framebuffer::setTexture(shadowOutput, light->shadowMap[i], GL_DEPTH_ATTACHMENT);
 						glClear(GL_DEPTH_BUFFER_BIT);
-						Model::renderAllModels(camera, light, shadowShader);
+						Model::renderAllModels(camera, light, shadowShader, i);
 						Editor::addDebugTexture("ShadowMap", light->shadowMap[i]);
 					}
 					Shader::unbind();
@@ -564,9 +564,9 @@ namespace Renderer
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		Shader::bind(quad);
-		Texture::bind(defaultRenderTexture);
+		Texture::bind(defaultRenderTexture, 0);
 		Geometry::render(quadGeo);
-		Texture::unbind();
+		Texture::unbind(0);
 		Shader::unbind();
 		
 		Editor::addDebugTexture("Default Render", defaultRenderTexture);
