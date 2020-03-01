@@ -1,10 +1,10 @@
 # Project Abstraction #
 
-An abstraction layer for creating realtime rendered applications. All the work done here is being redone from scratch by using as few libraries as possible [here](https://www.bitbucket.org/bluerriq/symmetry).
+An abstraction layer for creating realtime rendered applications. All the work done here is being redone from scratch by using as few libraries as possible [here](https://github.com/shariqshah/symmetry).
 
 ## Features ##
 - Realtime rendering in 3d using OpenGL 3.0.
-- Loading and rendering meshes from blender3d using my own addon [BlendExp](https://www.bitbucket.org/bluerriq/blendexp)
+- Loading and rendering meshes from blender3d using my own addon [BlendExp](https://github.com/shariqshah/blendexp)
 - Embedded [AngelScript](http://www.angelcode.com/angelscript/) for writing scripts that define behaviour. Scripts can be added/edited and reloaded in realtime without restarting the application.
 - Fully dynamic per-pixel lights (spot/point/directional).
 - Shadow mapping for spot/direcional lights with PCF and CSSM(only direcitonal lights).
